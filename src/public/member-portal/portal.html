@@ -202,7 +202,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     return (p[0]||'?')[0].toUpperCase();
   }
 
-  function showApp(m){
+  function showApp(m, initialTab){
     clearTimeout(initTimer);
     var name = (m.name||'').trim() || m.email || 'Μέλος';
     var ini = initials(name);
@@ -215,14 +215,25 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     document.getElementById('loadingScreen').classList.add('hidden');
     document.getElementById('errorScreen').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
-    loadBookings('all');
+    var tab = initialTab || 'bookings';
+    if (tab === 'profile') {
+      showTab('profile');
+      // Load bookings in background for stats
+      post({type:'REQUEST_MY_BOOKINGS', filter: null});
+    } else {
+      loadBookings('all');
+    }
   }
 
   function showTab(tab){
     document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('active', b.dataset.tab===tab); });
     document.getElementById('panelBookings').classList.toggle('hidden', tab!=='bookings');
     document.getElementById('panelProfile').classList.toggle('hidden', tab!=='profile');
-    if(tab==='profile' && !profileLoaded) loadProfile();
+    if(tab==='bookings') {
+      if(!document.getElementById('bookingsList').querySelector('.bk-card, .empty')) loadBookings(currentFilter);
+    } else if(tab==='profile' && !profileLoaded) {
+      loadProfile();
+    }
   }
 
   function loadBookings(filter){
@@ -339,7 +350,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     if(typeof raw==='string'){try{d=JSON.parse(raw);}catch(_){return;}}else{d=raw;}
     if(!d||!d.type) return;
     if(d.type==='MEMBER_INIT'){
-      if(d.member) showApp(d.member);
+      if(d.member) showApp(d.member, d.tab);
       return;
     }
     if(d.type==='MY_BOOKINGS'){
