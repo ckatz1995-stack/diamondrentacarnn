@@ -1,6 +1,26 @@
 # dependencies
 node_modules/
+
+# environment files
+.env
+.env.local
+.env.*.local
+
+# editors
 .vscode/
 .idea/
+
+# Wix
 .wix/
 jsconfig.json
+
+# build output
+dist/
+build/
+
+# uploads
+diamond-portal/server/uploads/
+
+# logs
+*.log
+logs/
