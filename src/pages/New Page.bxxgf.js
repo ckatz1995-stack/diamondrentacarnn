@@ -2,7 +2,7 @@
 // 1. Rename this page to "Ο Λογαριασμός μου" and set its URL to /member-portal
 // 2. Add an HTML iframe element to the page
 // 3. Set the iframe src to: member-portal/portal.html
-// 4. Set the iframe element ID to: #mbrPortalHtml
+// 4. The iframe element ID can be anything — code auto-detects it
 
 import wixLocation from 'wix-location';
 import { authentication, currentMember } from 'wix-members-frontend';
@@ -13,6 +13,12 @@ const COMP_IDS = ['#mbrPortalHtml', '#html1', '#html2', '#html3', '#htmlComponen
 
 function getComp() { return resolveHtmlComponent($w, COMP_IDS); }
 function post(payload) { return postMessageSafe(getComp(), payload, 'MemberPortal'); }
+
+function getInitialTab() {
+  try {
+    return (wixLocation.query && wixLocation.query.tab) || 'bookings';
+  } catch (_) { return 'bookings'; }
+}
 
 async function getMemberInfo() {
   try {
@@ -35,7 +41,7 @@ function handleMessage(event) {
 
   if (msg.type === 'PORTAL_READY' || msg.type === 'bridge-ready') {
     getMemberInfo().then((info) => {
-      if (info) post({ type: 'MEMBER_INIT', member: info });
+      if (info) post({ type: 'MEMBER_INIT', member: info, tab: getInitialTab() });
     });
     return;
   }
@@ -80,5 +86,5 @@ $w.onReady(async function () {
     try { comp.onMessage(handleMessage); } catch (e) { console.error('MemberPortal bind failed', e); }
     try { comp.expand(); comp.show(); } catch (_) {}
   }
-  post({ type: 'MEMBER_INIT', member: info });
+  post({ type: 'MEMBER_INIT', member: info, tab: getInitialTab() });
 });
