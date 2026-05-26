@@ -2,6 +2,7 @@ import wixLocation from "wix-location";
 import { authentication, currentMember } from "wix-members-frontend";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
 import { getVehicleCategoriesCatalog } from "backend/bookingEngine";
+import { getExtendedProfile } from 'backend/memberPortal.jsw';
 import { BRIDGE_TYPES, buildBookingContext, isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from "public/bridgeUtils";
 const COMP = "#bpage1";
 
@@ -94,9 +95,12 @@ function handleMessage(event) {
   if (data.type === "request-vehicle-categories-data") { ensureVehicleCategories().then((items)=>post({ type: "vehicle-categories-data", items: items || [] })); return; }
 
   if (data.type === 'REQUEST_MEMBER_STATE') {
-    getMemberInfo().then((info) => {
-      post({ type: 'PORTAL_MEMBER_STATE', loggedIn: !!info, member: info || null });
-    });
+    Promise.all([getMemberInfo(), getExtendedProfile().catch(() => null)])
+      .then(([info, ext]) => {
+        const driverAge = (ext && ext.ok && ext.extended && ext.extended.driverAge) || '';
+        const member = info ? { ...info, driverAge } : null;
+        post({ type: 'PORTAL_MEMBER_STATE', loggedIn: !!info, member });
+      });
     return;
   }
 
@@ -146,8 +150,11 @@ $w.onReady(async function () {
     try { comp.onMessage(handleMessage); } catch (e) { console.error("Bind home html onMessage failed", e); }
   }
   await syncData();
-  getMemberInfo().then((info) => {
-    if (info) post({ type: 'PORTAL_MEMBER_STATE', loggedIn: true, member: info });
+  Promise.all([getMemberInfo(), getExtendedProfile().catch(() => null)]).then(([info, ext]) => {
+    if (info) {
+      const driverAge = (ext && ext.ok && ext.extended && ext.extended.driverAge) || '';
+      post({ type: 'PORTAL_MEMBER_STATE', loggedIn: true, member: { ...info, driverAge } });
+    }
   });
   setTimeout(() => {
     if (!bridgeReadyAck) syncData();
