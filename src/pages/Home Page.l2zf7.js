@@ -1,6 +1,8 @@
 import wixLocation from "wix-location";
+import { session as wixSession } from "wix-storage";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
 import { getVehicleCategoriesCatalog } from "backend/bookingEngine";
+import { signIn as portalSignIn, signOut as portalSignOut } from "backend/memberPortal";
 import { BRIDGE_TYPES, buildBookingContext, isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from "public/bridgeUtils";
 const COMP = "#bpage1";
 
@@ -68,7 +70,47 @@ function handleMessage(event) {
   }
   if (data.type === BRIDGE_TYPES.REQUEST_PRICING) { ensurePricingCatalog().then((catalog)=>post({ type: BRIDGE_TYPES.PRICING, catalog: catalog || null })); return; }
   if (data.type === "request-pickup-locations-data") { ensurePricingCatalog().then((catalog)=>post({ type: "pickup-locations-data", items: Array.isArray(catalog?.pickupLocations) ? catalog.pickupLocations : [] })); return; }
-  if (data.type === "request-vehicle-categories-data") { ensureVehicleCategories().then((items)=>post({ type: "vehicle-categories-data", items: items || [] })); }
+  if (data.type === "request-vehicle-categories-data") { ensureVehicleCategories().then((items)=>post({ type: "vehicle-categories-data", items: items || [] })); return; }
+
+  if (data.type === 'PORTAL_SIGN_IN') {
+    (async () => {
+      try {
+        const result = await portalSignIn({ email: String(data.email || '').trim(), bookingRef: String(data.bookingRef || '').trim() });
+        if (result.ok) {
+          wixSession.setItem('diamondPortalSess', JSON.stringify({
+            customerId: result.customerId,
+            sessionToken: result.sessionToken,
+            customer: result.customer
+          }));
+        }
+        post({ type: 'PORTAL_AUTH_RESULT', ...result });
+      } catch (_) {
+        post({ type: 'PORTAL_AUTH_RESULT', ok: false, error: 'server_error' });
+      }
+    })();
+    return;
+  }
+
+  if (data.type === 'PORTAL_SIGN_OUT') {
+    (async () => {
+      try {
+        await portalSignOut({ customerId: String(data.customerId || ''), sessionToken: String(data.sessionToken || '') });
+        wixSession.removeItem('diamondPortalSess');
+      } catch (_) {}
+      post({ type: 'PORTAL_SIGN_OUT_RESULT' });
+    })();
+    return;
+  }
+
+  if (data.type === 'REQUEST_PORTAL_SESSION') {
+    try {
+      const stored = wixSession.getItem('diamondPortalSess');
+      post({ type: 'PORTAL_SESSION', session: stored ? JSON.parse(stored) : null });
+    } catch (_) {
+      post({ type: 'PORTAL_SESSION', session: null });
+    }
+    return;
+  }
 }
 
 $w.onReady(async function () {

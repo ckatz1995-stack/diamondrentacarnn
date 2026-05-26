@@ -1,4 +1,5 @@
 import wixLocation from "wix-location";
+import { session as wixSession } from "wix-storage";
 import { currentMember } from "wix-members-frontend";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
 import { getVehicleCategoryDetails, createBooking } from "backend/bookingEngine";
@@ -133,6 +134,13 @@ async function ensureMemberPrefill() {
   return memberPrefillPromise;
 }
 
+function readPortalSession() {
+  try {
+    const stored = wixSession.getItem('diamondPortalSess');
+    return stored ? JSON.parse(stored) : null;
+  } catch (_) { return null; }
+}
+
 function sendContext() {
   post(buildBookingContext(wixLocation));
 }
@@ -151,6 +159,22 @@ async function sendMemberPrefill() {
   const payload = await ensureMemberPrefill();
   if (!payload) return;
   post({ type: "member-prefill", member: payload, payload });
+}
+
+function sendPortalPrefill() {
+  const sess = readPortalSession();
+  if (!sess || !sess.customer) return;
+  const c = sess.customer;
+  const parts = String(c.name || '').trim().split(/\s+/);
+  post({
+    type: 'member-prefill',
+    member: {
+      firstName: parts[0] || '',
+      lastName: parts.slice(1).join(' ') || '',
+      email: c.email || '',
+      phone: c.phone || ''
+    }
+  });
 }
 
 async function handleSubmitBooking(payload) {
@@ -200,6 +224,7 @@ function handleMessage(event) {
   }
   if (data.type === "request-member-prefill") {
     sendMemberPrefill();
+    sendPortalPrefill();
     return;
   }
   if (data.type === "submit-booking") {
@@ -209,6 +234,7 @@ function handleMessage(event) {
 
 async function syncAll() {
   sendContext();
+  sendPortalPrefill();
   await Promise.all([
     sendPricingCatalog(),
     sendCategoryItem(),
