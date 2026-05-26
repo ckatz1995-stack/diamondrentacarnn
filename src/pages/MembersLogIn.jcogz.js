@@ -1,6 +1,6 @@
 import wixLocation from 'wix-location';
 import * as memberPortal from 'backend/memberPortal';
-import { PORTAL_LOCATIONS, SITE_CURRENCY, SITE_NAME } from 'backend/siteConfig';
+import { PORTAL_LOCATIONS, SITE_CURRENCY, SITE_NAME } from 'public/siteConstants';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 
 const COMP = '#memberPortalHtml';
