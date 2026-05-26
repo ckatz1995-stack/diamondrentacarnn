@@ -2760,7 +2760,7 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
     try{window.parent.postMessage({type:'PORTAL_REGISTER',email:email,password:pass,firstName:first,lastName:last},'*');}catch(_){}
   });
 
-  [['mbrDdBookings','/myroom'],['mbrDdProfile','/myroom'],['mbrDdSettings','/account-settings']].forEach(function(p){
+  [['mbrDdBookings','/member-portal'],['mbrDdProfile','/member-portal'],['mbrDdSettings','/my-account']].forEach(function(p){
     var el=document.getElementById(p[0]);
     if(el)el.addEventListener('click',function(e){e.preventDefault();document.getElementById('mbrDd').classList.add('hidden');try{window.parent.postMessage({type:'wix-booking-nav',path:p[1]},'*');}catch(_){}});
   });
