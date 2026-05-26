@@ -1,0 +1,8 @@
+﻿"Title","ID","Created Date","Updated Date","Owner","key","label","description","price","billingMode","sortOrder","active","publicVisible"
+"Booster","1c92d1aa-8f94-4a81-a507-c539fa683cc3",2026-03-15T14:22:55Z,2026-03-16T15:29:04Z,"284e089f-48c1-4969-b018-a9add65901a8","booster","Booster","4+ Ετών",4,"perDay",3,true,true
+"Παιδικό κάθισμα","5b129d48-22f4-4295-a9cf-e124426f5231",2026-03-15T14:22:55Z,2026-03-16T15:28:46Z,"284e089f-48c1-4969-b018-a9add65901a8","child","Παιδικό κάθισμα","1 - 4 Ετών",5,"perDay",2,true,true
+"GPS","5ddec631-3838-42d7-a702-dc3e22d22a47",2026-03-16T15:38:28Z,2026-03-16T15:38:28Z,"48ba7aa5-ed2b-43d2-bdd7-6596e6ec75a8","gps","GPS",,8,"perDay",50,false,false
+"Βάση Κινητού","93fb674a-5b2e-411b-8840-f2590e5db4c7",2026-03-16T15:23:34Z,2026-03-16T16:13:36Z,"48ba7aa5-ed2b-43d2-bdd7-6596e6ec75a8","smartphone_holder","Βάση Κινητού",".",1,"perDay",7,true,true
+"Δεύτερος οδηγός","a36dbf2a-a3ce-4c57-9aa3-df049b5d2bd8",2026-03-16T15:27:02Z,2026-03-16T15:27:02Z,"48ba7aa5-ed2b-43d2-bdd7-6596e6ec75a8","seconddriver","Δεύτερος οδηγός",,7,"perDay",40,false,false
+"Βρεφικό κάθισμα","d4b5fa4e-efbe-4590-8105-93bd3f2ffe74",2026-03-15T14:22:55Z,2026-03-16T15:28:24Z,"284e089f-48c1-4969-b018-a9add65901a8","baby","Βρεφικό κάθισμα","0 - 1 Ετών",3,"perDay",1,true,true
+"Αλυσίδες Χιονιού","d7f5c08f-3975-4744-85b1-a299b3c144a4",2026-03-16T15:21:51Z,2026-03-16T17:01:20Z,"48ba7aa5-ed2b-43d2-bdd7-6596e6ec75a8","snow_chains","Αλυσίδες Χιονιού",,30,"perBooking",6,true,true

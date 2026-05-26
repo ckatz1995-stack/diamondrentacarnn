@@ -1,0 +1,5 @@
+﻿"Title","ID","Created Date","Updated Date","Owner","key","label","description","startDate","endDate","priority","sortOrder","repeatYearly","active","publicVisible"
+,"e5eee4d4-bddd-492e-83ff-91d658b6ad5d",2026-03-15T22:36:29Z,2026-03-15T22:36:29Z,"284e089f-48c1-4969-b018-a9add65901a8","mid_season","Mid Season","Μεσαία σεζόν","2026-05-01","2026-06-30",20,20,false,true,true
+,"efb72c6d-a337-4b08-a41d-8727c9d4b36d",2026-03-15T22:36:29Z,2026-03-15T22:36:29Z,"284e089f-48c1-4969-b018-a9add65901a8","winter_repeat","Winter Repeat","Επαναλαμβανόμενη χειμερινή περίοδος κάθε χρόνο","2026-12-01","2027-01-31",15,40,true,true,true
+,"f263e6d8-a77c-453c-b930-bd68c4d8e16a",2026-03-15T22:36:29Z,2026-03-15T22:36:29Z,"284e089f-48c1-4969-b018-a9add65901a8","low_season","Low Season","Χαμηλή σεζόν","2026-02-01","2026-04-30",10,10,false,true,true
+,"f723b4d5-19cc-49db-8090-3a4343299e88",2026-03-15T22:36:29Z,2026-03-15T22:36:29Z,"284e089f-48c1-4969-b018-a9add65901a8","high_season","High Season","Υψηλή σεζόν","2026-07-01","2026-08-31",30,30,false,true,true

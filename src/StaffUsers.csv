@@ -1,0 +1,5 @@
+﻿"Title","ID","Created Date","Updated Date","Owner","email","fullName","roleKey","active","memberId","notes","deactivatedAt"
+,"4cde494f-3f4e-4c9b-b340-4b8c261d2e19",2026-03-19T11:34:24Z,2026-03-19T11:34:24Z,"4139a8c1-c961-498e-9512-465437a7bf6c","aristotelhs19@gmail.com","Αριστοτέλειος","admin",true,,,
+,"d4ed8f23-7878-452d-aea5-b0aff12cff35",2026-03-15T14:39:39Z,2026-03-19T13:44:49Z,"284e089f-48c1-4969-b018-a9add65901a8","ckatz1995@gmail.com","Nik nik","admin",true,,,
+,"d5b30205-e254-409c-959e-96c22056cb62",2026-03-15T15:50:06Z,2026-03-16T09:05:37Z,"4139a8c1-c961-498e-9512-465437a7bf6c","test@test.gr","Test test","desk",true,,,
+,"faac40d0-dbbc-4a92-93ff-1c5530a2939e",2026-03-15T13:40:04Z,2026-03-15T14:13:47Z,"284e089f-48c1-4969-b018-a9add65901a8","admin@diamondrentacar.gr","Site Admin","admin",true,,"Πρώτος staff user. Συνδέεται όταν το site member email ταιριάξει.",

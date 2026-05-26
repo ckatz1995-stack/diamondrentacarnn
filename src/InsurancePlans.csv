@@ -1,0 +1,4 @@
+﻿"Title","ID","Created Date","Updated Date","Owner","key","label","description","pricePerDay","sortOrder","active","publicVisible","Billingmode"
+"FULL","23ece734-b264-4c49-8884-9c93e6a6beee",2026-03-15T14:25:24Z,2026-03-15T16:53:26Z,"284e089f-48c1-4969-b018-a9add65901a8","full","FULL","Πιο ολοκληρωμένη κάλυψη με χρέωση 20",12,3,true,true,"perDay"
+"SCDW","725bb540-20ef-42a3-8f68-97749ca33295",2026-03-15T15:29:00Z,2026-03-15T17:11:13Z,"4139a8c1-c961-498e-9512-465437a7bf6c","scdw","SCDW","Μειωμένη ευθύνη με ημερήσια χρέωση.",6,2,true,true,"perDay"
+"CDW","ff1edf4c-8492-433f-9fbd-50dacc4fce4d",2026-03-15T14:25:24Z,2026-03-16T10:35:04Z,"284e089f-48c1-4969-b018-a9add65901a8","cdw","CDW","Βασική ασφαλιστική επιλογή χωρίς επιπλέον ημερήσια χρέωση.",0,1,true,true,"perDay"
