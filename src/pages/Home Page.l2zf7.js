@@ -1,8 +1,7 @@
 import wixLocation from "wix-location";
-import { session as wixSession } from "wix-storage";
+import { authentication, currentMember } from "wix-members-frontend";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
 import { getVehicleCategoriesCatalog } from "backend/bookingEngine";
-import { signIn as portalSignIn, signOut as portalSignOut } from "backend/memberPortal";
 import { BRIDGE_TYPES, buildBookingContext, isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from "public/bridgeUtils";
 const COMP = "#bpage1";
 
@@ -23,6 +22,28 @@ function getComponent(){
 
 function post(payload){
   return postMessageSafe(getComponent(), payload, "Home Page");
+}
+
+function mapAuthError(err) {
+  const msg = String(err?.message || err || '').toLowerCase();
+  if (msg.includes('invalid') || msg.includes('wrong') || msg.includes('incorrect')) return 'invalid_credentials';
+  if (msg.includes('exist') || msg.includes('already')) return 'email_exists';
+  if (msg.includes('weak')) return 'weak_password';
+  if (msg.includes('not found') || msg.includes('no member')) return 'not_found';
+  return 'server_error';
+}
+
+async function getMemberInfo() {
+  try {
+    const member = await currentMember.getMember({ fieldsets: ['FULL'] });
+    if (!member) return null;
+    const d = member.contactDetails || {};
+    return {
+      name: `${d.firstName || ''} ${d.lastName || ''}`.trim(),
+      email: (d.emails && d.emails[0]) || member.loginEmail || '',
+      memberId: member._id || ''
+    };
+  } catch (_) { return null; }
 }
 
 async function ensurePricingCatalog(){
@@ -72,20 +93,39 @@ function handleMessage(event) {
   if (data.type === "request-pickup-locations-data") { ensurePricingCatalog().then((catalog)=>post({ type: "pickup-locations-data", items: Array.isArray(catalog?.pickupLocations) ? catalog.pickupLocations : [] })); return; }
   if (data.type === "request-vehicle-categories-data") { ensureVehicleCategories().then((items)=>post({ type: "vehicle-categories-data", items: items || [] })); return; }
 
-  if (data.type === 'PORTAL_SIGN_IN') {
+  if (data.type === 'REQUEST_MEMBER_STATE') {
+    getMemberInfo().then((info) => {
+      post({ type: 'PORTAL_MEMBER_STATE', loggedIn: !!info, member: info || null });
+    });
+    return;
+  }
+
+  if (data.type === 'PORTAL_LOGIN') {
     (async () => {
       try {
-        const result = await portalSignIn({ email: String(data.email || '').trim(), bookingRef: String(data.bookingRef || '').trim() });
-        if (result.ok) {
-          wixSession.setItem('diamondPortalSess', JSON.stringify({
-            customerId: result.customerId,
-            sessionToken: result.sessionToken,
-            customer: result.customer
-          }));
-        }
-        post({ type: 'PORTAL_AUTH_RESULT', ...result });
-      } catch (_) {
-        post({ type: 'PORTAL_AUTH_RESULT', ok: false, error: 'server_error' });
+        await authentication.login(String(data.email || '').trim(), String(data.password || ''));
+        const info = await getMemberInfo();
+        post({ type: 'PORTAL_AUTH_RESULT', ok: true, member: info });
+      } catch (err) {
+        post({ type: 'PORTAL_AUTH_RESULT', ok: false, error: mapAuthError(err) });
+      }
+    })();
+    return;
+  }
+
+  if (data.type === 'PORTAL_REGISTER') {
+    (async () => {
+      try {
+        const result = await authentication.register(
+          String(data.email || '').trim(),
+          String(data.password || ''),
+          { contactInfo: { firstName: String(data.firstName || '').trim(), lastName: String(data.lastName || '').trim() } }
+        );
+        const info = await getMemberInfo();
+        const isPending = result?.status === 'PENDING' || info === null;
+        post({ type: 'PORTAL_AUTH_RESULT', ok: true, member: info, pending: isPending });
+      } catch (err) {
+        post({ type: 'PORTAL_AUTH_RESULT', ok: false, error: mapAuthError(err) });
       }
     })();
     return;
@@ -93,22 +133,9 @@ function handleMessage(event) {
 
   if (data.type === 'PORTAL_SIGN_OUT') {
     (async () => {
-      try {
-        await portalSignOut({ customerId: String(data.customerId || ''), sessionToken: String(data.sessionToken || '') });
-        wixSession.removeItem('diamondPortalSess');
-      } catch (_) {}
+      try { await authentication.logout(); } catch (_) {}
       post({ type: 'PORTAL_SIGN_OUT_RESULT' });
     })();
-    return;
-  }
-
-  if (data.type === 'REQUEST_PORTAL_SESSION') {
-    try {
-      const stored = wixSession.getItem('diamondPortalSess');
-      post({ type: 'PORTAL_SESSION', session: stored ? JSON.parse(stored) : null });
-    } catch (_) {
-      post({ type: 'PORTAL_SESSION', session: null });
-    }
     return;
   }
 }
@@ -119,6 +146,9 @@ $w.onReady(async function () {
     try { comp.onMessage(handleMessage); } catch (e) { console.error("Bind home html onMessage failed", e); }
   }
   await syncData();
+  getMemberInfo().then((info) => {
+    if (info) post({ type: 'PORTAL_MEMBER_STATE', loggedIn: true, member: info });
+  });
   setTimeout(() => {
     if (!bridgeReadyAck) syncData();
   }, 1200);
