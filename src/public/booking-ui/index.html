@@ -2795,7 +2795,11 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
     }
     if(d.type==='PORTAL_SIGN_OUT_RESULT'){cSess();uiUpdate();return;}
     if(d.type==='PORTAL_MEMBER_STATE'){
-      if(d.loggedIn&&d.member){wSess(d.member);uiUpdate();}
+      if(d.loggedIn&&d.member){
+        wSess(d.member);
+        if(d.member.driverAge){try{var sel=document.getElementById('driverAge');if(sel&&[...sel.options].some(function(o){return o.value===d.member.driverAge;})){sel.value=d.member.driverAge;if(typeof window.refreshCustomControls==='function')window.refreshCustomControls(['category']);}}catch(_){}}
+        uiUpdate();
+      }
       return;
     }
   });

@@ -1248,6 +1248,11 @@ function applyMemberPrefill(member = {}){
       el.value = field === 'dob' ? toDateInputValue(value) : value;
     }
   });
+  const prefillAge = String(member.driverAge || '').trim();
+  if (prefillAge && state.age === '23-69') {
+    state.age = prefillAge;
+    if (vehicle) renderVehicle(vehicle);
+  }
   if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['checkoutDobProxy']);
   setTimeout(notifyHeight, 50);
 }

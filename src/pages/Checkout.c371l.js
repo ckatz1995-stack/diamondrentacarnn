@@ -3,6 +3,7 @@ import { session as wixSession } from "wix-storage";
 import { currentMember } from "wix-members-frontend";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
 import { getVehicleCategoryDetails, createBooking } from "backend/bookingEngine";
+import { getExtendedProfile } from 'backend/memberPortal.jsw';
 import { BRIDGE_TYPES, buildBookingContext, isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from "public/bridgeUtils";
 
 const COMPONENT_CANDIDATES = ["#bpage4", "#checkoutHtml", "#bookingHtml", "#html1"];
@@ -97,8 +98,11 @@ async function ensureMemberPrefill() {
   if (memberPrefillPromise) return memberPrefillPromise;
 
   const requestEpoch = cacheEpoch;
-  memberPrefillPromise = currentMember.getMember({ fieldsets: ["FULL"] })
-    .then((member) => {
+  memberPrefillPromise = Promise.all([
+    currentMember.getMember({ fieldsets: ["FULL"] }),
+    getExtendedProfile().catch(() => null)
+  ])
+    .then(([member, ext]) => {
       if (requestEpoch !== cacheEpoch) return memberPrefill;
       if (!member) {
         memberPrefill = null;
@@ -118,7 +122,8 @@ async function ensureMemberPrefill() {
         address2: address?.addressLine2 || "",
         city: address?.city || "",
         country: address?.country || "",
-        postalCode: address?.postalCode || ""
+        postalCode: address?.postalCode || "",
+        driverAge: (ext && ext.ok && ext.extended && ext.extended.driverAge) || ""
       };
       return memberPrefill;
     })
