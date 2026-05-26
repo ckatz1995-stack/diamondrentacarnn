@@ -9,7 +9,7 @@ import { authentication, currentMember } from 'wix-members-frontend';
 import { getMyBookings, getMyProfile } from 'backend/memberPortal.jsw';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 
-const COMP_IDS = ['#mbrPortalHtml', '#htmlComponent1', '#htmlComp1', '#bpage1'];
+const COMP_IDS = ['#mbrPortalHtml', '#html1', '#html2', '#html3', '#htmlComponent1', '#htmlComp1', '#htmlComp', '#iframeComp', '#bpage1', '#bpage2'];
 
 function getComp() { return resolveHtmlComponent($w, COMP_IDS); }
 function post(payload) { return postMessageSafe(getComp(), payload, 'MemberPortal'); }
