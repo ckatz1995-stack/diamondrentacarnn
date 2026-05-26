@@ -1,5 +1,6 @@
 import wixData from 'wix-data';
 import { PORTAL_SESSION_TTL_HOURS } from 'backend/siteConfig';
+import { currentMember } from 'wix-members-backend';
 
 function generateToken() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -224,4 +225,36 @@ export async function cancelBooking({ bookingId, reason, customerId, sessionToke
   }, { suppressAuth: true });
 
   return { ok: true, booking: sanitizeBooking(updated) };
+}
+
+export async function getMyBookings(filter) {
+  let member;
+  try { member = await currentMember.getMember({ fieldsets: ['FULL'] }); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!member) return { ok: false, error: 'unauthorized' };
+  const email = ((member.contactDetails && member.contactDetails.emails && member.contactDetails.emails[0]) || member.loginEmail || '').toLowerCase().trim();
+  if (!email) return { ok: false, error: 'unauthorized' };
+  const now = new Date().toISOString();
+  let q = wixData.query('BookingsNew').eq('customerEmail', email).descending('_createdDate').limit(100);
+  if (filter === 'upcoming') q = q.gt('pickupDateTime', now).ne('status', 'Canceled');
+  else if (filter === 'past') q = q.lt('dropoffDateTime', now);
+  const res = await q.find({ suppressAuth: true });
+  return { ok: true, bookings: (res.items || []).map(sanitizeBooking), total: res.totalCount || (res.items || []).length };
+}
+
+export async function getMyProfile() {
+  let member;
+  try { member = await currentMember.getMember({ fieldsets: ['FULL'] }); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!member) return { ok: false, error: 'unauthorized' };
+  const d = member.contactDetails || {};
+  return {
+    ok: true,
+    profile: {
+      memberId: member._id,
+      name: ((d.firstName || '') + ' ' + (d.lastName || '')).trim(),
+      firstName: d.firstName || '',
+      lastName: d.lastName || '',
+      email: (d.emails && d.emails[0]) || member.loginEmail || '',
+      phone: (d.phones && d.phones[0]) || ''
+    }
+  };
 }
