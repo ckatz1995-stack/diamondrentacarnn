@@ -1,0 +1,824 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+import { VAT_RATE } from 'backend/bookingConfig';
+import { getPricingCatalog, getFallbackCatalogSnapshot, computeAutomaticFees, resolveDynamicPricingRate } from 'backend/pricingCatalog.jsw';
+import { buildPricingSnapshot } from 'backend/pricingSnapshot.js';
+import { computeBillableDaysDetailed } from 'backend/billableDays';
+
+// ==========================
+// Helpers
+// ==========================
+async function generateBookingNumber() {
+    const year = new Date().getFullYear();
+
+    const results = await wixData.query("BookingsNew")
+        .startsWith("bookingNumber", `RNT-${year}-`)
+        .descending("_createdDate")
+        .limit(1)
+        .find({ suppressAuth: true });
+
+    let nextNumber = 1;
+
+    if (results.items.length && results.items[0].bookingNumber) {
+        const parts = String(results.items[0].bookingNumber).split("-");
+        const lastSeq = Number(parts[2]);
+        if (!Number.isNaN(lastSeq)) nextNumber = lastSeq + 1;
+    }
+
+    return `RNT-${year}-${String(nextNumber).padStart(4, "0")}`;
+}
+
+async function hasOverlap(vehicleId, start, end, excludeBookingId) {
+    const res = await wixData.query("BookingsNew")
+        .eq("assignedVehicle", vehicleId)
+        .ne("status", "Canceled")
+        .lt("pickupDateTime", end)      // pickup < newEnd
+        .gt("dropoffDateTime", start)   // dropoff > newStart
+        .limit(1000)
+        .find({ suppressAuth: true });
+
+    const items = res.items || [];
+    return items.some(b => b._id !== excludeBookingId);
+}
+
+async function getActiveFleetCountByCategoryKeys(categoryKeys = []) {
+  const uniqueKeys = [...new Set((categoryKeys || []).map(v => String(v || '').trim()).filter(Boolean))];
+  for (const key of uniqueKeys) {
+    const res = await wixData.query("FleetNew")
+      .eq("active", true)
+      .eq("category", key)
+      .limit(1000)
+      .find({ suppressAuth: true });
+    if ((res.items || []).length) return res.items.length;
+  }
+  return 0;
+}
+
+async function countOverlappingBookingsByCategoryKeys(categoryKeys, start, end, excludeBookingId) {
+  const uniqueKeys = [...new Set((categoryKeys || []).map(v => String(v || '').trim()).filter(Boolean))];
+  const seen = new Set();
+  let total = 0;
+
+  for (const key of uniqueKeys) {
+    let q = wixData.query("BookingsNew")
+      .eq("categoryId", key)
+      .ne("status", "Canceled")
+      .lt("pickupDateTime", end)
+      .gt("dropoffDateTime", start)
+      .limit(1000);
+
+    if (excludeBookingId) q = q.ne("_id", excludeBookingId);
+
+    const res = await q.find({ suppressAuth: true });
+    for (const item of (res.items || [])) {
+      if (seen.has(item._id)) continue;
+      seen.add(item._id);
+      total += 1;
+    }
+  }
+
+  return total;
+}
+
+const BUSINESS_TIMEZONE = 'Europe/Athens';
+
+function readPart(parts, type) {
+  const hit = (parts || []).find(p => p.type === type);
+  return hit ? Number(hit.value) : 0;
+}
+
+function getTimeZoneOffsetMs(date, timeZone = BUSINESS_TIMEZONE) {
+  const dtf = new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23'
+  });
+  const parts = dtf.formatToParts(date);
+  const asUtc = Date.UTC(
+    readPart(parts, 'year'),
+    readPart(parts, 'month') - 1,
+    readPart(parts, 'day'),
+    readPart(parts, 'hour'),
+    readPart(parts, 'minute'),
+    readPart(parts, 'second')
+  );
+  return asUtc - date.getTime();
+}
+
+function parseBusinessLocalDateTime(value, timeZone = BUSINESS_TIMEZONE) {
+  if (!value && value !== 0) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+
+  const raw = String(value).trim();
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (match) {
+    const [, yy, mm, dd, hh, mi, ss = '00'] = match;
+    const guessUtc = new Date(Date.UTC(Number(yy), Number(mm) - 1, Number(dd), Number(hh), Number(mi), Number(ss)));
+    const offsetA = getTimeZoneOffsetMs(guessUtc, timeZone);
+    let candidate = new Date(guessUtc.getTime() - offsetA);
+    const offsetB = getTimeZoneOffsetMs(candidate, timeZone);
+    if (offsetB !== offsetA) candidate = new Date(guessUtc.getTime() - offsetB);
+    return Number.isNaN(candidate.getTime()) ? null : candidate;
+  }
+
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function athensHour(date, timeZone = BUSINESS_TIMEZONE) {
+  const dtf = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  const parts = dtf.formatToParts(date);
+  return { hour: readPart(parts, 'hour'), minute: readPart(parts, 'minute') };
+}
+
+function isNightShift(date, timeZone = BUSINESS_TIMEZONE) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return false;
+  const { hour } = athensHour(date, timeZone);
+  return hour < 8 || hour >= 22;
+}
+
+function deriveAgeFee(driverAge) {
+  const age = String(driverAge || '').trim();
+  if (age === '19-22') return 16;
+  if (age === '70+') return 10;
+  return 0;
+}
+
+function toFiniteNumber(value, fallback = 0) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function cleanText(value) {
+  return (value ?? '').toString().trim();
+}
+
+function buildVehicleCategoryDisplayName(categoryCode = '', title = '') {
+  const code = cleanText(categoryCode).toUpperCase();
+  const name = cleanText(title);
+  const normalizedName = name.replace(/\s+/g, ' ').trim();
+  if (code && normalizedName && new RegExp(`^${code}\\s*-`, 'i').test(normalizedName)) return normalizedName;
+  if (code && name) return `${code} - ${name}`;
+  return name || code || 'Όχημα';
+}
+
+function extractCategoryCode(value) {
+  const raw = cleanText(value);
+  if (!raw) return '';
+  const match = raw.match(/^([A-Za-z0-9]+)\s*-/);
+  return cleanText(match ? match[1] : raw).toUpperCase();
+}
+
+function normalizeLocationCompare(value) {
+  return cleanText(value).toLowerCase();
+}
+
+function resolvePickupLocationFee(catalog, value, kind = 'both') {
+  const rows = Array.isArray(catalog?.pickupLocations) ? catalog.pickupLocations : [];
+  const target = normalizeLocationCompare(value);
+  if (!target) return 0;
+  const hit = rows.find((item) => {
+    const type = cleanText(item?.locationType || 'both').toLowerCase() || 'both';
+    if (type !== 'both' && type !== cleanText(kind).toLowerCase()) return false;
+    const label = normalizeLocationCompare(item?.label);
+    const key = normalizeLocationCompare(item?.key);
+    return target === label || target === key;
+  });
+  return Number(toFiniteNumber(hit?.extraFee, 0).toFixed(2));
+}
+
+// ==========================
+// Create Booking (PRICE LOCK)
+// ==========================
+
+
+function vehicleCategoryImageUrl(value) {
+  const src = value?.src || value?.url || value;
+  if (!src) return '';
+  const raw = String(src);
+  if (/^https?:\/\//i.test(raw)) return raw;
+  const match = raw.match(/^wix:image:\/\/v1\/([^\/]+)\//i);
+  if (match) return `https://static.wixstatic.com/media/${match[1]}`;
+  return raw;
+}
+
+function toImageArray(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.flatMap((item) => toImageArray(item));
+  if (typeof value === 'object') {
+    const src = vehicleCategoryImageUrl(value?.src || value?.url || value?.image || value?.fileUrl || '');
+    if (src) return [src];
+    const nested = [value?.images, value?.gallery, value?.photos, value?.items].flatMap((item) => toImageArray(item));
+    return nested;
+  }
+  const url = vehicleCategoryImageUrl(value);
+  return url ? [url] : [];
+}
+
+function uniqueImageList(values = []) {
+  return Array.from(new Set((Array.isArray(values) ? values : []).filter(Boolean))).slice(0, 3);
+}
+
+function deriveFleetCategoryCode(raw) {
+  if (!raw) return '';
+  if (typeof raw === 'object') {
+    const candidates = [raw.category, raw.Category, raw.code, raw.key, raw.label, raw.title, raw.name, raw.value, raw._id];
+    for (const value of candidates) {
+      const resolved = deriveFleetCategoryCode(value);
+      if (resolved) return resolved;
+    }
+    return '';
+  }
+  const textValue = cleanText(raw);
+  if (!textValue) return '';
+  if (/^[A-Z]{1,3}$/i.test(textValue)) return textValue.toUpperCase();
+  const prefix = textValue.match(/^([A-Z]{1,3})/i);
+  return prefix ? String(prefix[1]).toUpperCase() : '';
+}
+
+function mapVehicleCategoryCatalogItem(item = {}) {
+  const categoryCode = String(
+    item.category ||
+    item.Category ||
+    item.categoryCode ||
+    item.CategoryCode ||
+    item.code ||
+    item.Code ||
+    ''
+  ).trim();
+  const title = String(
+    item.title ||
+    item.Title ||
+    item.name ||
+    item.Name ||
+    item.displayName ||
+    item.DisplayName ||
+    item.model ||
+    item.Model ||
+    item.modelName ||
+    item.ModelName ||
+    item.vehicleModel ||
+    item.VehicleModel ||
+    item.representativeModel ||
+    item.RepresentativeModel ||
+    item.sampleModel ||
+    item.SampleModel ||
+    item.subtitle ||
+    item.Subtitle ||
+    item.note ||
+    item.Note ||
+    ''
+  ).trim();
+  const photos = uniqueImageList([
+    ...toImageArray(item.photos),
+    ...toImageArray(item.Photos),
+    ...toImageArray(item.images),
+    ...toImageArray(item.Images),
+    ...toImageArray(item.image),
+    ...toImageArray(item.Image)
+  ]);
+  const displayName = buildVehicleCategoryDisplayName(categoryCode, title);
+  const rawAc = item.airCondition ?? item.AirCondition ?? item.ac ?? item.AC;
+  const acLabel = typeof rawAc === 'string'
+    ? (/^(yes|true|1|ναι)$/i.test(rawAc.trim()) ? 'Ναι' : 'Όχι')
+    : (rawAc ? 'Ναι' : 'Όχι');
+  return {
+    id: String(item._id || ''),
+    itemType: 'category',
+    source: 'vehicles',
+    title,
+    name: title || categoryCode || 'Όχημα',
+    displayName,
+    displayTitle: displayName,
+    category: categoryCode,
+    categoryCode,
+    label: categoryCode,
+    price: Number(
+      item.price ||
+      item.Price ||
+      item.pricePerDay ||
+      item.dailyPrice ||
+      item.dayPrice ||
+      item.basePrice ||
+      item.BasePrice ||
+      item.rate ||
+      item.Rate ||
+      item.priceDay ||
+      item.PriceDay ||
+      item.price_daily ||
+      item.PriceDaily ||
+      0
+    ) || 0,
+    image: photos[0] ? vehicleCategoryImageUrl(photos[0]) : '',
+    photos: photos.map((src) => vehicleCategoryImageUrl(src)),
+    active: (item.active ?? item.Active ?? true) !== false,
+    status: String(item.status || item.Status || '').trim(),
+    specs: {
+      gearbox: item.transmission || item.Transmission || item.gearbox || item.Gearbox || '-',
+      fuel: item.fuelType || item.FuelType || '-',
+      seats: item.seats || item.Seats || '-',
+      doors: item.doors || item.Doors || '-',
+      bags: item.luggage1 || item.luggage || item.Luggage || item.bags || item.Bags || item.luggageBags || '-',
+      luggage: item.luggage || item.Luggage || item.bags || item.Bags || item.luggageBags || '-',
+      ac: acLabel,
+      engineCc: item.engineCc || item.EngineCc || '-'
+    }
+  };
+}
+
+export async function getVehicleCategoriesCatalog() {
+  const res = await wixData.query('VehiclesNew')
+    .ascending('price')
+    .limit(1000)
+    .find({ suppressAuth: true });
+
+  return (res.items || [])
+    .filter((item) => (item?.active ?? item?.Active ?? true) !== false)
+    .map(mapVehicleCategoryCatalogItem);
+}
+
+
+function isVehicleCategoryActive(item = {}) {
+  return (item?.active ?? item?.Active ?? true) !== false;
+}
+
+async function findVehicleCategoryRecord({ vehicleId, categoryCode } = {}) {
+  const id = cleanText(vehicleId || '');
+  const code = cleanText(categoryCode || '');
+
+  if (id) {
+    try {
+      const item = await wixData.get('VehiclesNew', id, { suppressAuth: true });
+      if (item && isVehicleCategoryActive(item)) return item;
+    } catch (err) {}
+  }
+
+  if (code) {
+    const res = await wixData.query('VehiclesNew').limit(1000).find({ suppressAuth: true });
+    const match = (res.items || []).find((item) => {
+      if (!isVehicleCategoryActive(item)) return false;
+      const itemCode = cleanText(item.category || item.Category || '');
+      return itemCode === code;
+    });
+    if (match) return match;
+  }
+
+  return null;
+}
+
+export async function getVehicleCategoryDetails({ vehicleId, categoryCode } = {}) {
+  const item = await findVehicleCategoryRecord({ vehicleId, categoryCode });
+  if (!item) return null;
+  return mapVehicleCategoryCatalogItem(item);
+}
+
+
+function buildFleetSpecs(entry = {}, fallback = {}) {
+  return {
+    gearbox: entry.transmission || entry.Transmission || entry.gearbox || fallback.gearbox || '-',
+    fuel: entry.fuelType || entry.FuelType || entry.fuel || fallback.fuel || '-',
+    seats: entry.seats || entry.Seats || fallback.seats || '-',
+    doors: entry.doors || entry.Doors || fallback.doors || '-',
+    bags: entry.luggage1 || entry.luggage || entry.Luggage || fallback.bags || fallback.luggage || '-',
+    luggage: entry.luggage || entry.Luggage || fallback.luggage || fallback.bags || '-',
+    ac: (entry.airCondition ?? entry.AirCondition) !== undefined ? ((entry.airCondition || entry.AirCondition) ? 'Ναι' : 'Όχι') : (fallback.ac || '-'),
+    engineCc: entry.engineCc || entry.EngineCc || fallback.engineCc || '-'
+  };
+}
+
+export async function getFleetModelsPreview({ vehicleId, categoryCode } = {}) {
+  let resolvedCategoryCode = cleanText(categoryCode || '');
+  let vehicleItem = null;
+  if (!resolvedCategoryCode || vehicleId) {
+    vehicleItem = await findVehicleCategoryRecord({ vehicleId, categoryCode: resolvedCategoryCode || '' });
+    if (!resolvedCategoryCode) {
+      resolvedCategoryCode = cleanText(vehicleItem?.category || vehicleItem?.Category || '');
+    }
+  }
+
+  const vehiclesRes = await wixData.query('VehiclesNew').limit(1000).find({ suppressAuth: true }).catch(() => ({ items: [] }));
+  const activeVehicleRows = (vehiclesRes.items || []).filter((item) => isVehicleCategoryActive(item));
+  const vehicleByCode = new Map();
+  for (const row of activeVehicleRows) {
+    const code = cleanText(row.category || row.Category || '');
+    if (code && !vehicleByCode.has(code)) vehicleByCode.set(code, row);
+  }
+  if (!vehicleItem && resolvedCategoryCode) vehicleItem = vehicleByCode.get(resolvedCategoryCode) || null;
+
+  let query = wixData.query('FleetNew').limit(1000);
+  try { query = query.include('Category'); } catch (err) {}
+  const res = await query.find({ suppressAuth: true });
+  const categoryFallbackImage = uniqueImageList(toImageArray(vehicleItem?.image || vehicleItem?.Image || ''));
+  const categoryLabel = buildVehicleCategoryDisplayName(resolvedCategoryCode, vehicleItem?.title || vehicleItem?.Title || '');
+
+  const grouped = new Map();
+  for (const entry of (res.items || [])) {
+    const entryCategoryCode = deriveFleetCategoryCode(entry?.Category) || deriveFleetCategoryCode(entry?.category) || deriveFleetCategoryCode(entry?.categoryCode) || deriveFleetCategoryCode(entry?.categoryId);
+    if (resolvedCategoryCode && entryCategoryCode && entryCategoryCode !== resolvedCategoryCode) continue;
+    const isActive = (entry?.active ?? entry?.Active ?? true) !== false;
+    if (!isActive) continue;
+    const model = cleanText(entry.model || entry.Model || entry.title || entry.Title || '');
+    if (!model) continue;
+    const key = model.toLowerCase();
+    const matchedVehicle = vehicleByCode.get(entryCategoryCode) || vehicleItem || null;
+    const matchedCategoryCode = entryCategoryCode || cleanText(matchedVehicle?.category || matchedVehicle?.Category || resolvedCategoryCode || '');
+    const matchedCategoryLabel = buildVehicleCategoryDisplayName(matchedCategoryCode, matchedVehicle?.title || matchedVehicle?.Title || '');
+    const photos = uniqueImageList([
+      ...toImageArray(entry?.photos),
+      ...toImageArray(entry?.Photos),
+      ...toImageArray(entry?.gallery),
+      ...toImageArray(entry?.Gallery),
+      ...toImageArray(entry?.images),
+      ...toImageArray(entry?.Images),
+      ...toImageArray(entry?.album),
+      ...toImageArray(entry?.Album),
+      ...toImageArray(entry?.image),
+      ...toImageArray(entry?.Image),
+      ...toImageArray(entry?.photo),
+      ...toImageArray(entry?.Photo),
+      ...toImageArray(matchedVehicle?.image),
+      ...toImageArray(matchedVehicle?.Image),
+      ...categoryFallbackImage
+    ]);
+    const specs = buildFleetSpecs(entry, mapVehicleCategoryCatalogItem(matchedVehicle || {}).specs || {});
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        id: String(matchedVehicle?._id || ''),
+        vehicleCategoryId: String(matchedVehicle?._id || ''),
+        itemType: 'model',
+        source: 'fleet',
+        model,
+        title: model,
+        name: model,
+        displayName: model,
+        displayTitle: model,
+        label: matchedCategoryCode,
+        category: matchedCategoryCode,
+        categoryCode: matchedCategoryCode,
+        categoryLabel: matchedCategoryLabel,
+        image: photos[0] || '',
+        photos,
+        note: `Ενδεικτικό μοντέλο${matchedCategoryLabel ? ` · ${matchedCategoryLabel}` : ''}`,
+        specs
+      });
+    } else {
+      const current = grouped.get(key);
+      current.photos = uniqueImageList([...(current.photos || []), ...photos]);
+      if (!current.image && current.photos[0]) current.image = current.photos[0];
+      if (!current.id && matchedVehicle?._id) current.id = String(matchedVehicle._id);
+      if (!current.vehicleCategoryId && matchedVehicle?._id) current.vehicleCategoryId = String(matchedVehicle._id);
+      if (!current.categoryCode && matchedCategoryCode) current.categoryCode = matchedCategoryCode;
+      if (!current.category && matchedCategoryCode) current.category = matchedCategoryCode;
+      if (!current.label && matchedCategoryCode) current.label = matchedCategoryCode;
+      if (!current.categoryLabel && matchedCategoryLabel) current.categoryLabel = matchedCategoryLabel;
+    }
+  }
+
+  return {
+    category: categoryLabel || resolvedCategoryCode,
+    items: Array.from(grouped.values()).sort((a, b) => String(a.model || a.name || '').localeCompare(String(b.model || b.name || ''), 'el'))
+  };
+}
+
+export async function createBooking(data) {
+    try {
+        const {
+            vehicleId,
+            categoryId,
+            category,
+            pickupDateTime,
+            dropoffDateTime,
+            customerName,
+            phone,
+            email,
+            selectedPackage,
+            selectedExtras,
+            driverAge,
+            pickuppoint,
+            dropoffpoint,
+            flightNumber,
+            dropoffInfo,
+            originCity,
+            customerComments,
+            customerData,
+            billingData,
+            source
+        } = data || {};
+
+        if (!vehicleId || !categoryId || !pickupDateTime || !dropoffDateTime || !customerName || !email || !phone) {
+            return { success: false, message: "Λείπουν υποχρεωτικά πεδία." };
+        }
+
+        const pickup = parseBusinessLocalDateTime(pickupDateTime);
+        const dropoff = parseBusinessLocalDateTime(dropoffDateTime);
+        if (!pickup || !dropoff || Number.isNaN(pickup.getTime()) || Number.isNaN(dropoff.getTime()) || dropoff <= pickup) {
+            return { success: false, message: "Μη έγκυρες ημερομηνίες παραλαβής/παράδοσης." };
+        }
+
+        let pricingCatalog;
+        try {
+            pricingCatalog = await getPricingCatalog({ scope: 'all' });
+        } catch (e) {
+            pricingCatalog = getFallbackCatalogSnapshot();
+        }
+
+        const businessSettings = pricingCatalog?.businessSettings || {};
+        const allowOverbooking = !!businessSettings?.allowOverbooking;
+
+        const fleetCategoryKeys = [vehicleId, categoryId, category];
+
+        const fleetCount = await getActiveFleetCountByCategoryKeys(fleetCategoryKeys);
+        const overlaps = await countOverlappingBookingsByCategoryKeys(fleetCategoryKeys, pickup, dropoff, null);
+
+        if (fleetCount > 0 && overlaps >= fleetCount && !allowOverbooking) {
+            return { success: false, message: "Δεν υπάρχει διαθεσιμότητα για τις συγκεκριμένες ημερομηνίες/ώρες." };
+        }
+
+        const vehicle = await wixData.get("VehiclesNew", vehicleId, { suppressAuth: true });
+        if (!vehicle || !isVehicleCategoryActive(vehicle)) {
+            return { success: false, message: "Η κατηγορία οχήματος δεν είναι διαθέσιμη." };
+        }
+
+        const rawCategoryId = cleanText(categoryId);
+        const rawVehicleId = cleanText(vehicleId);
+        const resolvedCategoryCode = extractCategoryCode(
+          (rawCategoryId && rawCategoryId !== rawVehicleId ? rawCategoryId : '') ||
+          category ||
+          vehicle?.category ||
+          vehicle?.Category ||
+          ''
+        );
+
+        const fallbackBasePricePerDay = toFiniteNumber(vehicle.price, 0);
+        const { hours, billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1);
+
+        const insuranceMap = pricingCatalog?.maps?.insurance || {};
+        const extrasMap = pricingCatalog?.maps?.extras || {};
+        const dynamicPricing = resolveDynamicPricingRate({
+          categoryCode: resolvedCategoryCode,
+          vehicleCategoryId: String(vehicleId),
+          billableDays,
+          pickupDateTime: pickup,
+          dropoffDateTime: dropoff,
+          catalog: pricingCatalog,
+          fallbackPricePerDay: fallbackBasePricePerDay
+        });
+        const basePricePerDay = toFiniteNumber(dynamicPricing?.pricePerDay, fallbackBasePricePerDay);
+
+        const pkg = cleanText(selectedPackage || "cdw").toLowerCase();
+        const insuranceExtraPerDay = toFiniteNumber(insuranceMap[pkg], 0);
+
+        const extrasInput = Array.isArray(selectedExtras) ? selectedExtras : [];
+        const finalExtras = [];
+        const extraLabels = [];
+        const selectedExtrasDetails = [];
+        let computedExtrasTotal = 0;
+
+        for (const rawExtra of extrasInput) {
+            const extraKey = cleanText(typeof rawExtra === 'object' ? (rawExtra.key || rawExtra.id || rawExtra.value || rawExtra.label || '') : rawExtra).trim();
+            if (!extraKey || finalExtras.includes(extraKey)) continue;
+            finalExtras.push(extraKey);
+
+            const extraCfg = extrasMap[extraKey] || {};
+            const label = cleanText(typeof rawExtra === 'object' ? (rawExtra.label || rawExtra.name || '') : '') || cleanText(extraCfg.label || extraKey);
+            const mode = cleanText(typeof rawExtra === 'object' ? (rawExtra.mode || rawExtra.billingMode || '') : '') || cleanText(extraCfg.billingMode || extraCfg.mode || 'perDay');
+            const unitPrice = Number(toFiniteNumber(typeof rawExtra === 'object' ? (rawExtra.pricePerDay ?? rawExtra.price ?? rawExtra.amount) : undefined, toFiniteNumber(extraCfg.price, 0)).toFixed(2));
+            const lineTotal = Number((mode === 'perBooking' ? unitPrice : unitPrice * billableDays).toFixed(2));
+
+            extraLabels.push(label || extraKey);
+            selectedExtrasDetails.push({ key: extraKey, label: label || extraKey, mode: mode === 'perBooking' ? 'perBooking' : 'perDay', unitPrice, lineTotal });
+            computedExtrasTotal += lineTotal;
+        }
+
+        const computedBaseCost = Number((basePricePerDay * billableDays).toFixed(2));
+        const computedInsuranceCost = Number((insuranceExtraPerDay * billableDays).toFixed(2));
+        const automaticFees = computeAutomaticFees({
+          driverAge,
+          pickupDateTime: pickup,
+          dropoffDateTime: dropoff,
+          businessSettings,
+          feeRules: pricingCatalog?.feeRules || []
+        });
+        // Money fields are server-authoritative: ignore anything the client sends to prevent price tampering.
+        const finalAgeFee = Number(toFiniteNumber(automaticFees?.ageFee, deriveAgeFee(driverAge)).toFixed(2));
+        const finalNightFee = Number(toFiniteNumber(automaticFees?.nightFee, ((isNightShift(pickup) ? 15 : 0) + (isNightShift(dropoff) ? 15 : 0))).toFixed(2));
+        const finalBaseCost = computedBaseCost;
+        const finalInsuranceCost = computedInsuranceCost;
+        const finalExtrasCost = Number(computedExtrasTotal.toFixed(2));
+        const finalPickupLocationFee = Number(resolvePickupLocationFee(pricingCatalog, pickuppoint, 'pickup').toFixed(2));
+        const finalDropoffLocationFee = Number(resolvePickupLocationFee(pricingCatalog, dropoffpoint, 'dropoff').toFixed(2));
+        const finalLocationFee = Number((finalPickupLocationFee + finalDropoffLocationFee).toFixed(2));
+        const totalPrice = Number((finalBaseCost + finalInsuranceCost + finalExtrasCost + finalAgeFee + finalNightFee + finalLocationFee).toFixed(2));
+        const vatRateDecimal = toFiniteNumber(businessSettings?.vatRateDecimal, VAT_RATE);
+        const netAmount = Number((totalPrice / (1 + vatRateDecimal)).toFixed(2));
+        const vatAmount = Number((totalPrice - netAmount).toFixed(2));
+
+        const bookingNumber = await generateBookingNumber();
+        const userId = wixUsersBackend.currentUser?.id || null;
+
+        const residenceCity = cleanText(customerData?.city || "");
+        const travelCity = cleanText(customerData?.originCity || originCity || data?.originCity || data?.city || "");
+        const normalizedMainDriver = {
+            ...(customerData || {}),
+            fullName: cleanText(customerData?.fullName || customerName),
+            phone: cleanText(customerData?.phone || phone),
+            email: cleanText(customerData?.email || email),
+            address: cleanText(customerData?.address || ""),
+            city: residenceCity,
+            originCity: travelCity,
+            dob: cleanText(customerData?.dob || ""),
+            notes: cleanText(customerData?.notes || customerComments || "")
+        };
+
+        const normalizedBilling = {
+            ...(billingData || {}),
+            invoiceType: cleanText(billingData?.invoiceType || ""),
+            companyName: cleanText(billingData?.companyName || ""),
+            profession: cleanText(billingData?.profession || ""),
+            vatNumber: cleanText(billingData?.vatNumber || ""),
+            taxOffice: cleanText(billingData?.taxOffice || ""),
+            address: cleanText(billingData?.address || ""),
+            city: cleanText(billingData?.city || ""),
+            zip: cleanText(billingData?.zip || ""),
+            country: cleanText(billingData?.country || ""),
+            phone: cleanText(billingData?.phone || ""),
+            companyEmail: cleanText(billingData?.companyEmail || ""),
+            vatInclusive: billingData?.vatInclusive !== false,
+            vatRate: toFiniteNumber(billingData?.vatRate, 0.24)
+        };
+
+        const booking = {
+            bookingNumber,
+
+            vehicleId: String(vehicleId),
+
+categoryId: String(resolvedCategoryCode),
+category: cleanText(extractCategoryCode(category) || resolvedCategoryCode),
+vehicleCategoryCode: String(resolvedCategoryCode),
+vehicleCategoryName: buildVehicleCategoryDisplayName(resolvedCategoryCode, cleanText(vehicle.title || vehicle.Title || '')),
+vehicleCategoryTitle: cleanText(vehicle.title || vehicle.Title || ''),
+vehicleCategoryImage: vehicleCategoryImageUrl(vehicle.image || vehicle.Image || ''),
+vehicleCategorySpecs: mapVehicleCategoryCatalogItem(vehicle).specs,
+
+            pickupDateTime: pickup,
+            dropoffDateTime: dropoff,
+
+            customerName: String(customerName),
+            phone: String(phone),
+            email: String(email),
+
+            selectedPackage: pkg,
+            selectedExtras: finalExtras,
+            selectedExtrasDetails,
+            extras: extraLabels.join(", "),
+
+            driverAge: driverAge ? String(driverAge) : "",
+            pickuppoint: pickuppoint ? String(pickuppoint) : "",
+            dropoffpoint: dropoffpoint ? String(dropoffpoint) : "",
+
+            durationHours: Number(hours.toFixed(2)),
+            billableDays,
+
+            basePricePerDay,
+            basePriceSource: String(dynamicPricing?.source || 'vehicleBasePrice'),
+            pricingSeasonKey: String(dynamicPricing?.season?.key || ''),
+            pricingSeasonLabel: String(dynamicPricing?.season?.label || ''),
+            pricingRuleKey: String(dynamicPricing?.rule?.key || ''),
+            pricingRuleLabel: String(dynamicPricing?.rule?.label || ''),
+            insuranceExtraPerDay,
+            baseCost: finalBaseCost,
+            insuranceCost: finalInsuranceCost,
+            extrasTotal: finalExtrasCost,
+            ageFee: finalAgeFee,
+            nightFee: finalNightFee,
+            pickupLocationFee: finalPickupLocationFee,
+            dropoffLocationFee: finalDropoffLocationFee,
+            locationFee: finalLocationFee,
+            totalPrice,
+            netAmount,
+            vatAmount,
+            vatRate: vatRateDecimal,
+
+            status: "Pending",
+
+            mainDriver: normalizedMainDriver,
+            billing: normalizedBilling,
+            invoiceType: normalizedBilling.invoiceType,
+            companyName: normalizedBilling.companyName,
+            profession: normalizedBilling.profession,
+            vatNumber: normalizedBilling.vatNumber,
+            taxOffice: normalizedBilling.taxOffice,
+            billingAddress: normalizedBilling.address,
+            billingCity: normalizedBilling.city,
+            billingZip: normalizedBilling.zip,
+            billingCountry: normalizedBilling.country,
+            companyPhone: normalizedBilling.phone,
+            companyEmail: normalizedBilling.companyEmail,
+            internalMemo: normalizedMainDriver.notes || "",
+            pickupComment: flightNumber ? `Flight: ${String(flightNumber)}` : "",
+            flightNumber: flightNumber ? String(flightNumber) : "",
+            dropoffInfo: dropoffInfo ? String(dropoffInfo) : "",
+            city: travelCity,
+            customerCity: residenceCity,
+            originCity: travelCity,
+
+            memberId: userId || "",
+            createdBy: userId,
+            source: cleanText(source || data?.channel || "Website"),
+            createdAtApp: new Date()
+        };
+
+        booking.pricingSnapshot = buildPricingSnapshot({
+            catalog: pricingCatalog,
+            booking,
+            selectedPackage: pkg,
+            selectedExtrasDetails,
+            charges: {
+              rental: finalBaseCost,
+              insurance: finalInsuranceCost,
+              options: finalExtrasCost,
+              ageFee: finalAgeFee,
+              nightFee: finalNightFee,
+              transport: finalLocationFee,
+              gross: totalPrice
+            },
+            source: 'createBooking'
+        });
+
+        const inserted = await wixData.insert("BookingsNew", booking, { suppressAuth: true });
+        return { success: true, bookingNumber: inserted.bookingNumber, _id: inserted._id };
+
+    } catch (err) {
+        return { success: false, message: (err && err.message) ? err.message : String(err) };
+    }
+}
+
+// ==========================
+// Calendar: move/assign + overlap block + audit
+// ==========================
+export async function applyCalendarChange(change) {
+    try {
+        const { bookingId, resourceId, start, end } = change || {};
+        if (!bookingId) return { success: false, message: "Missing bookingId" };
+
+        const booking = await wixData.get("BookingsNew", bookingId, { suppressAuth: true });
+        if (!booking) return { success: false, message: "Booking not found" };
+
+        if (booking.status === "Canceled") {
+            return { success: false, message: "Canceled booking cannot be moved" };
+        }
+
+        const newStart = start ? new Date(start) : new Date(booking.pickupDateTime);
+        const newEnd = end ? new Date(end) : new Date(booking.dropoffDateTime);
+
+        if (Number.isNaN(newStart.getTime()) || Number.isNaN(newEnd.getTime()) || newEnd <= newStart) {
+            return { success: false, message: "Invalid dates" };
+        }
+
+        const newAssigned = (!resourceId || resourceId === "unassigned") ? null : resourceId;
+
+        // overlap check
+        if (newAssigned) {
+            const overlap = await hasOverlap(newAssigned, newStart, newEnd, bookingId);
+            if (overlap) return { success: false, message: "BOOKING_OVERLAP" };
+        }
+
+        const userId = wixUsersBackend.currentUser?.id || null;
+        const now = new Date();
+
+        const assignedChanged = String(booking.assignedVehicle || "") !== String(newAssigned || "");
+
+        booking.pickupDateTime = newStart;
+        booking.dropoffDateTime = newEnd;
+        booking.assignedVehicle = newAssigned;
+
+        booking.scheduleChangedAt = now;
+        booking.scheduleChangedBy = userId;
+
+        if (assignedChanged) {
+            booking.assignedVehicleChangedAt = now;
+            booking.assignedVehicleChangedBy = userId;
+        }
+
+        const saved = await wixData.update("BookingsNew", booking, { suppressAuth: true });
+
+        const event = {
+            id: saved._id,
+            resourceId: saved.assignedVehicle ? saved.assignedVehicle : "unassigned",
+            title: (saved.bookingNumber || "") + " - " + (saved.customerName || ""),
+            start: saved.pickupDateTime,
+            end: saved.dropoffDateTime,
+            status: saved.status || "Pending"
+        };
+
+        return { success: true, booking: saved, event };
+
+    } catch (err) {
+        return { success: false, message: (err && err.message) ? err.message : String(err) };
+    }
+}
