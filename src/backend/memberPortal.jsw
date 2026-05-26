@@ -1,6 +1,6 @@
 import wixData from 'wix-data';
 import { PORTAL_SESSION_TTL_HOURS } from 'backend/siteConfig';
-import { currentMember } from 'wix-members-backend';
+import { currentMember, members as wixMembers } from 'wix-members-backend';
 
 function generateToken() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -225,6 +225,78 @@ export async function cancelBooking({ bookingId, reason, customerId, sessionToke
   }, { suppressAuth: true });
 
   return { ok: true, booking: sanitizeBooking(updated) };
+}
+
+async function memberEmail() {
+  const m = await currentMember.getMember({ fieldsets: ['FULL'] });
+  if (!m) return null;
+  return ((m.contactDetails && m.contactDetails.emails && m.contactDetails.emails[0]) || m.loginEmail || '').toLowerCase().trim() || null;
+}
+
+async function ownedBooking(bookingId, email) {
+  const res = await wixData.query('BookingsNew').eq('_id', String(bookingId)).limit(1).find({ suppressAuth: true });
+  const b = res.items && res.items[0];
+  if (!b) return { err: 'not_found' };
+  const bEmail = String(b.customerEmail || b.email || '').toLowerCase().trim();
+  if (bEmail !== email) return { err: 'unauthorized' };
+  return { booking: b };
+}
+
+export async function cancelMyBooking({ bookingId, reason }) {
+  let email;
+  try { email = await memberEmail(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!email) return { ok: false, error: 'unauthorized' };
+  const { booking, err } = await ownedBooking(bookingId, email);
+  if (err) return { ok: false, error: err };
+  if (booking.status === 'Canceled') return { ok: false, error: 'already_canceled' };
+  if (new Date(booking.pickupDateTime) <= new Date()) return { ok: false, error: 'pickup_passed' };
+  const updated = await wixData.update('BookingsNew', {
+    ...booking,
+    status: 'Canceled',
+    canceledAt: new Date().toISOString(),
+    cancelReason: String(reason || '').trim() || 'Customer request'
+  }, { suppressAuth: true });
+  return { ok: true, booking: sanitizeBooking(updated) };
+}
+
+export async function updateMyBooking({ bookingId, changes }) {
+  let email;
+  try { email = await memberEmail(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!email) return { ok: false, error: 'unauthorized' };
+  const { booking, err } = await ownedBooking(bookingId, email);
+  if (err) return { ok: false, error: err };
+  if (booking.status === 'Canceled') return { ok: false, error: 'already_canceled' };
+  if (new Date(booking.dropoffDateTime) <= new Date()) return { ok: false, error: 'booking_passed' };
+  const allowed = ['pickupDateTime', 'dropoffDateTime', 'pickupLocation', 'dropoffLocation', 'notes'];
+  const patch = {};
+  for (const key of allowed) {
+    if (changes && changes[key] !== undefined) patch[key] = changes[key];
+  }
+  if (!Object.keys(patch).length) return { ok: false, error: 'no_changes' };
+  if (patch.pickupDateTime || patch.dropoffDateTime) {
+    const np = new Date(patch.pickupDateTime || booking.pickupDateTime);
+    const nd = new Date(patch.dropoffDateTime || booking.dropoffDateTime);
+    if (nd <= np) return { ok: false, error: 'invalid_dates' };
+  }
+  const updated = await wixData.update('BookingsNew', { ...booking, ...patch }, { suppressAuth: true });
+  return { ok: true, booking: sanitizeBooking(updated) };
+}
+
+export async function updateMyProfile({ firstName, lastName, phone }) {
+  let member;
+  try { member = await currentMember.getMember({ fieldsets: ['FULL'] }); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!member) return { ok: false, error: 'unauthorized' };
+  const contactDetails = {};
+  if (firstName !== undefined) contactDetails.firstName = String(firstName || '').trim();
+  if (lastName !== undefined) contactDetails.lastName = String(lastName || '').trim();
+  if (phone !== undefined) contactDetails.phones = String(phone || '').trim() ? [String(phone).trim()] : [];
+  try {
+    await wixMembers.updateMember(member._id, { contactDetails });
+    return { ok: true };
+  } catch (err) {
+    console.warn('updateMyProfile error', err);
+    return { ok: false, error: 'update_failed' };
+  }
 }
 
 export async function getMyBookings(filter) {
