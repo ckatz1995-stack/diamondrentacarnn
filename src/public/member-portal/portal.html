@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ο Λογαριασμός μου</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f4f2ee;color:#1f1a13;min-height:100vh}
+.hidden{display:none!important}
+#loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;color:#aaa}
+#loading svg{width:40px;height:40px;opacity:.35}
+#hdr{background:#1f1a13;color:#fff;padding:20px 24px;display:flex;align-items:center;gap:14px}
+#avatar{width:46px;height:46px;border-radius:50%;background:#e7bf69;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#1f1a13;flex-shrink:0;letter-spacing:-.5px}
+#hdrInfo{flex:1;min-width:0}
+#memberName{font-size:16px;font-weight:800;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#memberEmail{font-size:12px;color:#888;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tabBar{display:flex;background:#fff;border-bottom:2px solid #ede9e0;padding:0 20px;position:sticky;top:0;z-index:10}
+.tab{flex:none;background:none;border:none;border-bottom:2.5px solid transparent;margin-bottom:-2px;padding:14px 18px;font-size:14px;font-weight:700;color:#aaa;cursor:pointer;transition:color .18s,border-color .18s;font-family:inherit;white-space:nowrap}
+.tab.active{color:#3f748a;border-bottom-color:#3f748a}
+.tab:hover:not(.active){color:#555}
+#content{padding:20px 16px 40px;max-width:700px;margin:0 auto}
+#filterBar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.chip{background:#fff;border:1.5px solid #ddd8cc;color:#777;font-size:13px;font-weight:700;padding:7px 15px;border-radius:999px;cursor:pointer;transition:all .18s;font-family:inherit}
+.chip.active{background:#3f748a;border-color:#3f748a;color:#fff}
+.chip:hover:not(.active){border-color:#3f748a;color:#3f748a}
+.bk-card{background:#fff;border-radius:14px;padding:18px 20px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.04)}
+.bk-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px}
+.bk-num{font-size:15px;font-weight:900;color:#1f1a13}
+.bk-status{font-size:11px;font-weight:800;padding:4px 11px;border-radius:999px;white-space:nowrap;letter-spacing:.02em}
+.s-confirmed,.s-active{background:#e8f5e9;color:#1a7a45}
+.s-pending{background:#fff8e1;color:#a07000}
+.s-canceled{background:#fff2f0;color:#b83c2e}
+.s-completed{background:#eef2ff;color:#3a5fd4}
+.bk-vehicle{font-size:14px;font-weight:700;color:#3f748a;margin-bottom:12px}
+.bk-rows{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.bk-row strong{display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.bk-row span{font-size:13px;color:#333}
+.bk-footer{display:flex;justify-content:flex-end;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #f0ece3}
+.bk-price{font-size:19px;font-weight:900;color:#1f1a13}
+.empty{text-align:center;padding:56px 24px 40px;color:#ccc}
+.empty svg{width:52px;height:52px;margin-bottom:14px;opacity:.35}
+.empty p{font-size:14px;color:#bbb}
+.spin{display:flex;justify-content:center;padding:48px 24px;color:#ccc;font-size:14px}
+.profile-wrap{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.profile-banner{background:linear-gradient(135deg,#1f1a13 0%,#3f748a 100%);padding:32px 24px 24px;display:flex;flex-direction:column;align-items:center}
+.profile-avatar-lg{width:72px;height:72px;border-radius:50%;background:#e7bf69;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#1f1a13;margin-bottom:12px;letter-spacing:-.5px}
+.profile-fullname{font-size:20px;font-weight:900;color:#fff;text-align:center}
+.profile-fields{padding:8px 0}
+.profile-field{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid #f4f2ee}
+.profile-field:last-child{border:none}
+.profile-field label{font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.05em}
+.profile-field span{font-size:14px;font-weight:600;color:#1f1a13;text-align:right}
+.profile-empty{color:#ccc;font-style:italic}
+.settings-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 48px);margin:20px 24px;padding:14px;background:#f4f2ee;border:none;border-radius:10px;font-size:14px;font-weight:700;color:#3f748a;cursor:pointer;font-family:inherit;transition:background .18s}
+.settings-btn:hover{background:#ede9e0}
+@media(max-width:480px){.bk-rows{grid-template-columns:1fr}.tab{padding:14px 12px;font-size:13px}}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
+  <span>Φόρτωση λογαριασμού...</span>
+</div>
+
+<div id="app" class="hidden">
+  <div id="hdr">
+    <div id="avatar">?</div>
+    <div id="hdrInfo">
+      <strong id="memberName">—</strong>
+      <span id="memberEmail"></span>
+    </div>
+  </div>
+
+  <div id="tabBar">
+    <button class="tab active" data-tab="bookings">Κρατήσεις μου</button>
+    <button class="tab" data-tab="profile">Προφίλ</button>
+  </div>
+
+  <div id="content">
+    <div id="panelBookings">
+      <div id="filterBar">
+        <button class="chip active" data-filter="all">Όλες</button>
+        <button class="chip" data-filter="upcoming">Επερχόμενες</button>
+        <button class="chip" data-filter="past">Παρελθοντικές</button>
+      </div>
+      <div id="bookingsList"><div class="spin">Φόρτωση κρατήσεων...</div></div>
+    </div>
+
+    <div id="panelProfile" class="hidden">
+      <div id="profileContent"><div class="spin">Φόρτωση προφίλ...</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var currentFilter = 'all';
+  var profileLoaded = false;
+
+  function post(msg) { try { window.parent.postMessage(msg, '*'); } catch(_) {} }
+
+  function fmt(dt) {
+    if (!dt) return '—';
+    try {
+      return new Date(dt).toLocaleDateString('el-GR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    } catch(_) { return dt; }
+  }
+
+  var STATUS_LABELS = { Confirmed:'Επιβεβαιωμένη', Active:'Ενεργή', Pending:'Σε αναμονή', Canceled:'Ακυρωμένη', Completed:'Ολοκληρωμένη' };
+  var STATUS_CLASS = { confirmed:'s-confirmed', active:'s-active', pending:'s-pending', canceled:'s-canceled', cancelled:'s-canceled', completed:'s-completed' };
+
+  function sLabel(s) { return STATUS_LABELS[s] || s || '—'; }
+  function sClass(s) { return STATUS_CLASS[(s||'').toLowerCase()] || 's-confirmed'; }
+
+  function initials(name) {
+    if (!name) return '?';
+    var p = name.trim().split(/\s+/).filter(Boolean);
+    if (p.length >= 2) return (p[0][0] + p[p.length-1][0]).toUpperCase();
+    return (p[0] || '?')[0].toUpperCase();
+  }
+
+  function setMember(m) {
+    var name = m.name || m.email || 'Μέλος';
+    document.getElementById('memberName').textContent = name;
+    document.getElementById('memberEmail').textContent = m.email || '';
+    document.getElementById('avatar').textContent = initials(name);
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    loadBookings(currentFilter);
+  }
+
+  function showTab(tab) {
+    document.querySelectorAll('.tab').forEach(function(b) { b.classList.toggle('active', b.dataset.tab === tab); });
+    document.getElementById('panelBookings').classList.toggle('hidden', tab !== 'bookings');
+    document.getElementById('panelProfile').classList.toggle('hidden', tab !== 'profile');
+    if (tab === 'profile' && !profileLoaded) loadProfile();
+  }
+
+  function loadBookings(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.chip').forEach(function(c) { c.classList.toggle('active', c.dataset.filter === filter); });
+    document.getElementById('bookingsList').innerHTML = '<div class="spin">Φόρτωση κρατήσεων...</div>';
+    post({ type: 'REQUEST_MY_BOOKINGS', filter: filter === 'all' ? null : filter });
+  }
+
+  function loadProfile() {
+    document.getElementById('profileContent').innerHTML = '<div class="spin">Φόρτωση προφίλ...</div>';
+    post({ type: 'REQUEST_MY_PROFILE' });
+  }
+
+  function renderBookings(list) {
+    var el = document.getElementById('bookingsList');
+    if (!list || !list.length) {
+      el.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><p>Δεν βρέθηκαν κρατήσεις.</p></div>';
+      return;
+    }
+    el.innerHTML = list.map(function(b) {
+      return '<div class="bk-card">' +
+        '<div class="bk-head"><span class="bk-num">#' + (b.bookingNumber || b._id) + '</span>' +
+        '<span class="bk-status ' + sClass(b.status) + '">' + sLabel(b.status) + '</span></div>' +
+        '<div class="bk-vehicle">' + (b.vehicleName || 'Όχημα') + '</div>' +
+        '<div class="bk-rows">' +
+          '<div class="bk-row"><strong>Παραλαβή</strong><span>' + fmt(b.pickupDateTime) + '</span></div>' +
+          '<div class="bk-row"><strong>Επιστροφή</strong><span>' + fmt(b.dropoffDateTime) + '</span></div>' +
+          '<div class="bk-row"><strong>Σημείο παραλαβής</strong><span>' + (b.pickupLocation || '—') + '</span></div>' +
+          '<div class="bk-row"><strong>Σημείο επιστροφής</strong><span>' + (b.dropoffLocation || '—') + '</span></div>' +
+        '</div>' +
+        (b.totalPrice ? '<div class="bk-footer"><span class="bk-price">' + Number(b.totalPrice).toFixed(2) + ' €</span></div>' : '') +
+      '</div>';
+    }).join('');
+  }
+
+  function renderProfile(p) {
+    profileLoaded = true;
+    var el = document.getElementById('profileContent');
+    el.innerHTML =
+      '<div class="profile-wrap">' +
+        '<div class="profile-banner">' +
+          '<div class="profile-avatar-lg">' + initials(p.name || p.email || '') + '</div>' +
+          '<div class="profile-fullname">' + (p.name || '—') + '</div>' +
+        '</div>' +
+        '<div class="profile-fields">' +
+          '<div class="profile-field"><label>Email</label><span>' + (p.email || '<span class="profile-empty">—</span>') + '</span></div>' +
+          '<div class="profile-field"><label>Τηλέφωνο</label><span>' + (p.phone || '<span class="profile-empty">—</span>') + '</span></div>' +
+        '</div>' +
+        '<button class="settings-btn" id="settingsBtn">⚙ Ρυθμίσεις Λογαριασμού</button>' +
+      '</div>';
+    document.getElementById('settingsBtn').addEventListener('click', function() {
+      post({ type: 'MEMBER_PORTAL_NAV', path: '/my-account' });
+    });
+  }
+
+  document.querySelectorAll('.tab').forEach(function(btn) {
+    btn.addEventListener('click', function() { showTab(this.dataset.tab); });
+  });
+  document.querySelectorAll('.chip').forEach(function(btn) {
+    btn.addEventListener('click', function() { loadBookings(this.dataset.filter); });
+  });
+
+  window.addEventListener('message', function(event) {
+    var raw = event.data, d = null;
+    if (typeof raw === 'string') { try { d = JSON.parse(raw); } catch(_) { return; } } else { d = raw; }
+    if (!d || !d.type) return;
+    if (d.type === 'MEMBER_INIT') { if (d.member) setMember(d.member); return; }
+    if (d.type === 'MY_BOOKINGS') {
+      if (d.ok) renderBookings(d.bookings || []);
+      else document.getElementById('bookingsList').innerHTML = '<div class="empty"><p>Αδυναμία φόρτωσης κρατήσεων.</p></div>';
+      return;
+    }
+    if (d.type === 'MY_PROFILE') {
+      if (d.ok) renderProfile(d.profile || {});
+      else document.getElementById('profileContent').innerHTML = '<div class="empty"><p>Αδυναμία φόρτωσης προφίλ.</p></div>';
+      return;
+    }
+  });
+
+  setTimeout(function() { post({ type: 'PORTAL_READY' }); }, 120);
+})();
+</script>
+</body>
+</html>
