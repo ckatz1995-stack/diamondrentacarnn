@@ -234,11 +234,18 @@ export async function getMyBookings(filter) {
   const email = ((member.contactDetails && member.contactDetails.emails && member.contactDetails.emails[0]) || member.loginEmail || '').toLowerCase().trim();
   if (!email) return { ok: false, error: 'unauthorized' };
   const now = new Date().toISOString();
-  let q = wixData.query('BookingsNew').eq('customerEmail', email).descending('_createdDate').limit(100);
-  if (filter === 'upcoming') q = q.gt('pickupDateTime', now).ne('status', 'Canceled');
-  else if (filter === 'past') q = q.lt('dropoffDateTime', now);
-  const res = await q.find({ suppressAuth: true });
-  return { ok: true, bookings: (res.items || []).map(sanitizeBooking), total: res.totalCount || (res.items || []).length };
+  function buildQ(field) {
+    let q = wixData.query('BookingsNew').eq(field, email).descending('_createdDate').limit(100);
+    if (filter === 'upcoming') q = q.gt('pickupDateTime', now).ne('status', 'Canceled');
+    else if (filter === 'past') q = q.lt('dropoffDateTime', now);
+    return q.find({ suppressAuth: true });
+  }
+  const [r1, r2] = await Promise.all([buildQ('customerEmail'), buildQ('email')]);
+  const seen = new Set();
+  const items = [...(r1.items || []), ...(r2.items || [])]
+    .filter(function(b) { if (seen.has(b._id)) return false; seen.add(b._id); return true; })
+    .sort(function(a, b) { return new Date(b._createdDate || 0) - new Date(a._createdDate || 0); });
+  return { ok: true, bookings: items.map(sanitizeBooking), total: items.length };
 }
 
 export async function getMyProfile() {
