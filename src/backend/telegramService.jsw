@@ -75,3 +75,79 @@ export async function sendTelegramNotification(booking) {
     console.error('[telegram] sendTelegramNotification error', err?.message || String(err));
   }
 }
+
+export async function sendTelegramCancelNotification(booking) {
+  try {
+    const token = await getSecret('TELEGRAM_BOT_TOKEN');
+    if (!token) return;
+    const lines = [
+      '❌ <b>Ακύρωση Κράτησης!</b>',
+      '',
+      `📋 <b>${booking.bookingNumber || '—'}</b>`,
+      `👤 ${booking.driverName || '—'}  📞 ${booking.driverPhone || '—'}`,
+      `📧 ${booking.driverEmail || '—'}`,
+      '',
+      `🚙 ${booking.vehicleName || '—'}`,
+      `📍 Παραλαβή: ${booking.pickupLocation || '—'}  ${formatDT(booking.pickupDateTime)}`,
+      `📍 Επιστροφή: ${booking.dropoffLocation || '—'}  ${formatDT(booking.dropoffDateTime)}`,
+      '',
+      `💶 Σύνολο: <b>${Number(booking.totalPrice || 0).toFixed(2)} €</b>`,
+    ];
+    if (booking.cancelReason) lines.push(`💬 Λόγος: ${booking.cancelReason}`);
+    const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: lines.join('\n'), parse_mode: 'HTML' })
+    });
+    const json = await res.json();
+    if (!json.ok) console.error('[telegram] cancelNotification failed', JSON.stringify(json));
+  } catch (err) { console.error('[telegram] sendTelegramCancelNotification error', err?.message || String(err)); }
+}
+
+export async function sendTelegramEditNotification(booking, changes) {
+  try {
+    const token = await getSecret('TELEGRAM_BOT_TOKEN');
+    if (!token) return;
+    const lines = [
+      '✏️ <b>Τροποποίηση Κράτησης!</b>',
+      '',
+      `📋 <b>${booking.bookingNumber || '—'}</b>`,
+      `👤 ${booking.driverName || '—'}  📞 ${booking.driverPhone || '—'}`,
+      `🚙 ${booking.vehicleName || '—'}`,
+      '',
+      '🔄 <b>Αλλαγές:</b>',
+    ];
+    if (changes.pickupDateTime) lines.push(`📅 Νέα παραλαβή: ${formatDT(changes.pickupDateTime)}`);
+    if (changes.dropoffDateTime) lines.push(`📅 Νέα επιστροφή: ${formatDT(changes.dropoffDateTime)}`);
+    if (changes.pickupLocation) lines.push(`📍 Σημείο παραλαβής: ${changes.pickupLocation}`);
+    if (changes.dropoffLocation) lines.push(`📍 Σημείο επιστροφής: ${changes.dropoffLocation}`);
+    if (changes.notes !== undefined) lines.push(`💬 Σημειώσεις: ${changes.notes || '(αδειο)'}`);
+    const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: lines.join('\n'), parse_mode: 'HTML' })
+    });
+    const json = await res.json();
+    if (!json.ok) console.error('[telegram] editNotification failed', JSON.stringify(json));
+  } catch (err) { console.error('[telegram] sendTelegramEditNotification error', err?.message || String(err)); }
+}
+
+export async function sendTelegramReviewNotification({ booking, rating, comment }) {
+  try {
+    const token = await getSecret('TELEGRAM_BOT_TOKEN');
+    if (!token) return;
+    const stars = '⭐'.repeat(Math.min(5, Math.max(1, Number(rating) || 5)));
+    const lines = [
+      `⭐ <b>Νέα Αξιολόγηση!</b>`,
+      '',
+      `📋 <b>${booking.bookingNumber || '—'}</b>`,
+      `🚙 ${booking.vehicleName || '—'}`,
+      `${stars} <b>${rating}/5</b>`,
+    ];
+    if (comment) lines.push(`💬 "${comment}"`);
+    const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: lines.join('\n'), parse_mode: 'HTML' })
+    });
+    const json = await res.json();
+    if (!json.ok) console.error('[telegram] reviewNotification failed', JSON.stringify(json));
+  } catch (err) { console.error('[telegram] sendTelegramReviewNotification error', err?.message || String(err)); }
+}

@@ -5,7 +5,7 @@
 
 import wixLocation from 'wix-location';
 import { authentication, currentMember } from 'wix-members-frontend';
-import { getMyBookings, getMyProfile, cancelMyBooking, updateMyBooking, updateMyProfile } from 'backend/memberPortal.jsw';
+import { getMyBookings, getMyProfile, cancelMyBooking, updateMyBooking, updateMyProfile, checkBookingAvailability, submitBookingReview, getExtendedProfile, updateExtendedProfile } from 'backend/memberPortal.jsw';
 import { PORTAL_LOCATIONS } from 'public/siteConstants';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 
@@ -84,6 +84,34 @@ function handleMessage(event) {
 
   if (msg.type === 'MEMBER_PORTAL_NAV') {
     if (msg.path) { try { wixLocation.to(String(msg.path)); } catch (_) {} }
+    return;
+  }
+
+  if (msg.type === 'CHECK_AVAILABILITY') {
+    checkBookingAvailability({ categoryId: msg.categoryId, pickupDateTime: msg.pickupDateTime, dropoffDateTime: msg.dropoffDateTime, excludeBookingId: msg.bookingId })
+      .then((r) => post({ type: 'AVAILABILITY_RESULT', ...r }))
+      .catch(() => post({ type: 'AVAILABILITY_RESULT', ok: true, available: true, conflicts: 0 }));
+    return;
+  }
+
+  if (msg.type === 'SUBMIT_REVIEW') {
+    submitBookingReview({ bookingId: msg.bookingId, rating: msg.rating, comment: msg.comment || '' })
+      .then((r) => post({ type: 'REVIEW_RESULT', bookingId: msg.bookingId, ...r }))
+      .catch(() => post({ type: 'REVIEW_RESULT', ok: false, error: 'server_error' }));
+    return;
+  }
+
+  if (msg.type === 'GET_EXTENDED_PROFILE') {
+    getExtendedProfile()
+      .then((r) => post({ type: 'EXTENDED_PROFILE', ...r }))
+      .catch(() => post({ type: 'EXTENDED_PROFILE', ok: false }));
+    return;
+  }
+
+  if (msg.type === 'UPDATE_EXTENDED_PROFILE') {
+    updateExtendedProfile({ driverAge: msg.driverAge, nationality: msg.nationality, licenseNumber: msg.licenseNumber, licenseExpiry: msg.licenseExpiry })
+      .then((r) => post({ type: 'UPDATE_EXTENDED_PROFILE_RESULT', ...r }))
+      .catch(() => post({ type: 'UPDATE_EXTENDED_PROFILE_RESULT', ok: false }));
     return;
   }
 }
