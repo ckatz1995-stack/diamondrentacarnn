@@ -120,7 +120,7 @@ export default function Register() {
         </div>
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-white font-bold text-xl mb-6">Εγγραφή</html>
+          <h2 className="text-white font-bold text-xl mb-6">Εγγραφή</h2>
 
           {apiError && (
             <div className="mb-5 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm flex items-center gap-2">
