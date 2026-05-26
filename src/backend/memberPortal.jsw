@@ -1,6 +1,7 @@
 import wixData from 'wix-data';
 import { PORTAL_SESSION_TTL_HOURS } from 'backend/siteConfig';
 import { currentMember, members as wixMembers } from 'wix-members-backend';
+import { sendTelegramCancelNotification, sendTelegramEditNotification, sendTelegramReviewNotification } from 'backend/telegramService.jsw';
 
 function generateToken() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -44,53 +45,33 @@ function sanitizeBooking(b) {
     driverPhone: b.customerPhone || b.phone || '',
     driverAge: b.driverAge || null,
     canceledAt: b.canceledAt || null,
-    cancelReason: b.cancelReason || ''
+    cancelReason: b.cancelReason || '',
+    memberRating: b.memberRating || null,
+    memberReview: b.memberReview || ''
   };
 }
 
 export async function signIn({ email, bookingRef }) {
   if (!email || !bookingRef) return { ok: false, error: 'missing_fields' };
-
   const normalizedEmail = String(email).trim().toLowerCase();
   const normalizedRef = String(bookingRef).trim().toUpperCase();
-
-  const bookingRes = await wixData.query('BookingsNew')
-    .eq('bookingNumber', normalizedRef)
-    .limit(1)
-    .find({ suppressAuth: true });
-
+  const bookingRes = await wixData.query('BookingsNew').eq('bookingNumber', normalizedRef).limit(1).find({ suppressAuth: true });
   const booking = bookingRes.items && bookingRes.items[0];
   if (!booking) return { ok: false, error: 'not_found' };
-
   const bookingEmail = String(booking.customerEmail || booking.email || '').trim().toLowerCase();
   if (bookingEmail !== normalizedEmail) return { ok: false, error: 'not_found' };
-
   const customerId = String(booking.customerId || booking._id);
-
   let customer = null;
   if (booking.customerId) {
-    const custRes = await wixData.query('Customers')
-      .eq('_id', String(booking.customerId))
-      .limit(1)
-      .find({ suppressAuth: true });
+    const custRes = await wixData.query('Customers').eq('_id', String(booking.customerId)).limit(1).find({ suppressAuth: true });
     customer = custRes.items && custRes.items[0];
   }
-
   const token = generateToken();
   const ttl = Number.isFinite(PORTAL_SESSION_TTL_HOURS) ? PORTAL_SESSION_TTL_HOURS : 8;
   const expiresAt = new Date(Date.now() + ttl * 60 * 60 * 1000).toISOString();
-
-  await wixData.insert('PortalSessions', {
-    customerId,
-    sessionToken: token,
-    expiresAt,
-    createdAt: new Date().toISOString()
-  }, { suppressAuth: true });
-
+  await wixData.insert('PortalSessions', { customerId, sessionToken: token, expiresAt, createdAt: new Date().toISOString() }, { suppressAuth: true });
   return {
-    ok: true,
-    customerId,
-    sessionToken: token,
+    ok: true, customerId, sessionToken: token,
     customer: {
       _id: customer ? customer._id : customerId,
       name: (customer ? (customer.name || customer.customerName) : null) || booking.customerName || booking.firstName || '',
@@ -103,14 +84,8 @@ export async function signIn({ email, bookingRef }) {
 export async function signOut({ customerId, sessionToken }) {
   if (!customerId || !sessionToken) return { ok: true };
   try {
-    const res = await wixData.query('PortalSessions')
-      .eq('customerId', String(customerId))
-      .eq('sessionToken', String(sessionToken))
-      .limit(1)
-      .find({ suppressAuth: true });
-    if (res.items && res.items[0]) {
-      await wixData.remove('PortalSessions', res.items[0]._id, { suppressAuth: true });
-    }
+    const res = await wixData.query('PortalSessions').eq('customerId', String(customerId)).eq('sessionToken', String(sessionToken)).limit(1).find({ suppressAuth: true });
+    if (res.items && res.items[0]) await wixData.remove('PortalSessions', res.items[0]._id, { suppressAuth: true });
   } catch (_) {}
   return { ok: true };
 }
@@ -118,87 +93,45 @@ export async function signOut({ customerId, sessionToken }) {
 export async function getCustomerProfile({ customerId, sessionToken }) {
   const session = await resolveSession(customerId, sessionToken);
   if (!session) return { ok: false, error: 'unauthorized' };
-
-  const res = await wixData.query('Customers')
-    .eq('_id', String(customerId))
-    .limit(1)
-    .find({ suppressAuth: true });
+  const res = await wixData.query('Customers').eq('_id', String(customerId)).limit(1).find({ suppressAuth: true });
   const profile = res.items && res.items[0];
   if (!profile) return { ok: false, error: 'not_found' };
-
-  return {
-    ok: true,
-    profile: {
-      _id: profile._id,
-      name: profile.name || profile.customerName || '',
-      email: profile.email || profile.customerEmail || '',
-      phone: profile.phone || profile.customerPhone || ''
-    }
-  };
+  return { ok: true, profile: { _id: profile._id, name: profile.name || profile.customerName || '', email: profile.email || profile.customerEmail || '', phone: profile.phone || profile.customerPhone || '' } };
 }
 
 export async function getCustomerBookings({ customerId, sessionToken, filter }) {
   const session = await resolveSession(customerId, sessionToken);
   if (!session) return { ok: false, error: 'unauthorized' };
-
   const now = new Date().toISOString();
-  let q = wixData.query('BookingsNew')
-    .eq('customerId', String(customerId))
-    .descending('_createdDate')
-    .limit(100);
-
-  if (filter === 'upcoming') {
-    q = q.gt('pickupDateTime', now).ne('status', 'Canceled');
-  } else if (filter === 'active') {
-    q = q.le('pickupDateTime', now).ge('dropoffDateTime', now).ne('status', 'Canceled');
-  } else if (filter === 'past') {
-    q = q.lt('dropoffDateTime', now);
-  }
-
+  let q = wixData.query('BookingsNew').eq('customerId', String(customerId)).descending('_createdDate').limit(100);
+  if (filter === 'upcoming') q = q.gt('pickupDateTime', now).ne('status', 'Canceled');
+  else if (filter === 'active') q = q.le('pickupDateTime', now).ge('dropoffDateTime', now).ne('status', 'Canceled');
+  else if (filter === 'past') q = q.lt('dropoffDateTime', now);
   const res = await q.find({ suppressAuth: true });
-  return {
-    ok: true,
-    bookings: (res.items || []).map(sanitizeBooking),
-    total: res.totalCount || (res.items || []).length
-  };
+  return { ok: true, bookings: (res.items || []).map(sanitizeBooking), total: res.totalCount || (res.items || []).length };
 }
 
 export async function getBookingDetail({ bookingId, customerId, sessionToken }) {
   const session = await resolveSession(customerId, sessionToken);
   if (!session) return { ok: false, error: 'unauthorized' };
-
-  const res = await wixData.query('BookingsNew')
-    .eq('_id', String(bookingId))
-    .eq('customerId', String(customerId))
-    .limit(1)
-    .find({ suppressAuth: true });
+  const res = await wixData.query('BookingsNew').eq('_id', String(bookingId)).eq('customerId', String(customerId)).limit(1).find({ suppressAuth: true });
   const b = res.items && res.items[0];
   if (!b) return { ok: false, error: 'not_found' };
-
   return { ok: true, booking: sanitizeBooking(b) };
 }
 
 export async function updateBooking({ bookingId, changes, customerId, sessionToken }) {
   const session = await resolveSession(customerId, sessionToken);
   if (!session) return { ok: false, error: 'unauthorized' };
-
-  const res = await wixData.query('BookingsNew')
-    .eq('_id', String(bookingId))
-    .eq('customerId', String(customerId))
-    .limit(1)
-    .find({ suppressAuth: true });
+  const res = await wixData.query('BookingsNew').eq('_id', String(bookingId)).eq('customerId', String(customerId)).limit(1).find({ suppressAuth: true });
   const booking = res.items && res.items[0];
   if (!booking) return { ok: false, error: 'not_found' };
   if (booking.status === 'Canceled') return { ok: false, error: 'already_canceled' };
   if (new Date(booking.pickupDateTime) <= new Date()) return { ok: false, error: 'pickup_passed' };
-
   const allowed = ['pickupDateTime', 'dropoffDateTime', 'pickupLocation', 'dropoffLocation', 'notes'];
   const patch = {};
-  for (const key of allowed) {
-    if (changes && changes[key] !== undefined) patch[key] = changes[key];
-  }
+  for (const key of allowed) { if (changes && changes[key] !== undefined) patch[key] = changes[key]; }
   if (!Object.keys(patch).length) return { ok: false, error: 'no_changes' };
-
   const updated = await wixData.update('BookingsNew', { ...booking, ...patch }, { suppressAuth: true });
   return { ok: true, booking: sanitizeBooking(updated) };
 }
@@ -206,24 +139,12 @@ export async function updateBooking({ bookingId, changes, customerId, sessionTok
 export async function cancelBooking({ bookingId, reason, customerId, sessionToken }) {
   const session = await resolveSession(customerId, sessionToken);
   if (!session) return { ok: false, error: 'unauthorized' };
-
-  const res = await wixData.query('BookingsNew')
-    .eq('_id', String(bookingId))
-    .eq('customerId', String(customerId))
-    .limit(1)
-    .find({ suppressAuth: true });
+  const res = await wixData.query('BookingsNew').eq('_id', String(bookingId)).eq('customerId', String(customerId)).limit(1).find({ suppressAuth: true });
   const booking = res.items && res.items[0];
   if (!booking) return { ok: false, error: 'not_found' };
   if (booking.status === 'Canceled') return { ok: false, error: 'already_canceled' };
   if (new Date(booking.pickupDateTime) <= new Date()) return { ok: false, error: 'pickup_passed' };
-
-  const updated = await wixData.update('BookingsNew', {
-    ...booking,
-    status: 'Canceled',
-    canceledAt: new Date().toISOString(),
-    cancelReason: String(reason || '').trim() || 'Customer request'
-  }, { suppressAuth: true });
-
+  const updated = await wixData.update('BookingsNew', { ...booking, status: 'Canceled', canceledAt: new Date().toISOString(), cancelReason: String(reason || '').trim() || 'Customer request' }, { suppressAuth: true });
   return { ok: true, booking: sanitizeBooking(updated) };
 }
 
@@ -250,13 +171,10 @@ export async function cancelMyBooking({ bookingId, reason }) {
   if (err) return { ok: false, error: err };
   if (booking.status === 'Canceled') return { ok: false, error: 'already_canceled' };
   if (new Date(booking.pickupDateTime) <= new Date()) return { ok: false, error: 'pickup_passed' };
-  const updated = await wixData.update('BookingsNew', {
-    ...booking,
-    status: 'Canceled',
-    canceledAt: new Date().toISOString(),
-    cancelReason: String(reason || '').trim() || 'Customer request'
-  }, { suppressAuth: true });
-  return { ok: true, booking: sanitizeBooking(updated) };
+  const updated = await wixData.update('BookingsNew', { ...booking, status: 'Canceled', canceledAt: new Date().toISOString(), cancelReason: String(reason || '').trim() || 'Customer request' }, { suppressAuth: true });
+  const result = sanitizeBooking(updated);
+  try { await sendTelegramCancelNotification(result); } catch (_) {}
+  return { ok: true, booking: result };
 }
 
 export async function updateMyBooking({ bookingId, changes }) {
@@ -269,9 +187,7 @@ export async function updateMyBooking({ bookingId, changes }) {
   if (new Date(booking.dropoffDateTime) <= new Date()) return { ok: false, error: 'booking_passed' };
   const allowed = ['pickupDateTime', 'dropoffDateTime', 'pickupLocation', 'dropoffLocation', 'notes'];
   const patch = {};
-  for (const key of allowed) {
-    if (changes && changes[key] !== undefined) patch[key] = changes[key];
-  }
+  for (const key of allowed) { if (changes && changes[key] !== undefined) patch[key] = changes[key]; }
   if (!Object.keys(patch).length) return { ok: false, error: 'no_changes' };
   if (patch.pickupDateTime || patch.dropoffDateTime) {
     const np = new Date(patch.pickupDateTime || booking.pickupDateTime);
@@ -279,7 +195,9 @@ export async function updateMyBooking({ bookingId, changes }) {
     if (nd <= np) return { ok: false, error: 'invalid_dates' };
   }
   const updated = await wixData.update('BookingsNew', { ...booking, ...patch }, { suppressAuth: true });
-  return { ok: true, booking: sanitizeBooking(updated) };
+  const result = sanitizeBooking(updated);
+  try { await sendTelegramEditNotification(result, patch); } catch (_) {}
+  return { ok: true, booking: result };
 }
 
 export async function updateMyProfile({ firstName, lastName, phone }) {
@@ -336,4 +254,67 @@ export async function getMyProfile() {
       phone: (d.phones && d.phones[0]) || ''
     }
   };
+}
+
+export async function checkBookingAvailability({ categoryId, pickupDateTime, dropoffDateTime, excludeBookingId }) {
+  if (!categoryId) return { ok: true, available: true, conflicts: 0 };
+  try {
+    const res = await wixData.query('BookingsNew').eq('categoryId', String(categoryId)).ne('status', 'Canceled').limit(200).find({ suppressAuth: true });
+    const pickup = new Date(pickupDateTime);
+    const dropoff = new Date(dropoffDateTime);
+    const conflicts = (res.items || []).filter(b => {
+      if (excludeBookingId && b._id === String(excludeBookingId)) return false;
+      if (b.status === 'Completed') return false;
+      return new Date(b.pickupDateTime) < dropoff && new Date(b.dropoffDateTime) > pickup;
+    });
+    return { ok: true, available: conflicts.length === 0, conflicts: conflicts.length };
+  } catch (err) {
+    console.warn('checkBookingAvailability error', err);
+    return { ok: true, available: true, conflicts: 0 };
+  }
+}
+
+export async function submitBookingReview({ bookingId, rating, comment }) {
+  let email;
+  try { email = await memberEmail(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!email) return { ok: false, error: 'unauthorized' };
+  const { booking, err } = await ownedBooking(bookingId, email);
+  if (err) return { ok: false, error: err };
+  const r = Math.min(5, Math.max(1, Number(rating) || 5));
+  const c = String(comment || '').trim();
+  try { await wixData.update('BookingsNew', { ...booking, memberRating: r, memberReview: c }, { suppressAuth: true }); } catch (e) { console.warn('submitBookingReview update failed', e); }
+  try {
+    await wixData.insert('BookingReviews', { bookingId: String(bookingId), bookingNumber: booking.bookingNumber || '', vehicleName: booking.vehicleName || booking.categoryName || '', customerEmail: email, rating: r, comment: c, createdAt: new Date().toISOString() }, { suppressAuth: true });
+  } catch (e) { console.warn('submitBookingReview insert failed (collection may not exist yet)', e); }
+  try { await sendTelegramReviewNotification({ booking: sanitizeBooking(booking), rating: r, comment: c }); } catch (_) {}
+  return { ok: true };
+}
+
+export async function getExtendedProfile() {
+  let email;
+  try { email = await memberEmail(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!email) return { ok: false, error: 'unauthorized' };
+  const res = await wixData.query('Customers').eq('email', email).limit(1).find({ suppressAuth: true });
+  const c = res.items && res.items[0];
+  return { ok: true, extended: { driverAge: c?.driverAge || '', nationality: c?.nationality || '', licenseNumber: c?.licenseNumber || '', licenseExpiry: c?.licenseExpiry || '' } };
+}
+
+export async function updateExtendedProfile({ driverAge, nationality, licenseNumber, licenseExpiry }) {
+  let email;
+  try { email = await memberEmail(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!email) return { ok: false, error: 'unauthorized' };
+  const res = await wixData.query('Customers').eq('email', email).limit(1).find({ suppressAuth: true });
+  if (!(res.items && res.items[0])) return { ok: false, error: 'not_found' };
+  const patch = {};
+  if (driverAge !== undefined) patch.driverAge = String(driverAge || '').trim();
+  if (nationality !== undefined) patch.nationality = String(nationality || '').trim();
+  if (licenseNumber !== undefined) patch.licenseNumber = String(licenseNumber || '').trim();
+  if (licenseExpiry !== undefined) patch.licenseExpiry = String(licenseExpiry || '').trim();
+  try {
+    await wixData.update('Customers', { ...res.items[0], ...patch }, { suppressAuth: true });
+    return { ok: true };
+  } catch (err) {
+    console.warn('updateExtendedProfile error', err);
+    return { ok: false, error: 'update_failed' };
+  }
 }
