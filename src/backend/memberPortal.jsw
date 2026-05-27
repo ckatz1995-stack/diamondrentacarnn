@@ -429,3 +429,94 @@ export async function updateExtendedProfile({ driverAge, nationality, licenseNum
     return { ok: false, error: 'update_failed' };
   }
 }
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+// Requires a Wix CMS collection named "MemberNotifications" with fields:
+//   memberId (Text), type (Text), title (Text), body (Text),
+//   isRead (Boolean, default false), relatedBookingId (Text, optional)
+
+async function getMemberId() {
+  const m = await currentMember.getMember({ fieldsets: ['FULL'] });
+  return m ? m._id : null;
+}
+
+export async function getMyNotifications() {
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!memberId) return { ok: false, error: 'unauthorized' };
+  try {
+    const res = await wixData.query('MemberNotifications')
+      .eq('memberId', memberId)
+      .descending('_createdDate')
+      .limit(50)
+      .find({ suppressAuth: true });
+    return { ok: true, notifications: res.items || [] };
+  } catch (err) {
+    console.warn('getMyNotifications error', err.message);
+    // Collection may not exist yet — return empty list gracefully
+    return { ok: true, notifications: [] };
+  }
+}
+
+export async function markNotificationRead({ notificationId }) {
+  if (!notificationId) return { ok: false };
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false }; }
+  if (!memberId) return { ok: false };
+  try {
+    const res = await wixData.query('MemberNotifications')
+      .eq('_id', String(notificationId))
+      .eq('memberId', memberId)
+      .limit(1)
+      .find({ suppressAuth: true });
+    const item = res.items && res.items[0];
+    if (!item) return { ok: false };
+    await wixData.update('MemberNotifications', { ...item, isRead: true }, { suppressAuth: true });
+    return { ok: true };
+  } catch (err) {
+    console.warn('markNotificationRead error', err.message);
+    return { ok: false };
+  }
+}
+
+export async function readAllMyNotifications() {
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false }; }
+  if (!memberId) return { ok: false };
+  try {
+    const res = await wixData.query('MemberNotifications')
+      .eq('memberId', memberId)
+      .eq('isRead', false)
+      .limit(100)
+      .find({ suppressAuth: true });
+    const updates = (res.items || []).map(item =>
+      wixData.update('MemberNotifications', { ...item, isRead: true }, { suppressAuth: true })
+    );
+    await Promise.all(updates);
+    return { ok: true };
+  } catch (err) {
+    console.warn('readAllMyNotifications error', err.message);
+    return { ok: false };
+  }
+}
+
+export async function deleteMyNotification({ notificationId }) {
+  if (!notificationId) return { ok: false };
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false }; }
+  if (!memberId) return { ok: false };
+  try {
+    const res = await wixData.query('MemberNotifications')
+      .eq('_id', String(notificationId))
+      .eq('memberId', memberId)
+      .limit(1)
+      .find({ suppressAuth: true });
+    if (res.items && res.items[0]) {
+      await wixData.remove('MemberNotifications', res.items[0]._id, { suppressAuth: true });
+    }
+    return { ok: true };
+  } catch (err) {
+    console.warn('deleteMyNotification error', err.message);
+    return { ok: false };
+  }
+}

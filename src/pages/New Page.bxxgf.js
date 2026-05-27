@@ -5,7 +5,7 @@
 
 import wixLocation from 'wix-location';
 import { authentication, currentMember } from 'wix-members-frontend';
-import { getMyBookings, getMyProfile, cancelMyBooking, updateMyBooking, updateMyProfile, checkBookingAvailability, submitBookingReview, getExtendedProfile, updateExtendedProfile } from 'backend/memberPortal.jsw';
+import { getMyBookings, getMyProfile, cancelMyBooking, updateMyBooking, updateMyProfile, checkBookingAvailability, submitBookingReview, getExtendedProfile, updateExtendedProfile, getMyNotifications, markNotificationRead, readAllMyNotifications, deleteMyNotification } from 'backend/memberPortal.jsw';
 import { PORTAL_LOCATIONS } from 'public/siteConstants';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 
@@ -112,6 +112,34 @@ function handleMessage(event) {
     updateExtendedProfile({ driverAge: msg.driverAge, nationality: msg.nationality, licenseNumber: msg.licenseNumber, licenseExpiry: msg.licenseExpiry })
       .then((r) => post({ type: 'UPDATE_EXTENDED_PROFILE_RESULT', ...r }))
       .catch(() => post({ type: 'UPDATE_EXTENDED_PROFILE_RESULT', ok: false }));
+    return;
+  }
+
+  if (msg.type === 'GET_NOTIFICATIONS') {
+    getMyNotifications()
+      .then((r) => post({ type: 'NOTIFICATIONS_RESULT', ...r }))
+      .catch(() => post({ type: 'NOTIFICATIONS_RESULT', ok: false, error: 'server_error' }));
+    return;
+  }
+
+  if (msg.type === 'MARK_NOTIFICATION_READ') {
+    markNotificationRead({ notificationId: msg.notificationId })
+      .then((r) => post({ type: 'NOTIFICATION_READ_RESULT', ...r }))
+      .catch(() => {});
+    return;
+  }
+
+  if (msg.type === 'READ_ALL_NOTIFICATIONS') {
+    readAllMyNotifications()
+      .then((r) => post({ type: 'NOTIFICATIONS_READ_ALL_RESULT', ...r }))
+      .catch(() => {});
+    return;
+  }
+
+  if (msg.type === 'DELETE_NOTIFICATION') {
+    deleteMyNotification({ notificationId: msg.notificationId })
+      .then((r) => post({ type: 'NOTIFICATION_DELETE_RESULT', ...r }))
+      .catch(() => {});
     return;
   }
 }
