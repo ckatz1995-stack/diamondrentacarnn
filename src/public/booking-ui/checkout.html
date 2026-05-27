@@ -352,7 +352,65 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
 .summary-shell,.form-card,.section{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .btn-submit{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
-</style></head><body>
+</style>
+<style>
+/* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
+/* DIAMOND MOBILE: Hamburger */
+.hamburger-btn{display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer;border-radius:8px;min-width:40px;min-height:40px;width:40px;height:40px;flex-shrink:0;transition:background .15s;padding:0;line-height:1}
+.hamburger-btn:hover,.hamburger-btn:focus-visible{background:rgba(255,255,255,.22);outline:none}
+.mobile-nav{overflow:hidden;max-height:0;transition:max-height .3s ease;background:rgba(20,40,48,.98);border-top:1px solid rgba(231,191,105,.12);width:100%}
+.mobile-nav.is-open{max-height:440px}
+.mobile-nav a{display:flex;align-items:center;color:rgba(255,255,255,.88);text-decoration:none;font-size:15px;font-weight:700;padding:0 22px;min-height:48px;border-bottom:1px solid rgba(255,255,255,.06);transition:background .12s}
+.mobile-nav a:last-child{border-bottom:none}
+.mobile-nav a:active,.mobile-nav a:hover{background:rgba(231,191,105,.09);color:#f6e19f}
+.header-phone-label{display:inline}
+@media(max-width:767px){
+  .header-nav{display:none!important}
+  .hamburger-btn{display:flex!important}
+  .brand-text span,.brand-text em{display:none}
+  .header-phone-label{display:none}
+  .header-phone{padding:9px 12px!important;min-width:40px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+}
+@media(prefers-reduced-motion:reduce){.mobile-nav{transition:none}}
+
+/* DIAMOND MOBILE: Order summary 4→2 cell grid */
+@media(max-width:767px){
+  .summary-grid{grid-template-columns:1fr!important}
+  .meta-grid{grid-template-columns:1fr 1fr!important}
+  .vehicle-visual{display:none!important}
+  /* Cost accordion */
+  .analysis-box .analysis-line:not(.big){display:none}
+  .analysis-box.expanded .analysis-line{display:flex!important}
+  .analysis-accordion-btn{display:flex!important}
+  /* Form fields full-width */
+  .grid{grid-template-columns:1fr!important}
+  .grid-4{grid-template-columns:1fr!important}
+  /* Invoice toggle full-width */
+  .invoice-choices{grid-template-columns:1fr 1fr!important;display:grid!important}
+  .invoice-choices .choice{text-align:center}
+  /* Submit button full-width */
+  .btn-submit{width:100%!important;min-height:52px!important;font-size:18px!important}
+  .actions{flex-direction:column-reverse!important}
+  .actions .btn{width:100%!important;min-height:48px!important}
+  /* Terms checkbox row */
+  .check-row{display:flex!important;align-items:flex-start!important;gap:10px!important;flex-wrap:nowrap!important}
+  .check-row input[type="checkbox"]{flex-shrink:0;width:20px;height:20px;margin-top:2px}
+  /* Invoice fields overflow fix */
+  .toggle-content{overflow-x:hidden!important}
+  .invoice-box{overflow-x:hidden!important}
+}
+
+/* DIAMOND MOBILE: Analysis accordion toggle button */
+.analysis-accordion-btn{display:none;width:100%;background:none;border:none;color:var(--accent,#3f748a);font-size:13px;font-weight:800;cursor:pointer;padding:8px 0;text-align:left;font-family:inherit;gap:6px;align-items:center}
+.analysis-accordion-btn:hover{opacity:.8}
+
+/* DIAMOND LOADING: Timeout / network error state */
+#submitTimeoutError{display:none;margin:12px 0 0;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:13px 16px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.5}
+#submitTimeoutError.visible{display:block}
+#submitTimeoutError .retry-btn{display:inline-block;margin-top:10px;background:var(--accent,#3f748a);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit}
+#submitTimeoutError .retry-btn:hover{opacity:.9}
+</style>
+</head><body>
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="/">
@@ -369,8 +427,16 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
       <a href="/rental-terms">Όροι ενοικίασης</a>
       <a href="/booking">Ολοκλήρωση</a>
     </nav>
-    <a class="header-phone" href="tel:+302310000000">+30 2310 000 000</a>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Μενού" aria-expanded="false">☰</button>
+    <a class="header-phone" href="tel:+302310000000"><span aria-hidden="true">📞</span><span class="header-phone-label">+30 2310 000 000</span></a>
   </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Κύρια πλοήγηση">
+    <a href="/">Αρχική</a>
+    <a href="/categories">Οχήματα</a>
+    <a href="/options">Ασφάλειες &amp; extras</a>
+    <a href="/rental-terms">Όροι ενοικίασης</a>
+    <a href="/booking">Ολοκλήρωση</a>
+  </nav>
 </header>
 
 <div class="page">
@@ -398,8 +464,9 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           <div class="meta"><span class="k">Extras</span><span class="v" id="extrasText">Χωρίς extras</span></div>
         </div>
       </div>
-      <div class="analysis-box">
+      <div class="analysis-box" id="analysisBox">
         <h3>Οικονομική ανάλυση</h3>
+        <button class="analysis-accordion-btn" id="analysisAccordionBtn" type="button">▼ Εμφάνιση ανάλυσης κόστους</button>
         <div class="analysis-line"><span>Βασική χρέωση</span><span id="baseCost">0,00€</span></div>
         <div class="analysis-line" id="insuranceRow"><span>Ασφάλεια</span><span id="insuranceCost">0,00€</span></div>
         <div class="analysis-line" id="extrasRow"><span>Extras</span><span id="extrasCost">0,00€</span></div>
@@ -447,6 +514,12 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           </div>
           <div class="helper-note">Η τελική ανάλυση παραμένει ορατή πάνω στη σελίδα ώστε να γνωρίζει ο πελάτης ακριβώς τι αποστέλλει πριν ολοκληρώσει το αίτημα.</div>
           <label class="check-row"><input type="checkbox" required><span>Έχω διαβάσει και αποδέχομαι τους όρους, τις προϋποθέσεις και την πολιτική απορρήτου.</span></label>
+          <div id="submitError" role="alert" style="display:none;margin:12px 0 0;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:11px 14px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.4"></div>
+          <div id="submitTimeoutError" role="alert">
+            <span id="submitTimeoutMsg"></span>
+            <br>
+            <button class="retry-btn" id="retryBtn" type="button">Δοκιμάστε ξανά</button>
+          </div>
           <div class="actions">
             <button class="btn btn-back" type="button">Πίσω</button>
             <button class="btn btn-submit" type="submit">Αποστολή αιτήματος</button>
@@ -1107,6 +1180,22 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
   const oldText = submitBtn.textContent;
   submitBtn.disabled = true;
   submitBtn.textContent = 'Υποβολή...';
+  // DIAMOND LOADING: Duplicate submission guard
+  form.dataset.submitting = 'true';
+
+  // DIAMOND LOADING: 15-second timeout handler
+  let submissionTimedOut = false;
+  const timeoutId = setTimeout(function(){
+    submissionTimedOut = true;
+    submitBtn.disabled = false;
+    submitBtn.textContent = oldText;
+    form.dataset.submitting = '';
+    const supportPhone = (window.BookingState && BookingState.get('supportPhone')) || '+30 2310 000 000';
+    const msgEl = document.getElementById('submitTimeoutMsg');
+    const errEl = document.getElementById('submitTimeoutError');
+    if(msgEl) msgEl.textContent = 'Το αίτημα αργεί περισσότερο από το αναμενόμενο. Η κράτησή σας ενδέχεται να έχει ληφθεί — μην υποβάλετε ξανά. Επικοινωνήστε μαζί μας στο ' + supportPhone + ' για επιβεβαίωση.';
+    if(errEl) errEl.classList.add('visible');
+  }, 15000);
 
   try {
     const uiSurchargeNote = [
@@ -1218,12 +1307,34 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       total: summaryTotal
     });
 
+    clearTimeout(timeoutId);
+    // DIAMOND LOADING: Mark as submitted and save reference
+    if(window.BookingState){
+      BookingState.set('submitted', true);
+      BookingState.set('bookingReference', data.bookingNumber || data.id || '');
+      BookingState.set('totalPrice', totals.total || 0);
+    }
     goTo(`/success?booking=${encodeURIComponent(data.bookingNumber)}`);
   } catch (err) {
-    alert(err.message || 'Παρουσιάστηκε σφάλμα κατά την υποβολή.');
-  } finally {
+    clearTimeout(timeoutId);
+    if(submissionTimedOut) return;
     submitBtn.disabled = false;
     submitBtn.textContent = oldText;
+    form.dataset.submitting = '';
+    // DIAMOND LOADING: Distinguish network errors from server errors
+    const isNetworkErr = err instanceof TypeError || (err.message && err.message.toLowerCase().includes('fetch'));
+    if(isNetworkErr){
+      const msgEl = document.getElementById('submitTimeoutMsg');
+      const errEl = document.getElementById('submitTimeoutError');
+      if(msgEl) msgEl.textContent = 'Δεν ήταν δυνατή η σύνδεση. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.';
+      if(errEl) errEl.classList.add('visible');
+    } else {
+      const submitErrEl = document.getElementById('submitError');
+      if(submitErrEl){ submitErrEl.textContent = err.message || 'Σφάλμα υποβολής. Δοκιμάστε ξανά.'; submitErrEl.style.display = 'block'; }
+      else { alert(err.message || 'Παρουσιάστηκε σφάλμα κατά την υποβολή.'); }
+    }
+  } finally {
+    // cleanup handled per-branch above; ensure button re-enabled if timed out path didn't run
   }
 });
 
@@ -1575,4 +1686,74 @@ loadVehicle();
 window.addEventListener('load', () => { notifyHeight(); setTimeout(notifyHeight, 250); setTimeout(notifyHeight, 1000); });
 window.addEventListener('resize', notifyHeight);
 try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
+
+// DIAMOND LOADING: Retry button clears timeout error and re-enables submit
+(function(){
+  var retryBtn = document.getElementById('retryBtn');
+  var errEl = document.getElementById('submitTimeoutError');
+  var submitBtn = document.querySelector('.btn-submit');
+  var form = document.getElementById('checkoutForm');
+  if(!retryBtn) return;
+  retryBtn.addEventListener('click', function(){
+    if(errEl) errEl.classList.remove('visible');
+    if(submitBtn){ submitBtn.disabled = false; }
+    if(form) form.dataset.submitting = '';
+    var submitErrEl = document.getElementById('submitError');
+    if(submitErrEl){ submitErrEl.style.display = 'none'; submitErrEl.textContent = ''; }
+  });
+})();
+
+// DIAMOND MOBILE: Cost analysis accordion on mobile
+(function(){
+  var btn = document.getElementById('analysisAccordionBtn');
+  var box = document.getElementById('analysisBox');
+  if(!btn||!box) return;
+  function syncAccordion(){
+    if(window.innerWidth < 768){
+      btn.style.display = 'flex';
+      if(!box.classList.contains('expanded')){
+        btn.textContent = '▼ Εμφάνιση ανάλυσης κόστους';
+      } else {
+        btn.textContent = '▲ Απόκρυψη ανάλυσης';
+      }
+    } else {
+      btn.style.display = 'none';
+      box.classList.add('expanded');
+    }
+  }
+  btn.addEventListener('click', function(){
+    box.classList.toggle('expanded');
+    syncAccordion();
+  });
+  window.addEventListener('resize', syncAccordion);
+  syncAccordion();
+})();
+
+// DIAMOND MOBILE: Hamburger menu toggle
+(function(){
+  var btn=document.getElementById('hamburgerBtn');
+  var nav=document.getElementById('mobileNav');
+  if(!btn||!nav)return;
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=nav.classList.toggle('is-open');
+    btn.textContent=open?'✕':'☰';
+    btn.setAttribute('aria-expanded',String(open));
+  });
+  document.addEventListener('click',function(e){
+    if(nav.classList.contains('is-open')&&!nav.contains(e.target)&&e.target!==btn){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    }
+  });
+  Array.from(nav.querySelectorAll('a')).forEach(function(a){
+    a.addEventListener('click',function(){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    });
+  });
+})();
+
 </script></body></html>

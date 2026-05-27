@@ -110,10 +110,86 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .hero,.summary,.next{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .btn-primary,.btn-gold{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
 </style>
+<script>
+/* DIAMOND STATE: BookingState utility — sessionStorage wrapper */
+window.BookingState=(function(){
+  var K='diamond_booking';
+  function r(){try{var v=sessionStorage.getItem(K);return v?JSON.parse(v):{}}catch(_){return{}}}
+  function w(o){try{sessionStorage.setItem(K,JSON.stringify(o))}catch(_){}}
+  return{
+    get:function(k){return r()[k]},
+    set:function(k,v){var o=r();o[k]=v;w(o)},
+    setMany:function(obj){var o=r();Object.keys(obj).forEach(function(k){o[k]=obj[k]});w(o)},
+    getAll:function(){return r()},
+    clear:function(){try{sessionStorage.removeItem(K)}catch(_){}},
+    invalidateSelection:function(){var o=r();delete o.vehicleCategory;delete o.vehicleId;delete o.basePrice;delete o.vehicleImage;w(o)}
+  };
+})();
+</script>
+<style>
+/* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
+/* DIAMOND MOBILE: Hamburger */
+.hamburger-btn{display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer;border-radius:8px;min-width:40px;min-height:40px;width:40px;height:40px;flex-shrink:0;transition:background .15s;padding:0;line-height:1}
+.hamburger-btn:hover,.hamburger-btn:focus-visible{background:rgba(255,255,255,.22);outline:none}
+.mobile-nav{overflow:hidden;max-height:0;transition:max-height .3s ease;background:rgba(20,40,48,.98);border-top:1px solid rgba(231,191,105,.12);width:100%}
+.mobile-nav.is-open{max-height:440px}
+.mobile-nav a{display:flex;align-items:center;color:rgba(255,255,255,.88);text-decoration:none;font-size:15px;font-weight:700;padding:0 22px;min-height:48px;border-bottom:1px solid rgba(255,255,255,.06);transition:background .12s}
+.mobile-nav a:last-child{border-bottom:none}
+.mobile-nav a:active,.mobile-nav a:hover{background:rgba(231,191,105,.09);color:#f6e19f}
+.header-phone-label{display:inline}
+@media(max-width:767px){
+  .header-nav{display:none!important}
+  .hamburger-btn{display:flex!important}
+  .brand-text span,.brand-text em{display:none}
+  .header-phone-label{display:none}
+  .header-phone{padding:9px 12px!important;min-width:40px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+}
+@media(prefers-reduced-motion:reduce){.mobile-nav{transition:none}}
+
+/* DIAMOND MOBILE: Success page responsive layout */
+@media(max-width:767px){
+  .hero{grid-template-columns:1fr!important;padding:16px!important}
+  .side-card{margin-top:0}
+  .summary-grid{grid-template-columns:1fr!important}
+  .vehicle-card{flex-direction:row!important;gap:14px!important}
+  .vehicle-shot{min-height:100px!important;flex:0 0 100px!important}
+  .info-grid{grid-template-columns:1fr 1fr!important}
+  .actions{flex-direction:column!important}
+  .actions .btn{width:100%!important;min-width:0!important}
+  .hero h1{font-size:28px!important}
+  .booking-no{font-size:24px!important}
+  .big{font-size:clamp(20px,5vw,32px)!important}
+}
+
+/* DIAMOND LOADING: Booking fallback panel */
+#bookingFallback{display:none}
+#bookingFallback h2{color:#fff!important}
+#bookingFallback p{color:rgba(255,255,255,.82)!important}
+</style>
 </head>
 <body>
-<header class="site-header"><div class="header-inner"><a class="brand" href="/"><div class="brand-logo-mark">◆</div><div class="brand-text"><strong>DIAMOND Rent A Car</strong><span>Thessaloniki</span></div></a><nav class="header-nav"><a href="/">Αρχική</a><a href="/categories">Οχήματα</a><a href="/options">Extras</a><a href="/rental-terms">Όροι ενοικίασης</a><a href="/booking">Ολοκλήρωση</a></nav><a class="header-phone" href="tel:+302310000000">+30 2310 000 000</a></div></header>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/"><div class="brand-logo-mark">◆</div><div class="brand-text"><strong>DIAMOND Rent A Car</strong><span>Thessaloniki</span></div></a>
+    <nav class="header-nav"><a href="/">Αρχική</a><a href="/categories">Οχήματα</a><a href="/options">Extras</a><a href="/rental-terms">Όροι ενοικίασης</a><a href="/booking">Ολοκλήρωση</a></nav>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Μενού" aria-expanded="false">☰</button>
+    <a class="header-phone" href="tel:+302310000000"><span aria-hidden="true">📞</span><span class="header-phone-label">+30 2310 000 000</span></a>
+  </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Κύρια πλοήγηση">
+    <a href="/">Αρχική</a>
+    <a href="/categories">Οχήματα</a>
+    <a href="/options">Extras</a>
+    <a href="/rental-terms">Όροι ενοικίασης</a>
+    <a href="/booking">Ολοκλήρωση</a>
+  </nav>
+</header>
 <div class="page"><div class="wrap">
+<!-- DIAMOND LOADING: Fallback shown when BookingState guard fails or page re-visited -->
+<div id="bookingFallback" class="next">
+  <h2>Κράτηση λήφθηκε</h2>
+  <p>Το αίτημα κράτησής σας υποβλήθηκε. Η ομάδα μας θα επικοινωνήσει σύντομα για επιβεβαίωση.</p>
+  <div class="actions"><a class="btn btn-primary" href="/">Νέα αναζήτηση</a></div>
+</div>
 <section class="hero"><div><span class="kicker">Η κράτηση στάλθηκε</span><h1>Το αίτημά σου καταχωρήθηκε επιτυχώς</h1><p>Η ομάδα της DIAMOND Rent A Car έλαβε το αίτημά σου και θα ακολουθήσει επιβεβαίωση διαθεσιμότητας και τελική επικοινωνία. Κράτησε τον αριθμό κράτησης για κάθε αναφορά.</p></div><div class="side-card"><div><h3>Αριθμός κράτησης</h3><div class="muted">Αποθήκευσε τον κωδικό σου. Θα τον χρειαστείς για επιβεβαίωση, αλλαγές ή οποιαδήποτε επικοινωνία με την ομάδα μας.</div></div><div class="big" id="sideBookingNo">—</div></div></section>
 <section class="summary"><div class="summary-grid"><div class="vehicle-card"><div class="vehicle-shot"><img id="vehicleImage" alt="Όχημα"/></div><div class="vehicle-title" id="vehicleName">Κατηγορία οχήματος</div><div class="vehicle-sub" id="vehicleLabel">ή παρόμοιο</div></div><div class="info-card"><div class="info-grid"><div class="mini"><span class="k">Παραλαβή</span><span class="v" id="pickupText">—</span></div><div class="mini"><span class="k">Επιστροφή</span><span class="v" id="dropoffText">—</span></div><div class="mini"><span class="k">Διάρκεια</span><span class="v" id="durationText">—</span></div><div class="mini"><span class="k">Ασφάλεια</span><span class="v" id="insuranceText">—</span></div><div class="mini"><span class="k">Extras</span><span class="v" id="extrasText">Χωρίς extras</span></div></div><div class="line"><span>Βασική χρέωση</span><strong id="baseCost">—</strong></div><div class="line" id="insuranceRow"><span>Ασφάλεια</span><strong id="insuranceCost">—</strong></div><div class="line" id="extrasRow"><span>Extras</span><strong id="extrasCost">—</strong></div><div class="line" id="locationFeeRow" hidden><span id="locationFeeLabel">Χρέωση τοποθεσιών</span><strong id="locationFeeCost">—</strong></div><div class="line" id="ageFeeRow" hidden><span id="ageFeeLabel">Επασφάλιστρο ηλικίας</span><strong id="ageFeeCost">—</strong></div><div class="line" id="nightFeeRow" hidden><span id="nightFeeLabel">Νυχτερινή χρέωση</span><strong id="nightFeeCost">—</strong></div><div class="total"><span>Τελικό σύνολο</span><strong id="grandTotal">—</strong></div></div></div></section>
 <section class="next"><h2>Επόμενα βήματα</h2><ul><li>Έλεγξε ότι κράτησες τον αριθμό κράτησης.</li><li>Θα ακολουθήσει επικοινωνία από την ομάδα μας για οριστική επιβεβαίωση.</li><li>Για αλλαγές ή διευκρινίσεις, χρησιμοποίησε τον αριθμό κράτησης στην επικοινωνία σου.</li></ul><div class="actions"><a class="btn btn-primary" href="/">Νέα αναζήτηση</a><a class="btn btn-gold" href="/categories">Πίσω στα οχήματα</a></div></section>
@@ -382,6 +458,66 @@ applyBusinessIdentity();
 window.addEventListener('load', async () => { await loadSummary(true); notifyHeight(); setTimeout(notifyHeight, 250); setTimeout(notifyHeight, 1000); });
 window.addEventListener('resize', notifyHeight);
 try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
+
+// DIAMOND LOADING: Guard against broken confirmation & prevent re-use
+(function(){
+  try{
+    if(!window.BookingState) return;
+    var ref = BookingState.get('bookingReference');
+    var total = BookingState.get('totalPrice');
+    var viewed = BookingState.get('successViewed');
+    var fallback = document.getElementById('bookingFallback');
+    var wrap = document.querySelector('.wrap');
+    if(!ref || !total || viewed){
+      if(fallback) fallback.style.display = '';
+      // Hide all real content sections (everything except the fallback)
+      if(wrap) Array.from(wrap.children).forEach(function(el){
+        if(el.id !== 'bookingFallback') el.style.display = 'none';
+      });
+      return;
+    }
+    // First successful render — mark as viewed
+    BookingState.set('successViewed', true);
+  }catch(_){}
+})();
+
+// DIAMOND LOADING: 'Νέα αναζήτηση' must clear BookingState before navigating
+(function(){
+  // Use capture phase so this fires before the bindRouteLinks handler
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('a.btn-primary[href="/"], a.btn[href="/"]');
+    if(!a) return;
+    try{ if(window.BookingState) BookingState.clear(); }catch(_){}
+    // Navigation proceeds via bindRouteLinks goTo() handler
+  }, true);
+})();
+
+// DIAMOND MOBILE: Hamburger menu toggle
+(function(){
+  var btn=document.getElementById('hamburgerBtn');
+  var nav=document.getElementById('mobileNav');
+  if(!btn||!nav)return;
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=nav.classList.toggle('is-open');
+    btn.textContent=open?'✕':'☰';
+    btn.setAttribute('aria-expanded',String(open));
+  });
+  document.addEventListener('click',function(e){
+    if(nav.classList.contains('is-open')&&!nav.contains(e.target)&&e.target!==btn){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    }
+  });
+  Array.from(nav.querySelectorAll('a')).forEach(function(a){
+    a.addEventListener('click',function(){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    });
+  });
+})();
 </script>
 </body>
 </html>
