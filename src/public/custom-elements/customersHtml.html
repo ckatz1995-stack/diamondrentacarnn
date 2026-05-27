@@ -360,7 +360,13 @@ function dispatch(msg) {
 
     case 'updateCustomerResult':
       if (msg.ok) {
-        if (msg.customer) state.selectedCustomer = msg.customer;
+        if (msg.customer) {
+          state.selectedCustomer = msg.customer;
+          // If a new CMS record was created for a member-only entry, adopt the real _id
+          if (msg.customer._id && msg.customer._id !== state.selectedCustomerId) {
+            state.selectedCustomerId = msg.customer._id;
+          }
+        }
         state.editingProfile = false;
         renderCustomerDetail();
         showToast('Profile saved successfully.', 'ok');
