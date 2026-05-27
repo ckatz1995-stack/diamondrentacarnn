@@ -386,6 +386,26 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .cat-badge{box-shadow:0 4px 14px rgba(90,48,0,.20)!important}
 .continue-btn{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
 </style>
+<script>
+/* DIAMOND STATE: BookingState utility — shared across all booking-ui pages */
+window.BookingState=(function(){
+  var KEY='diamond_booking';
+  function _l(){try{return JSON.parse(sessionStorage.getItem(KEY)||'{}')}catch(e){try{sessionStorage.removeItem(KEY)}catch(_){}return {}}}
+  function _s(o){try{sessionStorage.setItem(KEY,JSON.stringify(o))}catch(_){}}
+  return{
+    set:function(k,v){var s=_l();s[k]=v;_s(s)},
+    get:function(k){var v=_l()[k];return v!==undefined?v:null},
+    setMany:function(o){var s=_l();Object.assign(s,o);_s(s)},
+    getAll:function(){return _l()},
+    clear:function(){try{sessionStorage.removeItem(KEY)}catch(_){}},
+    invalidateSelection:function(){
+      var s=_l();
+      ['vehicleCategory','vehicleId','basePrice','vehicleImage','selectedInsurance','selectedInsurancePrice','selectedExtras','totalPrice','billableDays'].forEach(function(k){delete s[k]});
+      _s(s);
+    }
+  };
+})();
+</script>
 
 <style id="mobile-flow-patch">
 html,body{overflow-x:hidden!important}
@@ -485,6 +505,8 @@ html,body{overflow-x:hidden!important}
 .footer-bottom-links{display:flex;gap:16px}
 .footer-bottom-links a{color:rgba(255,255,255,.52);font-size:12.5px;font-weight:700;text-decoration:none}
 .footer-bottom-links a:hover{color:#f6e19f}
+@keyframes diamond-total-flash{0%{color:#f6e19f;transform:scale(1.07)}100%{color:inherit;transform:scale(1)}}
+.diamond-total-flash{animation:diamond-total-flash .4s ease-out}
 </style>
 
 </head>
@@ -958,6 +980,27 @@ bindRouteLinks();
       }).join('');
 
       bindChoiceInputs();
+
+      // DIAMOND STATE: Restore previously selected insurance/extras from BookingState (fallback when no URL params)
+      if(window.BookingState && !qs.has('insuranceKey') && !qs.has('extrasKeys')){
+        try{
+          const bsIns = BookingState.get('selectedInsurance');
+          const bsExtKeys = Array.isArray(BookingState.get('selectedExtras'))
+            ? BookingState.get('selectedExtras').map(function(x){return x.key||x.name||'';}).filter(Boolean)
+            : [];
+          if(bsIns){
+            document.querySelectorAll('input[name="insurance"]').forEach(function(inp){
+              inp.checked = (inp.dataset.key === bsIns);
+            });
+          }
+          if(bsExtKeys.length){
+            document.querySelectorAll('.extraInput').forEach(function(inp){
+              if(bsExtKeys.indexOf(inp.dataset.key) !== -1) inp.checked = true;
+            });
+          }
+        }catch(_){}
+      }
+
       applyCardStates();
     }
 
@@ -1202,7 +1245,12 @@ async function fetchFleetModels(categoryCode, vehicleId){
       if (extrasRow) extrasRow.hidden = !(extrasTotal > 0);
       document.getElementById('netLine').textContent = formatMoney(net);
       document.getElementById('vatLine').textContent = formatMoney(vat);
-      document.getElementById('grandTotal').textContent = formatMoney(total);
+      const gtEl = document.getElementById('grandTotal');
+      gtEl.textContent = formatMoney(total);
+      // DIAMOND STATE: Flash grand total on change to signal recalculation
+      gtEl.classList.remove('diamond-total-flash');
+      void gtEl.offsetWidth;
+      gtEl.classList.add('diamond-total-flash');
 
       const locationRow = document.getElementById('locationRow');
       if(locationTotal > 0){
@@ -1453,6 +1501,18 @@ async function loadVehicle(){
       const extrasTotal = payload.extras.reduce((sum, x) => sum + ((x.mode === 'perBooking') ? Number(x.price || x.pricePerDay || 0) : Number(x.price || x.pricePerDay || 0) * days), 0);
       const baseCost = Number((Number(payload.basePricePerDay || resolveDynamicDailyPrice(vehicle, days)) * days).toFixed(2));
       const total = baseCost + insuranceTotal + extrasTotal + Number(payload.ageFee || 0) + Number(payload.nightFee || 0) + Number(payload.locationFee || 0);
+
+      // DIAMOND STATE: Save selected insurance, extras, totals to BookingState before checkout
+      if(window.BookingState){
+        const bsExtras = payload.extras.map(function(x){ return {name:x.label,pricePerDay:Number(x.pricePerDay||x.price||0),key:x.key,mode:x.mode}; });
+        BookingState.setMany({
+          selectedInsurance: payload.insurance.key,
+          selectedInsurancePrice: payload.insurance.pricePerDay,
+          selectedExtras: bsExtras,
+          totalPrice: total,
+          billableDays: days
+        });
+      }
       const extrasLabels = payload.extras.map(x => x.label).join(', ');
       const checkoutPath = `/booking?vehicle=${encodeURIComponent(state.vehicleId || vehicle.id || '')}` +
         `&pickup=${encodeURIComponent(state.pickup)}` +

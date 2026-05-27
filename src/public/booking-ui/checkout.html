@@ -352,7 +352,30 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
 .summary-shell,.form-card,.section{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .btn-submit{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
-</style></head><body>
+.field-error{display:none;color:#b83c2e;font-size:12px;font-weight:700;margin-top:3px;line-height:1.3}
+.field-error.visible{display:block}
+.label-error{color:#b83c2e!important;font-weight:800!important}
+input.input-error,select.input-error,textarea.input-error{border-color:#b83c2e!important;box-shadow:0 0 0 2px rgba(184,60,46,.18)!important}
+</style><script>
+/* DIAMOND STATE: BookingState utility — shared across all booking-ui pages */
+window.BookingState=(function(){
+  var KEY='diamond_booking';
+  function _l(){try{return JSON.parse(sessionStorage.getItem(KEY)||'{}')}catch(e){try{sessionStorage.removeItem(KEY)}catch(_){}return {}}}
+  function _s(o){try{sessionStorage.setItem(KEY,JSON.stringify(o))}catch(_){}}
+  return{
+    set:function(k,v){var s=_l();s[k]=v;_s(s)},
+    get:function(k){var v=_l()[k];return v!==undefined?v:null},
+    setMany:function(o){var s=_l();Object.assign(s,o);_s(s)},
+    getAll:function(){return _l()},
+    clear:function(){try{sessionStorage.removeItem(KEY)}catch(_){}},
+    invalidateSelection:function(){
+      var s=_l();
+      ['vehicleCategory','vehicleId','basePrice','vehicleImage','selectedInsurance','selectedInsurancePrice','selectedExtras','totalPrice','billableDays'].forEach(function(k){delete s[k]});
+      _s(s);
+    }
+  };
+})();
+</script></head><body>
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="/">
@@ -419,16 +442,16 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         <div class="form-card">
           <h3 class="card-title">Στοιχεία επικοινωνίας</h3>
           <div class="grid">
-            <div class="field"><label>Όνομα *</label><input name="firstName" type="text" required></div>
-            <div class="field"><label>Επώνυμο *</label><input name="lastName" type="text" required></div>
-            <div class="field"><label>Ημερομηνία γέννησης</label><input name="dob" type="date"></div>
-            <div class="field"><label>Τηλέφωνο *</label><input name="phone" type="tel" required></div>
-            <div class="field"><label>Email *</label><input name="email" type="email" required></div>
+            <div class="field"><label id="lbl-firstName">Όνομα *</label><input id="firstName" name="firstName" type="text" required><span class="field-error" id="err-firstName"></span></div>
+            <div class="field"><label id="lbl-lastName">Επώνυμο *</label><input id="lastName" name="lastName" type="text" required><span class="field-error" id="err-lastName"></span></div>
+            <div class="field"><label id="lbl-dob">Ημερομηνία γέννησης</label><input id="dob" name="dob" type="date"><span class="field-error" id="err-dob"></span></div>
+            <div class="field"><label id="lbl-phone">Τηλέφωνο *</label><input id="phone" name="phone" type="tel" required><span class="field-error" id="err-phone"></span></div>
+            <div class="field"><label id="lbl-email">Email *</label><input id="email" name="email" type="email" required><span class="field-error" id="err-email"></span></div>
             <div class="field"><label>Χώρα</label><input name="country" type="text"></div>
             <div class="field"><label>Διεύθυνση</label><input name="address" type="text"></div>
             <div class="field"><label>Πόλη κατοικίας</label><input name="city" type="text"></div>
             <div class="field"><label>Τ.Κ.</label><input name="billingZip" type="text"></div>
-            <div class="field" id="flightNumberField"><label id="flightNumberLabel">Αριθμός πτήσης</label><input name="flightNumber" type="text"></div>
+            <div class="field" id="flightNumberField"><label id="flightNumberLabel">Αριθμός πτήσης</label><input id="flightNumber" name="flightNumber" type="text"><span class="field-error" id="err-flightNumber"></span></div>
             <div class="field" id="originCityField"><label id="originCityLabel">Πόλη άφιξης</label><input name="originCity" type="text" placeholder="π.χ. Αθήνα"></div>
             <div class="field" id="dropoffInfoField" style="display:none"><label id="dropoffInfoLabel">Πτήση Επιστροφής</label><input name="dropoffInfo" type="text"></div>
             <div class="field full"><label>Σχόλια</label><textarea name="comments" placeholder="Αν έχεις σχόλια για παραλαβή, πτήση ή κάτι σχετικό, γράψε τα εδώ."></textarea></div>
@@ -446,7 +469,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
             <div class="toggle-content" id="invoiceFields"><div class="grid-4"><div class="field"><label>Επωνυμία επιχείρησης</label><input name="companyName" type="text"></div><div class="field"><label>Επάγγελμα / δραστηριότητα</label><input name="profession" type="text"></div><div class="field"><label>Α.Φ.Μ.</label><input name="vatNumber" type="text"></div><div class="field"><label>Δ.Ο.Υ.</label><input name="taxOffice" type="text"></div><div class="field"><label>Διεύθυνση / έδρα</label><input name="billingAddress" type="text"></div><div class="field"><label>Πόλη</label><input name="companyCity" type="text"></div><div class="field"><label>Τ.Κ.</label><input name="companyZip" type="text"></div><div class="field"><label>Τηλέφωνο έδρας</label><input name="companyPhone" type="text"></div><div class="field"><label>Email εταιρίας</label><input name="companyEmail" type="email"></div></div></div>
           </div>
           <div class="helper-note">Η τελική ανάλυση παραμένει ορατή πάνω στη σελίδα ώστε να γνωρίζει ο πελάτης ακριβώς τι αποστέλλει πριν ολοκληρώσει το αίτημα.</div>
-          <label class="check-row"><input type="checkbox" required><span>Έχω διαβάσει και αποδέχομαι τους όρους, τις προϋποθέσεις και την πολιτική απορρήτου.</span></label>
+          <label class="check-row"><input id="termsCheck" type="checkbox" required><span>Έχω διαβάσει και αποδέχομαι τους όρους, τις προϋποθέσεις και την πολιτική απορρήτου.</span></label>
+          <span class="field-error" id="err-terms" style="margin-left:4px"></span>
           <div id="submitError" role="alert" style="display:none;margin:12px 0 0;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:11px 14px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.4"></div>
           <div class="actions">
             <button class="btn btn-back" type="button">Πίσω</button>
@@ -1110,22 +1134,104 @@ document.querySelector('.btn-back').addEventListener('click', () => {
   goTo(buildBackPath());
 });
 
+// Per-field validation helpers
+function setFieldErr(id, msg){
+  const sp = document.getElementById('err-'+id);
+  const inp = document.getElementById(id);
+  if(sp){ sp.textContent = msg||''; sp.classList.toggle('visible', !!msg); }
+  if(inp){ inp.classList.toggle('input-error', !!msg); }
+  const lbl = document.getElementById('lbl-'+id);
+  if(lbl) lbl.classList.toggle('label-error', !!msg);
+}
+function clearFieldErr(id){ setFieldErr(id, ''); }
+function validateCheckoutFields(fd, state){
+  const errors = {};
+  const firstName = (fd.get('firstName')||'').trim();
+  const lastName = (fd.get('lastName')||'').trim();
+  const dob = (fd.get('dob')||'').trim();
+  const phone = (fd.get('phone')||'').trim();
+  const email = (fd.get('email')||'').trim();
+  const termsChecked = !!document.getElementById('termsCheck')?.checked;
+  const flightFieldVisible = document.getElementById('flightNumberField')?.style.display !== 'none';
+  const flightNumber = (fd.get('flightNumber')||'').trim();
+  const docType = (fd.get('docType')||'receipt').toString();
+
+  if(!firstName || firstName.length < 2) errors.firstName = 'Το όνομα πρέπει να έχει τουλάχιστον 2 χαρακτήρες.';
+  if(!lastName || lastName.length < 2) errors.lastName = 'Το επώνυμο πρέπει να έχει τουλάχιστον 2 χαρακτήρες.';
+  if(dob){
+    const dobDate = new Date(dob);
+    const minAge = new Date(); minAge.setFullYear(minAge.getFullYear()-18);
+    if(isNaN(dobDate.getTime())) errors.dob = 'Μη έγκυρη ημερομηνία γέννησης.';
+    else if(dobDate > minAge) errors.dob = 'Ο οδηγός πρέπει να είναι τουλάχιστον 18 ετών.';
+  }
+  if(!phone || phone.replace(/[\s\-().+]/g,'').length < 7) errors.phone = 'Συμπληρώστε έγκυρο τηλέφωνο (τουλάχιστον 7 ψηφία).';
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Συμπληρώστε έγκυρη διεύθυνση email.';
+  if(!termsChecked) errors.terms = 'Αποδεχτείτε τους όρους για να συνεχίσετε.';
+  if(flightFieldVisible && !flightNumber) errors.flightNumber = 'Απαιτείται αριθμός πτήσης για αυτό το σημείο παραλαβής.';
+  if(docType === 'invoice'){
+    const companyName = (fd.get('companyName')||'').trim();
+    const vatNumber = (fd.get('vatNumber')||'').trim();
+    // invoice fields validated below if needed (not mapped to per-field spans currently)
+    if(!companyName || !vatNumber){
+      errors._invoice = 'Για τιμολόγιο απαιτούνται τουλάχιστον επωνυμία και Α.Φ.Μ.';
+    }
+  }
+  return errors;
+}
+
+// Blur/change listeners for real-time per-field validation
+['firstName','lastName','phone','email'].forEach(function(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('blur', function(){
+    const fd = new FormData(document.getElementById('checkoutForm'));
+    const errs = validateCheckoutFields(fd, {});
+    setFieldErr(id, errs[id]||'');
+  });
+});
+(function(){
+  const dob = document.getElementById('dob');
+  if(dob) dob.addEventListener('blur', function(){
+    const fd = new FormData(document.getElementById('checkoutForm'));
+    const errs = validateCheckoutFields(fd, {});
+    setFieldErr('dob', errs.dob||'');
+  });
+  const terms = document.getElementById('termsCheck');
+  if(terms) terms.addEventListener('change', function(){
+    if(terms.checked) setFieldErr('terms','');
+  });
+  const fn = document.getElementById('flightNumber');
+  if(fn) fn.addEventListener('blur', function(){
+    const fd = new FormData(document.getElementById('checkoutForm'));
+    const errs = validateCheckoutFields(fd, {});
+    setFieldErr('flightNumber', errs.flightNumber||'');
+  });
+})();
+
 document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!vehicle) return;
 
   const form = e.currentTarget;
   const fd = new FormData(form);
+  const errors = validateCheckoutFields(fd, state);
+
+  // Show per-field errors
+  ['firstName','lastName','dob','phone','email','terms','flightNumber'].forEach(function(id){ setFieldErr(id, errors[id]||''); });
+
+  if(Object.keys(errors).length > 0){
+    showSubmitError('Παρακαλώ διορθώστε τα επισημασμένα πεδία παρακάτω.');
+    const firstErrEl = document.querySelector('.field-error.visible');
+    if(firstErrEl) firstErrEl.scrollIntoView({behavior:'smooth',block:'center'});
+    if(errors._invoice) showSubmitError((document.getElementById('submitError').textContent||'') + ' ' + errors._invoice);
+    return;
+  }
+  hideSubmitError();
+
   const firstName = (fd.get('firstName') || '').toString().trim();
   const lastName = (fd.get('lastName') || '').toString().trim();
   const email = (fd.get('email') || '').toString().trim();
   const phone = (fd.get('phone') || '').toString().trim();
-
-  if (!firstName || !lastName || !email || !phone) {
-    showSubmitError('Παρακαλώ συμπλήρωσε όνομα, επώνυμο, email και τηλέφωνο.');
-    return;
-  }
-  hideSubmitError();
 
   const fullName = `${firstName} ${lastName}`.trim();
   const billingType = (fd.get('docType') || 'receipt').toString();
