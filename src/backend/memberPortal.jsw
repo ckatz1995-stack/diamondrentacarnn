@@ -429,3 +429,176 @@ export async function updateExtendedProfile({ driverAge, nationality, licenseNum
     return { ok: false, error: 'update_failed' };
   }
 }
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+// Requires a Wix CMS collection named "MemberNotifications" with fields:
+//   memberId (Text), type (Text), title (Text), body (Text),
+//   isRead (Boolean, default false), relatedBookingId (Text, optional)
+
+async function getMemberId() {
+  const m = await currentMember.getMember({ fieldsets: ['FULL'] });
+  return m ? m._id : null;
+}
+
+export async function getMyNotifications() {
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!memberId) return { ok: false, error: 'unauthorized' };
+  try {
+    const res = await wixData.query('MemberNotifications')
+      .eq('memberId', memberId)
+      .descending('_createdDate')
+      .limit(50)
+      .find({ suppressAuth: true });
+    return { ok: true, notifications: res.items || [] };
+  } catch (err) {
+    console.warn('getMyNotifications error', err.message);
+    // Collection may not exist yet — return empty list gracefully
+    return { ok: true, notifications: [] };
+  }
+}
+
+export async function markNotificationRead({ notificationId }) {
+  if (!notificationId) return { ok: false };
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false }; }
+  if (!memberId) return { ok: false };
+  try {
+    const res = await wixData.query('MemberNotifications')
+      .eq('_id', String(notificationId))
+      .eq('memberId', memberId)
+      .limit(1)
+      .find({ suppressAuth: true });
+    const item = res.items && res.items[0];
+    if (!item) return { ok: false };
+    await wixData.update('MemberNotifications', { ...item, isRead: true }, { suppressAuth: true });
+    return { ok: true };
+  } catch (err) {
+    console.warn('markNotificationRead error', err.message);
+    return { ok: false };
+  }
+}
+
+export async function readAllMyNotifications() {
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false }; }
+  if (!memberId) return { ok: false };
+  try {
+    const res = await wixData.query('MemberNotifications')
+      .eq('memberId', memberId)
+      .eq('isRead', false)
+      .limit(100)
+      .find({ suppressAuth: true });
+    const updates = (res.items || []).map(item =>
+      wixData.update('MemberNotifications', { ...item, isRead: true }, { suppressAuth: true })
+    );
+    await Promise.all(updates);
+    return { ok: true };
+  } catch (err) {
+    console.warn('readAllMyNotifications error', err.message);
+    return { ok: false };
+  }
+}
+
+export async function deleteMyNotification({ notificationId }) {
+  if (!notificationId) return { ok: false };
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false }; }
+  if (!memberId) return { ok: false };
+  try {
+    const res = await wixData.query('MemberNotifications')
+      .eq('_id', String(notificationId))
+      .eq('memberId', memberId)
+      .limit(1)
+      .find({ suppressAuth: true });
+    if (res.items && res.items[0]) {
+      await wixData.remove('MemberNotifications', res.items[0]._id, { suppressAuth: true });
+    }
+    return { ok: true };
+  } catch (err) {
+    console.warn('deleteMyNotification error', err.message);
+    return { ok: false };
+  }
+}
+
+// ─── Support Tickets ──────────────────────────────────────────────────────────
+// Requires Wix CMS collection "SupportTickets" with fields:
+//   memberId (Text), memberEmail (Text), subject (Text),
+//   category (Text), status (Text, default "open"),
+//   messages (Long Text — JSON array of {sender, text, createdAt}),
+//   bookingId (Text, optional)
+
+export async function getMyTickets() {
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!memberId) return { ok: false, error: 'unauthorized' };
+  try {
+    const res = await wixData.query('SupportTickets')
+      .eq('memberId', memberId)
+      .descending('_createdDate')
+      .limit(50)
+      .find({ suppressAuth: true });
+    return { ok: true, tickets: res.items || [] };
+  } catch (err) {
+    console.warn('getMyTickets error', err.message);
+    return { ok: true, tickets: [] };
+  }
+}
+
+export async function createMyTicket({ subject, category, message, bookingId }) {
+  if (!subject || !message) return { ok: false, error: 'missing_fields' };
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!memberId) return { ok: false, error: 'unauthorized' };
+  let mEmail = '';
+  try { mEmail = (await memberEmail()) || ''; } catch (_) {}
+  const messages = JSON.stringify([{
+    sender: 'member',
+    text: String(message).trim().slice(0, 2000),
+    createdAt: new Date().toISOString()
+  }]);
+  try {
+    await wixData.insert('SupportTickets', {
+      memberId,
+      memberEmail: mEmail,
+      subject: String(subject).trim().slice(0, 200),
+      category: String(category || 'general').trim(),
+      status: 'open',
+      messages,
+      bookingId: bookingId ? String(bookingId) : ''
+    }, { suppressAuth: true });
+    return { ok: true };
+  } catch (err) {
+    console.warn('createMyTicket error', err.message);
+    return { ok: false, error: 'server_error' };
+  }
+}
+
+export async function replyToMyTicket({ ticketId, message }) {
+  if (!ticketId || !message) return { ok: false, error: 'missing_fields' };
+  let memberId;
+  try { memberId = await getMemberId(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
+  if (!memberId) return { ok: false, error: 'unauthorized' };
+  try {
+    const res = await wixData.query('SupportTickets')
+      .eq('_id', String(ticketId))
+      .eq('memberId', memberId)
+      .limit(1)
+      .find({ suppressAuth: true });
+    const ticket = res.items && res.items[0];
+    if (!ticket) return { ok: false, error: 'not_found' };
+    if (ticket.status === 'closed') return { ok: false, error: 'ticket_closed' };
+    let msgs = [];
+    try { msgs = JSON.parse(ticket.messages || '[]'); } catch (_) {}
+    msgs.push({ sender: 'member', text: String(message).trim().slice(0, 2000), createdAt: new Date().toISOString() });
+    const updated = await wixData.update('SupportTickets', {
+      ...ticket,
+      messages: JSON.stringify(msgs),
+      status: ticket.status === 'resolved' ? 'open' : ticket.status
+    }, { suppressAuth: true });
+    return { ok: true, ticket: updated };
+  } catch (err) {
+    console.warn('replyToMyTicket error', err.message);
+    return { ok: false, error: 'server_error' };
+  }
+}

@@ -254,6 +254,33 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 .btn-invoice{background:#eef0ff;color:#3a5fd4;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;transition:background .15s}
 .btn-invoice:hover{background:#dce2ff}
 
+/* ── Notifications panel ── */
+.notif-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.notif-header-title{font-size:15px;font-weight:800;color:#1f1a13}
+.btn-read-all{background:#eef6fa;color:#3f748a;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-read-all:hover{background:#d8edf5}
+.notif-list{display:flex;flex-direction:column;gap:0;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.04)}
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid #f2f0eb;cursor:pointer;transition:background .15s;position:relative}
+.notif-item:last-child{border:none}
+.notif-item:hover{background:#fafaf8}
+.notif-item.unread{background:#f7fbfd}
+.notif-item.unread::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0}
+.notif-type-booking_confirmed .notif-item.unread::before,.notif-type-booking_changed .notif-item.unread::before{background:#3f748a}
+.notif-type-trip_reminder .notif-item.unread::before{background:#2a3d47}
+.notif-type-review_request .notif-item.unread::before,.notif-type-loyalty_milestone .notif-item.unread::before{background:#e7bf69}
+.notif-type-promo .notif-item.unread::before{background:#1a7a45}
+.notif-type-support_reply .notif-item.unread::before{background:#6d3fc9}
+.notif-icon{font-size:22px;width:36px;text-align:center;flex-shrink:0;margin-top:1px}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:13px;font-weight:700;color:#1f1a13;margin-bottom:3px}
+.notif-item.unread .notif-title{font-weight:800}
+.notif-text{font-size:12px;color:#888;line-height:1.45}
+.notif-time{font-size:11px;color:#bbb;margin-top:4px}
+.notif-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:flex-end}
+.btn-notif-del{background:none;border:none;color:#ddd;font-size:16px;cursor:pointer;padding:2px 4px;border-radius:4px;line-height:1;transition:color .15s}
+.btn-notif-del:hover{color:#b83c2e;background:#fff2f0}
+.notif-unread-dot{width:8px;height:8px;border-radius:50%;background:#3f748a;flex-shrink:0;margin-top:6px}
+
 /* ── Documents panel ── */
 .doc-intro{background:linear-gradient(135deg,#1a1510,#2a3d47);border-radius:14px;padding:18px 20px;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:16px}
 .doc-intro-icon{font-size:32px;flex-shrink:0}
@@ -271,6 +298,38 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 .btn-doc-view:hover{background:#d8edf5}
 .btn-doc-print{background:#f4f2ee;color:#555;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap}
 .btn-doc-print:hover{background:#e8e4da}
+
+/* ── Support / Tickets panel ── */
+.support-hero{background:linear-gradient(135deg,#1a1510,#2a3d47);border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#fff;display:flex;align-items:center;gap:16px}
+.support-hero-icon{font-size:32px;flex-shrink:0}
+.support-hero-title{font-size:15px;font-weight:800;margin-bottom:4px}
+.support-hero-sub{font-size:12px;color:rgba(255,255,255,.5);line-height:1.4}
+.new-ticket-btn{width:100%;background:#3f748a;color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:16px;transition:background .18s;text-align:center;display:block}
+.new-ticket-btn:hover{background:#2d6072}
+.ticket-list{display:flex;flex-direction:column;gap:10px}
+.ticket-card{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);cursor:pointer;transition:background .15s}
+.ticket-card:hover{background:#fafaf8}
+.ticket-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.ticket-subject{font-size:14px;font-weight:800;color:#1f1a13;flex:1;min-width:0}
+.ticket-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.ts-open{background:#e3f5e8;color:#1a7a45}
+.ts-in_progress{background:#fef9e7;color:#a07000}
+.ts-resolved{background:#eef2ff;color:#3a5fd4}
+.ts-closed{background:#f0ece3;color:#777}
+.ticket-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.ticket-cat{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#f0ece3;color:#3f748a}
+.ticket-date{font-size:11px;color:#bbb}
+.ticket-preview{font-size:12px;color:#888;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.thread-wrap{display:flex;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto;margin-bottom:16px;padding:4px 2px}
+.thread-msg{display:flex;flex-direction:column;gap:3px;max-width:82%}
+.thread-msg.msg-member{align-self:flex-end;align-items:flex-end}
+.thread-msg.msg-support{align-self:flex-start;align-items:flex-start}
+.msg-bubble{padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.5;word-wrap:break-word}
+.msg-member .msg-bubble{background:#3f748a;color:#fff;border-radius:12px 12px 2px 12px}
+.msg-support .msg-bubble{background:#f4f2ee;color:#1f1a13;border-radius:12px 12px 12px 2px}
+.msg-meta{font-size:10px;color:#bbb;padding:0 4px}
+.ticket-status-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f4f2ee;border-radius:8px;margin-bottom:14px;font-size:12px}
+.ticket-status-bar strong{font-size:13px;color:#1f1a13}
 
 @media(max-width:480px){
   .bk-det-grid{grid-template-columns:1fr}
@@ -324,6 +383,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     <button class="tab" data-tab="payments">💳 Πληρωμές</button>
     <button class="tab" data-tab="loyalty">🏆 Loyalty</button>
     <button class="tab" data-tab="documents">📄 Έγγραφα</button>
+    <button class="tab" data-tab="notifications" id="tabNotifications">🔔 Ειδοποιήσεις</button>
+    <button class="tab" data-tab="support">🎫 Υποστήριξη</button>
     <button class="tab" data-tab="profile">👤 Προφίλ</button>
   </div>
 
@@ -361,6 +422,16 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     <!-- Loyalty panel -->
     <div id="panelLoyalty" class="hidden">
       <div id="loyaltyContent"><div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div></div>
+    </div>
+
+    <!-- Notifications panel -->
+    <div id="panelNotifications" class="hidden">
+      <div id="notificationsContent"><div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div></div>
+    </div>
+
+    <!-- Support panel -->
+    <div id="panelSupport" class="hidden">
+      <div id="supportContent"><div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div></div>
     </div>
 
     <!-- Documents panel -->
@@ -491,6 +562,50 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   </div>
 </div>
 
+<!-- New Ticket Modal -->
+<div class="mover hidden" id="newTicketModal">
+  <div class="mbox">
+    <button class="mclose" id="newTicketModalClose">✕</button>
+    <h3>Νέο Αίτημα Υποστήριξης</h3>
+    <p class="msub">Περιγράψτε το πρόβλημά σας και θα επικοινωνήσουμε εντός 24 ωρών.</p>
+    <div class="merr" id="newTicketErr"></div>
+    <div class="mrow">
+      <label>Κατηγορία</label>
+      <select id="newTicketCat">
+        <option value="booking">🚗 Κράτηση</option>
+        <option value="payment">💳 Πληρωμή</option>
+        <option value="vehicle">🔧 Όχημα</option>
+        <option value="general">💬 Γενικό</option>
+      </select>
+    </div>
+    <div class="mrow"><label>Θέμα</label><input type="text" id="newTicketSubject" placeholder="π.χ. Αλλαγή ημερομηνίας κράτησης" maxlength="200"/></div>
+    <div class="mrow"><label>Μήνυμα</label><textarea id="newTicketMsg" placeholder="Περιγράψτε το θέμα σας..." style="min-height:100px"></textarea></div>
+    <div class="mbtn-row">
+      <button class="mbtn-ghost" id="newTicketCancelBtn">Άκυρο</button>
+      <button class="mbtn-primary" id="newTicketSubmitBtn">📨 Αποστολή</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ticket Detail Modal -->
+<div class="mover hidden" id="ticketDetailModal">
+  <div class="mbox">
+    <button class="mclose" id="ticketDetailModalClose">✕</button>
+    <h3 id="ticketDetailSubject" style="padding-right:28px">Αίτημα</h3>
+    <div class="ticket-status-bar" style="margin-top:8px">
+      <span id="ticketDetailCat" style="font-size:13px"></span>
+      <strong id="ticketDetailStatus"></strong>
+    </div>
+    <div class="thread-wrap" id="threadWrap"></div>
+    <div id="threadReplyArea">
+      <div class="merr" id="replyErr"></div>
+      <div class="mrow"><textarea id="replyMsg" placeholder="Γράψτε το μήνυμά σας..." style="min-height:72px"></textarea></div>
+      <button class="mbtn-primary" id="replySendBtn" style="width:100%">📨 Αποστολή μηνύματος</button>
+    </div>
+    <div id="threadClosedNote" class="hidden" style="text-align:center;color:#aaa;font-size:13px;padding:8px 0">Αυτό το αίτημα έχει κλείσει ή επιλυθεί.</div>
+  </div>
+</div>
+
 <script>
 (function(){
   'use strict';
@@ -501,8 +616,10 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   var memberProfile=null, extendedProfile=null, voucherBooking=null;
   var initTimer=null, currentRating=0, completedCount=0;
   var editIgnoreConflict=false, extendIgnoreConflict=false;
-  var allBookingsCache=[], analyticsBuilt=false, paymentsBuilt=false, loyaltyBuilt=false, documentsBuilt=false;
+  var allBookingsCache=[], analyticsBuilt=false, paymentsBuilt=false, loyaltyBuilt=false, documentsBuilt=false, notificationsLoaded=false;
+  var unreadCount=0;
   var currentTab='bookings';
+  var supportLoaded=false, ticketsData={}, currentTicketId=null;
 
   /* ─── postMessage ────────────────────────────────────── */
   function post(msg){try{window.parent.postMessage(msg,'*');}catch(_){}}
@@ -579,7 +696,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   function showTab(tab){
     currentTab=tab;
     document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
-    var panels=['bookings','analytics','payments','loyalty','documents','profile'];
+    var panels=['bookings','analytics','payments','loyalty','notifications','support','documents','profile'];
     panels.forEach(function(p){
       var el=document.getElementById('panel'+p.charAt(0).toUpperCase()+p.slice(1));
       if(el)el.classList.toggle('hidden',p!==tab);
@@ -589,6 +706,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     if(tab==='payments'&&!paymentsBuilt)buildPayments();
     if(tab==='loyalty'&&!loyaltyBuilt)buildLoyalty();
     if(tab==='documents'&&!documentsBuilt)buildDocuments();
+    if(tab==='notifications'){loadNotifications();}
+    if(tab==='support'&&!supportLoaded){loadSupport();}
   }
 
   /* ─── Bookings ───────────────────────────────────────── */
@@ -836,6 +955,211 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
         '<div class="section-title" style="margin-top:8px">Ιστορικό Πόντων</div>'+
         '<div class="pts-history">'+histRows+'</div>'
       :'');
+  }
+
+  /* ─── Notifications ─────────────────────────────────── */
+  var NOTIF_ICONS={booking_confirmed:'✅',booking_changed:'✏️',trip_reminder:'📅',review_request:'⭐',loyalty_milestone:'🏆',promo:'🎁',support_reply:'💬'};
+
+  function updateNotifBadge(count){
+    unreadCount=count;
+    var tab=document.getElementById('tabNotifications');
+    if(!tab)return;
+    tab.textContent=count>0?'🔔 Ειδοποιήσεις ('+count+')':'🔔 Ειδοποιήσεις';
+  }
+
+  function loadNotifications(){
+    document.getElementById('notificationsContent').innerHTML='<div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div>';
+    post({type:'GET_NOTIFICATIONS'});
+  }
+
+  function renderNotifications(items){
+    notificationsLoaded=true;
+    var unread=items.filter(function(n){return !n.isRead;}).length;
+    updateNotifBadge(unread);
+
+    if(!items.length){
+      document.getElementById('notificationsContent').innerHTML=
+        '<div class="empty"><div class="empty-icon">🔔</div><h3>Δεν υπάρχουν ειδοποιήσεις</h3><p>Οι ειδοποιήσεις για κρατήσεις και loyalty θα εμφανιστούν εδώ.</p></div>';
+      return;
+    }
+
+    var rowsHtml=items.map(function(n){
+      var icon=NOTIF_ICONS[n.type]||'ℹ️';
+      var isUnread=!n.isRead;
+      var timeAgo=timeAgoGreek(n._createdDate||n.createdAt);
+      return '<div class="notif-item'+(isUnread?' unread':'')+'" id="notif-'+esc(n._id)+'" onclick="notifClick(\''+esc(n._id)+'\',\''+esc(n.relatedBookingId||'')+'\')">'+
+        '<div class="notif-icon">'+icon+'</div>'+
+        '<div class="notif-body">'+
+          '<div class="notif-title">'+esc(n.title)+'</div>'+
+          '<div class="notif-text">'+esc(n.body)+'</div>'+
+          '<div class="notif-time">'+timeAgo+'</div>'+
+        '</div>'+
+        '<div class="notif-actions">'+
+          (isUnread?'<div class="notif-unread-dot"></div>':'')+
+          '<button class="btn-notif-del" title="Διαγραφή" onclick="event.stopPropagation();deleteNotif(\''+esc(n._id)+'\')">✕</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+
+    document.getElementById('notificationsContent').innerHTML=
+      '<div class="notif-header">'+
+        '<div class="notif-header-title">'+(unread>0?unread+' αδιάβαστες':'Όλες διαβασμένες')+'</div>'+
+        (unread>0?'<button class="btn-read-all" onclick="readAllNotifs()">✓ Διαβάστε όλες</button>':'')+
+      '</div>'+
+      '<div class="notif-list">'+rowsHtml+'</div>';
+  }
+
+  function timeAgoGreek(dt){
+    if(!dt)return '';
+    var diff=Math.floor((Date.now()-new Date(dt))/1000);
+    if(diff<60)return 'Μόλις τώρα';
+    if(diff<3600)return Math.floor(diff/60)+' λεπτά πριν';
+    if(diff<86400)return Math.floor(diff/3600)+' ώρ. πριν';
+    if(diff<604800)return Math.floor(diff/86400)+' μέρες πριν';
+    return fmtDate(dt);
+  }
+
+  window.notifClick=function(id, bookingId){
+    post({type:'MARK_NOTIFICATION_READ',notificationId:id});
+    var item=document.getElementById('notif-'+id);
+    if(item){item.classList.remove('unread');var dot=item.querySelector('.notif-unread-dot');if(dot)dot.remove();}
+    unreadCount=Math.max(0,unreadCount-1);
+    updateNotifBadge(unreadCount);
+    if(bookingId){showTab('bookings');loadBookings('all');}
+  };
+
+  window.deleteNotif=function(id){
+    post({type:'DELETE_NOTIFICATION',notificationId:id});
+    var item=document.getElementById('notif-'+id);
+    if(item)item.remove();
+    // update empty state if list is now empty
+    var list=document.querySelector('.notif-list');
+    if(list&&!list.children.length){
+      document.getElementById('notificationsContent').innerHTML=
+        '<div class="empty"><div class="empty-icon">🔔</div><h3>Δεν υπάρχουν ειδοποιήσεις</h3><p>Οι ειδοποιήσεις για κρατήσεις και loyalty θα εμφανιστούν εδώ.</p></div>';
+    }
+  };
+
+  window.readAllNotifs=function(){
+    post({type:'READ_ALL_NOTIFICATIONS'});
+    document.querySelectorAll('.notif-item.unread').forEach(function(el){
+      el.classList.remove('unread');
+      var dot=el.querySelector('.notif-unread-dot');if(dot)dot.remove();
+    });
+    updateNotifBadge(0);
+    var hdr=document.querySelector('.notif-header');
+    if(hdr)hdr.innerHTML='<div class="notif-header-title">Όλες διαβασμένες</div>';
+  };
+
+  /* ─── Support / Tickets ─────────────────────────────── */
+  var TCAT_LABELS={booking:'🚗 Κράτηση',payment:'💳 Πληρωμή',vehicle:'🔧 Όχημα',general:'💬 Γενικό'};
+  var TSTAT_LABELS={open:'Ανοιχτό',in_progress:'Σε εξέλιξη',resolved:'Επιλύθηκε',closed:'Κλειστό'};
+  var TSTAT_CLASS={open:'ts-open',in_progress:'ts-in_progress',resolved:'ts-resolved',closed:'ts-closed'};
+
+  function loadSupport(){
+    document.getElementById('supportContent').innerHTML='<div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div>';
+    post({type:'GET_MY_TICKETS'});
+  }
+
+  function renderTickets(list){
+    supportLoaded=true;
+    ticketsData={};
+    list.forEach(function(t){ticketsData[t._id]=t;});
+    var headerHtml=
+      '<div class="support-hero"><div class="support-hero-icon">🎫</div><div>'+
+        '<div class="support-hero-title">Υποστήριξη Πελατών</div>'+
+        '<div class="support-hero-sub">Διαχειριστείτε τα αιτήματά σας. Απαντάμε εντός 24 ωρών.</div>'+
+      '</div></div>'+
+      '<button class="new-ticket-btn" onclick="openNewTicket()">+ Νέο Αίτημα Υποστήριξης</button>';
+    if(!list.length){
+      document.getElementById('supportContent').innerHTML=
+        headerHtml+
+        '<div class="empty"><div class="empty-icon">💬</div>'+
+        '<h3>Δεν υπάρχουν αιτήματα</h3>'+
+        '<p>Δημιουργήστε ένα νέο αίτημα για βοήθεια.</p></div>';
+      return;
+    }
+    var cardsHtml=list.map(function(t){
+      var msgs=[];try{msgs=JSON.parse(t.messages||'[]');}catch(_){}
+      var last=msgs.length?msgs[msgs.length-1]:null;
+      var preview=last?String(last.text||'').slice(0,120):'';
+      var statusCls=TSTAT_CLASS[t.status]||'ts-closed';
+      var statusLbl=TSTAT_LABELS[t.status]||t.status||'—';
+      var catLbl=TCAT_LABELS[t.category]||t.category||'—';
+      return '<div class="ticket-card" onclick="openTicketDetail(\''+t._id+'\')">'+
+        '<div class="ticket-card-head">'+
+          '<div class="ticket-subject">'+esc(t.subject||'Αίτημα')+'</div>'+
+          '<span class="ticket-status '+statusCls+'">'+esc(statusLbl)+'</span>'+
+        '</div>'+
+        '<div class="ticket-meta">'+
+          '<span class="ticket-cat">'+esc(catLbl)+'</span>'+
+          '<span class="ticket-date">'+fmt(t._createdDate||t.createdAt||'')+'</span>'+
+        '</div>'+
+        (preview?'<div class="ticket-preview">'+esc(preview)+'</div>':'')+
+      '</div>';
+    }).join('');
+    document.getElementById('supportContent').innerHTML=headerHtml+'<div class="ticket-list">'+cardsHtml+'</div>';
+  }
+
+  window.openNewTicket=function(){
+    document.getElementById('newTicketSubject').value='';
+    document.getElementById('newTicketMsg').value='';
+    document.getElementById('newTicketCat').value='booking';
+    var e=document.getElementById('newTicketErr');e.textContent='';e.classList.remove('show');
+    setBusy('newTicketSubmitBtn',false,'📨 Αποστολή');
+    document.getElementById('newTicketModal').classList.remove('hidden');
+    setTimeout(function(){document.getElementById('newTicketSubject').focus();},80);
+  };
+
+  function closeNewTicketModal(){document.getElementById('newTicketModal').classList.add('hidden');}
+
+  function submitNewTicket(){
+    var subj=document.getElementById('newTicketSubject').value.trim();
+    var msg=document.getElementById('newTicketMsg').value.trim();
+    var cat=document.getElementById('newTicketCat').value;
+    var e=document.getElementById('newTicketErr');e.textContent='';e.classList.remove('show');
+    if(!subj){e.textContent='Παρακαλώ εισάγετε θέμα.';e.classList.add('show');return;}
+    if(!msg){e.textContent='Παρακαλώ εισάγετε μήνυμα.';e.classList.add('show');return;}
+    setBusy('newTicketSubmitBtn',true,'Αποστολή...');
+    post({type:'CREATE_TICKET',subject:subj,category:cat,message:msg});
+  }
+
+  window.openTicketDetail=function(id){
+    var t=ticketsData[id];
+    if(!t)return;
+    currentTicketId=id;
+    document.getElementById('ticketDetailSubject').textContent=t.subject||'Αίτημα';
+    document.getElementById('ticketDetailCat').textContent=TCAT_LABELS[t.category]||t.category||'—';
+    document.getElementById('ticketDetailStatus').textContent=TSTAT_LABELS[t.status]||t.status||'—';
+    var msgs=[];try{msgs=JSON.parse(t.messages||'[]');}catch(_){}
+    var threadHtml=msgs.map(function(m){
+      var isMember=m.sender==='member';
+      return '<div class="thread-msg '+(isMember?'msg-member':'msg-support')+'">'+
+        '<div class="msg-bubble">'+esc(m.text||'')+'</div>'+
+        '<div class="msg-meta">'+(isMember?'Εσείς':'Υποστήριξη Diamond')+' &middot; '+fmt(m.createdAt||'')+'</div>'+
+      '</div>';
+    }).join('');
+    var tw=document.getElementById('threadWrap');
+    tw.innerHTML=threadHtml||'<div style="text-align:center;color:#ccc;padding:20px;font-size:13px">Δεν υπάρχουν μηνύματα ακόμα.</div>';
+    setTimeout(function(){tw.scrollTop=tw.scrollHeight;},60);
+    var isClosed=t.status==='closed'||t.status==='resolved';
+    document.getElementById('threadReplyArea').classList.toggle('hidden',isClosed);
+    document.getElementById('threadClosedNote').classList.toggle('hidden',!isClosed);
+    document.getElementById('replyMsg').value='';
+    var re=document.getElementById('replyErr');re.textContent='';re.classList.remove('show');
+    setBusy('replySendBtn',false,'📨 Αποστολή μηνύματος');
+    document.getElementById('ticketDetailModal').classList.remove('hidden');
+  };
+
+  function closeTicketDetailModal(){document.getElementById('ticketDetailModal').classList.add('hidden');currentTicketId=null;}
+
+  function sendTicketReply(){
+    var msg=document.getElementById('replyMsg').value.trim();
+    var re=document.getElementById('replyErr');re.textContent='';re.classList.remove('show');
+    if(!msg){re.textContent='Παρακαλώ εισάγετε μήνυμα.';re.classList.add('show');return;}
+    if(!currentTicketId)return;
+    setBusy('replySendBtn',true,'Αποστολή...');
+    post({type:'REPLY_TO_TICKET',ticketId:currentTicketId,message:msg});
   }
 
   /* ─── Documents (vouchers from cached bookings) ─────── */
@@ -1135,6 +1459,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     else if(!document.getElementById('reviewModal').classList.contains('hidden'))closeReviewModal();
     else if(!document.getElementById('editProfileModal').classList.contains('hidden'))closeProfileModal();
     else if(!document.getElementById('voucherModal').classList.contains('hidden'))closeVoucher();
+    else if(!document.getElementById('newTicketModal').classList.contains('hidden'))closeNewTicketModal();
+    else if(!document.getElementById('ticketDetailModal').classList.contains('hidden'))closeTicketDetailModal();
   });
 
   /* ─── Window globals ─────────────────────────────────── */
@@ -1215,6 +1541,13 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   document.getElementById('voucherModalClose').addEventListener('click',closeVoucher);
   document.getElementById('voucherModal').addEventListener('click',function(e){if(e.target===this)closeVoucher();});
   document.getElementById('voucherPrintBtn').addEventListener('click',printVoucher);
+  document.getElementById('newTicketModalClose').addEventListener('click',closeNewTicketModal);
+  document.getElementById('newTicketCancelBtn').addEventListener('click',closeNewTicketModal);
+  document.getElementById('newTicketSubmitBtn').addEventListener('click',submitNewTicket);
+  document.getElementById('newTicketModal').addEventListener('click',function(e){if(e.target===this)closeNewTicketModal();});
+  document.getElementById('ticketDetailModalClose').addEventListener('click',closeTicketDetailModal);
+  document.getElementById('ticketDetailModal').addEventListener('click',function(e){if(e.target===this)closeTicketDetailModal();});
+  document.getElementById('replySendBtn').addEventListener('click',sendTicketReply);
   setupStars();
 
   /* ─── postMessage handler ────────────────────────────── */
@@ -1331,6 +1664,50 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
         extendedProfile.licenseExpiry=document.getElementById('editLicenseExp').value.trim();
         setTimeout(function(){closeProfileModal();profileLoaded=false;loadProfile();},1400);
       }else showErr('profileErr',berr(d.error));
+      return;
+    }
+
+    if(d.type==='MY_TICKETS'){
+      if(d.ok)renderTickets(d.tickets||[]);
+      else document.getElementById('supportContent').innerHTML=
+        '<div class="empty"><div class="empty-icon">⚠️</div><h3>Αδυναμία φόρτωσης</h3><p>Δοκιμάστε να ανανεώσετε τη σελίδα.</p></div>';
+      return;
+    }
+
+    if(d.type==='NEW_TICKET_RESULT'){
+      setBusy('newTicketSubmitBtn',false,'📨 Αποστολή');
+      if(d.ok){
+        closeNewTicketModal();
+        supportLoaded=false;
+        loadSupport();
+      }else{
+        var te=document.getElementById('newTicketErr');
+        te.textContent=berr(d.error||'server_error');te.classList.add('show');
+      }
+      return;
+    }
+
+    if(d.type==='TICKET_REPLY_RESULT'){
+      setBusy('replySendBtn',false,'📨 Αποστολή μηνύματος');
+      if(d.ok&&d.ticket){
+        ticketsData[d.ticket._id]=d.ticket;
+        closeTicketDetailModal();
+        supportLoaded=false;
+        loadSupport();
+      }else{
+        var rre=document.getElementById('replyErr');rre.textContent=berr(d.error||'server_error');rre.classList.add('show');
+      }
+      return;
+    }
+
+    if(d.type==='NOTIFICATIONS_RESULT'){
+      if(d.ok)renderNotifications(d.notifications||[]);
+      else document.getElementById('notificationsContent').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><h3>Αδυναμία φόρτωσης</h3><p>Βεβαιωθείτε ότι υπάρχει η συλλογή MemberNotifications στο Wix CMS.</p></div>';
+      return;
+    }
+
+    if(d.type==='NOTIFICATION_READ_RESULT'||d.type==='NOTIFICATIONS_READ_ALL_RESULT'||d.type==='NOTIFICATION_DELETE_RESULT'){
+      // UI already updated optimistically — nothing more to do
       return;
     }
   });
