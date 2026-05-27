@@ -508,6 +508,69 @@ html,body{overflow-x:hidden!important}
 @keyframes diamond-total-flash{0%{color:#f6e19f;transform:scale(1.07)}100%{color:inherit;transform:scale(1)}}
 .diamond-total-flash{animation:diamond-total-flash .4s ease-out}
 </style>
+<style>
+/* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
+/* DIAMOND MOBILE: Hamburger */
+.hamburger-btn{display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer;border-radius:8px;min-width:40px;min-height:40px;width:40px;height:40px;flex-shrink:0;transition:background .15s;padding:0;line-height:1}
+.hamburger-btn:hover,.hamburger-btn:focus-visible{background:rgba(255,255,255,.22);outline:none}
+.mobile-nav{overflow:hidden;max-height:0;transition:max-height .3s ease;background:rgba(20,40,48,.98);border-top:1px solid rgba(231,191,105,.12);width:100%}
+.mobile-nav.is-open{max-height:440px}
+.mobile-nav a{display:flex;align-items:center;color:rgba(255,255,255,.88);text-decoration:none;font-size:15px;font-weight:700;padding:0 22px;min-height:48px;border-bottom:1px solid rgba(255,255,255,.06);transition:background .12s}
+.mobile-nav a:last-child{border-bottom:none}
+.mobile-nav a:active,.mobile-nav a:hover{background:rgba(231,191,105,.09);color:#f6e19f}
+.header-phone-label{display:inline}
+@media(max-width:767px){
+  .header-nav{display:none!important}
+  .hamburger-btn{display:flex!important}
+  .brand-text span,.brand-text em{display:none}
+  .header-phone-label{display:none}
+  .header-phone{padding:9px 12px!important;min-width:40px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+}
+@media(prefers-reduced-motion:reduce){.mobile-nav{transition:none}}
+
+/* DIAMOND MOBILE: Compact hero card on mobile */
+@media(max-width:767px){
+  .hero-grid{grid-template-columns:1fr!important;gap:8px!important}
+  .vehicle-media{display:none!important} /* hide vehicle image on mobile */
+  .hero-side{min-width:0!important}
+  .rental-box{padding:10px 12px!important}
+  .hero-card{padding:10px 12px!important}
+  .title-line{flex-wrap:wrap!important}
+  /* Insurance full-width tappable cards */
+  .insurance-item{align-items:center!important;padding:14px!important;cursor:pointer!important;min-height:56px!important}
+  .insurance-item input[type="radio"]{width:20px;height:20px;flex-shrink:0}
+  /* Extras iOS-style rows */
+  .extra-item{display:flex!important;align-items:center!important;flex-direction:row!important;padding:12px 14px!important;min-height:52px!important;gap:10px!important}
+  .extra-item .item-content{flex:1!important;display:flex!important;align-items:center!important;gap:8px!important;min-width:0!important}
+  .extra-item .item-content .item-head{flex:1!important;display:flex!important;align-items:center!important;gap:8px!important}
+  .extra-item .item-content .item-detail{display:none!important} /* hide detail on mobile */
+  .extra-item input[type="checkbox"]{width:22px;height:22px;flex-shrink:0;order:99;margin-left:auto!important}
+  /* Choices grid single column */
+  .choices-grid{grid-template-columns:1fr!important}
+  /* Page bottom padding for fixed bar */
+  .page{padding-bottom:84px!important}
+}
+
+/* DIAMOND MOBILE: Fixed bottom summary bar */
+.mobile-summary-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:linear-gradient(180deg,rgba(20,40,48,.98),rgba(14,30,36,.99));border-top:2px solid rgba(231,191,105,.28);box-shadow:0 -4px 24px rgba(0,0,0,.32);padding:0}
+.mobile-summary-inner{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:10px}
+.mobile-summary-total{display:flex;flex-direction:column;gap:1px}
+.mobile-summary-label{font-size:11px;color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.mobile-summary-amount{font-size:24px;font-weight:950;color:#f6e19f;letter-spacing:-.02em}
+.mobile-summary-continue{background:linear-gradient(135deg,#c88a35,#e0a848)!important;color:#1a0e04!important;font-weight:900!important;border:none;border-radius:12px;padding:12px 22px;font-size:15px;cursor:pointer;font-family:inherit;min-height:44px;white-space:nowrap}
+.mobile-summary-expand{background:none;border:none;color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;padding:8px;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}
+.mobile-summary-expand:hover{color:#fff}
+@media(max-width:767px){
+  .mobile-summary-bar{display:block}
+  /* Hide the desktop summary card's continue button on mobile (we use the fixed bar) */
+  .summary-action{display:none!important}
+}
+
+/* DIAMOND LOADING: No-data guard banner */
+.no-data-banner{display:none;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.28);border-radius:12px;padding:14px 18px;color:#b83c2e;font-size:14px;font-weight:700;text-align:center;margin:0 0 16px}
+.no-data-banner.visible{display:block}
+.no-data-banner a{color:#b83c2e;font-weight:900}
+</style>
 
 </head>
 <body>
@@ -527,11 +590,35 @@ html,body{overflow-x:hidden!important}
         <a href="/rental-terms">Όροι ενοικίασης</a>
         <a href="/booking">Ολοκλήρωση</a>
       </nav>
-      <a class="header-phone" href="tel:+302310000000">+30 2310 000 000</a>
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Μενού" aria-expanded="false">☰</button>
+      <a class="header-phone" href="tel:+302310000000"><span aria-hidden="true">📞</span><span class="header-phone-label">+30 2310 000 000</span></a>
     </div>
+    <nav class="mobile-nav" id="mobileNav" aria-label="Κύρια πλοήγηση">
+      <a href="/">Αρχική</a>
+      <a href="/categories">Οχήματα</a>
+      <a href="/options">Ασφάλειες &amp; extras</a>
+      <a href="/rental-terms">Όροι ενοικίασης</a>
+      <a href="/booking">Ολοκλήρωση</a>
+    </nav>
   </header>
 
+  <!-- DIAMOND MOBILE: Fixed bottom summary bar -->
+  <div class="mobile-summary-bar" id="mobileSummaryBar">
+    <div class="mobile-summary-inner">
+      <button class="mobile-summary-expand" id="mobileSummaryExpand" aria-label="Εμφάνιση ανάλυσης" title="Εμφάνιση ανάλυσης">⌃</button>
+      <div class="mobile-summary-total">
+        <span class="mobile-summary-label">Σύνολο</span>
+        <span class="mobile-summary-amount" id="mobileTotalAmount">0,00€</span>
+      </div>
+      <button class="mobile-summary-continue" id="mobileContinueBtn" type="button">Συνέχεια →</button>
+    </div>
+  </div>
+
   <div class="page">
+    <!-- DIAMOND LOADING: No-data guard -->
+    <div class="no-data-banner" id="noDataBanner">
+      Παρακαλώ επιλέξτε πρώτα ένα <a href="/categories">όχημα</a>.
+    </div>
     <section class="hero-card">
       <div class="hero-grid">
         <div class="vehicle-media">
@@ -1598,6 +1685,102 @@ function notifyHeight(){
   try { if (window.frameElement) window.frameElement.style.height = h + 'px'; } catch (e) {}
   try { parent.postMessage({ type:'wix-booking-height', height:h }, '*'); } catch (e) {}
 }
+
+// DIAMOND LOADING: No-data guard — check BookingState has vehicle selection
+(function(){
+  try{
+    if(!window.BookingState) return;
+    var bs = BookingState.getAll();
+    var hasVehicle = !!(bs.vehicleCategory || bs.basePrice);
+    if(!hasVehicle){
+      var banner = document.getElementById('noDataBanner');
+      if(banner) banner.classList.add('visible');
+      var choicesCard = document.querySelector('.choices-card');
+      if(choicesCard) choicesCard.style.display = 'none';
+      var heroCard = document.querySelector('.hero-card');
+      if(heroCard) heroCard.style.display = 'none';
+      var summaryCard = document.querySelector('.summary-card');
+      if(summaryCard) summaryCard.style.display = 'none';
+    }
+  }catch(_){}
+})();
+
+// DIAMOND MOBILE: Fixed bottom summary bar sync with grand total
+(function(){
+  var mobileTotal = document.getElementById('mobileTotalAmount');
+  var mobileContinue = document.getElementById('mobileContinueBtn');
+  var desktopContinue = document.getElementById('continueBtn');
+  var expandBtn = document.getElementById('mobileSummaryExpand');
+  var summaryCard = document.querySelector('.summary-card');
+
+  function syncMobileTotal(){
+    var gt = document.getElementById('grandTotal');
+    if(mobileTotal && gt) mobileTotal.textContent = gt.textContent;
+  }
+
+  // Sync on every updateTotals call by observing the grandTotal element
+  if(typeof MutationObserver !== 'undefined'){
+    var gt = document.getElementById('grandTotal');
+    if(gt){
+      new MutationObserver(syncMobileTotal).observe(gt, {characterData:true, subtree:true, childList:true});
+    }
+  }
+
+  // Mobile continue button mirrors the desktop continue button
+  if(mobileContinue && desktopContinue){
+    mobileContinue.addEventListener('click', function(){
+      desktopContinue.click();
+    });
+  }
+
+  // Expand to show full summary card
+  if(expandBtn && summaryCard){
+    expandBtn.addEventListener('click', function(){
+      summaryCard.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  }
+
+  // Adjust page bottom padding to match fixed bar height
+  var bar = document.getElementById('mobileSummaryBar');
+  function adjustPadding(){
+    if(!bar) return;
+    var h = bar.offsetHeight;
+    var page = document.querySelector('.page');
+    if(page && window.innerWidth < 768) page.style.paddingBottom = (h + 8) + 'px';
+    else if(page) page.style.paddingBottom = '';
+  }
+  window.addEventListener('resize', adjustPadding);
+  window.addEventListener('load', adjustPadding);
+  setTimeout(adjustPadding, 100);
+  syncMobileTotal();
+})();
+
+// DIAMOND MOBILE: Hamburger menu toggle
+(function(){
+  var btn=document.getElementById('hamburgerBtn');
+  var nav=document.getElementById('mobileNav');
+  if(!btn||!nav)return;
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=nav.classList.toggle('is-open');
+    btn.textContent=open?'✕':'☰';
+    btn.setAttribute('aria-expanded',String(open));
+  });
+  document.addEventListener('click',function(e){
+    if(nav.classList.contains('is-open')&&!nav.contains(e.target)&&e.target!==btn){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    }
+  });
+  Array.from(nav.querySelectorAll('a')).forEach(function(a){
+    a.addEventListener('click',function(){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    });
+  });
+})();
 
 window.addEventListener('pageshow', () => {
   try { renderPricingChoices(); } catch (e) {}
