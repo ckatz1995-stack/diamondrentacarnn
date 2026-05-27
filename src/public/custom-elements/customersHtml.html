@@ -316,7 +316,8 @@ const state = {
   bookings: [], tickets: [],
   selectedTicketId: null,
   activeTab: 'profile',
-  editingProfile: false
+  editingProfile: false,
+  initialLoadDone: false
 };
 
 function postToWix(msg) {
@@ -340,11 +341,10 @@ function dispatch(msg) {
       if (msg.permissions) state.permissions = msg.permissions;
       updateTopbar();
       setTabsEnabled();
-      if (msg.type === 'authState') postToWix({ type: 'searchCustomers', q: '', limit: 40, skip: 0 });
-      break;
-
-    case 'customersReady':
-      postToWix({ type: 'requestUserContext' });
+      if (!state.initialLoadDone) {
+        state.initialLoadDone = true;
+        postToWix({ type: 'searchCustomers', q: '', limit: 40, skip: 0 });
+      }
       break;
 
     case 'customersResult':

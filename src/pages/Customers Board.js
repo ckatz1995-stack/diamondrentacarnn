@@ -21,7 +21,7 @@ function logErr(ctx, err) {
 }
 
 $w.onReady(async function () {
-  authState = await requireBackroomAccess({ area: 'customers', action: 'View' });
+  authState = await requireBackroomAccess({ area: '', action: 'View' });
   if (!authState?.ok) return;
 
   collapseHtmlSiblings($w, [HTML_ID]);
@@ -35,8 +35,9 @@ $w.onReady(async function () {
     const msg = normalizeBridgeMessage(event && event.data);
     if (!msg || typeof msg !== 'object' || !msg.type) return;
 
-    if (msg.type === 'requestUserContext') {
+    if (msg.type === 'customersReady' || msg.type === 'requestUserContext') {
       post(buildUserContext(authState));
+      if (msg.type === 'customersReady') await loadInitialCustomers();
       return;
     }
 
@@ -155,8 +156,18 @@ $w.onReady(async function () {
   });
 
   post(buildUserContext(authState));
-  post({ type: 'resume' });
+  await loadInitialCustomers();
 });
+
+async function loadInitialCustomers() {
+  try {
+    const res = await searchCustomers({ authToken: authState.sessionToken, q: '', limit: 40, skip: 0 });
+    post({ type: 'customersResult', ...res });
+  } catch (err) {
+    logErr('loadInitialCustomers', err);
+    post({ type: 'customersResult', ok: false, items: [], total: 0 });
+  }
+}
 
 function post(payload) {
   const html = getHtml();
