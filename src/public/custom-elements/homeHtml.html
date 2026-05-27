@@ -142,6 +142,7 @@
             <button class="tab" data-route="daily" type="button">Daily</button>
             <button class="tab" data-route="fleet" type="button">Fleet</button>
             <button class="tab" data-route="bookings" type="button">Bookings</button>
+            <button class="tab" data-route="customers" type="button">Customers</button>
             <button class="tab" data-route="settings" type="button">Settings</button>
           </div>
         </div></div>
@@ -285,6 +286,7 @@
           <div class="section" data-route-card="daily"><div class="sectionTitle">Daily View</div><div class="sectionText">Check-outs, check-ins και γρήγορο άνοιγμα συμβολαίων.</div></div>
           <div class="section" data-route-card="fleet"><div class="sectionTitle">Fleet Chart</div><div class="sectionText">Αναθέσεις οχημάτων, auto-assign και καθαρό οπτικό calendar.</div></div>
           <div class="section" data-route-card="bookings"><div class="sectionTitle">Bookings Board</div><div class="sectionText">Status, rental state και κεντρικός έλεγχος κρατήσεων.</div></div>
+          <div class="section" data-route-card="customers"><div class="sectionTitle">Customers</div><div class="sectionText">Customer cards, 16-field profiles, support tickets και member notifications.</div></div>
         <div class="section" data-route-card="settings"><div class="sectionTitle">Settings</div><div class="sectionText">Pricing catalog, users, roles, sessions και audit σε ένα private console.</div></div></div>
         <div class="footerNote" style="margin-top:12px">Στο πρώτο admin bootstrap login χρησιμοποίησε το προσωρινό password του setup και μετά όρισε μόνιμα credentials για τους χρήστες.</div>
       </div>
@@ -317,7 +319,7 @@ function readHandoffQueue(){ try{ const raw=JSON.parse(localStorage.getItem(HAND
 function readSavedViews(){ try{ const raw=JSON.parse(localStorage.getItem(SAVED_VIEWS_KEY)||'[]'); return Array.isArray(raw)?raw.filter(item=>item&&typeof item==='object'):[]; }catch(_){ return []; } }
 function readSnapshot(key){ try{ const raw=JSON.parse(localStorage.getItem(key)||'null'); return raw&&typeof raw==='object'?raw:null; }catch(_){ return null; } }
 function escapeHtml(value){ return String(value ?? '').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
-function permissionKey(route){ if(route==='daily') return 'rentalsView'; if(route==='fleet') return 'fleetView'; if(route==='bookings') return 'bookingsView'; if(route==='pricing' || route==='settings') return 'pricingView'; return ''; }
+function permissionKey(route){ if(route==='daily') return 'rentalsView'; if(route==='fleet') return 'fleetView'; if(route==='bookings') return 'bookingsView'; if(route==='customers') return 'customersView'; if(route==='pricing' || route==='settings') return 'pricingView'; return ''; }
 function canAccessRoute(route){ if(route==='home') return true; if(!state.authenticated) return false; const key=permissionKey(route); if(!key) return true; return !!((state.permissions||{})[key]); }
 function formatResumeTime(iso){ try{ const d=new Date(iso); if(isNaN(d.getTime())) return 'Πρόσφατο'; return d.toLocaleString('el-GR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}); }catch(_){ return 'Πρόσφατο'; } }
 
