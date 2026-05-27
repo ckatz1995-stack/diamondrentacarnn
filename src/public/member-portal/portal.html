@@ -2,11 +2,13 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ο Λογαριασμός μου</title>
+<title>Ο Λογαριασμός μου | Diamond Rent A Car</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0eb;color:#1f1a13;min-height:100vh;font-size:14px}
 .hidden{display:none!important}
+
+/* ── Loading / Error ── */
 #loadingScreen{position:fixed;inset:0;background:#f2f0eb;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:99}
 .loader-ring{width:44px;height:44px;border:3px solid #e0ddd5;border-top-color:#3f748a;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -15,35 +17,53 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 #errorScreen h2{font-size:18px;color:#1f1a13}
 #errorScreen p{font-size:13px;color:#999;max-width:260px;line-height:1.5}
 .retry-btn{margin-top:8px;background:#3f748a;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+
+/* ── Header ── */
 #hdr{background:linear-gradient(135deg,#1a1510 0%,#2a3d47 100%);color:#fff;padding:20px 20px 0}
 #hdrTop{display:flex;align-items:center;gap:14px;margin-bottom:18px}
 #avatar{width:50px;height:50px;border-radius:50%;background:#e7bf69;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#1f1a13;flex-shrink:0;border:2px solid rgba(255,255,255,.15)}
+#memberInfo{flex:1;min-width:0}
 #greeting{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:2px}
 #memberName{font-size:17px;font-weight:900;display:block}
 #memberEmail{font-size:12px;color:rgba(255,255,255,.4);display:block;margin-top:1px}
 #statsRow{display:flex;border-top:1px solid rgba(255,255,255,.08);margin:0 -20px}
-.stat{flex:1;padding:12px 16px;text-align:center;border-right:1px solid rgba(255,255,255,.08)}
+.stat{flex:1;padding:12px 8px;text-align:center;border-right:1px solid rgba(255,255,255,.08);cursor:default}
 .stat:last-child{border:none}
-.stat-val{font-size:20px;font-weight:900;color:#e7bf69;display:block}
-.stat-lbl{font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;display:block}
-#tabBar{display:flex;background:#fff;border-bottom:2px solid #e8e4da;padding:0 20px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.tab{background:none;border:none;border-bottom:2.5px solid transparent;margin-bottom:-2px;padding:14px 18px;font-size:14px;font-weight:700;color:#aaa;cursor:pointer;transition:color .18s,border-color .18s;font-family:inherit;white-space:nowrap}
+.stat-val{font-size:18px;font-weight:900;color:#e7bf69;display:block}
+.stat-lbl{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;display:block}
+.stat.clickable{cursor:pointer;transition:background .15s}
+.stat.clickable:hover{background:rgba(255,255,255,.07)}
+
+/* ── Tab bar ── */
+#tabBar{display:flex;background:#fff;border-bottom:2px solid #e8e4da;padding:0 4px;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#tabBar::-webkit-scrollbar{display:none}
+.tab{background:none;border:none;border-bottom:2.5px solid transparent;margin-bottom:-2px;padding:13px 14px;font-size:13px;font-weight:700;color:#aaa;cursor:pointer;transition:color .18s,border-color .18s;font-family:inherit;white-space:nowrap;flex-shrink:0}
 .tab.active{color:#3f748a;border-bottom-color:#3f748a}
 .tab:hover:not(.active){color:#555}
+
+/* ── Content ── */
 #content{padding:20px 16px 56px;max-width:720px;margin:0 auto}
+
+/* ── Next trip banner ── */
 .next-trip{background:linear-gradient(135deg,#2a3d47,#3f748a);border-radius:14px;padding:16px 20px;margin-bottom:20px;border:1px solid rgba(255,255,255,.1)}
 .nt-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);margin-bottom:8px}
 .nt-vehicle{font-size:16px;font-weight:900;color:#fff;margin-bottom:6px}
 .nt-meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:rgba(255,255,255,.7);align-items:center}
 .nt-countdown{margin-left:auto;font-size:19px;font-weight:900;color:#e7bf69;white-space:nowrap}
+
+/* ── Filter chips ── */
 #filterBar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .chip{background:#fff;border:1.5px solid #ddd8cc;color:#777;font-size:13px;font-weight:700;padding:7px 16px;border-radius:999px;cursor:pointer;transition:all .18s;font-family:inherit}
 .chip.active{background:#3f748a;border-color:#3f748a;color:#fff}
 .chip:hover:not(.active){border-color:#3f748a;color:#3f748a}
+
+/* ── New booking CTA ── */
 #newBookingCta{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;padding:14px 18px;margin-bottom:16px;cursor:pointer;border:1.5px dashed #ccc;width:100%;font-family:inherit;text-align:left;transition:border-color .18s}
 #newBookingCta:hover{border-color:#3f748a}
 #newBookingCta strong{font-size:14px;color:#3f748a;display:block}
 #newBookingCta span{font-size:12px;color:#bbb;margin-top:2px;display:block}
+
+/* ── Booking cards ── */
 .bk-card{background:#fff;border-radius:14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);overflow:hidden}
 .bk-summary{padding:18px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;-webkit-tap-highlight-color:transparent}
 .bk-summary:hover{background:#fafaf8}
@@ -83,13 +103,16 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 .btn-voucher{background:#eef0ff;color:#3a5fd4;border:none;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
 .btn-voucher:hover{background:#dce2ff}
 .review-given{background:#fefce8;border-radius:8px;padding:10px 14px;font-size:13px;color:#a07000;margin-top:10px;border:1px solid #fde68a;display:flex;align-items:center;gap:6px}
+
+/* ── Spinners / empty ── */
 .spin{display:flex;flex-direction:column;align-items:center;gap:10px;padding:56px 24px;color:#ccc}
 .spin-ring{width:32px;height:32px;border:2.5px solid #e0ddd5;border-top-color:#3f748a;border-radius:50%;animation:spin .8s linear infinite}
 .empty{text-align:center;padding:56px 24px 40px}
 .empty-icon{font-size:48px;margin-bottom:12px;opacity:.3}
 .empty h3{font-size:15px;font-weight:700;color:#aaa;margin-bottom:6px}
 .empty p{font-size:13px;color:#ccc}
-/* Profile */
+
+/* ── Profile ── */
 .profile-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:14px}
 .profile-banner{background:linear-gradient(135deg,#1a1510 0%,#2a3d47 100%);padding:28px 24px 22px;display:flex;flex-direction:column;align-items:center;gap:10px}
 .profile-av-lg{width:68px;height:68px;border-radius:50%;background:#e7bf69;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#1f1a13}
@@ -110,7 +133,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 .profile-actions{display:flex;gap:10px;padding:4px 20px 20px}
 .btn-profile-edit{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#eef6fa;color:#3f748a;border:none;padding:12px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
 .btn-profile-edit:hover{background:#d8edf5}
-/* Modals */
+
+/* ── Modals ── */
 .mover{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:1000;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(3px)}
 @media(min-width:500px){.mover{align-items:center;padding:16px}}
 .mbox{background:#fff;border-radius:20px 20px 0 0;padding:28px 22px 32px;width:100%;max-width:460px;position:relative;max-height:92vh;overflow-y:auto}
@@ -141,12 +165,14 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 .mbtn-ghost{flex:1;background:#f4f2ee;color:#555;border:none;padding:14px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .18s}
 .mbtn-ghost:hover{background:#e8e4da}
 .cancel-warn{background:#fff8f0;border:1px solid #ffd0a0;border-radius:10px;padding:12px 14px;font-size:13px;color:#8a5000;margin-bottom:16px;line-height:1.5}
-/* Stars */
+
+/* ── Stars ── */
 .star-row{display:flex;gap:8px;font-size:32px;cursor:pointer;margin:8px 0 20px;justify-content:center}
 .star{color:#e0ddd5;transition:color .12s;user-select:none;line-height:1}
 .star.on,.star.hov{color:#e7bf69}
 .rating-lbl{text-align:center;font-size:13px;color:#999;margin-top:-12px;margin-bottom:16px;min-height:18px}
-/* Voucher modal */
+
+/* ── Voucher modal ── */
 #voucherModal .mbox{max-width:540px}
 .voucher-box{padding:4px 0 16px}
 .voucher-logo{font-size:20px;font-weight:900;color:#1a1510;margin-bottom:2px}
@@ -160,14 +186,81 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 .voucher-footer{font-size:11px;color:#ccc;text-align:center;margin-top:12px;line-height:1.5}
 .voucher-print-btn{width:100%;background:#3f748a;color:#fff;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:14px;transition:background .18s}
 .voucher-print-btn:hover{background:#2d6072}
-/* Print */
-@media print{
-  body > *:not(#printArea){display:none!important}
-  #printArea{display:block!important;position:fixed;inset:0;background:#fff;padding:32px;z-index:99999}
-  #printArea .voucher-box{max-width:100%}
-}
+@media print{body > *:not(#printArea){display:none!important}#printArea{display:block!important;position:fixed;inset:0;background:#fff;padding:32px;z-index:99999}}
 #printArea{display:none}
-@media(max-width:480px){.bk-det-grid{grid-template-columns:1fr}.tab{padding:14px 12px;font-size:13px}.voucher-grid{grid-template-columns:1fr}}
+
+/* ── Analytics panel ── */
+.analytics-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.an-card{background:#fff;border-radius:14px;padding:18px 16px;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.04)}
+.an-icon{font-size:24px;margin-bottom:8px}
+.an-val{font-size:22px;font-weight:900;color:#1f1a13;margin-bottom:4px}
+.an-lbl{font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.section-title{font-size:13px;font-weight:800;color:#3f748a;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+.chart-wrap{background:#fff;border-radius:14px;padding:18px 16px;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.04);margin-bottom:20px}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:8px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-fill{width:100%;background:linear-gradient(180deg,#3f748a,#2a3d47);border-radius:4px 4px 0 0;transition:height .4s;min-height:2px}
+.bar-label{font-size:9px;color:#aaa;font-weight:600;text-align:center;transform:rotate(-30deg);transform-origin:top center;margin-top:4px;white-space:nowrap}
+.bar-val{font-size:9px;color:#3f748a;font-weight:700}
+.cat-list{background:#fff;border-radius:14px;padding:6px 0;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.04);margin-bottom:20px}
+.cat-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f2f0eb}
+.cat-row:last-child{border:none}
+.cat-bar-bg{flex:1;height:6px;background:#f0ece3;border-radius:999px;overflow:hidden}
+.cat-bar-fill{height:100%;background:#3f748a;border-radius:999px}
+.cat-name{font-size:13px;font-weight:700;color:#1f1a13;min-width:100px}
+.cat-count{font-size:12px;color:#aaa;min-width:40px;text-align:right}
+
+/* ── Loyalty panel ── */
+.loyalty-hero{background:linear-gradient(135deg,#1a1510 0%,#2a3d47 100%);border-radius:16px;padding:28px 24px;margin-bottom:20px;text-align:center;color:#fff}
+.loyalty-pts{font-size:52px;font-weight:900;color:#e7bf69;line-height:1}
+.loyalty-pts-lbl{font-size:13px;color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:16px}
+.loyalty-tier-name{font-size:16px;font-weight:800;margin-bottom:8px}
+.loyalty-progress-bg{height:8px;background:rgba(255,255,255,.15);border-radius:999px;overflow:hidden;margin-bottom:6px}
+.loyalty-progress-fill{height:100%;background:linear-gradient(90deg,#e7bf69,#c8960a);border-radius:999px;transition:width .6s}
+.loyalty-progress-labels{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.4)}
+.tier-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.tier-card{background:#fff;border-radius:12px;padding:14px 12px;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.04)}
+.tier-card.active-tier{border-color:#3f748a;box-shadow:0 0 0 2px #3f748a22}
+.tier-card-name{font-size:13px;font-weight:800;margin-bottom:6px}
+.tier-card-req{font-size:11px;color:#aaa;margin-bottom:8px}
+.tier-benefit{font-size:12px;color:#555;padding:2px 0;line-height:1.4}
+.pts-history{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.04)}
+.pts-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #f2f0eb}
+.pts-row:last-child{border:none}
+.pts-icon{font-size:18px;width:32px;text-align:center;flex-shrink:0}
+.pts-desc{flex:1;min-width:0}
+.pts-desc-main{font-size:13px;font-weight:600;color:#1f1a13}
+.pts-desc-date{font-size:11px;color:#aaa;margin-top:2px}
+.pts-amount{font-size:14px;font-weight:800;white-space:nowrap}
+.pts-earned{color:#1a7a45}
+.pts-redeemed{color:#b83c2e}
+
+/* ── Payments panel ── */
+.pay-summary-card{background:linear-gradient(135deg,#1a1510,#2a3d47);border-radius:14px;padding:20px;margin-bottom:20px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.pay-summary-lbl{font-size:11px;color:rgba(255,255,255,.5);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.pay-summary-val{font-size:24px;font-weight:900;color:#e7bf69}
+.pay-list{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.04)}
+.pay-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f2f0eb}
+.pay-row:last-child{border:none}
+.pay-row-left{flex:1;min-width:0}
+.pay-bk-num{font-size:13px;font-weight:700;color:#1f1a13}
+.pay-vehicle{font-size:12px;color:#aaa;margin-top:2px}
+.pay-date{font-size:11px;color:#bbb;margin-top:2px}
+.pay-row-right{text-align:right;flex-shrink:0}
+.pay-amount{font-size:15px;font-weight:900;color:#3f748a}
+.pay-status{font-size:11px;padding:2px 8px;border-radius:999px;margin-top:4px;display:inline-block}
+.pay-paid{background:#e3f5e8;color:#1a7a45;font-weight:700}
+.pay-refunded{background:#fef2f0;color:#b83c2e;font-weight:700}
+.btn-invoice{background:#eef0ff;color:#3a5fd4;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;transition:background .15s}
+.btn-invoice:hover{background:#dce2ff}
+
+@media(max-width:480px){
+  .bk-det-grid{grid-template-columns:1fr}
+  .tab{padding:13px 10px;font-size:12px}
+  .voucher-grid{grid-template-columns:1fr}
+  .analytics-stats{grid-template-columns:repeat(2,1fr)}
+  .tier-cards{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
@@ -190,7 +283,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   <div id="hdr">
     <div id="hdrTop">
       <div id="avatar">?</div>
-      <div>
+      <div id="memberInfo">
         <div id="greeting">Καλώς ήρθατε,</div>
         <strong id="memberName">—</strong>
         <span id="memberEmail"></span>
@@ -200,13 +293,21 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       <div class="stat"><span class="stat-val" id="statTotal">—</span><span class="stat-lbl">Κρατήσεις</span></div>
       <div class="stat"><span class="stat-val" id="statUpcoming">—</span><span class="stat-lbl">Επερχόμενες</span></div>
       <div class="stat"><span class="stat-val" id="statCompleted">—</span><span class="stat-lbl">Ολοκληρωμένες</span></div>
+      <div class="stat clickable" id="statLoyaltyCell" title="Δείτε Loyalty"><span class="stat-val" id="statLoyalty">—</span><span class="stat-lbl">Πόντοι</span></div>
     </div>
   </div>
+
   <div id="tabBar">
-    <button class="tab active" data-tab="bookings">📋 Κρατήσεις μου</button>
+    <button class="tab active" data-tab="bookings">📋 Κρατήσεις</button>
+    <button class="tab" data-tab="analytics">📊 Ανάλυση</button>
+    <button class="tab" data-tab="payments">💳 Πληρωμές</button>
+    <button class="tab" data-tab="loyalty">🏆 Loyalty</button>
     <button class="tab" data-tab="profile">👤 Προφίλ</button>
   </div>
+
   <div id="content">
+
+    <!-- Bookings panel -->
     <div id="panelBookings">
       <div id="nextTripBanner" class="next-trip hidden">
         <div class="nt-label">✈️ Επόμενη κράτησή σας</div>
@@ -215,6 +316,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       </div>
       <button id="newBookingCta" type="button">
         <div><strong>+ Νέα Κράτηση</strong><span>Κλείστε το επόμενο αυτοκίνητό σας</span></div>
+        <span style="font-size:20px;color:#bbb">→</span>
       </button>
       <div id="filterBar">
         <button class="chip active" data-filter="all">Όλες</button>
@@ -223,11 +325,29 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       </div>
       <div id="bookingsList"><div class="spin"><div class="spin-ring"></div><span>Φόρτωση κρατήσεων...</span></div></div>
     </div>
+
+    <!-- Analytics panel -->
+    <div id="panelAnalytics" class="hidden">
+      <div id="analyticsContent"><div class="spin"><div class="spin-ring"></div><span>Υπολογισμός...</span></div></div>
+    </div>
+
+    <!-- Payments panel -->
+    <div id="panelPayments" class="hidden">
+      <div id="paymentsContent"><div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div></div>
+    </div>
+
+    <!-- Loyalty panel -->
+    <div id="panelLoyalty" class="hidden">
+      <div id="loyaltyContent"><div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div></div>
+    </div>
+
+    <!-- Profile panel -->
     <div id="panelProfile" class="hidden">
       <div id="profileContent"><div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div></div>
     </div>
-  </div>
-</div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
 
 <!-- Edit Booking Modal -->
 <div class="mover hidden" id="editModal">
@@ -255,7 +375,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     <button class="mclose" id="cancelModalClose">✕</button>
     <h3>Ακύρωση Κράτησης</h3>
     <p class="msub" id="cancelModalSub"></p>
-    <div class="cancel-warn">⚠️ Αυτή η ενέργεια <strong>δεν μπορεί να αναιρεθεί</strong>. Η κράτηση θα ακυρωθεί οριστικά.</div>
+    <div class="cancel-warn" id="cancelPolicyBox">⚠️ Αυτή η ενέργεια <strong>δεν μπορεί να αναιρεθεί</strong>.</div>
     <div class="merr" id="cancelErr"></div>
     <div class="mrow"><label>Λόγος ακύρωσης (προαιρετικό)</label><textarea id="cancelReason" placeholder="π.χ. Αλλαγή πλάνων..."></textarea></div>
     <div class="mbtn-row">
@@ -292,10 +412,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     <div class="merr" id="reviewErr"></div>
     <div class="mok" id="reviewOk">✅ Ευχαριστούμε για την αξιολόγησή σας!</div>
     <div class="star-row" id="ratingStars">
-      <span class="star" data-v="1">★</span>
-      <span class="star" data-v="2">★</span>
-      <span class="star" data-v="3">★</span>
-      <span class="star" data-v="4">★</span>
+      <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span>
+      <span class="star" data-v="3">★</span><span class="star" data-v="4">★</span>
       <span class="star" data-v="5">★</span>
     </div>
     <div class="rating-lbl" id="ratingLbl">Επιλέξτε βαθμολογία</div>
@@ -319,7 +437,14 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     <div class="mrow"><label>Επώνυμο</label><input type="text" id="editLast" autocomplete="family-name"/></div>
     <div class="mrow"><label>Τηλέφωνο</label><input type="tel" id="editPhone" autocomplete="tel" placeholder="π.χ. +30 694 0000000"/></div>
     <div class="msect">Στοιχεία Οδηγού</div>
-    <div class="mrow"><label>Κατηγορία ηλικίας οδηγού</label><select id="editDriverAge"><option value="">— επιλέξτε —</option><option value="19-22">19-22 (επασφάλιστρο νέου)</option><option value="23-69">23-69 (κανονική)</option><option value="70+">70+ (επασφάλιστρο)</option></select></div>
+    <div class="mrow"><label>Κατηγορία ηλικίας οδηγού</label>
+      <select id="editDriverAge">
+        <option value="">— επιλέξτε —</option>
+        <option value="19-22">19–22 (επασφάλιστρο νέου)</option>
+        <option value="23-69">23–69 (κανονική)</option>
+        <option value="70+">70+ (επασφάλιστρο)</option>
+      </select>
+    </div>
     <div class="mrow"><label>Εθνικότητα</label><input type="text" id="editNationality" placeholder="π.χ. Ελληνική"/></div>
     <div class="mrow"><label>Αριθμός Άδειας Οδήγησης</label><input type="text" id="editLicenseNum" autocomplete="off"/></div>
     <div class="mrow"><label>Λήξη Άδειας Οδήγησης</label><input type="date" id="editLicenseExp"/></div>
@@ -341,29 +466,41 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 
 <script>
 (function(){
-  var currentFilter='all',profileLoaded=false,locations=[],allBookingData={};
-  var bookingForEdit=null,bookingForCancel=null,bookingForExtend=null,bookingForReview=null;
-  var memberProfile=null,extendedProfile=null,voucherBooking=null;
-  var initTimer=null,currentRating=0,completedCount=0;
-  var editIgnoreConflict=false,extendIgnoreConflict=false;
+  'use strict';
 
+  /* ─── State ─────────────────────────────────────────── */
+  var currentFilter='all', profileLoaded=false, locations=[], allBookingData={};
+  var bookingForEdit=null, bookingForCancel=null, bookingForExtend=null, bookingForReview=null;
+  var memberProfile=null, extendedProfile=null, voucherBooking=null;
+  var initTimer=null, currentRating=0, completedCount=0;
+  var editIgnoreConflict=false, extendIgnoreConflict=false;
+  var allBookingsCache=[], analyticsBuilt=false, paymentsBuilt=false, loyaltyBuilt=false;
+  var currentTab='bookings';
+
+  /* ─── postMessage ────────────────────────────────────── */
   function post(msg){try{window.parent.postMessage(msg,'*');}catch(_){}}
+
+  /* ─── Helpers ────────────────────────────────────────── */
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-  function fmt(dt){if(!dt)return '—';try{return new Date(dt).toLocaleDateString('el-GR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(_){return dt;}}
+  function fmt(dt){if(!dt)return '—';try{return new Date(dt).toLocaleString('el-GR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(_){return dt;}}
   function fmtDate(dt){if(!dt)return '—';try{return new Date(dt).toLocaleDateString('el-GR',{day:'2-digit',month:'long',year:'numeric'});}catch(_){return dt;}}
-  function fmtShort(dt){if(!dt)return '—';try{return new Date(dt).toLocaleDateString('el-GR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(_){return dt;}}
+  function fmtShort(dt){if(!dt)return '—';try{return new Date(dt).toLocaleString('el-GR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(_){return dt;}}
+  function fmtMon(dt){if(!dt)return '—';try{return new Date(dt).toLocaleDateString('el-GR',{month:'short',year:'2-digit'});}catch(_){return '';}}
   function toDatetimeLocal(iso){if(!iso)return '';try{var d=new Date(iso),off=d.getTimezoneOffset()*60000;return new Date(d-off).toISOString().slice(0,16);}catch(_){return '';}}
   function initials(n){if(!n)return '?';var p=n.trim().split(/\s+/).filter(Boolean);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(p[0]||'?')[0].toUpperCase();}
+  function fmtEUR(n){return Number(n||0).toLocaleString('el-GR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
+  function daysBetween(a,b){return Math.max(0,Math.round((new Date(b)-new Date(a))/86400000));}
 
   var SLABELS={Confirmed:'Επιβεβαιωμένη',Active:'Ενεργή',Pending:'Σε αναμονή',Canceled:'Ακυρωμένη',Completed:'Ολοκληρωμένη'};
   var SCLASS={confirmed:'s-confirmed',active:'s-active',pending:'s-pending',canceled:'s-canceled',cancelled:'s-canceled',completed:'s-completed'};
   function sLabel(s){return SLABELS[s]||s||'—';}
   function sClass(s){return SCLASS[(s||'').toLowerCase()]||'s-default';}
-  var BERR={already_canceled:'Αυτή η κράτηση είναι ήδη ακυρωμένη.',pickup_passed:'Δεν γίνεται ακύρωση — η ημερομηνία παραλαβής έχει παρέλθει.',booking_passed:'Η κράτηση έχει ήδη ολοκληρωθεί.',invalid_dates:'Η ημερομηνία επιστροφής πρέπει να είναι μετά την παραλαβή.',no_changes:'Δεν εντοπίστηκαν αλλαγές.',unauthorized:'Δεν έχετε πρόσβαση σε αυτή την κράτηση.',not_found:'Η κράτηση δεν βρέθηκε.',update_failed:'Αποτυχία αποθήκευσης. Δοκιμάστε ξανά.',server_error:'Σφάλμα διακομιστή. Δοκιμάστε ξανά.'};
+
+  var BERR={already_canceled:'Η κράτηση είναι ήδη ακυρωμένη.',pickup_passed:'Δεν γίνεται ακύρωση — η ημερομηνία παραλαβής έχει παρέλθει.',booking_passed:'Η κράτηση έχει ήδη ολοκληρωθεί.',invalid_dates:'Η επιστροφή πρέπει να είναι μετά την παραλαβή.',no_changes:'Δεν εντοπίστηκαν αλλαγές.',unauthorized:'Δεν έχετε πρόσβαση.',not_found:'Δεν βρέθηκε.',update_failed:'Αποτυχία αποθήκευσης. Δοκιμάστε ξανά.',server_error:'Σφάλμα. Δοκιμάστε ξανά.'};
   function berr(c){return BERR[c]||BERR.server_error;}
   function showErr(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.add('show');}}
   function showWarn(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.add('show');}}
-  function hideEl(id){var e=document.getElementById(id);if(e)e.classList.remove('show');}
+  function hideEl(id){var e=document.getElementById(id);if(e){e.classList.remove('show');e.classList.add('hidden-off');setTimeout(function(){var x=document.getElementById(id);if(x)x.classList.remove('hidden-off');},10);e.classList.remove('show');}}
   function showOk(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.add('show');}}
   function setBusy(id,busy,txt){var b=document.getElementById(id);if(!b)return;b.disabled=busy;if(txt&&busy)b.textContent=txt;}
 
@@ -371,18 +508,30 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   function canCancel(b){return b.status!=='Canceled'&&b.status!=='Completed'&&new Date(b.pickupDateTime)>new Date();}
   function canExtend(b){var now=new Date();return b.status!=='Canceled'&&b.status!=='Completed'&&new Date(b.pickupDateTime)<=now&&new Date(b.dropoffDateTime)>now;}
   function canBookAgain(b){return b.status==='Canceled'||new Date(b.dropoffDateTime)<new Date();}
-  function canReview(b){return (b.status==='Completed'||(b.dropoffDateTime&&new Date(b.dropoffDateTime)<new Date()))&&b.status!=='Canceled'&&!b.memberRating;}
-  function hasReview(b){return !!b.memberRating;}
+  function canReview(b){return(b.status==='Completed'||(b.dropoffDateTime&&new Date(b.dropoffDateTime)<new Date()))&&b.status!=='Canceled'&&!b.memberRating;}
+  function hasReview(b){return!!b.memberRating;}
 
   function loyaltyInfo(n){
-    if(n>=7)return{label:'Platinum Μέλος',cls:'badge-platinum',icon:'💎'};
-    if(n>=3)return{label:'Χρυσό Μέλος',cls:'badge-gold',icon:'🥇'};
-    if(n>=1)return{label:'Αργυρό Μέλος',cls:'badge-silver',icon:'🥈'};
-    return{label:'Νέο Μέλος',cls:'badge-new',icon:'🌟'};
+    if(n>=7)return{label:'Platinum Μέλος',cls:'badge-platinum',icon:'💎',tier:'platinum'};
+    if(n>=3)return{label:'Χρυσό Μέλος',cls:'badge-gold',icon:'🥇',tier:'gold'};
+    if(n>=1)return{label:'Αργυρό Μέλος',cls:'badge-silver',icon:'🥈',tier:'silver'};
+    return{label:'Νέο Μέλος',cls:'badge-new',icon:'🌟',tier:'new'};
   }
-
+  function loyaltyPoints(bookings){
+    return bookings.reduce(function(s,b){return b.status!=='Canceled'?s+Math.floor((b.totalPrice||0)/10):s;},0);
+  }
   var RATING_LABELS=['','Κακή','Μέτρια','Καλή','Πολύ καλή','Άριστη!'];
 
+  /* ─── cancellation policy label ─────────────────────── */
+  function cancelPolicyText(pickupDt){
+    var h=(new Date(pickupDt)-new Date())/3600000;
+    if(h<=0)return null;
+    if(h<=24)return '⚠️ Παραλαβή σε λιγότερο από 24 ώρες — <strong>χωρίς επιστροφή χρημάτων</strong>.';
+    if(h<=48)return '⚠️ Παραλαβή σε λιγότερο από 48 ώρες — επιστροφή <strong>50%</strong>.';
+    return '✅ Πλήρης επιστροφή χρημάτων (παραλαβή σε '+Math.floor(h/24)+' μέρες).';
+  }
+
+  /* ─── showApp ────────────────────────────────────────── */
   function showApp(m,tab){
     clearTimeout(initTimer);
     var name=(m.name||'').trim()||m.email||'Μέλος';
@@ -399,13 +548,22 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     else{loadBookings('all');}
   }
 
+  /* ─── Tab switching ──────────────────────────────────── */
   function showTab(tab){
+    currentTab=tab;
     document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
-    document.getElementById('panelBookings').classList.toggle('hidden',tab!=='bookings');
-    document.getElementById('panelProfile').classList.toggle('hidden',tab!=='profile');
+    var panels=['bookings','analytics','payments','loyalty','profile'];
+    panels.forEach(function(p){
+      var el=document.getElementById('panel'+p.charAt(0).toUpperCase()+p.slice(1));
+      if(el)el.classList.toggle('hidden',p!==tab);
+    });
     if(tab==='profile'&&!profileLoaded)loadProfile();
+    if(tab==='analytics'&&!analyticsBuilt)buildAnalytics();
+    if(tab==='payments'&&!paymentsBuilt)buildPayments();
+    if(tab==='loyalty'&&!loyaltyBuilt)buildLoyalty();
   }
 
+  /* ─── Bookings ───────────────────────────────────────── */
   function loadBookings(filter){
     currentFilter=filter;
     document.querySelectorAll('.chip').forEach(function(c){c.classList.toggle('active',c.dataset.filter===filter);});
@@ -423,7 +581,10 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     document.getElementById('statUpcoming').textContent=list.filter(function(b){return b.status!=='Canceled'&&new Date(b.pickupDateTime)>now;}).length;
     completedCount=list.filter(function(b){return b.status==='Completed'||(b.dropoffDateTime&&new Date(b.dropoffDateTime)<now&&b.status!=='Canceled');}).length;
     document.getElementById('statCompleted').textContent=completedCount;
+    var pts=loyaltyPoints(list);
+    document.getElementById('statLoyalty').textContent=pts;
   }
+
   function renderNextTrip(list){
     var now=new Date();
     var up=list.filter(function(b){return b.status!=='Canceled'&&b.status!=='Completed'&&new Date(b.pickupDateTime)>now;}).sort(function(a,b){return new Date(a.pickupDateTime)-new Date(b.pickupDateTime);});
@@ -448,7 +609,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       var ed=canEdit(b),cn=canCancel(b),ex=canExtend(b),ba=canBookAgain(b),rv=canReview(b),hr=hasReview(b);
       var extrasHtml='—';
       if(Array.isArray(b.extras)&&b.extras.length){
-        extrasHtml='<div class="extras-list">'+b.extras.map(function(e){var lbl=typeof e==='string'?e:(e.name||e.label||JSON.stringify(e));return '<span class="extra-badge">'+esc(lbl)+'</span>';}).join('')+'</div>';
+        extrasHtml='<div class="extras-list">'+b.extras.map(function(e){var lbl=typeof e==='string'?e:(e.name||e.label||'');return '<span class="extra-badge">'+esc(lbl)+'</span>';}).join('')+'</div>';
       }
       var actBtns='';
       if(ed)actBtns+='<button class="btn-edit" onclick="openEditForCard(\''+id+'\')">✏️ Επεξεργασία</button>';
@@ -456,15 +617,15 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       if(cn)actBtns+='<button class="btn-cancel-bk" onclick="openCancelForCard(\''+id+'\')">✕ Ακύρωση</button>';
       if(ba)actBtns+='<button class="btn-book-again" onclick="bookAgain(\''+id+'\')">🔄 Κλείστε ξανά</button>';
       if(rv)actBtns+='<button class="btn-review" onclick="openReviewForCard(\''+id+'\')">⭐ Αξιολόγηση</button>';
-      var isConfOrComp=b.status==='Confirmed'||b.status==='Active'||b.status==='Completed'||b.status==='Pending';
-      if(isConfOrComp)actBtns+='<button class="btn-voucher" onclick="openVoucherForCard(\''+id+'\')">🎫 Voucher</button>';
+      if(b.status==='Confirmed'||b.status==='Active'||b.status==='Completed'||b.status==='Pending')
+        actBtns+='<button class="btn-voucher" onclick="openVoucherForCard(\''+id+'\')">🎫 Voucher</button>';
       return '<div class="bk-card" id="bk-'+id+'">'+
         '<div class="bk-summary" onclick="toggleCard(\''+id+'\')">'+
           '<div class="bk-main">'+
             '<div class="bk-head"><span class="bk-num">#'+esc(b.bookingNumber||id)+'</span><span class="bk-status '+sClass(b.status)+'">'+sLabel(b.status)+'</span></div>'+
             '<div class="bk-vehicle">'+esc(b.vehicleName||'Όχημα')+'</div>'+
             '<div class="bk-dates">'+fmtDate(b.pickupDateTime)+' → '+fmtDate(b.dropoffDateTime)+'</div>'+
-            (b.totalPrice?'<div class="bk-price-inline">'+Number(b.totalPrice).toFixed(2)+' €</div>':'')+
+            (b.totalPrice?'<div class="bk-price-inline">'+fmtEUR(b.totalPrice)+'</div>':'')+
           '</div>'+
           '<div class="bk-chevron">⌄</div>'+
         '</div>'+
@@ -486,6 +647,170 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     }).join('');
   }
 
+  /* ─── Analytics (computed from bookings) ────────────── */
+  function buildAnalytics(){
+    analyticsBuilt=true;
+    var list=allBookingsCache.filter(function(b){return b.status!=='Canceled';});
+    if(!list.length){
+      document.getElementById('analyticsContent').innerHTML='<div class="empty"><div class="empty-icon">📊</div><h3>Δεν υπάρχουν δεδομένα</h3><p>Κάντε την πρώτη σας κράτηση για να δείτε στατιστικά.</p></div>';
+      return;
+    }
+    var totalSpend=list.reduce(function(s,b){return s+(b.totalPrice||0);},0);
+    var totalDays=list.reduce(function(s,b){return s+daysBetween(b.pickupDateTime,b.dropoffDateTime);},0);
+    var co2=Math.round(totalDays*200*0.21);
+
+    // monthly spend (last 12 months)
+    var now=new Date(), months=[];
+    for(var i=11;i>=0;i--){
+      var d=new Date(now.getFullYear(),now.getMonth()-i,1);
+      months.push({key:d.getFullYear()+'-'+(d.getMonth()+1),label:fmtMon(d),spend:0});
+    }
+    list.forEach(function(b){
+      var d=new Date(b.pickupDateTime);
+      var k=d.getFullYear()+'-'+(d.getMonth()+1);
+      var m=months.find(function(x){return x.key===k;});
+      if(m)m.spend+=(b.totalPrice||0);
+    });
+    var maxSpend=Math.max.apply(null,months.map(function(m){return m.spend;}));
+
+    // categories
+    var cats={};
+    list.forEach(function(b){var c=b.vehicleName||b.categoryId||'Άλλο';cats[c]=(cats[c]||0)+1;});
+    var catArr=Object.keys(cats).map(function(k){return{name:k,count:cats[k]};}).sort(function(a,b){return b.count-a.count;}).slice(0,5);
+    var maxCat=catArr.length?catArr[0].count:1;
+
+    var barsHtml=months.map(function(m){
+      var pct=maxSpend>0?Math.max(4,Math.round((m.spend/maxSpend)*100)):4;
+      return '<div class="bar-col">'+
+        (m.spend>0?'<div class="bar-val">'+Math.round(m.spend)+'</div>':'<div class="bar-val" style="opacity:0">0</div>')+
+        '<div class="bar-fill" style="height:'+pct+'%"></div>'+
+        '<div class="bar-label">'+m.label+'</div>'+
+      '</div>';
+    }).join('');
+
+    var catsHtml=catArr.map(function(c){
+      var pct=Math.round((c.count/maxCat)*100);
+      return '<div class="cat-row">'+
+        '<span class="cat-name">'+esc(c.name)+'</span>'+
+        '<div class="cat-bar-bg"><div class="cat-bar-fill" style="width:'+pct+'%"></div></div>'+
+        '<span class="cat-count">'+c.count+'x</span>'+
+      '</div>';
+    }).join('');
+
+    document.getElementById('analyticsContent').innerHTML=
+      '<div class="analytics-stats">'+
+        '<div class="an-card"><div class="an-icon">💶</div><div class="an-val">'+fmtEUR(totalSpend)+'</div><div class="an-lbl">Συνολική δαπάνη</div></div>'+
+        '<div class="an-card"><div class="an-icon">📅</div><div class="an-val">'+totalDays+'</div><div class="an-lbl">Ημέρες ενοικίασης</div></div>'+
+        '<div class="an-card"><div class="an-icon">🚗</div><div class="an-val">'+list.length+'</div><div class="an-lbl">Συνολικά ταξίδια</div></div>'+
+        '<div class="an-card"><div class="an-icon">🌿</div><div class="an-val">'+co2+' kg</div><div class="an-lbl">Εκτίμηση CO₂</div></div>'+
+      '</div>'+
+      '<div class="chart-wrap">'+
+        '<div class="section-title">Μηνιαία Δαπάνη (€)</div>'+
+        '<div class="bar-chart">'+barsHtml+'</div>'+
+      '</div>'+
+      (catArr.length?
+        '<div class="section-title">Κατηγορίες Οχημάτων</div>'+
+        '<div class="cat-list">'+catsHtml+'</div>':''
+      );
+  }
+
+  /* ─── Payments (computed from bookings) ─────────────── */
+  function buildPayments(){
+    paymentsBuilt=true;
+    var paid=allBookingsCache.filter(function(b){return b.status!=='Canceled'&&b.totalPrice>0;});
+    var totalSpend=paid.reduce(function(s,b){return s+(b.totalPrice||0);},0);
+    var canceled=allBookingsCache.filter(function(b){return b.status==='Canceled'&&b.totalPrice>0;});
+
+    if(!paid.length&&!canceled.length){
+      document.getElementById('paymentsContent').innerHTML='<div class="empty"><div class="empty-icon">💳</div><h3>Δεν υπάρχουν πληρωμές</h3><p>Οι πληρωμές σας θα εμφανιστούν εδώ.</p></div>';
+      return;
+    }
+
+    var rows=[...paid,...canceled].sort(function(a,b){return new Date(b.pickupDateTime)-new Date(a.pickupDateTime);});
+    var rowsHtml=rows.map(function(b){
+      var isCanceled=b.status==='Canceled';
+      return '<div class="pay-row">'+
+        '<div class="pay-row-left">'+
+          '<div class="pay-bk-num">#'+esc(b.bookingNumber||b._id)+'</div>'+
+          '<div class="pay-vehicle">'+esc(b.vehicleName||'—')+'</div>'+
+          '<div class="pay-date">'+fmtDate(b.pickupDateTime)+'</div>'+
+        '</div>'+
+        '<div class="pay-row-right">'+
+          '<div class="pay-amount">'+fmtEUR(b.totalPrice)+'</div>'+
+          '<div><span class="pay-status '+(isCanceled?'pay-refunded':'pay-paid')+'">'+(isCanceled?'Ακυρωμένη':'Πληρωμένη')+'</span></div>'+
+          (!isCanceled?'<button class="btn-invoice" onclick="openVoucherForCard(\''+b._id+'\')">🎫 Voucher</button>':'')+
+        '</div>'+
+      '</div>';
+    }).join('');
+
+    document.getElementById('paymentsContent').innerHTML=
+      '<div class="pay-summary-card">'+
+        '<div><div class="pay-summary-lbl">Συνολικές δαπάνες</div><div class="pay-summary-val">'+fmtEUR(totalSpend)+'</div></div>'+
+        '<div style="font-size:32px;opacity:.4">💳</div>'+
+      '</div>'+
+      '<div class="pay-list">'+rowsHtml+'</div>';
+  }
+
+  /* ─── Loyalty (computed from bookings) ──────────────── */
+  function buildLoyalty(){
+    loyaltyBuilt=true;
+    var now=new Date();
+    var completed=allBookingsCache.filter(function(b){return b.status==='Completed'||(b.dropoffDateTime&&new Date(b.dropoffDateTime)<now&&b.status!=='Canceled');});
+    var pts=loyaltyPoints(allBookingsCache);
+    var loy=loyaltyInfo(completed.length);
+
+    // tier thresholds
+    var tiers=[
+      {key:'new',label:'Νέο Μέλος',icon:'🌟',req:0,next:1,benefits:['Βασική εξυπηρέτηση','Πρόσβαση στο portal']},
+      {key:'silver',label:'Αργυρό',icon:'🥈',req:1,next:3,benefits:['5% έκπτωση στην επόμενη κράτηση','Προτεραιότητα εξυπηρέτησης']},
+      {key:'gold',label:'Χρυσό',icon:'🥇',req:3,next:7,benefits:['10% έκπτωση','Δωρεάν GPS','Προτεραιότητα']},
+      {key:'platinum',label:'Platinum',icon:'💎',req:7,next:null,benefits:['15% έκπτωση','Δωρεάν GPS','VIP εξυπηρέτηση','Αναβάθμιση οχήματος']}
+    ];
+    var curTierObj=tiers.find(function(t){return t.key===loy.tier;})||tiers[0];
+    var nextTierObj=curTierObj.next?tiers.find(function(t){return t.req===curTierObj.next;}):null;
+    var pct=nextTierObj?Math.min(100,Math.round((completed.length-curTierObj.req)/(nextTierObj.req-curTierObj.req)*100)):100;
+
+    var tierCardsHtml=tiers.map(function(t){
+      var isActive=t.key===loy.tier;
+      return '<div class="tier-card'+(isActive?' active-tier':'')+'">'+
+        '<div class="tier-card-name">'+t.icon+' '+t.label+(isActive?' ✓':'')+'</div>'+
+        '<div class="tier-card-req">'+(t.req===0?'Αρχή':(t.next?t.req+' – '+(t.next-1)+' ταξίδια':t.req+'+ ταξίδια'))+'</div>'+
+        t.benefits.map(function(b){return '<div class="tier-benefit">✔ '+b+'</div>';}).join('')+
+      '</div>';
+    }).join('');
+
+    // points history from bookings (simulated rows)
+    var histRows=allBookingsCache.filter(function(b){return b.status!=='Canceled'&&b.totalPrice>0;})
+      .sort(function(a,b){return new Date(b.pickupDateTime)-new Date(a.pickupDateTime);})
+      .slice(0,10)
+      .map(function(b){
+        var p=Math.floor((b.totalPrice||0)/10);
+        return '<div class="pts-row">'+
+          '<div class="pts-icon">🚗</div>'+
+          '<div class="pts-desc"><div class="pts-desc-main">'+esc(b.vehicleName||b.bookingNumber||'Κράτηση')+'</div><div class="pts-desc-date">'+fmtDate(b.pickupDateTime)+'</div></div>'+
+          '<div class="pts-amount pts-earned">+'+p+' πόντοι</div>'+
+        '</div>';
+      }).join('');
+
+    document.getElementById('loyaltyContent').innerHTML=
+      '<div class="loyalty-hero">'+
+        '<div class="loyalty-pts">'+pts+'</div>'+
+        '<div class="loyalty-pts-lbl">Πόντοι Loyalty</div>'+
+        '<div class="loyalty-tier-name">'+loy.icon+' '+loy.label+'</div>'+
+        (nextTierObj?
+          '<div class="loyalty-progress-bg"><div class="loyalty-progress-fill" style="width:'+pct+'%"></div></div>'+
+          '<div class="loyalty-progress-labels"><span>'+curTierObj.label+'</span><span>'+nextTierObj.label+' ('+nextTierObj.req+' ταξίδια)</span></div>'
+        :'<div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:8px">Έχετε φτάσει το ανώτατο επίπεδο! 🎉</div>')+
+      '</div>'+
+      '<div class="section-title">Επίπεδα Loyalty</div>'+
+      '<div class="tier-cards">'+tierCardsHtml+'</div>'+
+      (histRows?
+        '<div class="section-title" style="margin-top:8px">Ιστορικό Πόντων</div>'+
+        '<div class="pts-history">'+histRows+'</div>'
+      :'');
+  }
+
+  /* ─── Profile ────────────────────────────────────────── */
   function renderProfile(p){
     profileLoaded=true;memberProfile=p;
     var el=document.getElementById('profileContent');
@@ -504,10 +829,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
           '</div>'+
         '</div>'+
         '<div class="profile-fields">'+
-          row('✉️ Email',p.email)+
-          row('📱 Τηλέφωνο',p.phone)+
-          row('👤 Όνομα',p.firstName)+
-          row('👤 Επώνυμο',p.lastName)+
+          row('✉️ Email',p.email)+row('📱 Τηλέφωνο',p.phone)+row('👤 Όνομα',p.firstName)+row('👤 Επώνυμο',p.lastName)+
         '</div>'+
         '<div class="profile-actions"><button class="btn-profile-edit" id="editProfileBtn">✏️ Επεξεργασία στοιχείων</button></div>'+
       '</div>'+
@@ -516,7 +838,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
           '<div class="pf-row"><span class="pf-label">🚗 Ηλικία οδηγού</span><span class="pf-val'+(ext.driverAge?'':' empty-val')+'">'+(ext.driverAge?esc(ext.driverAge):'—')+'</span></div>'+
           row('🌍 Εθνικότητα',ext.nationality)+
           '<div class="pf-row"><span class="pf-label">📄 Άδεια οδήγησης</span><span class="pf-val'+(ext.licenseNumber?'':' empty-val')+'">'+(ext.licenseNumber?esc(ext.licenseNumber):'—')+'</span></div>'+
-          '<div class="pf-row"><span class="pf-label">📅 Λήξη άδειας</span><span class="pf-val'+(ext.licenseExpiry?'':' empty-val')+'">'+(ext.licenseExpiry?esc(ext.licenseExpiry):'—')+'</span></div>'+
+          '<div class="pf-row"><span class="pf-label">📅 Λήξη άδειας</span><span class="pf-val'+(ext.licenseExpiry?'':' empty-val')+'">'+(ext.licenseExpiry?fmtDate(ext.licenseExpiry):'—')+'</span></div>'+
         '</div>'+
       '</div>';
     document.getElementById('editProfileBtn').addEventListener('click',openEditProfile);
@@ -529,7 +851,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     sel.innerHTML=opts.map(function(loc){var v=typeof loc==='string'?loc:(loc.label||loc.name||loc.id||'');return '<option value="'+esc(v)+'"'+(v===curVal?' selected':'')+'>'+esc(v)+'</option>';}).join('');
   }
 
-  /* ── Edit booking ── */
+  /* ─── Edit booking ───────────────────────────────────── */
   function openEditModal(b){
     bookingForEdit=b;editIgnoreConflict=false;
     document.getElementById('editModalSub').textContent='Κράτηση #'+(b.bookingNumber||b._id);
@@ -541,7 +863,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     document.getElementById('editNotes').value=b.notes||'';
     populateLocSelect('editPickupLoc',b.pickupLocation);
     populateLocSelect('editDropoffLoc',b.dropoffLocation);
-    hideEl('editErr');hideEl('editWarn');
+    document.getElementById('editErr').classList.remove('show');
+    document.getElementById('editWarn').classList.remove('show');
     document.getElementById('editSaveBtn').textContent='💾 Αποθήκευση';
     setBusy('editSaveBtn',false);
     document.getElementById('editModal').classList.remove('hidden');
@@ -562,19 +885,23 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     if(editIgnoreConflict){
       setBusy('editSaveBtn',true,'Αποθήκευση...');
       post({type:'UPDATE_BOOKING',bookingId:bookingForEdit._id,changes:changes});
-    } else {
+    }else{
       setBusy('editSaveBtn',true,'Έλεγχος...');
       post({type:'CHECK_AVAILABILITY',categoryId:bookingForEdit.categoryId,pickupDateTime:(changes.pickupDateTime||bookingForEdit.pickupDateTime),dropoffDateTime:changes.dropoffDateTime,bookingId:bookingForEdit._id});
     }
   }
   function closeEditModal(){document.getElementById('editModal').classList.add('hidden');bookingForEdit=null;editIgnoreConflict=false;setBusy('editSaveBtn',false);}
 
-  /* ── Cancel booking ── */
+  /* ─── Cancel booking ─────────────────────────────────── */
   function openCancelModal(b){
     bookingForCancel=b;
     document.getElementById('cancelModalSub').textContent='Κράτηση #'+(b.bookingNumber||b._id)+' · '+(b.vehicleName||'');
     document.getElementById('cancelReason').value='';
-    hideEl('cancelErr');setBusy('cancelConfirmBtn',false);
+    var policyTxt=cancelPolicyText(b.pickupDateTime);
+    var box=document.getElementById('cancelPolicyBox');
+    box.innerHTML=policyTxt||'⚠️ Αυτή η ενέργεια <strong>δεν μπορεί να αναιρεθεί</strong>.';
+    document.getElementById('cancelErr').classList.remove('show');
+    setBusy('cancelConfirmBtn',false);
     document.getElementById('cancelModal').classList.remove('hidden');
   }
   function submitCancel(){
@@ -584,14 +911,15 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   }
   function closeCancelModal(){document.getElementById('cancelModal').classList.add('hidden');bookingForCancel=null;setBusy('cancelConfirmBtn',false);}
 
-  /* ── Extend booking ── */
+  /* ─── Extend booking ─────────────────────────────────── */
   function openExtendModal(b){
     bookingForExtend=b;extendIgnoreConflict=false;
     document.getElementById('extendModalSub').textContent=b.vehicleName||'Κράτηση #'+(b.bookingNumber||b._id);
     document.getElementById('extendCurrentDt').value=toDatetimeLocal(b.dropoffDateTime);
     document.getElementById('extendNewDt').value='';
     populateLocSelect('extendDropoffLoc',b.dropoffLocation);
-    hideEl('extendErr');hideEl('extendWarn');
+    document.getElementById('extendErr').classList.remove('show');
+    document.getElementById('extendWarn').classList.remove('show');
     document.getElementById('extendSaveBtn').textContent='⏱️ Παράταση';
     setBusy('extendSaveBtn',false);
     document.getElementById('extendModal').classList.remove('hidden');
@@ -608,19 +936,20 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     if(extendIgnoreConflict){
       setBusy('extendSaveBtn',true,'Αποθήκευση...');
       post({type:'UPDATE_BOOKING',bookingId:bookingForExtend._id,changes:changes});
-    } else {
-      setBusy('extendSaveBtn',true,'Έλεγχος διαθεσιμότητας...');
+    }else{
+      setBusy('extendSaveBtn',true,'Έλεγχος...');
       post({type:'CHECK_AVAILABILITY',categoryId:bookingForExtend.categoryId,pickupDateTime:bookingForExtend.pickupDateTime,dropoffDateTime:newDropoff.toISOString(),bookingId:bookingForExtend._id});
     }
   }
   function closeExtendModal(){document.getElementById('extendModal').classList.add('hidden');bookingForExtend=null;extendIgnoreConflict=false;setBusy('extendSaveBtn',false);}
 
-  /* ── Review ── */
+  /* ─── Review ─────────────────────────────────────────── */
   function openReviewModal(b){
     bookingForReview=b;currentRating=0;
     document.getElementById('reviewModalSub').textContent=(b.vehicleName||'')+(b.bookingNumber?' · #'+b.bookingNumber:'');
     document.getElementById('reviewComment').value='';
-    hideEl('reviewErr');hideEl('reviewOk');
+    document.getElementById('reviewErr').classList.remove('show');
+    document.getElementById('reviewOk').classList.remove('show');
     document.getElementById('reviewSubmitBtn').disabled=true;
     document.getElementById('reviewSubmitBtn').textContent='Υποβολή Αξιολόγησης';
     document.getElementById('ratingLbl').textContent='Επιλέξτε βαθμολογία';
@@ -647,7 +976,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   }
   function closeReviewModal(){document.getElementById('reviewModal').classList.add('hidden');bookingForReview=null;}
 
-  /* ── Voucher ── */
+  /* ─── Voucher ────────────────────────────────────────── */
   function openVoucher(b){
     voucherBooking=b;
     function vf(lbl,val){return '<div class="vf"><label>'+lbl+'</label><span>'+esc(val||'—')+'</span></div>';}
@@ -668,7 +997,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       (b.extras&&Array.isArray(b.extras)&&b.extras.length?'<div class="vf" style="margin-bottom:12px"><label>Extras</label><span>'+b.extras.map(function(e){return esc(typeof e==='string'?e:(e.name||e.label||''));}).join(', ')+'</span></div>':'')+
       (b.notes?'<div class="vf" style="margin-bottom:12px"><label>Σημειώσεις</label><span>'+esc(b.notes)+'</span></div>':'')+
       '<hr class="voucher-divider">'+
-      '<div class="voucher-total">'+Number(b.totalPrice||0).toFixed(2)+' €</div>'+
+      '<div class="voucher-total">'+fmtEUR(b.totalPrice)+'</div>'+
       '<div class="voucher-footer">Diamond Rent A Car — Θεσσαλονίκη<br>Αυτό το voucher αποτελεί επιβεβαίωση κράτησης.</div>';
     document.getElementById('voucherModal').classList.remove('hidden');
   }
@@ -681,7 +1010,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   }
   function closeVoucher(){document.getElementById('voucherModal').classList.add('hidden');voucherBooking=null;}
 
-  /* ── Edit profile ── */
+  /* ─── Edit profile ───────────────────────────────────── */
   function openEditProfile(){
     if(memberProfile){
       document.getElementById('editFirst').value=memberProfile.firstName||'';
@@ -693,7 +1022,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     document.getElementById('editNationality').value=ext.nationality||'';
     document.getElementById('editLicenseNum').value=ext.licenseNumber||'';
     document.getElementById('editLicenseExp').value=ext.licenseExpiry||'';
-    hideEl('profileErr');hideEl('profileOk');
+    document.getElementById('profileErr').classList.remove('show');
+    document.getElementById('profileOk').classList.remove('show');
     document.getElementById('profileSaveBtn').textContent='💾 Αποθήκευση';
     setBusy('profileSaveBtn',false);
     document.getElementById('editProfileModal').classList.remove('hidden');
@@ -705,16 +1035,11 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     if(!fn||!ln){showErr('profileErr','Συμπληρώστε όνομα και επώνυμο.');return;}
     setBusy('profileSaveBtn',true,'Αποθήκευση...');
     post({type:'UPDATE_PROFILE',firstName:fn,lastName:ln,phone:ph});
-    post({type:'UPDATE_EXTENDED_PROFILE',
-      driverAge:document.getElementById('editDriverAge').value.trim(),
-      nationality:document.getElementById('editNationality').value.trim(),
-      licenseNumber:document.getElementById('editLicenseNum').value.trim(),
-      licenseExpiry:document.getElementById('editLicenseExp').value.trim()
-    });
+    post({type:'UPDATE_EXTENDED_PROFILE',driverAge:document.getElementById('editDriverAge').value.trim(),nationality:document.getElementById('editNationality').value.trim(),licenseNumber:document.getElementById('editLicenseNum').value.trim(),licenseExpiry:document.getElementById('editLicenseExp').value.trim()});
   }
   function closeProfileModal(){document.getElementById('editProfileModal').classList.add('hidden');setBusy('profileSaveBtn',false);}
 
-  /* ── Book again ── */
+  /* ─── Book again ─────────────────────────────────────── */
   function bookAgainFn(b){
     var params=new URLSearchParams();
     if(b.categoryId)params.set('category',b.categoryId);
@@ -725,7 +1050,18 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     post({type:'MEMBER_PORTAL_NAV',path:'/?'+params.toString()});
   }
 
-  /* ── Window globals ── */
+  /* ─── Escape key handler for all modals ─────────────── */
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape')return;
+    if(!document.getElementById('editModal').classList.contains('hidden'))closeEditModal();
+    else if(!document.getElementById('cancelModal').classList.contains('hidden'))closeCancelModal();
+    else if(!document.getElementById('extendModal').classList.contains('hidden'))closeExtendModal();
+    else if(!document.getElementById('reviewModal').classList.contains('hidden'))closeReviewModal();
+    else if(!document.getElementById('editProfileModal').classList.contains('hidden'))closeProfileModal();
+    else if(!document.getElementById('voucherModal').classList.contains('hidden'))closeVoucher();
+  });
+
+  /* ─── Window globals ─────────────────────────────────── */
   window.toggleCard=function(id){var c=document.getElementById('bk-'+id);if(c)c.classList.toggle('open');};
   window.openEditForCard=function(id){var b=allBookingData[id];if(b)openEditModal(b);};
   window.openCancelForCard=function(id){var b=allBookingData[id];if(b)openCancelModal(b);};
@@ -734,16 +1070,19 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   window.openVoucherForCard=function(id){var b=allBookingData[id];if(b)openVoucher(b);};
   window.bookAgain=function(id){var b=allBookingData[id];if(b)bookAgainFn(b);};
 
-  /* ── DOM events ── */
+  /* ─── DOM events ─────────────────────────────────────── */
   document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){showTab(this.dataset.tab);});});
   document.querySelectorAll('.chip').forEach(function(b){b.addEventListener('click',function(){loadBookings(this.dataset.filter);});});
   document.getElementById('newBookingCta').addEventListener('click',function(){post({type:'MEMBER_PORTAL_NAV',path:'/'});});
+  document.getElementById('statLoyaltyCell').addEventListener('click',function(){showTab('loyalty');});
   document.getElementById('retryBtn').addEventListener('click',function(){
     document.getElementById('errorScreen').classList.add('hidden');
     document.getElementById('loadingScreen').classList.remove('hidden');
     post({type:'PORTAL_READY'});
     initTimer=setTimeout(function(){document.getElementById('loadingScreen').classList.add('hidden');document.getElementById('errorScreen').classList.remove('hidden');},8000);
   });
+
+  // Modal close buttons
   document.getElementById('editModalClose').addEventListener('click',closeEditModal);
   document.getElementById('editCancelBtn').addEventListener('click',closeEditModal);
   document.getElementById('editSaveBtn').addEventListener('click',submitEdit);
@@ -769,19 +1108,35 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   document.getElementById('voucherPrintBtn').addEventListener('click',printVoucher);
   setupStars();
 
-  /* ── Message handler ── */
+  /* ─── postMessage handler ────────────────────────────── */
   window.addEventListener('message',function(event){
     var raw=event.data,d=null;
     if(typeof raw==='string'){try{d=JSON.parse(raw);}catch(_){return;}}else{d=raw;}
     if(!d||!d.type)return;
 
-    if(d.type==='MEMBER_INIT'){if(d.locations)locations=d.locations;if(d.member)showApp(d.member,d.tab);return;}
+    if(d.type==='MEMBER_INIT'){
+      if(d.locations)locations=d.locations;
+      if(d.member)showApp(d.member,d.tab);
+      return;
+    }
 
     if(d.type==='MY_BOOKINGS'){
       if(d.ok){
-        if(currentFilter==='all'||!d.filter){updateStats(d.bookings||[]);renderNextTrip(d.bookings||[]);}
-        if(!document.getElementById('panelBookings').classList.contains('hidden')){renderBookings(d.bookings||[]);}
-      } else {
+        var bookings=d.bookings||[];
+        // cache ALL bookings (only when filter=all / no filter)
+        if(!d.filter||d.filter===null||d.filter==='all'){
+          allBookingsCache=bookings;
+          analyticsBuilt=false;paymentsBuilt=false;loyaltyBuilt=false;
+          updateStats(bookings);renderNextTrip(bookings);
+          // rebuild visible tab if already open
+          if(currentTab==='analytics')buildAnalytics();
+          if(currentTab==='payments')buildPayments();
+          if(currentTab==='loyalty')buildLoyalty();
+        }
+        if(!document.getElementById('panelBookings').classList.contains('hidden')){
+          renderBookings(bookings);
+        }
+      }else{
         document.getElementById('bookingsList').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><h3>Αδυναμία φόρτωσης</h3><p>Προσπαθήστε ξανά.</p></div>';
       }
       return;
@@ -802,9 +1157,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 
     if(d.type==='UPDATE_BOOKING_RESULT'){
       setBusy('editSaveBtn',false);setBusy('extendSaveBtn',false);
-      if(d.ok){
-        closeEditModal();closeExtendModal();loadBookings(currentFilter);
-      } else {
+      if(d.ok){closeEditModal();closeExtendModal();loadBookings(currentFilter);}
+      else{
         if(bookingForEdit)showErr('editErr',berr(d.error));
         if(bookingForExtend)showErr('extendErr',berr(d.error));
       }
@@ -815,18 +1169,9 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       setBusy('editSaveBtn',false);setBusy('extendSaveBtn',false);
       if(!d.available&&d.conflicts>0){
         var warnMsg='⚠️ Βρέθηκαν άλλες κρατήσεις για αυτό το διάστημα. Μπορείτε να συνεχίσετε — θα επικοινωνήσουμε μαζί σας αν χρειαστεί.';
-        if(bookingForEdit){
-          showWarn('editWarn',warnMsg);
-          editIgnoreConflict=true;
-          document.getElementById('editSaveBtn').textContent='✔ Αποθήκευση παρά τα εμπόδια';
-        }
-        if(bookingForExtend){
-          showWarn('extendWarn',warnMsg);
-          extendIgnoreConflict=true;
-          document.getElementById('extendSaveBtn').textContent='✔ Παράταση παρά τα εμπόδια';
-        }
-      } else {
-        // No conflict — proceed directly
+        if(bookingForEdit){showWarn('editWarn',warnMsg);editIgnoreConflict=true;document.getElementById('editSaveBtn').textContent='✔ Αποθήκευση παρά τα εμπόδια';}
+        if(bookingForExtend){showWarn('extendWarn',warnMsg);extendIgnoreConflict=true;document.getElementById('extendSaveBtn').textContent='✔ Παράταση παρά τα εμπόδια';}
+      }else{
         if(bookingForEdit){
           var pickup=document.getElementById('editPickupDt').value;
           var dropoff=document.getElementById('editDropoffDt').value;
@@ -836,10 +1181,10 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
           post({type:'UPDATE_BOOKING',bookingId:bookingForEdit._id,changes:changes});
         }
         if(bookingForExtend){
-          var newDt=document.getElementById('extendNewDt').value;
-          var loc=document.getElementById('extendDropoffLoc').value;
+          var newDt2=document.getElementById('extendNewDt').value;
+          var loc2=document.getElementById('extendDropoffLoc').value;
           setBusy('extendSaveBtn',true,'Αποθήκευση...');
-          post({type:'UPDATE_BOOKING',bookingId:bookingForExtend._id,changes:{dropoffDateTime:new Date(newDt).toISOString(),dropoffLocation:loc}});
+          post({type:'UPDATE_BOOKING',bookingId:bookingForExtend._id,changes:{dropoffDateTime:new Date(newDt2).toISOString(),dropoffLocation:loc2}});
         }
       }
       return;
@@ -850,7 +1195,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       if(d.ok){
         showOk('reviewOk','✅ Ευχαριστούμε για την αξιολόγησή σας!');
         setTimeout(function(){closeReviewModal();loadBookings(currentFilter);},1600);
-      } else showErr('reviewErr',berr(d.error));
+      }else showErr('reviewErr',berr(d.error));
       return;
     }
 
@@ -875,12 +1220,12 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
         extendedProfile.licenseNumber=document.getElementById('editLicenseNum').value.trim();
         extendedProfile.licenseExpiry=document.getElementById('editLicenseExp').value.trim();
         setTimeout(function(){closeProfileModal();profileLoaded=false;loadProfile();},1400);
-      } else showErr('profileErr',berr(d.error));
+      }else showErr('profileErr',berr(d.error));
       return;
     }
   });
 
-  /* ── Boot ── */
+  /* ─── Boot ───────────────────────────────────────────── */
   setTimeout(function(){post({type:'PORTAL_READY'});},120);
   initTimer=setTimeout(function(){
     if(document.getElementById('app').classList.contains('hidden')){
@@ -888,6 +1233,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       document.getElementById('errorScreen').classList.remove('hidden');
     }
   },8000);
+
 })();
 </script>
 </body>
