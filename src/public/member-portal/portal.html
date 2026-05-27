@@ -341,10 +341,119 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   .doc-card-actions{flex-direction:row;width:100%}
   .btn-doc-view,.btn-doc-print{flex:1;text-align:center}
 }
+
+/* ── Dark mode toggle button ── */
+#darkToggle{background:rgba(255,255,255,.12);border:none;color:#fff;font-size:16px;cursor:pointer;border-radius:8px;padding:6px 9px;line-height:1;transition:background .15s;flex-shrink:0}
+#darkToggle:hover{background:rgba(255,255,255,.22)}
+
+/* ── Dark mode overrides ── */
+body.dark{background:#111;color:#e4e0d8}
+body.dark #loadingScreen,body.dark #errorScreen{background:#111}
+body.dark #errorScreen h2{color:#e4e0d8}
+body.dark #errorScreen p{color:#888}
+body.dark #tabBar{background:#1a1a1a;border-bottom-color:#2d2d2d;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+body.dark .tab{color:#666}
+body.dark .tab.active{color:#5fa8c4;border-bottom-color:#5fa8c4}
+body.dark .tab:hover:not(.active){color:#aaa}
+body.dark .bk-card,body.dark .an-card,body.dark .chart-wrap,body.dark .cat-list,body.dark .pts-history,body.dark .pay-list,body.dark .notif-list,body.dark .doc-card,body.dark .ticket-card,body.dark .tier-card,body.dark .profile-card{background:#1c1c1c;border-color:#2d2d2d}
+body.dark .bk-summary:hover,body.dark .ticket-card:hover,body.dark .notif-item:hover{background:#232323}
+body.dark .bk-details{border-top-color:#2d2d2d}
+body.dark .bk-num,body.dark .bk-vehicle{color:#e4e0d8}
+body.dark .bk-dates{color:#777}
+body.dark .bk-det-field span{color:#c0b8aa}
+body.dark .notes-box{background:#232323;border-color:#2d2d2d;color:#c0b8aa}
+body.dark .extra-badge{background:#232323;color:#b0a898}
+body.dark .chip{background:#232323;border-color:#3a3a3a;color:#888}
+body.dark .chip.active{background:#3f748a;border-color:#3f748a;color:#fff}
+body.dark #newBookingCta{background:#1c1c1c;border-color:#3a3a3a}
+body.dark #newBookingCta strong{color:#5fa8c4}
+body.dark #newBookingCta span{color:#666}
+body.dark .mover{background:rgba(0,0,0,.76)}
+body.dark .mbox{background:#1c1c1c}
+body.dark .mbox h3{color:#e4e0d8}
+body.dark .msub{color:#888}
+body.dark .mrow input,body.dark .mrow select,body.dark .mrow textarea{background:#232323;border-color:#3a3a3a;color:#e4e0d8}
+body.dark .mclose{background:#2a2a2a;color:#aaa}
+body.dark .mclose:hover{background:#333;color:#e4e0d8}
+body.dark .mbtn-ghost{background:#232323;color:#aaa}
+body.dark .mbtn-ghost:hover{background:#333}
+body.dark .msect{color:#5fa8c4}
+body.dark .pay-row{border-bottom-color:#2d2d2d}
+body.dark .pay-bk-num{color:#e4e0d8}
+body.dark .pf-row{border-bottom-color:#2d2d2d}
+body.dark .pf-label{color:#666}
+body.dark .pf-val{color:#e4e0d8}
+body.dark .pf-val.empty-val{color:#555}
+body.dark .cat-row{border-bottom-color:#2d2d2d}
+body.dark .cat-name{color:#e4e0d8}
+body.dark .pts-row{border-bottom-color:#2d2d2d}
+body.dark .pts-desc-main{color:#e4e0d8}
+body.dark .pts-desc-date{color:#777}
+body.dark .notif-item.unread{background:#192028}
+body.dark .notif-title{color:#e4e0d8}
+body.dark .notif-text{color:#888}
+body.dark .section-title{color:#5fa8c4}
+body.dark .an-val{color:#e4e0d8}
+body.dark .an-lbl{color:#888}
+body.dark .ticket-subject{color:#e4e0d8}
+body.dark .ticket-status-bar{background:#232323}
+body.dark .ticket-status-bar strong{color:#e4e0d8}
+body.dark .thread-msg.msg-support .msg-bubble{background:#232323;color:#e4e0d8}
+body.dark .doc-card-title{color:#e4e0d8}
+body.dark .doc-card-meta{color:#777}
+body.dark .vf span{color:#e4e0d8}
+body.dark .vf label{color:#888}
+body.dark .voucher-footer{color:#666}
+body.dark .review-given{background:#1c2010;border-color:#3a5010}
+body.dark .cancel-warn{background:#1f1005;border-color:#4a2505;color:#c88040}
+body.dark .merr{background:#2a1010;border-color:#5a2020;color:#e08080}
+body.dark .mok{background:#0f2a10;border-color:#1a5a20;color:#60c070}
+body.dark .mwarn{background:#2a1f0a;border-color:#5a3a0a;color:#d0a050}
+body.dark .btn-edit{background:#1a2a32;color:#5fa8c4}
+body.dark .btn-cancel-bk{background:#2a1010;color:#e06060}
+body.dark .btn-extend{background:#2a2010;color:#c89040}
+body.dark .btn-book-again{background:#102a10;color:#60b060}
+body.dark .btn-review{background:#232323;color:#aaa}
+body.dark .btn-voucher{background:#1a1a2a;color:#7080e0}
+body.dark .btn-profile-edit{background:#1a2a32;color:#5fa8c4}
+body.dark .empty h3{color:#888}
+body.dark .empty p{color:#666}
+
+/* ── Toast notifications ── */
+#toastContainer{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;align-items:flex-end}
+.toast{background:#fff;border-radius:10px;padding:11px 16px 11px 14px;box-shadow:0 4px 24px rgba(0,0,0,.18);font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;max-width:320px;transform:translateX(calc(100% + 24px));opacity:0;transition:transform .28s cubic-bezier(.2,.8,.4,1),opacity .28s;pointer-events:auto;border-left:4px solid #ccc;cursor:pointer;line-height:1.4}
+.toast.t-in{transform:translateX(0);opacity:1}
+.toast.t-out{transform:translateX(calc(100% + 24px));opacity:0}
+.t-success{border-left-color:#1a7a45}
+.t-error{border-left-color:#b83c2e}
+.t-warn{border-left-color:#a07000}
+.t-info{border-left-color:#3f748a}
+.toast-icon{font-size:18px;flex-shrink:0}
+body.dark .toast{background:#1c1c1c;color:#e4e0d8;box-shadow:0 4px 24px rgba(0,0,0,.55)}
+
+/* ── Mobile bottom nav ── */
+#bottomNav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid #e8e4da;z-index:20;box-shadow:0 -2px 12px rgba(0,0,0,.07);padding-bottom:env(safe-area-inset-bottom,0px)}
+.bnav-btn{flex:1;background:none;border:none;cursor:pointer;padding:7px 4px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;position:relative}
+.bnav-icon{font-size:20px;line-height:1;position:relative}
+.bnav-lbl{font-size:10px;font-weight:700;color:#bbb;white-space:nowrap;transition:color .15s}
+.bnav-btn.active .bnav-lbl{color:#3f748a}
+.bnav-badge{position:absolute;top:-3px;right:-10px;background:#b83c2e;color:#fff;font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1}
+@media(max-width:640px){
+  #bottomNav{display:flex}
+  #content{padding-bottom:76px}
+  #toastContainer{top:auto;bottom:68px;right:8px;left:8px;align-items:stretch}
+  .toast{max-width:100%;transform:translateY(120%)}
+  .toast.t-in{transform:translateY(0)}
+  .toast.t-out{transform:translateY(120%)}
+}
+body.dark #bottomNav{background:#1a1a1a;border-top-color:#2d2d2d}
+body.dark .bnav-btn.active .bnav-lbl{color:#5fa8c4}
 </style>
 </head>
 <body>
+<script>/* prevent dark-mode flash */(function(){var s=localStorage.getItem('diamond-dark');if(s==='1'||(s!=='0'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.body.classList.add('dark');})()</script>
 
+<div id="toastContainer"></div>
 <div id="printArea"></div>
 
 <div id="loadingScreen">
@@ -368,6 +477,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
         <strong id="memberName">—</strong>
         <span id="memberEmail"></span>
       </div>
+      <button id="darkToggle" title="Εναλλαγή σκοτεινής λειτουργίας">🌙</button>
     </div>
     <div id="statsRow">
       <div class="stat"><span class="stat-val" id="statTotal">—</span><span class="stat-lbl">Κρατήσεις</span></div>
@@ -446,6 +556,14 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 
   </div><!-- /content -->
 </div><!-- /app -->
+
+<nav id="bottomNav">
+  <button class="bnav-btn active" data-tab="bookings"><span class="bnav-icon">📋</span><span class="bnav-lbl">Κρατήσεις</span></button>
+  <button class="bnav-btn" data-tab="loyalty"><span class="bnav-icon">🏆</span><span class="bnav-lbl">Loyalty</span></button>
+  <button class="bnav-btn" data-tab="notifications"><span class="bnav-icon">🔔<span id="bnavBadge" class="bnav-badge hidden">0</span></span><span class="bnav-lbl">Ειδοπ.</span></button>
+  <button class="bnav-btn" data-tab="support"><span class="bnav-icon">🎫</span><span class="bnav-lbl">Υποστήριξη</span></button>
+  <button class="bnav-btn" data-tab="profile"><span class="bnav-icon">👤</span><span class="bnav-lbl">Προφίλ</span></button>
+</nav>
 
 <!-- Edit Booking Modal -->
 <div class="mover hidden" id="editModal">
@@ -624,6 +742,24 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   /* ─── postMessage ────────────────────────────────────── */
   function post(msg){try{window.parent.postMessage(msg,'*');}catch(_){}}
 
+  /* ─── Toast notifications ───────────────────────────── */
+  function showToast(type,msg,dur){
+    var ic={success:'✅',error:'❌',warn:'⚠️',info:'ℹ️'};
+    var el=document.createElement('div');
+    el.className='toast t-'+type;
+    el.innerHTML='<span class="toast-icon">'+(ic[type]||'ℹ️')+'</span><span>'+esc(String(msg||''))+'</span>';
+    document.getElementById('toastContainer').appendChild(el);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.add('t-in');});});
+    var tid=setTimeout(function(){
+      el.classList.remove('t-in');el.classList.add('t-out');
+      setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},340);
+    },dur||3500);
+    el.addEventListener('click',function(){
+      clearTimeout(tid);el.classList.remove('t-in');el.classList.add('t-out');
+      setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},340);
+    });
+  }
+
   /* ─── Helpers ────────────────────────────────────────── */
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
   function fmt(dt){if(!dt)return '—';try{return new Date(dt).toLocaleString('el-GR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(_){return dt;}}
@@ -689,13 +825,17 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     document.getElementById('app').classList.remove('hidden');
     post({type:'GET_EXTENDED_PROFILE'});
     if((tab||'bookings')==='profile'){showTab('profile');post({type:'REQUEST_MY_BOOKINGS',filter:null});}
-    else{loadBookings('all');}
+    else{
+      loadBookings('all');
+      document.querySelectorAll('.bnav-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='bookings');});
+    }
   }
 
   /* ─── Tab switching ──────────────────────────────────── */
   function showTab(tab){
     currentTab=tab;
     document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
+    document.querySelectorAll('.bnav-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
     var panels=['bookings','analytics','payments','loyalty','notifications','support','documents','profile'];
     panels.forEach(function(p){
       var el=document.getElementById('panel'+p.charAt(0).toUpperCase()+p.slice(1));
@@ -963,8 +1103,9 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   function updateNotifBadge(count){
     unreadCount=count;
     var tab=document.getElementById('tabNotifications');
-    if(!tab)return;
-    tab.textContent=count>0?'🔔 Ειδοποιήσεις ('+count+')':'🔔 Ειδοποιήσεις';
+    if(tab)tab.textContent=count>0?'🔔 Ειδοποιήσεις ('+count+')':'🔔 Ειδοποιήσεις';
+    var bdg=document.getElementById('bnavBadge');
+    if(bdg){bdg.textContent=count>99?'99+':String(count);bdg.classList.toggle('hidden',count===0);}
   }
 
   function loadNotifications(){
@@ -1548,6 +1689,19 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   document.getElementById('ticketDetailModalClose').addEventListener('click',closeTicketDetailModal);
   document.getElementById('ticketDetailModal').addEventListener('click',function(e){if(e.target===this)closeTicketDetailModal();});
   document.getElementById('replySendBtn').addEventListener('click',sendTicketReply);
+
+  // Dark mode toggle
+  var darkBtn=document.getElementById('darkToggle');
+  darkBtn.textContent=document.body.classList.contains('dark')?'☀️':'🌙';
+  darkBtn.addEventListener('click',function(){
+    var isDark=document.body.classList.toggle('dark');
+    localStorage.setItem('diamond-dark',isDark?'1':'0');
+    this.textContent=isDark?'☀️':'🌙';
+  });
+
+  // Bottom nav
+  document.querySelectorAll('.bnav-btn').forEach(function(b){b.addEventListener('click',function(){showTab(this.dataset.tab);});});
+
   setupStars();
 
   /* ─── postMessage handler ────────────────────────────── */
@@ -1593,14 +1747,14 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 
     if(d.type==='CANCEL_RESULT'){
       setBusy('cancelConfirmBtn',false);
-      if(d.ok){closeCancelModal();loadBookings(currentFilter);}
+      if(d.ok){closeCancelModal();loadBookings(currentFilter);showToast('success','Η κράτηση ακυρώθηκε επιτυχώς.');}
       else showErr('cancelErr',berr(d.error));
       return;
     }
 
     if(d.type==='UPDATE_BOOKING_RESULT'){
       setBusy('editSaveBtn',false);setBusy('extendSaveBtn',false);
-      if(d.ok){closeEditModal();closeExtendModal();loadBookings(currentFilter);}
+      if(d.ok){closeEditModal();closeExtendModal();loadBookings(currentFilter);showToast('success','Η κράτηση ενημερώθηκε επιτυχώς.');}
       else{
         if(bookingForEdit)showErr('editErr',berr(d.error));
         if(bookingForExtend)showErr('extendErr',berr(d.error));
@@ -1637,7 +1791,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
       setBusy('reviewSubmitBtn',false);
       if(d.ok){
         showOk('reviewOk','✅ Ευχαριστούμε για την αξιολόγησή σας!');
-        setTimeout(function(){closeReviewModal();loadBookings(currentFilter);},1600);
+        setTimeout(function(){closeReviewModal();loadBookings(currentFilter);showToast('success','Ευχαριστούμε για την αξιολόγησή σας!');},1400);
       }else showErr('reviewErr',berr(d.error));
       return;
     }
@@ -1662,7 +1816,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
         extendedProfile.nationality=document.getElementById('editNationality').value.trim();
         extendedProfile.licenseNumber=document.getElementById('editLicenseNum').value.trim();
         extendedProfile.licenseExpiry=document.getElementById('editLicenseExp').value.trim();
-        setTimeout(function(){closeProfileModal();profileLoaded=false;loadProfile();},1400);
+        setTimeout(function(){closeProfileModal();profileLoaded=false;loadProfile();showToast('success','Το προφίλ σας ενημερώθηκε.');},1400);
       }else showErr('profileErr',berr(d.error));
       return;
     }
@@ -1680,6 +1834,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
         closeNewTicketModal();
         supportLoaded=false;
         loadSupport();
+        showToast('success','Το αίτημά σας υποβλήθηκε. Θα επικοινωνήσουμε σύντομα.');
       }else{
         var te=document.getElementById('newTicketErr');
         te.textContent=berr(d.error||'server_error');te.classList.add('show');
@@ -1694,6 +1849,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
         closeTicketDetailModal();
         supportLoaded=false;
         loadSupport();
+        showToast('success','Το μήνυμά σας στάλθηκε.');
       }else{
         var rre=document.getElementById('replyErr');rre.textContent=berr(d.error||'server_error');rre.classList.add('show');
       }
