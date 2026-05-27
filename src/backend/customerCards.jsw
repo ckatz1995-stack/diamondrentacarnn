@@ -1,6 +1,7 @@
 import wixData from 'wix-data';
 import { requireStaffAccess } from 'backend/staffAccess.jsw';
 import { members as wixMembers } from 'wix-members-backend';
+import { elevate } from 'wix-auth';
 
 // Member-only IDs are prefixed with 'm:' — no Customers CMS record exists yet
 const MEMBER_PREFIX = 'm:';
@@ -27,16 +28,58 @@ function ageband(dob) {
 // ─── Wix Members helper ────────────────────────────────────────────────────────
 
 async function queryWixMembers(limit = 200) {
+  // Method 1: elevate() + queryMembers (admin context fix)
+  try {
+    const elevatedQuery = elevate(wixMembers.queryMembers);
+    const result = await elevatedQuery()
+      .descending('_createdDate')
+      .limit(limit)
+      .find();
+    const items = result.items || result.members || [];
+    console.log('queryWixMembers: elevate success, count=' + items.length);
+    return items;
+  } catch (err) {
+    console.warn('queryWixMembers elevate failed:', err.message);
+  }
+
+  // Method 2: queryMembers without elevation
   try {
     const result = await wixMembers.queryMembers()
       .descending('_createdDate')
       .limit(limit)
       .find();
-    return result.items || [];
+    const items = result.items || result.members || [];
+    console.log('queryWixMembers: direct success, count=' + items.length);
+    return items;
   } catch (err) {
-    console.warn('queryWixMembers error', err.message);
-    return [];
+    console.warn('queryWixMembers direct failed:', err.message);
   }
+
+  // Method 3: Members/PrivateMembersData (most reliable fallback)
+  try {
+    const res = await wixData.query('Members/PrivateMembersData')
+      .descending('_createdDate')
+      .limit(limit)
+      .find({ suppressAuth: true });
+    const items = res.items || [];
+    console.log('queryWixMembers: PrivateMembersData success, count=' + items.length);
+    return items.map(m => ({
+      _id: m._id,
+      loginEmail: m.loginEmail || m.email || '',
+      contactDetails: {
+        firstName: m.firstName || '',
+        lastName: m.lastName || '',
+        phones: m.phone ? [m.phone] : [],
+        emails: [(m.loginEmail || m.email || '')].filter(Boolean)
+      },
+      _createdDate: m._createdDate,
+      _updatedDate: m._updatedDate
+    }));
+  } catch (err) {
+    console.warn('queryWixMembers PrivateMembersData failed:', err.message);
+  }
+
+  return [];
 }
 
 function memberToCustomer(m) {
