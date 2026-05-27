@@ -5,7 +5,7 @@
 
 import wixLocation from 'wix-location';
 import { authentication, currentMember } from 'wix-members-frontend';
-import { getMyBookings, getMyProfile, cancelMyBooking, updateMyBooking, updateMyProfile, checkBookingAvailability, submitBookingReview, getExtendedProfile, updateExtendedProfile, getMyNotifications, markNotificationRead, readAllMyNotifications, deleteMyNotification } from 'backend/memberPortal.jsw';
+import { getMyBookings, getMyProfile, cancelMyBooking, updateMyBooking, updateMyProfile, checkBookingAvailability, submitBookingReview, getExtendedProfile, updateExtendedProfile, getMyNotifications, markNotificationRead, readAllMyNotifications, deleteMyNotification, getMyTickets, createMyTicket, replyToMyTicket } from 'backend/memberPortal.jsw';
 import { PORTAL_LOCATIONS } from 'public/siteConstants';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 
@@ -140,6 +140,27 @@ function handleMessage(event) {
     deleteMyNotification({ notificationId: msg.notificationId })
       .then((r) => post({ type: 'NOTIFICATION_DELETE_RESULT', ...r }))
       .catch(() => {});
+    return;
+  }
+
+  if (msg.type === 'GET_MY_TICKETS') {
+    getMyTickets()
+      .then((r) => post({ type: 'MY_TICKETS', ...r }))
+      .catch(() => post({ type: 'MY_TICKETS', ok: false, error: 'server_error' }));
+    return;
+  }
+
+  if (msg.type === 'CREATE_TICKET') {
+    createMyTicket({ subject: msg.subject, category: msg.category, message: msg.message, bookingId: msg.bookingId || '' })
+      .then((r) => post({ type: 'NEW_TICKET_RESULT', ...r }))
+      .catch(() => post({ type: 'NEW_TICKET_RESULT', ok: false, error: 'server_error' }));
+    return;
+  }
+
+  if (msg.type === 'REPLY_TO_TICKET') {
+    replyToMyTicket({ ticketId: msg.ticketId, message: msg.message })
+      .then((r) => post({ type: 'TICKET_REPLY_RESULT', ...r }))
+      .catch(() => post({ type: 'TICKET_REPLY_RESULT', ok: false, error: 'server_error' }));
     return;
   }
 }
