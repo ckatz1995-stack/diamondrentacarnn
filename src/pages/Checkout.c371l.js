@@ -109,21 +109,27 @@ async function ensureMemberPrefill() {
         return null;
       }
       const details = member.contactDetails || {};
-      const address = Array.isArray(details.addresses)
+      const wixAddress = Array.isArray(details.addresses)
         ? details.addresses.find((item) => item && (item.addressLine || item.city || item.postalCode)) || details.addresses[0]
         : null;
+      const extData = (ext && ext.ok && ext.extended) ? ext.extended : {};
 
       memberPrefill = {
         firstName: details.firstName || "",
         lastName: details.lastName || "",
         email: (details.emails && details.emails[0]) || member.loginEmail || "",
-        phone: (details.phones && details.phones[0]) || "",
-        address: address?.addressLine || "",
-        address2: address?.addressLine2 || "",
-        city: address?.city || "",
-        country: address?.country || "",
-        postalCode: address?.postalCode || "",
-        driverAge: (ext && ext.ok && ext.extended && ext.extended.driverAge) || ""
+        phone: (details.phones && details.phones[0]) || extData.phone || "",
+        address: extData.address || wixAddress?.addressLine || "",
+        address2: wixAddress?.addressLine2 || "",
+        city: extData.city || wixAddress?.city || "",
+        country: extData.country || wixAddress?.country || "",
+        postalCode: extData.zipCode || wixAddress?.postalCode || "",
+        nationality: extData.nationality || "",
+        dateOfBirth: extData.dateOfBirth || "",
+        licenseNumber: extData.licenseNumber || "",
+        licenseExpiry: extData.licenseExpiry || "",
+        idNumber: extData.idNumber || "",
+        driverAge: extData.driverAge || ""
       };
       return memberPrefill;
     })

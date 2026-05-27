@@ -109,7 +109,13 @@ function handleMessage(event) {
   }
 
   if (msg.type === 'UPDATE_EXTENDED_PROFILE') {
-    updateExtendedProfile({ driverAge: msg.driverAge, nationality: msg.nationality, licenseNumber: msg.licenseNumber, licenseExpiry: msg.licenseExpiry })
+    updateExtendedProfile({
+      dateOfBirth: msg.dateOfBirth, nationality: msg.nationality, taxNumber: msg.taxNumber,
+      idNumber: msg.idNumber, idIssueCountry: msg.idIssueCountry, idIssueDate: msg.idIssueDate, idExpiry: msg.idExpiry,
+      licenseNumber: msg.licenseNumber, licenseCountry: msg.licenseCountry, licenseIssueDate: msg.licenseIssueDate, licenseExpiry: msg.licenseExpiry,
+      address: msg.address, city: msg.city, zipCode: msg.zipCode, country: msg.country,
+      firstName: msg.firstName, lastName: msg.lastName, phone: msg.phone
+    })
       .then((r) => post({ type: 'UPDATE_EXTENDED_PROFILE_RESULT', ...r }))
       .catch(() => post({ type: 'UPDATE_EXTENDED_PROFILE_RESULT', ok: false }));
     return;

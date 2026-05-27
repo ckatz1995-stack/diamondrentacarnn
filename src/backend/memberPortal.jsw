@@ -399,33 +399,101 @@ export async function getExtendedProfile() {
   if (!email) return { ok: false, error: 'unauthorized' };
   const res = await wixData.query('Customers').eq('email', email).limit(1).find({ suppressAuth: true });
   const c = res.items && res.items[0];
+  function toDateInput(d) { if (!d) return ''; try { return new Date(d).toISOString().slice(0, 10); } catch (_) { return ''; } }
   return {
     ok: true,
     extended: {
-      driverAge: c?.driverAge || '',
+      // Personal
+      dateOfBirth: toDateInput(c?.dateOfBirth),
       nationality: c?.nationality || '',
+      taxNumber: c?.taxNumber || '',
+      // ID document
+      idNumber: c?.idNumber || '',
+      idIssueCountry: c?.idIssueCountry || '',
+      idIssueDate: toDateInput(c?.idIssueDate),
+      idExpiry: toDateInput(c?.idExpiry),
+      // Driver licence
       licenseNumber: c?.licenseNumber || '',
-      licenseExpiry: c?.licenseExpiry || ''
+      licenseCountry: c?.licenseCountry || '',
+      licenseIssueDate: toDateInput(c?.licenseIssueDate),
+      licenseExpiry: toDateInput(c?.licenseExpiry),
+      // Address
+      address: c?.address || '',
+      city: c?.city || '',
+      zipCode: c?.zipCode || '',
+      country: c?.country || '',
+      // Legacy compat — compute age band from dateOfBirth if available
+      driverAge: c?.driverAge || (() => {
+        if (!c?.dateOfBirth) return '';
+        const age = Math.floor((Date.now() - new Date(c.dateOfBirth)) / 31557600000);
+        if (age >= 19 && age <= 22) return '19-22';
+        if (age >= 23 && age <= 69) return '23-69';
+        if (age >= 70) return '70+';
+        return '';
+      })()
     }
   };
 }
 
-export async function updateExtendedProfile({ driverAge, nationality, licenseNumber, licenseExpiry }) {
+export async function updateExtendedProfile({
+  dateOfBirth, nationality, taxNumber,
+  idNumber, idIssueCountry, idIssueDate, idExpiry,
+  licenseNumber, licenseCountry, licenseIssueDate, licenseExpiry,
+  address, city, zipCode, country,
+  firstName, lastName, phone
+}) {
   let email;
   try { email = await memberEmail(); } catch (_) { return { ok: false, error: 'unauthorized' }; }
   if (!email) return { ok: false, error: 'unauthorized' };
   const res = await wixData.query('Customers').eq('email', email).limit(1).find({ suppressAuth: true });
-  if (!(res.items && res.items[0])) return { ok: false, error: 'not_found' };
+  const existing = res.items && res.items[0];
+
+  const s = (v) => v !== undefined ? String(v || '').trim() : undefined;
+  const d = (v) => { if (v === undefined) return undefined; if (!v) return null; const dt = new Date(v); return isNaN(dt.getTime()) ? null : dt; };
+
   const patch = {};
-  if (driverAge !== undefined) patch.driverAge = String(driverAge || '').trim();
-  if (nationality !== undefined) patch.nationality = String(nationality || '').trim();
-  if (licenseNumber !== undefined) patch.licenseNumber = String(licenseNumber || '').trim();
-  if (licenseExpiry !== undefined) patch.licenseExpiry = String(licenseExpiry || '').trim();
+  if (dateOfBirth !== undefined) patch.dateOfBirth = d(dateOfBirth);
+  if (nationality !== undefined) patch.nationality = s(nationality);
+  if (taxNumber !== undefined) patch.taxNumber = s(taxNumber);
+  if (idNumber !== undefined) patch.idNumber = s(idNumber);
+  if (idIssueCountry !== undefined) patch.idIssueCountry = s(idIssueCountry);
+  if (idIssueDate !== undefined) patch.idIssueDate = d(idIssueDate);
+  if (idExpiry !== undefined) patch.idExpiry = d(idExpiry);
+  if (licenseNumber !== undefined) patch.licenseNumber = s(licenseNumber);
+  if (licenseCountry !== undefined) patch.licenseCountry = s(licenseCountry);
+  if (licenseIssueDate !== undefined) patch.licenseIssueDate = d(licenseIssueDate);
+  if (licenseExpiry !== undefined) patch.licenseExpiry = d(licenseExpiry);
+  if (address !== undefined) patch.address = s(address);
+  if (city !== undefined) patch.city = s(city);
+  if (zipCode !== undefined) patch.zipCode = s(zipCode);
+  if (country !== undefined) patch.country = s(country);
+  // Keep Customers record in sync with Wix Members names/phone (for backroom)
+  if (firstName !== undefined) patch.firstName = s(firstName);
+  if (lastName !== undefined) {
+    patch.lastName = s(lastName);
+    patch.fullName = ((s(firstName) || existing?.firstName || '') + ' ' + s(lastName)).trim();
+    patch.Title = patch.fullName || existing?.Title || email;
+  }
+  if (phone !== undefined) patch.mobilePhone = s(phone);
+
   try {
-    await wixData.update('Customers', { ...res.items[0], ...patch }, { suppressAuth: true });
+    if (existing) {
+      await wixData.update('Customers', { ...existing, ...patch }, { suppressAuth: true });
+    } else {
+      const fn = s(firstName) || '';
+      const ln = s(lastName) || '';
+      const fullName = (fn + ' ' + ln).trim() || email;
+      await wixData.insert('Customers', {
+        Title: fullName, email, fullName,
+        firstName: fn, lastName: ln,
+        mobilePhone: s(phone) || '',
+        isActive: true,
+        ...patch
+      }, { suppressAuth: true });
+    }
     return { ok: true };
   } catch (err) {
-    console.warn('updateExtendedProfile error', err);
+    console.warn('updateExtendedProfile error', err.message);
     return { ok: false, error: 'update_failed' };
   }
 }
