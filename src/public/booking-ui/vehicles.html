@@ -633,7 +633,28 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
 .search-wrap,.filter-combined,.result-card,.empty-card{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .cta{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
+.is-selected-card{outline:2.5px solid var(--gold,#e7bf69)!important;box-shadow:0 0 0 4px rgba(231,191,105,.18),0 22px 54px rgba(0,0,0,.20)!important}
 </style>
+<script>
+/* DIAMOND STATE: BookingState utility — shared across all booking-ui pages */
+window.BookingState=(function(){
+  var KEY='diamond_booking';
+  function _l(){try{return JSON.parse(sessionStorage.getItem(KEY)||'{}')}catch(e){try{sessionStorage.removeItem(KEY)}catch(_){}return {}}}
+  function _s(o){try{sessionStorage.setItem(KEY,JSON.stringify(o))}catch(_){}}
+  return{
+    set:function(k,v){var s=_l();s[k]=v;_s(s)},
+    get:function(k){var v=_l()[k];return v!==undefined?v:null},
+    setMany:function(o){var s=_l();Object.assign(s,o);_s(s)},
+    getAll:function(){return _l()},
+    clear:function(){try{sessionStorage.removeItem(KEY)}catch(_){}},
+    invalidateSelection:function(){
+      var s=_l();
+      ['vehicleCategory','vehicleId','basePrice','vehicleImage','selectedInsurance','selectedInsurancePrice','selectedExtras','totalPrice','billableDays'].forEach(function(k){delete s[k]});
+      _s(s);
+    }
+  };
+})();
+</script>
 </head>
 <body>
 <header class="site-header">
@@ -1190,15 +1211,19 @@ function render(){
   const nightRows = nightCharges();
   const nightExtra = nightRows.reduce((sum, item) => sum + item.amount, 0);
 
+  // DIAMOND STATE: Read previously selected category for card highlight
+  const bsSelectedCat = (window.BookingState ? BookingState.get('vehicleCategory') : null) || '';
   list.innerHTML = filtered.map(vehicle => {
     const dailyPrice = resolveDynamicDailyPrice(vehicle, days);
     const baseTotal = Number((dailyPrice * days).toFixed(2));
     const locationExtra = Number((locationFeeFor(document.getElementById('pickupLocation').value, 'pickup') + locationFeeFor(document.getElementById('dropoffLocation').value, 'dropoff')).toFixed(2));
     const grandTotal = baseTotal + ageExtra + nightExtra + locationExtra;
+    const catCode = extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || '');
+    const isSelected = bsSelectedCat && catCode === bsSelectedCat;
     const specs = vehicle.specs || {};
     const copy = cardCopy(vehicle);
     return `
-      <article class="result-card">
+      <article class="result-card${isSelected ? ' is-selected-card' : ''}">
         <div class="result-main">
           <div class="media-col">
             <div class="vehicle-badge">${escapeHtml(vehicle.categoryLabel || vehicle.label || vehicle.category || "-")}</div>
@@ -1386,6 +1411,21 @@ function goBooking(vehicleId, vehicleCategoryCode){
   };
   try{ sessionStorage.setItem(BOOKING_STORAGE_KEY, JSON.stringify(payload)); }catch(err){}
   try{ localStorage.setItem(BOOKING_STORAGE_KEY, JSON.stringify(payload)); }catch(err){}
+
+  // DIAMOND STATE: Save selected vehicle and context to BookingState before navigating to options
+  if(window.BookingState){
+    const bsDays = Math.max(1, Math.ceil((dropoffIso - pickupIso) / (1000*60*60*24)));
+    const pickedVehicle = Array.isArray(vehicles) ? vehicles.find(function(v){ return (v.vehicleCategoryId||v.id)===vehicleId; }) : null;
+    const bsBasePrice = resolveDynamicDailyPrice(pickedVehicle || {label:vehicleCategoryCode,id:vehicleId}, bsDays);
+    const bsImage = pickedVehicle ? (pickedVehicle.image||'') : '';
+    BookingState.setMany({
+      vehicleCategory: extractCategoryCode(vehicleCategoryCode||categorySelect.value),
+      vehicleId: vehicleId,
+      basePrice: bsBasePrice,
+      vehicleImage: bsImage
+    });
+  }
+
   goTo(`${PAGE_ROUTES.options}?vehicle=${encodeURIComponent(vehicleId)}&pickup=${encodeURIComponent(payload.pickup)}&dropoff=${encodeURIComponent(payload.dropoff)}&pickupLocation=${encodeURIComponent(pickupLocation)}&dropoffLocation=${encodeURIComponent(dropoffLocation)}&category=${encodeURIComponent(extractCategoryCode(vehicleCategoryCode || categorySelect.value))}&age=${encodeURIComponent(ageGroup.value)}`);
 }
 initPageOwnedControls([
@@ -1409,6 +1449,24 @@ if(Array.isArray(embeddedVehicleItems)){
 }
 loadVehicles();
 if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls();
+
+// DIAMOND STATE: Detect stale vehicle selection when search params have changed
+(function(){
+  try{
+    if(!window.BookingState) return;
+    var bs = BookingState.getAll();
+    if(!bs.searchHash) return;
+    var pl = document.getElementById('pickupLocation');
+    var dl = document.getElementById('dropoffLocation');
+    var pd = document.getElementById('pickupDate');
+    var dd = document.getElementById('dropoffDate');
+    var pt = document.getElementById('pickupTime');
+    var dt = document.getElementById('dropoffTime');
+    if(!pl||!pd||!dd) return;
+    var currentHash = [pl.value||'',dl?dl.value:'',pd.value||'',dd.value||'',pt?pt.value:'',dt?dt.value:''].join('|');
+    if(currentHash !== bs.searchHash) BookingState.invalidateSelection();
+  }catch(_){}
+})();
 
 
 function escapeCustomUi(value){

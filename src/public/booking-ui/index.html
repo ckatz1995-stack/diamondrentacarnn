@@ -1530,6 +1530,27 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 }
 
 </style>
+<script>
+/* DIAMOND STATE: BookingState utility — shared across all booking-ui pages */
+window.BookingState=(function(){
+  var KEY='diamond_booking';
+  function _l(){try{return JSON.parse(sessionStorage.getItem(KEY)||'{}')}catch(e){try{sessionStorage.removeItem(KEY)}catch(_){}return {}}}
+  function _s(o){try{sessionStorage.setItem(KEY,JSON.stringify(o))}catch(_){}}
+  return{
+    set:function(k,v){var s=_l();s[k]=v;_s(s)},
+    get:function(k){var v=_l()[k];return v!==undefined?v:null},
+    setMany:function(o){var s=_l();Object.assign(s,o);_s(s)},
+    getAll:function(){return _l()},
+    clear:function(){try{sessionStorage.removeItem(KEY)}catch(_){}},
+    invalidateSelection:function(){
+      var s=_l();
+      ['vehicleCategory','vehicleId','basePrice','vehicleImage','selectedInsurance','selectedInsurancePrice','selectedExtras','totalPrice','billableDays'].forEach(function(k){delete s[k]});
+      _s(s);
+    }
+  };
+})();
+</script>
+<style>.label-error{color:#b83c2e!important;font-weight:800!important}.field-error{display:none;color:#b83c2e;font-size:12px;font-weight:700;margin-top:3px}.field-error.visible{display:block}</style>
 </head>
 <body>
 <header class="site-header">
@@ -1583,6 +1604,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
       <div class="booking-wrap">
         <div class="booking-card">
           <form id="searchForm">
+            <div id="searchError" role="alert" style="display:none;margin:0 0 14px;padding:12px 14px;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.28);border-radius:12px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.4"></div>
             <div class="grid">
               <div class="field">
                 <label>Σταθμός παραλαβής</label>
@@ -2518,6 +2540,24 @@ function initForm(){
 
   mergeCtx(safeReadSearch());
   mergeCtx(parseCtx(location.search));
+
+  // DIAMOND STATE: Restore search params from BookingState as additional source
+  (function(){
+    try{
+      if(!window.BookingState) return;
+      var bs = BookingState.getAll();
+      if(!bs.pickupDate && !bs.pickupLocation) return;
+      var bsCtx = {};
+      if(bs.pickupDate && bs.pickupTime) bsCtx.pickup = bs.pickupDate+'T'+bs.pickupTime+':00';
+      if(bs.dropoffDate && bs.dropoffTime) bsCtx.dropoff = bs.dropoffDate+'T'+bs.dropoffTime+':00';
+      if(bs.pickupLocation) bsCtx.pickupLocation = bs.pickupLocation;
+      if(bs.dropoffLocation) bsCtx.dropoffLocation = bs.dropoffLocation;
+      if(bs.vehicleCategory) bsCtx.category = bs.vehicleCategory;
+      if(bs.driverAge) bsCtx.age = bs.driverAge;
+      mergeCtx(bsCtx);
+    }catch(_){}
+  })();
+
   applySearchContext(ctx);
 
   pickupDate.addEventListener('change', ()=>{
@@ -2550,19 +2590,69 @@ function initForm(){
   document.getElementById('searchForm').addEventListener('submit', e=>{
     e.preventDefault();
 
-    const pickup = normalizeDateTime(pickupDate,pickupTime);
-    const dropoff = normalizeDateTime(document.getElementById('dropoffDate'), document.getElementById('dropoffTime'));
+    const errEl = document.getElementById('searchError');
+    function showErr(msg){ if(errEl){ errEl.textContent=msg; errEl.style.display='block'; errEl.scrollIntoView({behavior:'smooth',block:'nearest'}); } }
+    function hideErr(){ if(errEl) errEl.style.display='none'; }
 
-    if(pickup < new Date()){
-      alert('Η παραλαβή δεν μπορεί να είναι σε περασμένη ώρα ή ημερομηνία.');
-      return;
-    }
-    if(dropoff <= pickup){
-      alert('Η επιστροφή πρέπει να είναι μεταγενέστερη της παραλαβής.');
-      return;
+    const pickupDateEl = document.getElementById('pickupDate');
+    const pickupTimeEl = document.getElementById('pickupTime');
+    const dropoffDateEl = document.getElementById('dropoffDate');
+    const dropoffTimeEl = document.getElementById('dropoffTime');
+    const pickupLocationEl = document.getElementById('pickupLocation');
+    const dropoffLocationEl = document.getElementById('dropoffLocation');
+    const driverAgeEl = document.getElementById('driverAge');
+
+    const pickupDateVal = pickupDateEl ? pickupDateEl.value : '';
+    const pickupTimeVal = pickupTimeEl ? pickupTimeEl.value : '';
+    const dropoffDateVal = dropoffDateEl ? dropoffDateEl.value : '';
+    const dropoffTimeVal = dropoffTimeEl ? dropoffTimeEl.value : '';
+    const pickupLocationVal = pickupLocationEl ? pickupLocationEl.value : '';
+    const dropoffLocationVal = dropoffLocationEl ? dropoffLocationEl.value : '';
+    const driverAgeVal = driverAgeEl ? driverAgeEl.value : '';
+
+    if(!pickupLocationVal){ showErr('Παρακαλώ επιλέξτε σημείο παραλαβής.'); return; }
+    if(!dropoffLocationVal){ showErr('Παρακαλώ επιλέξτε σημείο επιστροφής.'); return; }
+    if(!pickupDateVal){ showErr('Παρακαλώ επιλέξτε ημερομηνία παραλαβής.'); return; }
+    if(!pickupTimeVal){ showErr('Παρακαλώ επιλέξτε ώρα παραλαβής.'); return; }
+    if(!dropoffDateVal){ showErr('Παρακαλώ επιλέξτε ημερομηνία επιστροφής.'); return; }
+    if(!dropoffTimeVal){ showErr('Παρακαλώ επιλέξτε ώρα επιστροφής.'); return; }
+    if(!driverAgeVal){ showErr('Παρακαλώ επιλέξτε ηλικία οδηγού.'); return; }
+
+    const pickup = normalizeDateTime(pickupDateEl, pickupTimeEl);
+    const dropoff = normalizeDateTime(dropoffDateEl, dropoffTimeEl);
+    const now = new Date();
+
+    if(pickup < now){ showErr('Η ημερομηνία/ώρα παραλαβής δεν μπορεί να είναι στο παρελθόν.'); return; }
+
+    const isToday = pickupDateVal === fmtDateInput(now);
+    if(isToday && pickup.getHours() >= 18){ showErr('Δεν γίνονται κρατήσεις με παραλαβή σήμερα μετά τις 18:00. Επιλέξτε αύριο ή αργότερη ώρα.'); return; }
+
+    if(dropoff <= pickup){ showErr('Η ημερομηνία/ώρα επιστροφής πρέπει να είναι μεταγενέστερη της παραλαβής.'); return; }
+
+    const diffHours = (dropoff - pickup) / 3600000;
+    if(diffHours < 24){ showErr('Η ελάχιστη διάρκεια ενοικίασης είναι 24 ώρες.'); return; }
+
+    hideErr();
+    const searchParams = collectSearchState();
+    safeStoreSearch(searchParams);
+
+    // DIAMOND STATE: Save search params + hash to BookingState
+    if(window.BookingState){
+      const categoryVal = document.getElementById('category') ? document.getElementById('category').value : 'all';
+      const hash = [pickupLocationVal,dropoffLocationVal,pickupDateVal,dropoffDateVal,pickupTimeVal,dropoffTimeVal].join('|');
+      BookingState.setMany({
+        pickupDate: pickupDateVal,
+        pickupTime: pickupTimeVal,
+        dropoffDate: dropoffDateVal,
+        dropoffTime: dropoffTimeVal,
+        pickupLocation: pickupLocationVal,
+        dropoffLocation: dropoffLocationVal,
+        vehicleCategory: categoryVal,
+        driverAge: driverAgeVal,
+        searchHash: hash
+      });
     }
 
-    safeStoreSearch(collectSearchState());
     goTo(getSearchPath());
 });
 }
