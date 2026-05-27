@@ -646,24 +646,31 @@ body.dark .bnav-btn.active .bnav-lbl{color:#5fa8c4}
   <div class="mbox">
     <button class="mclose" id="editProfileClose">✕</button>
     <h3>Επεξεργασία Προφίλ</h3>
+    <p class="msub">Τα στοιχεία σας αποθηκεύονται ασφαλώς και χρησιμοποιούνται στις κρατήσεις.</p>
     <div class="merr" id="profileErr"></div>
     <div class="mok" id="profileOk">✅ Τα στοιχεία σας ενημερώθηκαν!</div>
-    <div class="msect">Στοιχεία Επικοινωνίας</div>
+    <div class="msect">Προσωπικά Στοιχεία</div>
     <div class="mrow"><label>Όνομα</label><input type="text" id="editFirst" autocomplete="given-name"/></div>
     <div class="mrow"><label>Επώνυμο</label><input type="text" id="editLast" autocomplete="family-name"/></div>
     <div class="mrow"><label>Τηλέφωνο</label><input type="tel" id="editPhone" autocomplete="tel" placeholder="π.χ. +30 694 0000000"/></div>
-    <div class="msect">Στοιχεία Οδηγού</div>
-    <div class="mrow"><label>Κατηγορία ηλικίας οδηγού</label>
-      <select id="editDriverAge">
-        <option value="">— επιλέξτε —</option>
-        <option value="19-22">19–22 (επασφάλιστρο νέου)</option>
-        <option value="23-69">23–69 (κανονική)</option>
-        <option value="70+">70+ (επασφάλιστρο)</option>
-      </select>
-    </div>
+    <div class="mrow"><label>Ημερομηνία Γέννησης</label><input type="date" id="editBirthdate"/></div>
     <div class="mrow"><label>Εθνικότητα</label><input type="text" id="editNationality" placeholder="π.χ. Ελληνική"/></div>
+    <div class="mrow"><label>ΑΦΜ</label><input type="text" id="editTaxNumber" autocomplete="off" placeholder="π.χ. 123456789"/></div>
+    <div class="msect">Ταυτότητα / Διαβατήριο</div>
+    <div class="mrow"><label>Αριθμός Ταυτότητας / Διαβατηρίου</label><input type="text" id="editIdNumber" autocomplete="off"/></div>
+    <div class="mrow"><label>Χώρα Έκδοσης</label><input type="text" id="editIdIssueCountry" placeholder="π.χ. Ελλάδα"/></div>
+    <div class="mrow"><label>Ημερομηνία Έκδοσης</label><input type="date" id="editIdIssueDate"/></div>
+    <div class="mrow"><label>Ημερομηνία Λήξης</label><input type="date" id="editIdExpiry"/></div>
+    <div class="msect">Άδεια Οδήγησης</div>
     <div class="mrow"><label>Αριθμός Άδειας Οδήγησης</label><input type="text" id="editLicenseNum" autocomplete="off"/></div>
-    <div class="mrow"><label>Λήξη Άδειας Οδήγησης</label><input type="date" id="editLicenseExp"/></div>
+    <div class="mrow"><label>Χώρα Έκδοσης</label><input type="text" id="editLicenseCountry" placeholder="π.χ. Ελλάδα"/></div>
+    <div class="mrow"><label>Ημερομηνία Έκδοσης</label><input type="date" id="editLicenseIssueDate"/></div>
+    <div class="mrow"><label>Ημερομηνία Λήξης</label><input type="date" id="editLicenseExp"/></div>
+    <div class="msect">Διεύθυνση</div>
+    <div class="mrow"><label>Οδός &amp; Αριθμός</label><input type="text" id="editAddress" autocomplete="street-address" placeholder="π.χ. Αγίας Σοφίας 15"/></div>
+    <div class="mrow"><label>Πόλη</label><input type="text" id="editCity" autocomplete="address-level2"/></div>
+    <div class="mrow"><label>Ταχυδρομικός Κώδικας</label><input type="text" id="editZipCode" autocomplete="postal-code"/></div>
+    <div class="mrow"><label>Χώρα</label><input type="text" id="editCountry" autocomplete="country-name" placeholder="π.χ. Ελλάδα"/></div>
     <div class="mbtn-row">
       <button class="mbtn-ghost" id="profileCancelBtn">Άκυρο</button>
       <button class="mbtn-primary" id="profileSaveBtn">💾 Αποθήκευση</button>
@@ -1358,6 +1365,7 @@ body.dark .bnav-btn.active .bnav-lbl{color:#5fa8c4}
     var name=(p.name||'').trim()||'—';
     var loy=loyaltyInfo(completedCount);
     function row(lbl,val){return '<div class="pf-row"><span class="pf-label">'+lbl+'</span><span class="pf-val'+(val?'':' empty-val')+'">'+(val?esc(val):'—')+'</span></div>';}
+    function rowD(lbl,val){return row(lbl,val?fmtDate(val):'');}
     var ext=extendedProfile||{};
     el.innerHTML=
       '<div class="profile-card">'+
@@ -1370,16 +1378,30 @@ body.dark .bnav-btn.active .bnav-lbl{color:#5fa8c4}
           '</div>'+
         '</div>'+
         '<div class="profile-fields">'+
-          row('✉️ Email',p.email)+row('📱 Τηλέφωνο',p.phone)+row('👤 Όνομα',p.firstName)+row('👤 Επώνυμο',p.lastName)+
+          row('✉️ Email',p.email)+row('📱 Τηλέφωνο',p.phone)+
+          row('👤 Όνομα',p.firstName)+row('👤 Επώνυμο',p.lastName)+
+          rowD('🎂 Ημ. Γέννησης',ext.dateOfBirth)+row('🌍 Εθνικότητα',ext.nationality)+row('🏛️ ΑΦΜ',ext.taxNumber)+
         '</div>'+
         '<div class="profile-actions"><button class="btn-profile-edit" id="editProfileBtn">✏️ Επεξεργασία στοιχείων</button></div>'+
       '</div>'+
       '<div class="profile-card">'+
+        '<div style="padding:12px 20px 2px"><span class="section-title">Ταυτότητα / Διαβατήριο</span></div>'+
         '<div class="profile-fields">'+
-          '<div class="pf-row"><span class="pf-label">🚗 Ηλικία οδηγού</span><span class="pf-val'+(ext.driverAge?'':' empty-val')+'">'+(ext.driverAge?esc(ext.driverAge):'—')+'</span></div>'+
-          row('🌍 Εθνικότητα',ext.nationality)+
-          '<div class="pf-row"><span class="pf-label">📄 Άδεια οδήγησης</span><span class="pf-val'+(ext.licenseNumber?'':' empty-val')+'">'+(ext.licenseNumber?esc(ext.licenseNumber):'—')+'</span></div>'+
-          '<div class="pf-row"><span class="pf-label">📅 Λήξη άδειας</span><span class="pf-val'+(ext.licenseExpiry?'':' empty-val')+'">'+(ext.licenseExpiry?fmtDate(ext.licenseExpiry):'—')+'</span></div>'+
+          row('📄 Αριθμός',ext.idNumber)+row('🌐 Χώρα Έκδοσης',ext.idIssueCountry)+
+          rowD('📅 Ημ. Έκδοσης',ext.idIssueDate)+rowD('📅 Ημ. Λήξης',ext.idExpiry)+
+        '</div>'+
+      '</div>'+
+      '<div class="profile-card">'+
+        '<div style="padding:12px 20px 2px"><span class="section-title">Άδεια Οδήγησης</span></div>'+
+        '<div class="profile-fields">'+
+          row('📄 Αριθμός',ext.licenseNumber)+row('🌐 Χώρα Έκδοσης',ext.licenseCountry)+
+          rowD('📅 Ημ. Έκδοσης',ext.licenseIssueDate)+rowD('📅 Λήξη',ext.licenseExpiry)+
+        '</div>'+
+      '</div>'+
+      '<div class="profile-card">'+
+        '<div style="padding:12px 20px 2px"><span class="section-title">Διεύθυνση</span></div>'+
+        '<div class="profile-fields">'+
+          row('🏠 Οδός',ext.address)+row('🏙️ Πόλη',ext.city)+row('📮 Τ.Κ.',ext.zipCode)+row('🌍 Χώρα',ext.country)+
         '</div>'+
       '</div>';
     document.getElementById('editProfileBtn').addEventListener('click',openEditProfile);
@@ -1559,10 +1581,21 @@ body.dark .bnav-btn.active .bnav-lbl{color:#5fa8c4}
       document.getElementById('editPhone').value=memberProfile.phone||'';
     }
     var ext=extendedProfile||{};
-    document.getElementById('editDriverAge').value=ext.driverAge||'';
+    document.getElementById('editBirthdate').value=ext.dateOfBirth||'';
     document.getElementById('editNationality').value=ext.nationality||'';
+    document.getElementById('editTaxNumber').value=ext.taxNumber||'';
+    document.getElementById('editIdNumber').value=ext.idNumber||'';
+    document.getElementById('editIdIssueCountry').value=ext.idIssueCountry||'';
+    document.getElementById('editIdIssueDate').value=ext.idIssueDate||'';
+    document.getElementById('editIdExpiry').value=ext.idExpiry||'';
     document.getElementById('editLicenseNum').value=ext.licenseNumber||'';
+    document.getElementById('editLicenseCountry').value=ext.licenseCountry||'';
+    document.getElementById('editLicenseIssueDate').value=ext.licenseIssueDate||'';
     document.getElementById('editLicenseExp').value=ext.licenseExpiry||'';
+    document.getElementById('editAddress').value=ext.address||'';
+    document.getElementById('editCity').value=ext.city||'';
+    document.getElementById('editZipCode').value=ext.zipCode||'';
+    document.getElementById('editCountry').value=ext.country||'';
     document.getElementById('profileErr').classList.remove('show');
     document.getElementById('profileOk').classList.remove('show');
     document.getElementById('profileSaveBtn').textContent='💾 Αποθήκευση';
@@ -1576,7 +1609,24 @@ body.dark .bnav-btn.active .bnav-lbl{color:#5fa8c4}
     if(!fn||!ln){showErr('profileErr','Συμπληρώστε όνομα και επώνυμο.');return;}
     setBusy('profileSaveBtn',true,'Αποθήκευση...');
     post({type:'UPDATE_PROFILE',firstName:fn,lastName:ln,phone:ph});
-    post({type:'UPDATE_EXTENDED_PROFILE',driverAge:document.getElementById('editDriverAge').value.trim(),nationality:document.getElementById('editNationality').value.trim(),licenseNumber:document.getElementById('editLicenseNum').value.trim(),licenseExpiry:document.getElementById('editLicenseExp').value.trim()});
+    post({type:'UPDATE_EXTENDED_PROFILE',
+      firstName:fn,lastName:ln,phone:ph,
+      dateOfBirth:document.getElementById('editBirthdate').value,
+      nationality:document.getElementById('editNationality').value.trim(),
+      taxNumber:document.getElementById('editTaxNumber').value.trim(),
+      idNumber:document.getElementById('editIdNumber').value.trim(),
+      idIssueCountry:document.getElementById('editIdIssueCountry').value.trim(),
+      idIssueDate:document.getElementById('editIdIssueDate').value,
+      idExpiry:document.getElementById('editIdExpiry').value,
+      licenseNumber:document.getElementById('editLicenseNum').value.trim(),
+      licenseCountry:document.getElementById('editLicenseCountry').value.trim(),
+      licenseIssueDate:document.getElementById('editLicenseIssueDate').value,
+      licenseExpiry:document.getElementById('editLicenseExp').value,
+      address:document.getElementById('editAddress').value.trim(),
+      city:document.getElementById('editCity').value.trim(),
+      zipCode:document.getElementById('editZipCode').value.trim(),
+      country:document.getElementById('editCountry').value.trim()
+    });
   }
   function closeProfileModal(){document.getElementById('editProfileModal').classList.add('hidden');setBusy('profileSaveBtn',false);}
 
@@ -1812,10 +1862,21 @@ body.dark .bnav-btn.active .bnav-lbl{color:#5fa8c4}
           memberProfile.name=(memberProfile.firstName+' '+memberProfile.lastName).trim();
         }
         if(!extendedProfile)extendedProfile={};
-        extendedProfile.driverAge=document.getElementById('editDriverAge').value.trim();
+        extendedProfile.dateOfBirth=document.getElementById('editBirthdate').value;
         extendedProfile.nationality=document.getElementById('editNationality').value.trim();
+        extendedProfile.taxNumber=document.getElementById('editTaxNumber').value.trim();
+        extendedProfile.idNumber=document.getElementById('editIdNumber').value.trim();
+        extendedProfile.idIssueCountry=document.getElementById('editIdIssueCountry').value.trim();
+        extendedProfile.idIssueDate=document.getElementById('editIdIssueDate').value;
+        extendedProfile.idExpiry=document.getElementById('editIdExpiry').value;
         extendedProfile.licenseNumber=document.getElementById('editLicenseNum').value.trim();
-        extendedProfile.licenseExpiry=document.getElementById('editLicenseExp').value.trim();
+        extendedProfile.licenseCountry=document.getElementById('editLicenseCountry').value.trim();
+        extendedProfile.licenseIssueDate=document.getElementById('editLicenseIssueDate').value;
+        extendedProfile.licenseExpiry=document.getElementById('editLicenseExp').value;
+        extendedProfile.address=document.getElementById('editAddress').value.trim();
+        extendedProfile.city=document.getElementById('editCity').value.trim();
+        extendedProfile.zipCode=document.getElementById('editZipCode').value.trim();
+        extendedProfile.country=document.getElementById('editCountry').value.trim();
         setTimeout(function(){closeProfileModal();profileLoaded=false;loadProfile();showToast('success','Το προφίλ σας ενημερώθηκε.');},1400);
       }else showErr('profileErr',berr(d.error));
       return;
