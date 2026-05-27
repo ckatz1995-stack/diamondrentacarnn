@@ -254,12 +254,33 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
 .btn-invoice{background:#eef0ff;color:#3a5fd4;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;transition:background .15s}
 .btn-invoice:hover{background:#dce2ff}
 
+/* ── Documents panel ── */
+.doc-intro{background:linear-gradient(135deg,#1a1510,#2a3d47);border-radius:14px;padding:18px 20px;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:16px}
+.doc-intro-icon{font-size:32px;flex-shrink:0}
+.doc-intro-title{font-size:15px;font-weight:800;margin-bottom:4px}
+.doc-intro-sub{font-size:12px;color:rgba(255,255,255,.5);line-height:1.4}
+.doc-list{display:flex;flex-direction:column;gap:10px}
+.doc-card{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);display:flex;align-items:center;gap:14px}
+.doc-card-icon{font-size:28px;flex-shrink:0;width:40px;text-align:center}
+.doc-card-body{flex:1;min-width:0}
+.doc-card-title{font-size:14px;font-weight:800;color:#1f1a13;margin-bottom:3px}
+.doc-card-meta{font-size:12px;color:#aaa}
+.doc-card-status{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:6px}
+.doc-card-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.btn-doc-view{background:#eef6fa;color:#3f748a;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap}
+.btn-doc-view:hover{background:#d8edf5}
+.btn-doc-print{background:#f4f2ee;color:#555;border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap}
+.btn-doc-print:hover{background:#e8e4da}
+
 @media(max-width:480px){
   .bk-det-grid{grid-template-columns:1fr}
   .tab{padding:13px 10px;font-size:12px}
   .voucher-grid{grid-template-columns:1fr}
   .analytics-stats{grid-template-columns:repeat(2,1fr)}
   .tier-cards{grid-template-columns:repeat(2,1fr)}
+  .doc-card{flex-wrap:wrap}
+  .doc-card-actions{flex-direction:row;width:100%}
+  .btn-doc-view,.btn-doc-print{flex:1;text-align:center}
 }
 </style>
 </head>
@@ -302,6 +323,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     <button class="tab" data-tab="analytics">📊 Ανάλυση</button>
     <button class="tab" data-tab="payments">💳 Πληρωμές</button>
     <button class="tab" data-tab="loyalty">🏆 Loyalty</button>
+    <button class="tab" data-tab="documents">📄 Έγγραφα</button>
     <button class="tab" data-tab="profile">👤 Προφίλ</button>
   </div>
 
@@ -339,6 +361,11 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     <!-- Loyalty panel -->
     <div id="panelLoyalty" class="hidden">
       <div id="loyaltyContent"><div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div></div>
+    </div>
+
+    <!-- Documents panel -->
+    <div id="panelDocuments" class="hidden">
+      <div id="documentsContent"><div class="spin"><div class="spin-ring"></div><span>Φόρτωση...</span></div></div>
     </div>
 
     <!-- Profile panel -->
@@ -474,7 +501,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   var memberProfile=null, extendedProfile=null, voucherBooking=null;
   var initTimer=null, currentRating=0, completedCount=0;
   var editIgnoreConflict=false, extendIgnoreConflict=false;
-  var allBookingsCache=[], analyticsBuilt=false, paymentsBuilt=false, loyaltyBuilt=false;
+  var allBookingsCache=[], analyticsBuilt=false, paymentsBuilt=false, loyaltyBuilt=false, documentsBuilt=false;
   var currentTab='bookings';
 
   /* ─── postMessage ────────────────────────────────────── */
@@ -552,7 +579,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   function showTab(tab){
     currentTab=tab;
     document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
-    var panels=['bookings','analytics','payments','loyalty','profile'];
+    var panels=['bookings','analytics','payments','loyalty','documents','profile'];
     panels.forEach(function(p){
       var el=document.getElementById('panel'+p.charAt(0).toUpperCase()+p.slice(1));
       if(el)el.classList.toggle('hidden',p!==tab);
@@ -561,6 +588,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
     if(tab==='analytics'&&!analyticsBuilt)buildAnalytics();
     if(tab==='payments'&&!paymentsBuilt)buildPayments();
     if(tab==='loyalty'&&!loyaltyBuilt)buildLoyalty();
+    if(tab==='documents'&&!documentsBuilt)buildDocuments();
   }
 
   /* ─── Bookings ───────────────────────────────────────── */
@@ -808,6 +836,54 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
         '<div class="section-title" style="margin-top:8px">Ιστορικό Πόντων</div>'+
         '<div class="pts-history">'+histRows+'</div>'
       :'');
+  }
+
+  /* ─── Documents (vouchers from cached bookings) ─────── */
+  function buildDocuments(){
+    documentsBuilt=true;
+    var eligible=allBookingsCache.filter(function(b){
+      return b.status==='Confirmed'||b.status==='Active'||b.status==='Completed'||b.status==='Pending';
+    }).sort(function(a,b){return new Date(b.pickupDateTime)-new Date(a.pickupDateTime);});
+
+    if(!eligible.length){
+      document.getElementById('documentsContent').innerHTML=
+        '<div class="empty"><div class="empty-icon">📄</div>'+
+        '<h3>Δεν υπάρχουν έγγραφα</h3>'+
+        '<p>Τα vouchers επιβεβαιωμένων κρατήσεων θα εμφανιστούν εδώ.</p></div>';
+      return;
+    }
+
+    var cardsHtml=eligible.map(function(b){
+      var id=b._id;
+      var statusCls=b.status==='Confirmed'||b.status==='Active'?'s-confirmed':b.status==='Completed'?'s-completed':'s-pending';
+      var icon=b.status==='Active'?'🚗':b.status==='Completed'?'✅':'🎫';
+      return '<div class="doc-card">'+
+        '<div class="doc-card-icon">'+icon+'</div>'+
+        '<div class="doc-card-body">'+
+          '<div class="doc-card-title">'+
+            'Voucher #'+esc(b.bookingNumber||b._id)+
+            '<span class="doc-card-status '+statusCls+'">'+sLabel(b.status)+'</span>'+
+          '</div>'+
+          '<div class="doc-card-meta">'+esc(b.vehicleName||'—')+'</div>'+
+          '<div class="doc-card-meta">'+fmtDate(b.pickupDateTime)+' → '+fmtDate(b.dropoffDateTime)+'</div>'+
+          (b.totalPrice?'<div class="doc-card-meta" style="margin-top:3px;font-weight:700;color:#3f748a">'+fmtEUR(b.totalPrice)+'</div>':'')+
+        '</div>'+
+        '<div class="doc-card-actions">'+
+          '<button class="btn-doc-view" onclick="openVoucherForCard(\''+id+'\')">🎫 Προβολή</button>'+
+          '<button class="btn-doc-print" onclick="printVoucherForCard(\''+id+'\')">🖨️ Εκτύπωση</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+
+    document.getElementById('documentsContent').innerHTML=
+      '<div class="doc-intro">'+
+        '<div class="doc-intro-icon">📄</div>'+
+        '<div>'+
+          '<div class="doc-intro-title">Τα Έγγραφά σας</div>'+
+          '<div class="doc-intro-sub">'+eligible.length+' voucher'+(eligible.length===1?'':'s')+' διαθέσιμα — προβολή ή εκτύπωση ανά πάσα στιγμή</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="doc-list">'+cardsHtml+'</div>';
   }
 
   /* ─── Profile ────────────────────────────────────────── */
@@ -1067,7 +1143,40 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
   window.openCancelForCard=function(id){var b=allBookingData[id];if(b)openCancelModal(b);};
   window.openExtendForCard=function(id){var b=allBookingData[id];if(b)openExtendModal(b);};
   window.openReviewForCard=function(id){var b=allBookingData[id];if(b)openReviewModal(b);};
-  window.openVoucherForCard=function(id){var b=allBookingData[id];if(b)openVoucher(b);};
+  window.openVoucherForCard=function(id){
+    // look in allBookingData first (bookings panel), fall back to cache (documents panel)
+    var b=allBookingData[id]||allBookingsCache.find(function(x){return x._id===id;});
+    if(b)openVoucher(b);
+  };
+  window.printVoucherForCard=function(id){
+    var b=allBookingData[id]||allBookingsCache.find(function(x){return x._id===id;});
+    if(!b)return;
+    // populate voucher content then print without opening modal
+    function vf(lbl,val){return '<div class="vf"><label>'+lbl+'</label><span>'+esc(val||'—')+'</span></div>';}
+    var html=
+      '<div class="voucher-logo">Diamond Rent A Car</div>'+
+      '<div class="voucher-sub">Επιβεβαίωση Κράτησης</div>'+
+      '<div class="voucher-title">#'+esc(b.bookingNumber||b._id)+'</div>'+
+      '<div class="voucher-grid">'+
+        vf('Κατηγορία Οχήματος',b.vehicleName)+
+        vf('Κατάσταση',sLabel(b.status))+
+        vf('Παραλαβή',fmtShort(b.pickupDateTime))+
+        vf('Επιστροφή',fmtShort(b.dropoffDateTime))+
+        vf('Σημείο Παραλαβής',b.pickupLocation)+
+        vf('Σημείο Επιστροφής',b.dropoffLocation)+
+        (b.insurance?vf('Ασφάλεια',b.insurance):'')+
+        (b.driverAge?vf('Ηλικία Οδηγού',b.driverAge+' ετών'):'')+
+      '</div>'+
+      (b.extras&&Array.isArray(b.extras)&&b.extras.length?'<div class="vf" style="margin-bottom:12px"><label>Extras</label><span>'+b.extras.map(function(e){return esc(typeof e==='string'?e:(e.name||e.label||''));}).join(', ')+'</span></div>':'')+
+      (b.notes?'<div class="vf" style="margin-bottom:12px"><label>Σημειώσεις</label><span>'+esc(b.notes)+'</span></div>':'')+
+      '<hr class="voucher-divider">'+
+      '<div class="voucher-total">'+fmtEUR(b.totalPrice)+'</div>'+
+      '<div class="voucher-footer">Diamond Rent A Car — Θεσσαλονίκη<br>Αυτό το voucher αποτελεί επιβεβαίωση κράτησης.</div>';
+    var pa=document.getElementById('printArea');
+    pa.innerHTML=html;
+    window.print();
+    pa.innerHTML='';
+  };
   window.bookAgain=function(id){var b=allBookingData[id];if(b)bookAgainFn(b);};
 
   /* ─── DOM events ─────────────────────────────────────── */
@@ -1126,12 +1235,13 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f2f0e
         // cache ALL bookings (only when filter=all / no filter)
         if(!d.filter||d.filter===null||d.filter==='all'){
           allBookingsCache=bookings;
-          analyticsBuilt=false;paymentsBuilt=false;loyaltyBuilt=false;
+          analyticsBuilt=false;paymentsBuilt=false;loyaltyBuilt=false;documentsBuilt=false;
           updateStats(bookings);renderNextTrip(bookings);
           // rebuild visible tab if already open
           if(currentTab==='analytics')buildAnalytics();
           if(currentTab==='payments')buildPayments();
           if(currentTab==='loyalty')buildLoyalty();
+          if(currentTab==='documents')buildDocuments();
         }
         if(!document.getElementById('panelBookings').classList.contains('hidden')){
           renderBookings(bookings);
