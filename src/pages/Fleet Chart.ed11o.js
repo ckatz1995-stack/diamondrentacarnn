@@ -45,6 +45,7 @@ $w.onReady(async function () {
       if (route === 'daily') return wixLocation.to(ROUTES.daily);
       if (route === 'fleet') return wixLocation.to(ROUTES.fleet);
       if (route === 'bookings') return wixLocation.to(ROUTES.bookings);
+      if (route === 'customers') return wixLocation.to(ROUTES.customers);
       if (route === 'settings') return wixLocation.to(ROUTES.settings);
     }
 

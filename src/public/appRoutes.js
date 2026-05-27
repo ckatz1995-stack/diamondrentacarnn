@@ -6,6 +6,7 @@ export const APP_ROUTES = {
   bookings: '/myroom-bookingboard',
   contract: '/myroom-contract',
   vehiclecard: '/vehiclecard',
+  customers: '/myroom-customers',
   settings: '/account-settings',
   pricing: '/account-settings'
 };

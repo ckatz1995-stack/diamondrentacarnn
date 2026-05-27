@@ -1238,7 +1238,7 @@ function applyMemberPrefill(member = {}){
     address: ['address'],
     city: ['city'],
     billingZip: ['postalCode','zip'],
-    dob: ['birthdate','dob']
+    dob: ['dateOfBirth','birthdate','dob']
   };
   Object.entries(map).forEach(([field, keys]) => {
     const el = document.querySelector(`[name="${field}"]`);
