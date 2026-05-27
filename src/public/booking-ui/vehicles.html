@@ -1645,6 +1645,183 @@ window.addEventListener('load', () => { notifyHeight(); setTimeout(notifyHeight,
 window.addEventListener('resize', notifyHeight);
 try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
 
+/* ===== MEMBER PORTAL AUTH ===== */
+(function memberPortalInit(){
+  var S='diamondMbrSess';
+  function rSess(){try{return JSON.parse(sessionStorage.getItem(S)||'null')}catch(_){return null}}
+  function wSess(v){try{sessionStorage.setItem(S,JSON.stringify(v))}catch(_){}}
+  function cSess(){try{sessionStorage.removeItem(S)}catch(_){}}
+
+  var css=document.createElement('style');
+  css.textContent='.mbr-area{position:relative;flex-shrink:0;margin-left:4px}.mbr-btn{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.22);color:#fff;font-size:13px;font-weight:800;padding:9px 15px;border-radius:999px;cursor:pointer;transition:background .2s;white-space:nowrap;font-family:inherit}.mbr-btn:hover{background:rgba(255,255,255,.25)}.mbr-btn.on{background:var(--gold,#e7bf69);color:#1f1a13;border-color:transparent}.mbr-btn svg{width:15px;height:15px;flex-shrink:0}.mbr-dd{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.18);min-width:210px;z-index:200;overflow:hidden;border:1px solid rgba(0,0,0,.07)}.mbr-dd.hidden{display:none}.mbr-dd-hdr{padding:12px 16px;background:#f7f3eb;border-bottom:1px solid rgba(0,0,0,.07)}.mbr-dd-hdr strong{display:block;font-size:14px;color:#1f1a13;font-weight:800}.mbr-dd-hdr span{display:block;font-size:12px;color:#999;margin-top:2px}.mbr-dd a{display:block;padding:11px 16px;font-size:14px;color:#1f1a13;font-weight:600;text-decoration:none;transition:background .15s}.mbr-dd a:hover{background:#f7f3eb}.mbr-dd hr{border:none;border-top:1px solid rgba(0,0,0,.07);margin:0}.mbr-dd .mbr-out{color:#b83c2e}.mbr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}.mbr-overlay.hidden{display:none}.mbr-modal{background:#fff;border-radius:16px;padding:32px;width:100%;max-width:400px;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.22)}.mbr-modal h3{margin:0 0 18px;font-size:21px;font-weight:900;color:#1f1a13}.mbr-tabs{display:flex;gap:0;border-bottom:2px solid #f0ece3;margin-bottom:22px}.mbr-tab{flex:1;background:none;border:none;padding:10px 0;font-size:14px;font-weight:700;color:#aaa;cursor:pointer;transition:color .2s;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px}.mbr-tab.active{color:var(--accent,#3f748a);border-bottom-color:var(--accent,#3f748a)}.mbr-panel{display:none}.mbr-panel.active{display:block}.mbr-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;line-height:1;padding:4px 6px}.mbr-close:hover{color:#333}.mbr-modal label{display:block;font-size:12px;font-weight:700;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}.mbr-modal input[type=email],.mbr-modal input[type=text],.mbr-modal input[type=password]{display:block;width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;transition:border .2s;font-family:inherit;box-sizing:border-box}.mbr-modal input:focus{border-color:var(--accent,#3f748a)}.mbr-err{display:none;color:#b83c2e;font-size:13px;margin:-6px 0 12px;padding:9px 12px;background:#fff2f0;border-radius:6px;border:1px solid #f5c6c6}.mbr-err.show{display:block}.mbr-ok{display:none;color:#1a7a45;font-size:13px;margin:-6px 0 12px;padding:9px 12px;background:#f0faf4;border-radius:6px;border:1px solid #b2dfc4}.mbr-ok.show{display:block}.mbr-submit{width:100%;padding:13px;background:var(--accent,#3f748a);color:#fff;font-size:15px;font-weight:800;border:none;border-radius:10px;cursor:pointer;transition:background .2s;font-family:inherit}.mbr-submit:hover:not([disabled]){background:var(--accent2,#2d6072)}.mbr-submit[disabled]{opacity:.6;cursor:not-allowed}';
+  document.head.appendChild(css);
+
+  var ph=document.querySelector('.header-phone');
+  if(ph){
+    ph.insertAdjacentHTML('afterend',
+      '<div class="mbr-area" id="mbrArea">'+
+        '<button class="mbr-btn" id="mbrBtn" type="button">'+
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+
+            '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'+
+          '</svg>'+
+          '<span id="mbrLbl">Σύνδεση</span>'+
+        '</button>'+
+        '<div class="mbr-dd hidden" id="mbrDd">'+
+          '<div class="mbr-dd-hdr"><strong id="mbrDdName">—</strong><span id="mbrDdEmail"></span></div>'+
+          '<a href="#" id="mbrDdBookings">Οι Κρατήσεις μου</a>'+
+          '<a href="#" id="mbrDdProfile">Το Προφίλ μου</a>'+
+          '<a href="#" id="mbrDdSettings">Ρυθμίσεις Λογαριασμού</a>'+
+          '<hr>'+
+          '<a href="#" id="mbrDdOut" class="mbr-out">Αποσύνδεση</a>'+
+        '</div>'+
+      '</div>');
+  }
+
+  document.body.insertAdjacentHTML('beforeend',
+    '<div class="mbr-overlay hidden" id="mbrOverlay">'+
+      '<div class="mbr-modal">'+
+        '<button class="mbr-close" id="mbrClose" type="button">&#215;</button>'+
+        '<h3 id="mbrModalTitle">Σύνδεση / Εγγραφή</h3>'+
+        '<div class="mbr-tabs">'+
+          '<button class="mbr-tab active" id="mbrTabLogin" type="button">Σύνδεση</button>'+
+          '<button class="mbr-tab" id="mbrTabReg" type="button">Εγγραφή</button>'+
+        '</div>'+
+        '<div class="mbr-panel active" id="mbrPanelLogin">'+
+          '<form id="mbrFormLogin" novalidate>'+
+            '<label>Email</label>'+
+            '<input id="mbrLoginEmail" type="email" autocomplete="email" placeholder="your@email.com"/>'+
+            '<label>Κωδικός</label>'+
+            '<input id="mbrLoginPass" type="password" autocomplete="current-password" placeholder="τουλάχιστον 6 χαρακτήρες"/>'+
+            '<div class="mbr-err" id="mbrLoginErr"></div>'+
+            '<button class="mbr-submit" id="mbrLoginSubmit" type="submit">Σύνδεση →</button>'+
+          '</form>'+
+        '</div>'+
+        '<div class="mbr-panel" id="mbrPanelReg">'+
+          '<form id="mbrFormReg" novalidate>'+
+            '<label>Όνομα</label>'+
+            '<input id="mbrRegFirst" type="text" autocomplete="given-name" placeholder="Πρώτο όνομα"/>'+
+            '<label>Επώνυμο</label>'+
+            '<input id="mbrRegLast" type="text" autocomplete="family-name" placeholder="Επώνυμο"/>'+
+            '<label>Email</label>'+
+            '<input id="mbrRegEmail" type="email" autocomplete="email" placeholder="your@email.com"/>'+
+            '<label>Κωδικός</label>'+
+            '<input id="mbrRegPass" type="password" autocomplete="new-password" placeholder="τουλάχιστον 6 χαρακτήρες"/>'+
+            '<label>Επανάληψη Κωδικού</label>'+
+            '<input id="mbrRegPass2" type="password" autocomplete="new-password" placeholder="Επανάληψη κωδικού"/>'+
+            '<div class="mbr-err" id="mbrRegErr"></div>'+
+            '<div class="mbr-ok" id="mbrRegOk"></div>'+
+            '<button class="mbr-submit" id="mbrRegSubmit" type="submit">Δημιουργία Λογαριασμού →</button>'+
+          '</form>'+
+        '</div>'+
+      '</div>'+
+    '</div>');
+
+  var ERR_MAP={invalid_credentials:'Λάθος email ή κωδικός.',email_exists:'Αυτό το email χρησιμοποιείται ήδη.',weak_password:'Ο κωδικός είναι πολύ αδύναμος.',not_found:'Δεν βρέθηκε λογαριασμός.',server_error:'Σφάλμα σύνδεσης. Δοκιμάστε ξανά.'};
+
+  function uiUpdate(){
+    var s=rSess(),btn=document.getElementById('mbrBtn'),lbl=document.getElementById('mbrLbl'),nm=document.getElementById('mbrDdName'),em=document.getElementById('mbrDdEmail');
+    if(!btn)return;
+    if(s&&s.name){
+      var n=s.name||s.email||'Μέλος';
+      lbl.textContent=n.split(' ')[0]||n;btn.classList.add('on');
+      if(nm)nm.textContent=s.name||'Μέλος';
+      if(em)em.textContent=s.email||'';
+    }else{lbl.textContent='Σύνδεση';btn.classList.remove('on');var dd=document.getElementById('mbrDd');if(dd)dd.classList.add('hidden');}
+  }
+
+  function showTab(tab){
+    document.getElementById('mbrTabLogin').classList.toggle('active',tab==='login');
+    document.getElementById('mbrTabReg').classList.toggle('active',tab==='reg');
+    document.getElementById('mbrPanelLogin').classList.toggle('active',tab==='login');
+    document.getElementById('mbrPanelReg').classList.toggle('active',tab==='reg');
+  }
+
+  function setErr(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.toggle('show',!!m);}}
+  function setOk(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.toggle('show',!!m);}}
+  function setBusy(id,b,label,busyLabel){var btn=document.getElementById(id);if(!btn)return;btn.disabled=b;btn.textContent=b?busyLabel:label;}
+
+  function closeModal(){
+    document.getElementById('mbrOverlay').classList.add('hidden');
+    setErr('mbrLoginErr','');setErr('mbrRegErr','');setOk('mbrRegOk','');
+    setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
+    setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμείνετε...');
+  }
+
+  document.getElementById('mbrBtn').addEventListener('click',function(e){
+    e.stopPropagation();
+    var s=rSess(),dd=document.getElementById('mbrDd');
+    if(s&&s.name){dd.classList.toggle('hidden');}
+    else{document.getElementById('mbrOverlay').classList.remove('hidden');showTab('login');setTimeout(function(){var i=document.getElementById('mbrLoginEmail');if(i)i.focus();},40);}
+  });
+  document.addEventListener('click',function(){var d=document.getElementById('mbrDd');if(d)d.classList.add('hidden');});
+  document.getElementById('mbrClose').addEventListener('click',closeModal);
+  document.getElementById('mbrOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+  document.getElementById('mbrTabLogin').addEventListener('click',function(){showTab('login');});
+  document.getElementById('mbrTabReg').addEventListener('click',function(){showTab('reg');});
+
+  document.getElementById('mbrFormLogin').addEventListener('submit',function(e){
+    e.preventDefault();setErr('mbrLoginErr','');
+    var email=(document.getElementById('mbrLoginEmail').value||'').trim();
+    var pass=document.getElementById('mbrLoginPass').value||'';
+    if(!email||!pass){setErr('mbrLoginErr','Συμπληρώστε email και κωδικό.');return;}
+    setBusy('mbrLoginSubmit',true,'Σύνδεση →','Σύνδεση...');
+    try{window.parent.postMessage({type:'PORTAL_LOGIN',email:email,password:pass},'*');}catch(_){}
+  });
+
+  document.getElementById('mbrFormReg').addEventListener('submit',function(e){
+    e.preventDefault();setErr('mbrRegErr','');setOk('mbrRegOk','');
+    var first=(document.getElementById('mbrRegFirst').value||'').trim();
+    var last=(document.getElementById('mbrRegLast').value||'').trim();
+    var email=(document.getElementById('mbrRegEmail').value||'').trim();
+    var pass=document.getElementById('mbrRegPass').value||'';
+    var pass2=document.getElementById('mbrRegPass2').value||'';
+    if(!first||!last||!email||!pass){setErr('mbrRegErr','Συμπληρώστε όλα τα πεδία.');return;}
+    if(pass.length<6){setErr('mbrRegErr','Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες.');return;}
+    if(pass!==pass2){setErr('mbrRegErr','Οι κωδικοί δεν ταιριάζουν.');return;}
+    setBusy('mbrRegSubmit',true,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
+    try{window.parent.postMessage({type:'PORTAL_REGISTER',email:email,password:pass,firstName:first,lastName:last},'*');}catch(_){}
+  });
+
+  [['mbrDdBookings','/member-portal?tab=bookings'],['mbrDdProfile','/member-portal?tab=profile'],['mbrDdSettings','/member-portal?tab=profile']].forEach(function(p){
+    var el=document.getElementById(p[0]);
+    if(el)el.addEventListener('click',function(e){e.preventDefault();document.getElementById('mbrDd').classList.add('hidden');try{window.parent.postMessage({type:'wix-booking-nav',path:p[1]},'*');}catch(_){}});
+  });
+
+  document.getElementById('mbrDdOut').addEventListener('click',function(e){
+    e.preventDefault();document.getElementById('mbrDd').classList.add('hidden');
+    try{window.parent.postMessage({type:'PORTAL_SIGN_OUT'},'*');}catch(_){}
+    cSess();uiUpdate();
+  });
+
+  window.addEventListener('message',function(event){
+    var raw=event.data,d=null;
+    if(typeof raw==='string'){try{d=JSON.parse(raw);}catch(_){return;}}else{d=raw;}
+    if(!d||!d.type)return;
+    if(d.type==='PORTAL_AUTH_RESULT'){
+      setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
+      setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
+      if(d.ok){
+        if(d.pending){setOk('mbrRegOk','Ο λογαριασμός δημιουργήθηκε! Ελέγξτε το email σας για επιβεβαίωση.');}
+        else{if(d.member){wSess(d.member);}closeModal();uiUpdate();}
+      }else{
+        var errMsg=ERR_MAP[d.error]||ERR_MAP.server_error;
+        var isReg=document.getElementById('mbrPanelReg').classList.contains('active');
+        setErr(isReg?'mbrRegErr':'mbrLoginErr',errMsg);
+      }
+      return;
+    }
+    if(d.type==='PORTAL_SIGN_OUT_RESULT'){cSess();uiUpdate();return;}
+    if(d.type==='PORTAL_MEMBER_STATE'){
+      if(d.loggedIn&&d.member){wSess(d.member);uiUpdate();}
+      return;
+    }
+  });
+
+  uiUpdate();
+  setTimeout(function(){try{window.parent.postMessage({type:'REQUEST_MEMBER_STATE'},'*');}catch(_){}},150);
+})();
+/* ===== END MEMBER PORTAL AUTH ===== */
+
 </script>
 </body>
 </html>
