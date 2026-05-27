@@ -1,0 +1,68 @@
+import wixData from 'wix-data';
+
+async function resolveMemberId(memberId, email) {
+  if (memberId) return String(memberId).trim() || null;
+  if (!email) return null;
+  try {
+    const res = await wixData.query('Members/PrivateMembersData')
+      .eq('loginEmail', String(email).toLowerCase().trim())
+      .limit(1)
+      .find({ suppressAuth: true });
+    return (res.items && res.items[0] && res.items[0]._id) || null;
+  } catch (_) { return null; }
+}
+
+async function insertNotification({ memberId, memberEmail, type, title, body, bookingId }) {
+  await wixData.insert('MemberNotifications', {
+    memberId,
+    memberEmail: String(memberEmail || ''),
+    type: String(type || 'info'),
+    title: String(title || '').slice(0, 200),
+    body: String(body || '').slice(0, 1000),
+    isRead: false,
+    relatedBookingId: String(bookingId || ''),
+    data: ''
+  }, { suppressAuth: true });
+}
+
+export async function notifyBookingSubmitted({ memberId, email, bookingNumber, bookingId }) {
+  try {
+    const mid = await resolveMemberId(memberId, email);
+    if (!mid) return;
+    await insertNotification({
+      memberId: mid, memberEmail: email,
+      type: 'booking_confirmed',
+      title: `Κράτηση #${bookingNumber} υποβλήθηκε`,
+      body: 'Η κράτησή σας υποβλήθηκε επιτυχώς. Θα επικοινωνήσουμε σύντομα για επιβεβαίωση.',
+      bookingId
+    });
+  } catch (err) { console.warn('notifyBookingSubmitted error:', err.message); }
+}
+
+export async function notifyBookingConfirmed({ memberId, email, bookingNumber, bookingId }) {
+  try {
+    const mid = await resolveMemberId(memberId, email);
+    if (!mid) return;
+    await insertNotification({
+      memberId: mid, memberEmail: email,
+      type: 'booking_confirmed',
+      title: `Κράτηση #${bookingNumber} επιβεβαιώθηκε ✓`,
+      body: 'Η κράτησή σας επιβεβαιώθηκε. Θα σας ειδοποιήσουμε όταν αντιστοιχιστεί το όχημά σας.',
+      bookingId
+    });
+  } catch (err) { console.warn('notifyBookingConfirmed error:', err.message); }
+}
+
+export async function notifyBookingCancelled({ memberId, email, bookingNumber, bookingId }) {
+  try {
+    const mid = await resolveMemberId(memberId, email);
+    if (!mid) return;
+    await insertNotification({
+      memberId: mid, memberEmail: email,
+      type: 'booking_changed',
+      title: `Κράτηση #${bookingNumber} ακυρώθηκε`,
+      body: 'Η κράτησή σας ακυρώθηκε. Επικοινωνήστε μαζί μας αν έχετε ερωτήσεις.',
+      bookingId
+    });
+  } catch (err) { console.warn('notifyBookingCancelled error:', err.message); }
+}

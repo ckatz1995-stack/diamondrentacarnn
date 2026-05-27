@@ -5,7 +5,7 @@
 
 import wixLocation from 'wix-location';
 import { authentication, currentMember } from 'wix-members-frontend';
-import { getMyBookings, getMyProfile, cancelMyBooking, updateMyBooking, updateMyProfile, checkBookingAvailability, submitBookingReview, getExtendedProfile, updateExtendedProfile } from 'backend/memberPortal.jsw';
+import { getMyBookings, getMyProfile, cancelMyBooking, updateMyBooking, updateMyProfile, checkBookingAvailability, submitBookingReview, getExtendedProfile, updateExtendedProfile, getMyNotifications, markNotificationRead, readAllMyNotifications, deleteMyNotification, getMyTickets, createMyTicket, replyToMyTicket } from 'backend/memberPortal.jsw';
 import { PORTAL_LOCATIONS } from 'public/siteConstants';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 
@@ -109,9 +109,64 @@ function handleMessage(event) {
   }
 
   if (msg.type === 'UPDATE_EXTENDED_PROFILE') {
-    updateExtendedProfile({ driverAge: msg.driverAge, nationality: msg.nationality, licenseNumber: msg.licenseNumber, licenseExpiry: msg.licenseExpiry })
+    updateExtendedProfile({
+      dateOfBirth: msg.dateOfBirth, nationality: msg.nationality, taxNumber: msg.taxNumber,
+      idNumber: msg.idNumber, idIssueCountry: msg.idIssueCountry, idIssueDate: msg.idIssueDate, idExpiry: msg.idExpiry,
+      licenseNumber: msg.licenseNumber, licenseCountry: msg.licenseCountry, licenseIssueDate: msg.licenseIssueDate, licenseExpiry: msg.licenseExpiry,
+      address: msg.address, city: msg.city, zipCode: msg.zipCode, country: msg.country,
+      firstName: msg.firstName, lastName: msg.lastName, phone: msg.phone
+    })
       .then((r) => post({ type: 'UPDATE_EXTENDED_PROFILE_RESULT', ...r }))
       .catch(() => post({ type: 'UPDATE_EXTENDED_PROFILE_RESULT', ok: false }));
+    return;
+  }
+
+  if (msg.type === 'GET_NOTIFICATIONS') {
+    getMyNotifications()
+      .then((r) => post({ type: 'NOTIFICATIONS_RESULT', ...r }))
+      .catch(() => post({ type: 'NOTIFICATIONS_RESULT', ok: false, error: 'server_error' }));
+    return;
+  }
+
+  if (msg.type === 'MARK_NOTIFICATION_READ') {
+    markNotificationRead({ notificationId: msg.notificationId })
+      .then((r) => post({ type: 'NOTIFICATION_READ_RESULT', ...r }))
+      .catch(() => {});
+    return;
+  }
+
+  if (msg.type === 'READ_ALL_NOTIFICATIONS') {
+    readAllMyNotifications()
+      .then((r) => post({ type: 'NOTIFICATIONS_READ_ALL_RESULT', ...r }))
+      .catch(() => {});
+    return;
+  }
+
+  if (msg.type === 'DELETE_NOTIFICATION') {
+    deleteMyNotification({ notificationId: msg.notificationId })
+      .then((r) => post({ type: 'NOTIFICATION_DELETE_RESULT', ...r }))
+      .catch(() => {});
+    return;
+  }
+
+  if (msg.type === 'GET_MY_TICKETS') {
+    getMyTickets()
+      .then((r) => post({ type: 'MY_TICKETS', ...r }))
+      .catch(() => post({ type: 'MY_TICKETS', ok: false, error: 'server_error' }));
+    return;
+  }
+
+  if (msg.type === 'CREATE_TICKET') {
+    createMyTicket({ subject: msg.subject, category: msg.category, message: msg.message, bookingId: msg.bookingId || '' })
+      .then((r) => post({ type: 'NEW_TICKET_RESULT', ...r }))
+      .catch(() => post({ type: 'NEW_TICKET_RESULT', ok: false, error: 'server_error' }));
+    return;
+  }
+
+  if (msg.type === 'REPLY_TO_TICKET') {
+    replyToMyTicket({ ticketId: msg.ticketId, message: msg.message })
+      .then((r) => post({ type: 'TICKET_REPLY_RESULT', ...r }))
+      .catch(() => post({ type: 'TICKET_REPLY_RESULT', ok: false, error: 'server_error' }));
     return;
   }
 }

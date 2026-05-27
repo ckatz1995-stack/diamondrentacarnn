@@ -1,0 +1,373 @@
+import wixData from 'wix-data';
+import { requireStaffAccess } from 'backend/staffAccess.jsw';
+import { members as wixMembers } from 'wix-members-backend';
+import { elevate } from 'wix-auth';
+
+// Member-only IDs are prefixed with 'm:' — no Customers CMS record exists yet
+const MEMBER_PREFIX = 'm:';
+
+function safeDate(v) {
+  if (!v) return null;
+  try { const d = new Date(v); return isNaN(d.getTime()) ? null : d; } catch (_) { return null; }
+}
+
+function ageband(dob) {
+  if (!dob) return '';
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return '';
+  const now = new Date();
+  let a = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
+  if (a < 25) return 'U25';
+  if (a < 30) return '25-29';
+  if (a < 65) return '30-64';
+  return '65+';
+}
+
+// ─── Wix Members helper ────────────────────────────────────────────────────────
+
+async function queryWixMembers(limit = 200) {
+  // Method 1: elevate() + queryMembers (admin context fix)
+  try {
+    const elevatedQuery = elevate(wixMembers.queryMembers);
+    const result = await elevatedQuery()
+      .descending('_createdDate')
+      .limit(limit)
+      .find();
+    const items = result.items || result.members || [];
+    console.log('queryWixMembers: elevate success, count=' + items.length);
+    return items;
+  } catch (err) {
+    console.warn('queryWixMembers elevate failed:', err.message);
+  }
+
+  // Method 2: queryMembers without elevation
+  try {
+    const result = await wixMembers.queryMembers()
+      .descending('_createdDate')
+      .limit(limit)
+      .find();
+    const items = result.items || result.members || [];
+    console.log('queryWixMembers: direct success, count=' + items.length);
+    return items;
+  } catch (err) {
+    console.warn('queryWixMembers direct failed:', err.message);
+  }
+
+  // Method 3: Members/PrivateMembersData (most reliable fallback)
+  try {
+    const res = await wixData.query('Members/PrivateMembersData')
+      .descending('_createdDate')
+      .limit(limit)
+      .find({ suppressAuth: true });
+    const items = res.items || [];
+    console.log('queryWixMembers: PrivateMembersData success, count=' + items.length);
+    return items.map(m => ({
+      _id: m._id,
+      loginEmail: m.loginEmail || m.email || '',
+      contactDetails: {
+        firstName: m.firstName || '',
+        lastName: m.lastName || '',
+        phones: m.phone ? [m.phone] : [],
+        emails: [(m.loginEmail || m.email || '')].filter(Boolean)
+      },
+      _createdDate: m._createdDate,
+      _updatedDate: m._updatedDate
+    }));
+  } catch (err) {
+    console.warn('queryWixMembers PrivateMembersData failed:', err.message);
+  }
+
+  return [];
+}
+
+function memberToCustomer(m) {
+  const contact = m.contactDetails || m.contact || {};
+  const fn = contact.firstName || '';
+  const ln = contact.lastName || '';
+  const name = [fn, ln].filter(Boolean).join(' ') || m.profile?.nickname || m.loginEmail || '';
+  const email = (m.loginEmail || (contact.emails && contact.emails[0]) || '').toLowerCase();
+  const phone = (contact.phones && contact.phones[0]) || '';
+  return {
+    _id: MEMBER_PREFIX + m._id,
+    memberId: m._id,
+    name,
+    firstName: fn,
+    lastName: ln,
+    email,
+    customerEmail: email,
+    phone,
+    customerPhone: phone,
+    _memberOnly: true,
+    _createdDate: m._createdDate,
+    _updatedDate: m._updatedDate
+  };
+}
+
+// ─── Customer List ─────────────────────────────────────────────────────────────
+
+export async function searchCustomers({ authToken, q = '', limit = 40, skip = 0 } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: 'customers', action: 'View' });
+  try {
+    // Query CMS Customers and Wix Members in parallel
+    const term = (q || '').trim();
+
+    const [cmsResult, allMembers] = await Promise.all([
+      (async () => {
+        if (term) {
+          const [byEmail, byName, byPhone] = await Promise.all([
+            wixData.query('Customers').contains('email', term).limit(100).find({ suppressAuth: true }),
+            wixData.query('Customers').contains('name', term).limit(100).find({ suppressAuth: true }),
+            wixData.query('Customers').contains('phone', term).limit(100).find({ suppressAuth: true })
+          ]);
+          const seen = new Set();
+          return [...byEmail.items, ...byName.items, ...byPhone.items].filter(item => {
+            if (seen.has(item._id)) return false;
+            seen.add(item._id);
+            return true;
+          });
+        }
+        const res = await wixData.query('Customers').descending('_updatedDate').limit(200).find({ suppressAuth: true });
+        return res.items || [];
+      })(),
+      queryWixMembers(300)
+    ]);
+
+    // Build lookup maps from CMS records to detect duplicates
+    const cmsByMemberId = new Map(cmsResult.map(c => [c.memberId, c]).filter(([k]) => k));
+    const cmsByEmail = new Map(cmsResult.map(c => [(c.email || '').toLowerCase(), c]).filter(([k]) => k));
+
+    // Add Wix Members not already represented in CMS
+    const memberOnlyItems = [];
+    for (const m of allMembers) {
+      if (cmsByMemberId.has(m._id)) continue;
+      const email = (m.loginEmail || '').toLowerCase();
+      if (email && cmsByEmail.has(email)) continue;
+
+      const synth = memberToCustomer(m);
+
+      // Apply search filter to member-only entries
+      if (term) {
+        const t = term.toLowerCase();
+        if (!synth.name.toLowerCase().includes(t) && !synth.email.includes(t) && !synth.phone.includes(t)) continue;
+      }
+      memberOnlyItems.push(synth);
+    }
+
+    const merged = [...cmsResult, ...memberOnlyItems];
+    return { ok: true, items: merged.slice(skip, skip + limit), total: merged.length };
+  } catch (err) {
+    if (err.message === 'AUTH_REQUIRED' || err.message === 'ACCESS_DENIED') throw err;
+    console.warn('searchCustomers error', err.message);
+    return { ok: false, error: 'server_error' };
+  }
+}
+
+// ─── Customer Card ─────────────────────────────────────────────────────────────
+
+export async function getCustomerCard({ authToken, customerId } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: 'customers', action: 'View' });
+  if (!customerId) return { ok: false, error: 'missing_id' };
+  try {
+    // Member-only (no CMS record yet)
+    if (String(customerId).startsWith(MEMBER_PREFIX)) {
+      const memberId = String(customerId).slice(MEMBER_PREFIX.length);
+      const allMembers = await queryWixMembers(500);
+      const m = allMembers.find(x => x._id === memberId);
+      if (!m) return { ok: false, error: 'not_found' };
+      return { ok: true, customer: memberToCustomer(m) };
+    }
+    const res = await wixData.query('Customers').eq('_id', String(customerId)).limit(1).find({ suppressAuth: true });
+    const item = res.items && res.items[0];
+    if (!item) return { ok: false, error: 'not_found' };
+    return { ok: true, customer: item };
+  } catch (err) {
+    if (err.message === 'AUTH_REQUIRED' || err.message === 'ACCESS_DENIED') throw err;
+    console.warn('getCustomerCard error', err.message);
+    return { ok: false, error: 'server_error' };
+  }
+}
+
+export async function updateCustomerCard({ authToken, customerId, ...fields } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: 'customers', action: 'Edit' });
+  if (!customerId) return { ok: false, error: 'missing_id' };
+  try {
+    let existing = null;
+    let isNew = false;
+
+    if (String(customerId).startsWith(MEMBER_PREFIX)) {
+      const memberId = String(customerId).slice(MEMBER_PREFIX.length);
+      // Check if a CMS record was created since the page loaded
+      const res = await wixData.query('Customers').eq('memberId', memberId).limit(1).find({ suppressAuth: true });
+      existing = res.items && res.items[0];
+      if (!existing) {
+        existing = { memberId };
+        isNew = true;
+      }
+    } else {
+      const res = await wixData.query('Customers').eq('_id', String(customerId)).limit(1).find({ suppressAuth: true });
+      existing = res.items && res.items[0];
+      if (!existing) return { ok: false, error: 'not_found' };
+    }
+
+    const patch = { ...existing };
+    const textFields = ['firstName', 'lastName', 'email', 'phone', 'nationality', 'taxNumber',
+      'idNumber', 'idIssueCountry', 'licenseNumber', 'licenseCountry', 'address', 'city', 'zipCode', 'country'];
+    const dateFields = ['dateOfBirth', 'idIssueDate', 'idExpiry', 'licenseIssueDate', 'licenseExpiry'];
+
+    textFields.forEach(f => { if (fields[f] !== undefined) patch[f] = String(fields[f] || '').trim(); });
+    dateFields.forEach(f => { if (fields[f] !== undefined) patch[f] = safeDate(fields[f]); });
+
+    if (patch.firstName || patch.lastName) {
+      patch.name = `${patch.firstName || ''} ${patch.lastName || ''}`.trim();
+      patch.customerName = patch.name;
+      patch.customerEmail = patch.email || patch.customerEmail || '';
+      patch.customerPhone = patch.phone || patch.customerPhone || '';
+    }
+    patch.driverAge = ageband(patch.dateOfBirth);
+
+    const result = isNew
+      ? await wixData.insert('Customers', patch, { suppressAuth: true })
+      : await wixData.update('Customers', patch, { suppressAuth: true });
+    return { ok: true, customer: result };
+  } catch (err) {
+    if (err.message === 'AUTH_REQUIRED' || err.message === 'ACCESS_DENIED') throw err;
+    console.warn('updateCustomerCard error', err.message);
+    return { ok: false, error: 'server_error' };
+  }
+}
+
+// ─── Customer Bookings ─────────────────────────────────────────────────────────
+
+export async function getCustomerBookings({ authToken, customerId, email, limit = 20 } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: 'customers', action: 'View' });
+  try {
+    let items = [];
+    // For m:-prefixed IDs, skip the direct customerId lookup (it won't match)
+    const cmsId = customerId && !String(customerId).startsWith(MEMBER_PREFIX) ? String(customerId) : null;
+    if (cmsId) {
+      const res = await wixData.query('BookingsNew').eq('customerId', cmsId)
+        .descending('_createdDate').limit(limit).find({ suppressAuth: true });
+      items = res.items || [];
+    }
+    if (!items.length && email) {
+      const e = String(email).toLowerCase().trim();
+      const [byEmail, byEmail2] = await Promise.all([
+        wixData.query('BookingsNew').eq('customerEmail', e).descending('_createdDate').limit(limit).find({ suppressAuth: true }),
+        wixData.query('BookingsNew').eq('email', e).descending('_createdDate').limit(limit).find({ suppressAuth: true })
+      ]);
+      const seen = new Set();
+      items = [...byEmail.items, ...byEmail2.items].filter(b => {
+        if (seen.has(b._id)) return false;
+        seen.add(b._id);
+        return true;
+      }).slice(0, limit);
+    }
+    return { ok: true, bookings: items };
+  } catch (err) {
+    if (err.message === 'AUTH_REQUIRED' || err.message === 'ACCESS_DENIED') throw err;
+    console.warn('getCustomerBookings error', err.message);
+    return { ok: true, bookings: [] };
+  }
+}
+
+// ─── Support Tickets (Staff) ───────────────────────────────────────────────────
+
+export async function getStaffTickets({ authToken, status = '', customerId = '', email = '', limit = 50, skip = 0 } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: 'customers', action: 'View' });
+  try {
+    let query = wixData.query('SupportTickets');
+    if (status && status !== 'all') query = query.eq('status', status);
+    // For m:-prefixed IDs, extract the real memberId
+    const memberId = customerId && String(customerId).startsWith(MEMBER_PREFIX)
+      ? String(customerId).slice(MEMBER_PREFIX.length)
+      : customerId;
+    if (memberId) {
+      query = query.eq('memberId', memberId);
+    } else if (email) {
+      query = query.eq('memberEmail', String(email).toLowerCase().trim());
+    }
+    const res = await query.descending('_updatedDate').limit(limit).skip(skip).find({ suppressAuth: true });
+    return { ok: true, tickets: res.items || [], total: res.totalCount || 0 };
+  } catch (err) {
+    if (err.message === 'AUTH_REQUIRED' || err.message === 'ACCESS_DENIED') throw err;
+    console.warn('getStaffTickets error', err.message);
+    return { ok: true, tickets: [] };
+  }
+}
+
+export async function replyToTicketStaff({ authToken, ticketId, message } = {}) {
+  const auth = await requireStaffAccess({ sessionToken: authToken, area: 'customers', action: 'Edit' });
+  if (!ticketId || !message) return { ok: false, error: 'missing_fields' };
+  try {
+    const res = await wixData.query('SupportTickets').eq('_id', String(ticketId)).limit(1).find({ suppressAuth: true });
+    const ticket = res.items && res.items[0];
+    if (!ticket) return { ok: false, error: 'not_found' };
+
+    let msgs = [];
+    try { msgs = JSON.parse(ticket.messages || '[]'); } catch (_) {}
+    msgs.push({
+      sender: 'staff',
+      staffName: auth.fullName || 'Staff',
+      text: String(message).trim().slice(0, 2000),
+      createdAt: new Date().toISOString()
+    });
+
+    const updated = await wixData.update('SupportTickets', {
+      ...ticket,
+      messages: JSON.stringify(msgs),
+      status: ticket.status === 'open' ? 'in_progress' : (ticket.status === 'closed' ? 'open' : ticket.status)
+    }, { suppressAuth: true });
+    return { ok: true, ticket: updated };
+  } catch (err) {
+    if (err.message === 'AUTH_REQUIRED' || err.message === 'ACCESS_DENIED') throw err;
+    console.warn('replyToTicketStaff error', err.message);
+    return { ok: false, error: 'server_error' };
+  }
+}
+
+export async function setTicketStatus({ authToken, ticketId, status } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: 'customers', action: 'Edit' });
+  if (!ticketId) return { ok: false, error: 'missing_id' };
+  const VALID = ['open', 'in_progress', 'resolved', 'closed'];
+  const newStatus = VALID.includes(status) ? status : 'closed';
+  try {
+    const res = await wixData.query('SupportTickets').eq('_id', String(ticketId)).limit(1).find({ suppressAuth: true });
+    const ticket = res.items && res.items[0];
+    if (!ticket) return { ok: false, error: 'not_found' };
+    const updated = await wixData.update('SupportTickets', { ...ticket, status: newStatus }, { suppressAuth: true });
+    return { ok: true, ticket: updated };
+  } catch (err) {
+    if (err.message === 'AUTH_REQUIRED' || err.message === 'ACCESS_DENIED') throw err;
+    console.warn('setTicketStatus error', err.message);
+    return { ok: false, error: 'server_error' };
+  }
+}
+
+// ─── Member Notifications (Staff) ─────────────────────────────────────────────
+
+export async function createMemberNotification({ authToken, memberId, memberEmail = '', type = 'info', title, body, data = {} } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: 'customers', action: 'Edit' });
+  if (!memberId || !title || !body) return { ok: false, error: 'missing_fields' };
+  // Strip m: prefix if accidentally passed
+  const cleanMemberId = String(memberId).startsWith(MEMBER_PREFIX)
+    ? String(memberId).slice(MEMBER_PREFIX.length)
+    : String(memberId);
+  try {
+    await wixData.insert('MemberNotifications', {
+      memberId: cleanMemberId,
+      memberEmail: String(memberEmail || ''),
+      type: String(type || 'info'),
+      title: String(title).trim().slice(0, 200),
+      body: String(body).trim().slice(0, 1000),
+      isRead: false,
+      data: typeof data === 'object' ? JSON.stringify(data) : String(data || '')
+    }, { suppressAuth: true });
+    return { ok: true };
+  } catch (err) {
+    if (err.message === 'AUTH_REQUIRED' || err.message === 'ACCESS_DENIED') throw err;
+    console.warn('createMemberNotification error', err.message);
+    return { ok: false, error: 'server_error' };
+  }
+}

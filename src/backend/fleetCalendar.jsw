@@ -1,6 +1,7 @@
 // backend/fleetCalendar.jsw
 import wixData from "wix-data";
 import { requireStaffAccess } from "backend/staffAccess.jsw";
+import { notifyBookingConfirmed } from 'backend/notificationTriggers.jsw';
 import { extractCode as sharedExtractCode, isLikelyId } from "backend/utils";
 
 /**
@@ -392,11 +393,12 @@ export async function confirmAndAutoAssign({ authToken, bookingId } = {}) {
   if (currentStatusNorm && currentStatusNorm !== "pending" && currentStatusNorm !== "confirmed") {
     return { success: false, message: `Cannot confirm a booking in status: ${currentStatusRaw}` };
   }
-  if (currentStatusNorm !== "confirmed") {
+  const statusChanged = currentStatusNorm !== "confirmed";
+  if (statusChanged) {
     b[F.status] = "Confirmed";
   }
 // If already assigned
-  if (refId(b?.[F.assignedFleetId])) return { success: true, assigned: true, alreadyAssigned: true };
+  if (refId(b?.[F.assignedFleetId])) return { success: true, assigned: true, alreadyAssigned: true, statusChanged };
 
   const start = toDate(b?.[F.pickupDT]);
   const end = toDate(b?.[F.dropoffDT]);
@@ -429,11 +431,14 @@ export async function confirmAndAutoAssign({ authToken, bookingId } = {}) {
         b.assignedCategoryCode = meta.assignedCategoryCode || "";
       }
       await wixData.update(COLLECTIONS.Bookings, b, { suppressAuth: true });
-      return { success: true, assigned: true, vehicleId: String(v[VF.id]) };
+      if (statusChanged) {
+        notifyBookingConfirmed({ memberId: b.memberId || '', email: b[F.email] || '', bookingNumber: b[F.bookingNumber] || '', bookingId: b[F.bookingId] || '' }).catch(() => {});
+      }
+      return { success: true, assigned: true, vehicleId: String(v[VF.id]), statusChanged };
     }
   }
 
-  return { success: true, assigned: false };
+  return { success: true, assigned: false, statusChanged };
 }
 
 /**

@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--text:#0f172a;--sub:#475569;--border:rgba(0,0,0,.10);--shadow:0 12px 30px rgba(0,0,0,.06);--pri1:#a8844a;--pri2:#8e6d3d;--danger:#b91c1c;--ok:#166534;--shellDark1:#4f3a22;--shellDark2:#7a5b33;--shellDark3:#9f7845}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{min-height:100%;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);font-size:14px}
+    .hidden{display:none!important}
+
+    /* Top bar */
+    .topbar{border-radius:24px;background:linear-gradient(135deg,var(--shellDark1) 0%,var(--shellDark2) 42%,var(--shellDark3) 100%);border:1px solid rgba(0,0,0,.06);box-shadow:0 18px 40px rgba(15,23,42,.14);margin:12px}
+    .toprow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;overflow:visible}
+    .leftScroll{overflow-x:auto}.leftLine{min-width:860px;display:flex;align-items:center;gap:14px;padding:14px 16px}
+    .brand{display:inline-flex;align-items:center;gap:10px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#8e6d3d,#b48a4f,#6c522e);border:1px solid rgba(255,255,255,.08);color:#fff;font-weight:950;flex:0 0 auto}
+    .logo{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.16);color:#fff;font-weight:1100}
+    .brandText{display:flex;flex-direction:column;line-height:1.08}.brandTitle{font-weight:1100;color:#fff;font-size:16px;letter-spacing:-.02em}.brandSub{font-size:11px;color:rgba(255,255,255,.82);font-weight:900}
+    .tabs{display:inline-flex;align-items:center;gap:10px;flex:0 0 auto}
+    .tab{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;border-radius:999px;padding:10px 15px;font:800 14px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;cursor:pointer}
+    .tab.active{background:linear-gradient(135deg,#b48a4f,#8e6d3d);border-color:transparent;box-shadow:0 10px 20px rgba(91,68,35,.18)}
+    .tab[disabled]{opacity:.38;cursor:not-allowed}
+    .meta{padding:14px 16px;display:inline-flex;align-items:center;gap:12px;overflow:visible;position:relative;z-index:3}
+    .userWrap{position:relative;display:inline-flex;align-items:center;overflow:visible;z-index:6}
+    .userBtn{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);border-radius:999px;cursor:pointer;font:900 13px/1.1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#fff}
+    .userBadge{width:30px;height:30px;border-radius:999px;display:grid;place-items:center;background:rgba(255,255,255,.16);color:#fff;font-weight:1100;border:1px solid rgba(255,255,255,.18)}
+    .userText{display:flex;flex-direction:column}.userName{font-weight:1000}.userRole{font-size:11px;color:rgba(255,255,255,.72);font-weight:900}.caret{font-size:10px;color:rgba(255,255,255,.72)}
+    .menu{position:absolute;right:0;top:calc(100% + 8px);min-width:180px;background:#fff;border:1px solid rgba(0,0,0,.10);border-radius:16px;box-shadow:0 18px 45px rgba(0,0,0,.16);display:none;z-index:999999;overflow:hidden}.menu.open{display:block}
+    .menuItem{padding:12px 14px;font:900 13px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#0f172a;background:#fff;border:0;border-bottom:1px solid rgba(0,0,0,.06);text-align:left;cursor:pointer;width:100%}.menuItem:last-child{border-bottom:none}.menuItem:hover{background:rgba(180,138,79,.08)}.menuItem.danger{color:var(--danger)}
+
+    /* Layout */
+    .page{padding:12px;display:flex;flex-direction:column;gap:12px}
+    .mainGrid{display:grid;grid-template-columns:310px minmax(0,1fr);gap:12px;align-items:start}
+
+    /* Sidebar */
+    .sidebar{background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;min-height:600px}
+    .sideHead{padding:16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+    .sideTitle{font-size:15px;font-weight:1000}
+    .searchWrap{position:relative;display:flex;align-items:center}
+    .searchInput{width:100%;padding:10px 38px 10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12);font:800 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8fafc;color:var(--text)}
+    .searchInput:focus{outline:none;border-color:#a8844a;box-shadow:0 0 0 3px rgba(180,138,79,.12);background:#fff}
+    .searchBtn{position:absolute;right:8px;background:none;border:0;cursor:pointer;color:#64748b;font-size:15px;padding:4px}
+    .customerList{flex:1;overflow-y:auto;padding:6px}
+    .customerItem{padding:10px 12px;border-radius:14px;cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s;display:flex;align-items:center;gap:10px;margin-bottom:2px}
+    .customerItem:hover{background:rgba(180,138,79,.06);border-color:rgba(180,138,79,.18)}
+    .customerItem.selected{background:rgba(180,138,79,.10);border-color:rgba(180,138,79,.30)}
+    .custAvatar{width:36px;height:36px;border-radius:999px;background:linear-gradient(135deg,rgba(180,138,79,.18),rgba(108,82,46,.12));display:grid;place-items:center;font:900 14px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#6c522e;flex:0 0 auto}
+    .custInfo{min-width:0;flex:1}.custName{font:800 13px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.custEmail{font:700 11px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .noResults{padding:24px 16px;text-align:center;color:var(--sub);font:800 13px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+
+    /* Detail panel */
+    .detail{background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;min-height:600px}
+    .emptyState{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px;color:var(--sub);text-align:center;gap:12px}
+    .emptyIcon{font-size:44px;opacity:.35}
+    .emptyText{font:800 14px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+
+    /* Customer header */
+    .custHeader{padding:20px 22px 16px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border)}
+    .custHeaderAvatar{width:52px;height:52px;border-radius:999px;background:linear-gradient(135deg,rgba(180,138,79,.22),rgba(108,82,46,.16));display:grid;place-items:center;font:900 20px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#6c522e;flex:0 0 auto}
+    .custHeaderInfo{flex:1;min-width:0}
+    .custHeaderName{font:900 20px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;letter-spacing:-.02em}
+    .custHeaderMeta{font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--sub);margin-top:4px}
+
+    /* Detail tabs */
+    .detailTabs{display:flex;gap:2px;padding:10px 22px;border-bottom:1px solid var(--border);overflow-x:auto}
+    .dtab{appearance:none;border:0;background:none;padding:8px 14px;border-radius:10px;font:800 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;cursor:pointer;color:var(--sub);white-space:nowrap}
+    .dtab.active{background:rgba(180,138,79,.12);color:#6c522e}
+    .dtab:hover:not(.active){background:rgba(0,0,0,.04)}
+
+    .detailBody{padding:20px 22px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+
+    /* Profile sections */
+    .profileSection{border:1px solid var(--border);border-radius:16px;overflow:hidden}
+    .profileSectionHead{padding:11px 16px;background:rgba(180,138,79,.07);border-bottom:1px solid var(--border);font:900 11px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#6c522e;display:flex;align-items:center;justify-content:space-between}
+    .profileRows{display:grid;grid-template-columns:repeat(2,1fr)}
+    .profileRow{padding:10px 16px;display:flex;flex-direction:column;gap:3px;border-bottom:1px solid rgba(0,0,0,.05)}
+    .profileRow:nth-last-child(-n+2){border-bottom:none}
+    .profileLabel{font:900 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8}
+    .profileValue{font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .profileValue.empty{color:#94a3b8;font-style:italic}
+
+    /* Edit form */
+    .editForm{display:flex;flex-direction:column;gap:14px}
+    .formSection{border:1px solid var(--border);border-radius:16px;overflow:hidden}
+    .formSectionHead{padding:11px 16px;background:rgba(180,138,79,.07);border-bottom:1px solid var(--border);font:900 11px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#6c522e}
+    .formGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px 16px}
+    .field{display:flex;flex-direction:column;gap:5px}
+    .field label{font:900 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#64748b}
+    .field input,.field select{width:100%;padding:9px 11px;border-radius:10px;border:1px solid rgba(0,0,0,.12);font:800 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff;color:var(--text)}
+    .field input:focus,.field select:focus{outline:none;border-color:#a8844a;box-shadow:0 0 0 3px rgba(180,138,79,.10)}
+    .formActions{display:flex;gap:10px;justify-content:flex-end;padding:4px 0 0}
+
+    /* Buttons */
+    .btn{appearance:none;border:0;border-radius:12px;padding:10px 16px;font:900 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;cursor:pointer}
+    .btn.primary{color:#fff;background:linear-gradient(135deg,var(--pri1),var(--pri2))}
+    .btn.ghost{background:#f7f0e5;color:#6c522e;border:1px solid rgba(180,138,79,.22)}
+    .btn.danger{background:#fef2f2;color:var(--danger);border:1px solid rgba(185,28,28,.18)}
+    .btn.ok{background:#f0fdf4;color:var(--ok);border:1px solid rgba(22,101,52,.18)}
+    .btn.sm{padding:7px 12px;font-size:12px}
+
+    /* Bookings */
+    .bookingItem{padding:12px 16px;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .bkStatus{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;font:900 11px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;white-space:nowrap}
+    .bkStatus.confirmed,.bkStatus.active{background:#f0fdf4;color:#166534}
+    .bkStatus.pending{background:#fff7ed;color:#9a3412}
+    .bkStatus.cancelled,.bkStatus.canceled{background:#fef2f2;color:#b91c1c}
+    .bkStatus.completed{background:#f0f9ff;color:#075985}
+    .bkInfo{flex:1;min-width:0}
+    .bkTitle{font:800 13px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .bkMeta{font:700 11px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--sub);margin-top:2px}
+
+    /* Support Tickets */
+    .ticketItem{padding:12px 16px;border:1px solid var(--border);border-radius:14px;cursor:pointer;margin-bottom:8px}
+    .ticketItem:hover{background:rgba(180,138,79,.04)}
+    .ticketItem.selected{border-color:rgba(180,138,79,.40);background:rgba(180,138,79,.05)}
+    .ticketHead{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+    .ticketSubject{font:800 13px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;flex:1}
+    .tStatus{display:inline-flex;align-items:center;padding:3px 7px;border-radius:6px;font:900 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;white-space:nowrap}
+    .tStatus.open{background:#fff7ed;color:#9a3412}
+    .tStatus.in_progress{background:#eff6ff;color:#1e40af}
+    .tStatus.resolved{background:#f0fdf4;color:#166534}
+    .tStatus.closed{background:#f1f5f9;color:#64748b}
+    .ticketMeta{font:700 11px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--sub)}
+
+    /* Ticket detail */
+    .ticketDetail{border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:4px}
+    .ticketDetailHead{padding:12px 16px;background:rgba(180,138,79,.07);border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .ticketDetailHeadInfo{flex:1;min-width:0}
+    .ticketDetailTitle{font:800 14px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .ticketDetailSub{font:700 11px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#64748b;margin-top:3px}
+    .ticketDetailActions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+    .statusSel{padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,.12);font:800 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff}
+    .ticketMessages{display:flex;flex-direction:column;gap:10px;padding:14px 16px;max-height:280px;overflow-y:auto}
+    .msgBubble{padding:10px 14px;border-radius:14px;max-width:84%;font:800 13px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .msgBubble.member{background:#f1f5f9;align-self:flex-start;border-bottom-left-radius:4px}
+    .msgBubble.staff{background:rgba(180,138,79,.13);align-self:flex-end;border-bottom-right-radius:4px}
+    .msgSender{font:900 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;color:#64748b}
+    .msgTime{font:700 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#94a3b8;margin-top:5px}
+    .replyArea{padding:12px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+    .replyTextarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12);font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;resize:vertical;min-height:68px;background:#f8fafc}
+    .replyTextarea:focus{outline:none;border-color:#a8844a;box-shadow:0 0 0 3px rgba(180,138,79,.10);background:#fff}
+    .replyActions{display:flex;gap:8px;justify-content:space-between;align-items:center}
+
+    /* Notifications */
+    .notifyCard{border:1px solid var(--border);border-radius:16px;overflow:hidden}
+    .notifyHead{padding:12px 16px;background:rgba(180,138,79,.07);border-bottom:1px solid var(--border);font:900 11px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#6c522e}
+    .notifyBody{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+    .notifyRow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .notifyTextarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12);font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;resize:vertical;min-height:80px;background:#f8fafc}
+    .notifyTextarea:focus{outline:none;border-color:#a8844a;box-shadow:0 0 0 3px rgba(180,138,79,.10);background:#fff}
+
+    /* Toast */
+    .toast{position:fixed;bottom:20px;right:20px;padding:12px 18px;border-radius:14px;background:#1e293b;color:#fff;font:800 13px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:9999;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;max-width:300px}
+    .toast.ok{background:#166534}.toast.error{background:var(--danger)}.toast.show{opacity:1;transform:translateY(0)}
+
+    /* Loading */
+    .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(168,132,74,.2);border-top-color:var(--pri1);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loadingRow{display:flex;align-items:center;justify-content:center;gap:10px;padding:24px;color:var(--sub);font:800 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+
+    @media(max-width:880px){.mainGrid{grid-template-columns:1fr}.profileRows,.formGrid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Top nav bar -->
+  <div class="topbar">
+    <div class="toprow">
+      <div class="leftScroll">
+        <div class="leftLine">
+          <div class="brand">
+            <div class="logo">D</div>
+            <div class="brandText">
+              <div class="brandTitle">Diamond</div>
+              <div class="brandSub">Backroom</div>
+            </div>
+          </div>
+          <div class="tabs">
+            <button class="tab" data-route="home" type="button">Myroom</button>
+            <button class="tab" data-route="bookings" type="button">Bookings</button>
+            <button class="tab" data-route="daily" type="button">Daily</button>
+            <button class="tab" data-route="fleet" type="button">Fleet</button>
+            <button class="tab active" data-route="customers" type="button">Customers</button>
+            <button class="tab" data-route="settings" type="button">Settings</button>
+          </div>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="userWrap">
+          <button class="userBtn" id="userMenuBtn" type="button">
+            <div class="userBadge" id="userBadge">?</div>
+            <div class="userText">
+              <div class="userName" id="userName">Staff</div>
+              <div class="userRole" id="userRole">Backroom</div>
+            </div>
+            <span class="caret">▾</span>
+          </button>
+          <div class="menu" id="userMenu">
+            <button class="menuItem danger" type="button" data-menu-action="logout">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="mainGrid">
+
+    <!-- Sidebar: search + customer list -->
+    <div class="sidebar">
+      <div class="sideHead">
+        <div class="sideTitle">Customers</div>
+        <div class="searchWrap">
+          <input class="searchInput" id="searchInput" type="text" placeholder="Search name, email, phone…" autocomplete="off"/>
+          <button class="searchBtn" id="searchBtn" type="button">⌕</button>
+        </div>
+      </div>
+      <div class="customerList" id="customerList">
+        <div class="loadingRow"><span class="spinner"></span>Loading…</div>
+      </div>
+    </div>
+
+    <!-- Detail panel -->
+    <div class="detail">
+      <div class="emptyState" id="emptyState">
+        <div class="emptyIcon">👤</div>
+        <div class="emptyText">Select a customer from the list<br/>to view and edit their card.</div>
+      </div>
+
+      <div class="hidden" id="customerDetail">
+        <!-- Customer header -->
+        <div class="custHeader">
+          <div class="custHeaderAvatar" id="detailAvatar">?</div>
+          <div class="custHeaderInfo">
+            <div class="custHeaderName" id="detailName">Customer</div>
+            <div class="custHeaderMeta" id="detailMeta"></div>
+          </div>
+          <button class="btn ghost sm" id="editProfileBtn" type="button">Edit Profile</button>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="detailTabs">
+          <button class="dtab active" data-dtab="profile" type="button">Profile</button>
+          <button class="dtab" data-dtab="bookings" type="button">Bookings</button>
+          <button class="dtab" data-dtab="tickets" type="button">Support Tickets</button>
+          <button class="dtab" data-dtab="notify" type="button">Send Notification</button>
+        </div>
+
+        <!-- Profile tab -->
+        <div class="detailBody" id="tabProfile">
+          <div id="profileView"></div>
+          <div class="hidden" id="profileEditWrap">
+            <div class="editForm" id="profileEditForm"></div>
+          </div>
+        </div>
+
+        <!-- Bookings tab -->
+        <div class="detailBody hidden" id="tabBookings">
+          <div id="bookingsList"><div class="loadingRow"><span class="spinner"></span>Loading…</div></div>
+        </div>
+
+        <!-- Tickets tab -->
+        <div class="detailBody hidden" id="tabTickets">
+          <div id="ticketsList"></div>
+          <div class="hidden" id="ticketDetailWrap"></div>
+        </div>
+
+        <!-- Notification tab -->
+        <div class="detailBody hidden" id="tabNotify">
+          <div class="notifyCard">
+            <div class="notifyHead">Send Notification to Member</div>
+            <div class="notifyBody">
+              <div class="notifyRow">
+                <div class="field">
+                  <label>Type</label>
+                  <select id="notifyType">
+                    <option value="info">Info</option>
+                    <option value="booking">Booking Update</option>
+                    <option value="payment">Payment</option>
+                    <option value="alert">Alert</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label>Title</label>
+                <input type="text" id="notifyTitle" placeholder="Notification title" maxlength="200"/>
+              </div>
+              <div class="field">
+                <label>Message</label>
+                <textarea class="notifyTextarea" id="notifyBody" placeholder="Write the notification body…" rows="4" maxlength="1000"></textarea>
+              </div>
+              <div style="display:flex;gap:10px;justify-content:flex-end">
+                <button class="btn primary" id="sendNotifyBtn" type="button">Send Notification</button>
+              </div>
+              <div class="hidden" id="noMemberId" style="padding:10px 14px;border-radius:12px;background:#fff7ed;color:#9a3412;font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif">
+                This customer does not have a linked member account. Notifications can only be sent to Wix Members.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const state = {
+  authenticated: false,
+  user: '', role: '', permissions: {},
+  customers: [],
+  selectedCustomerId: null,
+  selectedCustomer: null,
+  bookings: [], tickets: [],
+  selectedTicketId: null,
+  activeTab: 'profile',
+  editingProfile: false,
+  initialLoadDone: false
+};
+
+function postToWix(msg) {
+  try { window.parent.postMessage(JSON.stringify(msg), '*'); } catch (_) {}
+}
+
+window.addEventListener('message', e => {
+  let data;
+  try { data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch (_) { return; }
+  if (!data || !data.type) return;
+  dispatch(data);
+});
+
+function dispatch(msg) {
+  switch (msg.type) {
+    case 'authState':
+    case 'userContext':
+      if (msg.authenticated !== undefined) state.authenticated = !!msg.authenticated;
+      if (msg.user || msg.name) state.user = msg.user || msg.name;
+      if (msg.role) state.role = msg.role;
+      if (msg.permissions) state.permissions = msg.permissions;
+      updateTopbar();
+      setTabsEnabled();
+      if (!state.initialLoadDone) {
+        state.initialLoadDone = true;
+        postToWix({ type: 'searchCustomers', q: '', limit: 40, skip: 0 });
+      }
+      break;
+
+    case 'customersResult':
+      renderCustomerList(msg.items || []);
+      break;
+
+    case 'customerCardResult':
+      if (msg.ok && msg.customer) {
+        state.selectedCustomer = msg.customer;
+        renderCustomerDetail();
+      }
+      break;
+
+    case 'updateCustomerResult':
+      if (msg.ok) {
+        if (msg.customer) {
+          state.selectedCustomer = msg.customer;
+          // If a new CMS record was created for a member-only entry, adopt the real _id
+          if (msg.customer._id && msg.customer._id !== state.selectedCustomerId) {
+            state.selectedCustomerId = msg.customer._id;
+          }
+        }
+        state.editingProfile = false;
+        renderCustomerDetail();
+        showToast('Profile saved successfully.', 'ok');
+      } else {
+        showToast('Save failed: ' + (msg.error || 'error'), 'error');
+      }
+      break;
+
+    case 'customerBookingsResult':
+      state.bookings = msg.bookings || [];
+      renderBookingsTab();
+      break;
+
+    case 'staffTicketsResult':
+      state.tickets = msg.tickets || [];
+      state.selectedTicketId = null;
+      renderTicketsTab();
+      break;
+
+    case 'ticketReplyResult':
+      if (msg.ok) { showToast('Reply sent.', 'ok'); loadTickets(); }
+      else showToast('Reply failed: ' + (msg.error || ''), 'error');
+      break;
+
+    case 'ticketStatusResult':
+      if (msg.ok) { showToast('Ticket updated.', 'ok'); loadTickets(); }
+      else showToast('Update failed.', 'error');
+      break;
+
+    case 'notificationResult':
+      if (msg.ok) {
+        showToast('Notification sent!', 'ok');
+        const titleEl = document.getElementById('notifyTitle');
+        const bodyEl = document.getElementById('notifyBody');
+        if (titleEl) titleEl.value = '';
+        if (bodyEl) bodyEl.value = '';
+      } else {
+        showToast('Send failed: ' + (msg.error || ''), 'error');
+      }
+      break;
+
+    case 'resume':
+      postToWix({ type: 'requestUserContext' });
+      break;
+  }
+}
+
+// ── Topbar ──────────────────────────────────────────────────────────────────────
+function updateTopbar() {
+  const badge = document.getElementById('userBadge');
+  const nameEl = document.getElementById('userName');
+  const roleEl = document.getElementById('userRole');
+  if (badge && state.user) badge.textContent = (state.user[0] || '?').toUpperCase();
+  if (nameEl && state.user) nameEl.textContent = state.user;
+  if (roleEl && state.role) roleEl.textContent = state.role;
+}
+
+function permKey(route) {
+  const map = { daily: 'rentalsView', fleet: 'fleetView', bookings: 'bookingsView', customers: 'customersView', settings: 'pricingView', pricing: 'pricingView' };
+  return map[route] || '';
+}
+
+function canAccess(route) {
+  if (route === 'home' || route === 'customers') return true;
+  if (!state.authenticated) return false;
+  const key = permKey(route);
+  return !key || !!(state.permissions[key]);
+}
+
+function setTabsEnabled() {
+  document.querySelectorAll('.tab[data-route]').forEach(btn => {
+    const route = btn.getAttribute('data-route');
+    if (canAccess(route)) btn.removeAttribute('disabled');
+    else btn.setAttribute('disabled', 'disabled');
+  });
+}
+
+// ── Customer list ───────────────────────────────────────────────────────────────
+function renderCustomerList(items) {
+  state.customers = items;
+  const el = document.getElementById('customerList');
+  if (!el) return;
+  if (!items.length) {
+    el.innerHTML = '<div class="noResults">No customers found.</div>';
+    reportHeight();
+    return;
+  }
+  el.innerHTML = items.map(c => {
+    const name = c.name || c.customerName || [c.firstName, c.lastName].filter(Boolean).join(' ') || 'Unknown';
+    const email = c.email || c.customerEmail || '';
+    const initials = name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+    const sel = c._id === state.selectedCustomerId ? ' selected' : '';
+    return `<div class="customerItem${sel}" data-id="${esc(c._id)}">
+      <div class="custAvatar">${esc(initials || '?')}</div>
+      <div class="custInfo">
+        <div class="custName">${esc(name)}</div>
+        <div class="custEmail">${esc(email)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.customerItem').forEach(item => {
+    item.addEventListener('click', () => selectCustomer(item.getAttribute('data-id')));
+  });
+  reportHeight();
+}
+
+function selectCustomer(id) {
+  state.selectedCustomerId = id;
+  state.activeTab = 'profile';
+  state.editingProfile = false;
+  document.querySelectorAll('.customerItem').forEach(el =>
+    el.classList.toggle('selected', el.getAttribute('data-id') === id));
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('customerDetail').classList.remove('hidden');
+  document.getElementById('detailName').textContent = 'Loading…';
+  document.getElementById('detailMeta').textContent = '';
+  postToWix({ type: 'getCustomerCard', customerId: id });
+}
+
+// ── Customer detail ─────────────────────────────────────────────────────────────
+function renderCustomerDetail() {
+  const c = state.selectedCustomer;
+  if (!c) return;
+  const name = c.name || c.customerName || [c.firstName, c.lastName].filter(Boolean).join(' ') || 'Unknown';
+  const initials = name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+  document.getElementById('detailAvatar').textContent = initials || '?';
+  document.getElementById('detailName').textContent = name;
+  document.getElementById('detailMeta').textContent = [c.email || c.customerEmail, c.phone || c.customerPhone].filter(Boolean).join(' · ');
+
+  // Show/hide notify note based on memberId
+  const noMemberId = document.getElementById('noMemberId');
+  const sendBtn = document.getElementById('sendNotifyBtn');
+  if (noMemberId && sendBtn) {
+    const hasMember = !!(c.memberId);
+    noMemberId.classList.toggle('hidden', hasMember);
+    sendBtn.classList.toggle('hidden', !hasMember);
+  }
+
+  switchTab(state.activeTab, false);
+  reportHeight();
+}
+
+function switchTab(tab, doLoad = true) {
+  state.activeTab = tab;
+  document.querySelectorAll('.dtab[data-dtab]').forEach(b =>
+    b.classList.toggle('active', b.getAttribute('data-dtab') === tab));
+  ['profile', 'bookings', 'tickets', 'notify'].forEach(t => {
+    const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.classList.toggle('hidden', t !== tab);
+  });
+  if (!doLoad) { if (tab === 'profile') renderProfileView(); return; }
+  if (tab === 'profile') renderProfileView();
+  if (tab === 'bookings') loadBookings();
+  if (tab === 'tickets') loadTickets();
+}
+
+// ── Profile view ────────────────────────────────────────────────────────────────
+function fmtDate(v) {
+  if (!v) return '';
+  try {
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? String(v) : d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } catch (_) { return String(v || ''); }
+}
+
+function row(label, value) {
+  const empty = !value;
+  return `<div class="profileRow"><div class="profileLabel">${esc(label)}</div><div class="profileValue${empty ? ' empty' : ''}">${esc(value) || '–'}</div></div>`;
+}
+
+function renderProfileView() {
+  const c = state.selectedCustomer;
+  if (!c) return;
+  const view = document.getElementById('profileView');
+  const editWrap = document.getElementById('profileEditWrap');
+  const editBtn = document.getElementById('editProfileBtn');
+  if (state.editingProfile) {
+    view.classList.add('hidden');
+    editWrap.classList.remove('hidden');
+    if (editBtn) editBtn.textContent = 'Cancel Edit';
+    renderEditForm();
+  } else {
+    view.classList.remove('hidden');
+    editWrap.classList.add('hidden');
+    if (editBtn) editBtn.textContent = 'Edit Profile';
+    view.innerHTML = `
+      <div class="profileSection">
+        <div class="profileSectionHead">Personal Info</div>
+        <div class="profileRows">
+          ${row('First Name', c.firstName)}${row('Last Name', c.lastName)}
+          ${row('Email', c.email || c.customerEmail)}${row('Phone', c.phone || c.customerPhone)}
+          ${row('Date of Birth', fmtDate(c.dateOfBirth))}${row('Nationality', c.nationality)}
+          ${row('Tax Number', c.taxNumber)}${row('Age Band', c.driverAge)}
+        </div>
+      </div>
+      <div class="profileSection">
+        <div class="profileSectionHead">ID / Passport</div>
+        <div class="profileRows">
+          ${row('ID Number', c.idNumber)}${row('Issue Country', c.idIssueCountry)}
+          ${row('Issue Date', fmtDate(c.idIssueDate))}${row('Expiry', fmtDate(c.idExpiry))}
+        </div>
+      </div>
+      <div class="profileSection">
+        <div class="profileSectionHead">Driver's Licence</div>
+        <div class="profileRows">
+          ${row('Licence Number', c.licenseNumber)}${row('Country', c.licenseCountry)}
+          ${row('Issue Date', fmtDate(c.licenseIssueDate))}${row('Expiry', fmtDate(c.licenseExpiry))}
+        </div>
+      </div>
+      <div class="profileSection">
+        <div class="profileSectionHead">Address</div>
+        <div class="profileRows">
+          ${row('Address', c.address)}${row('City', c.city)}
+          ${row('Postal Code', c.zipCode)}${row('Country', c.country)}
+        </div>
+      </div>`;
+  }
+  reportHeight();
+}
+
+// ── Edit form ────────────────────────────────────────────────────────────────────
+function toInputDate(v) {
+  if (!v) return '';
+  try {
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return '';
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  } catch (_) { return ''; }
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function inp(id, label, type, val) {
+  return `<div class="field"><label>${esc(label)}</label><input type="${esc(type)}" id="ef_${esc(id)}" value="${esc(val || '')}"/></div>`;
+}
+
+function renderEditForm() {
+  const c = state.selectedCustomer || {};
+  const wrap = document.getElementById('profileEditForm');
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <div class="formSection">
+      <div class="formSectionHead">Personal Info</div>
+      <div class="formGrid">
+        ${inp('firstName', 'First Name', 'text', c.firstName)}
+        ${inp('lastName', 'Last Name', 'text', c.lastName)}
+        ${inp('email', 'Email', 'email', c.email || c.customerEmail)}
+        ${inp('phone', 'Phone', 'tel', c.phone || c.customerPhone)}
+        ${inp('dateOfBirth', 'Date of Birth', 'date', toInputDate(c.dateOfBirth))}
+        ${inp('nationality', 'Nationality', 'text', c.nationality)}
+        ${inp('taxNumber', 'Tax Number', 'text', c.taxNumber)}
+      </div>
+    </div>
+    <div class="formSection">
+      <div class="formSectionHead">ID / Passport</div>
+      <div class="formGrid">
+        ${inp('idNumber', 'ID Number', 'text', c.idNumber)}
+        ${inp('idIssueCountry', 'Issue Country', 'text', c.idIssueCountry)}
+        ${inp('idIssueDate', 'Issue Date', 'date', toInputDate(c.idIssueDate))}
+        ${inp('idExpiry', 'Expiry Date', 'date', toInputDate(c.idExpiry))}
+      </div>
+    </div>
+    <div class="formSection">
+      <div class="formSectionHead">Driver's Licence</div>
+      <div class="formGrid">
+        ${inp('licenseNumber', 'Licence Number', 'text', c.licenseNumber)}
+        ${inp('licenseCountry', 'Country', 'text', c.licenseCountry)}
+        ${inp('licenseIssueDate', 'Issue Date', 'date', toInputDate(c.licenseIssueDate))}
+        ${inp('licenseExpiry', 'Expiry Date', 'date', toInputDate(c.licenseExpiry))}
+      </div>
+    </div>
+    <div class="formSection">
+      <div class="formSectionHead">Address</div>
+      <div class="formGrid">
+        ${inp('address', 'Address', 'text', c.address)}
+        ${inp('city', 'City', 'text', c.city)}
+        ${inp('zipCode', 'Postal Code', 'text', c.zipCode)}
+        ${inp('country', 'Country', 'text', c.country)}
+      </div>
+    </div>
+    <div class="formActions">
+      <button class="btn ghost" id="cancelEditBtn" type="button">Cancel</button>
+      <button class="btn primary" id="saveProfileBtn" type="button">Save Changes</button>
+    </div>`;
+
+  document.getElementById('cancelEditBtn').addEventListener('click', () => {
+    state.editingProfile = false;
+    renderProfileView();
+  });
+  document.getElementById('saveProfileBtn').addEventListener('click', saveProfile);
+  reportHeight();
+}
+
+function get(id) { return (document.getElementById('ef_' + id) || {}).value || ''; }
+
+function saveProfile() {
+  postToWix({
+    type: 'updateCustomerCard',
+    data: {
+      customerId: state.selectedCustomerId,
+      firstName: get('firstName'), lastName: get('lastName'),
+      email: get('email'), phone: get('phone'),
+      dateOfBirth: get('dateOfBirth') || null,
+      nationality: get('nationality'), taxNumber: get('taxNumber'),
+      idNumber: get('idNumber'), idIssueCountry: get('idIssueCountry'),
+      idIssueDate: get('idIssueDate') || null,
+      idExpiry: get('idExpiry') || null,
+      licenseNumber: get('licenseNumber'), licenseCountry: get('licenseCountry'),
+      licenseIssueDate: get('licenseIssueDate') || null,
+      licenseExpiry: get('licenseExpiry') || null,
+      address: get('address'), city: get('city'),
+      zipCode: get('zipCode'), country: get('country')
+    }
+  });
+  showToast('Saving…');
+}
+
+// ── Bookings tab ────────────────────────────────────────────────────────────────
+function loadBookings() {
+  const c = state.selectedCustomer;
+  if (!c) return;
+  document.getElementById('bookingsList').innerHTML = '<div class="loadingRow"><span class="spinner"></span>Loading…</div>';
+  postToWix({ type: 'getCustomerBookings', customerId: state.selectedCustomerId, email: c.email || c.customerEmail || '' });
+}
+
+function renderBookingsTab() {
+  const el = document.getElementById('bookingsList');
+  if (!el) return;
+  if (!state.bookings.length) { el.innerHTML = '<div class="noResults">No bookings found for this customer.</div>'; reportHeight(); return; }
+  el.innerHTML = state.bookings.map(b => {
+    const status = (b.status || 'unknown').toLowerCase().replace(/\s+/g, '_');
+    const vehicle = b.vehicleName || b.categoryName || b.categoryCode || '';
+    const dates = [b.pickupDate || b.startDate, b.dropoffDate || b.endDate].filter(Boolean).map(fmtDate).join(' → ');
+    return `<div class="bookingItem">
+      <div class="bkStatus ${esc(status)}">${esc(b.status || 'Unknown')}</div>
+      <div class="bkInfo">
+        <div class="bkTitle">${esc(b.bookingNumber || ('#' + (b._id || '').slice(-6)))}</div>
+        <div class="bkMeta">${[vehicle, dates].filter(Boolean).map(esc).join(' · ')}</div>
+      </div>
+    </div>`;
+  }).join('');
+  reportHeight();
+}
+
+// ── Support Tickets tab ─────────────────────────────────────────────────────────
+function loadTickets() {
+  const c = state.selectedCustomer;
+  if (!c) return;
+  document.getElementById('ticketsList').innerHTML = '<div class="loadingRow"><span class="spinner"></span>Loading…</div>';
+  document.getElementById('ticketDetailWrap').classList.add('hidden');
+  postToWix({
+    type: 'getStaffTickets',
+    customerId: c.memberId || '',
+    email: c.email || c.customerEmail || '',
+    status: 'all'
+  });
+}
+
+function renderTicketsTab() {
+  const listEl = document.getElementById('ticketsList');
+  if (!listEl) return;
+  if (!state.tickets.length) {
+    listEl.innerHTML = '<div class="noResults">No support tickets for this customer.</div>';
+    reportHeight();
+    return;
+  }
+  listEl.innerHTML = state.tickets.map(t => {
+    const msgs = parseMsgs(t.messages);
+    const selCls = t._id === state.selectedTicketId ? ' selected' : '';
+    const status = t.status || 'open';
+    return `<div class="ticketItem${selCls}" data-tid="${esc(t._id)}">
+      <div class="ticketHead">
+        <div class="ticketSubject">${esc(t.subject || 'No subject')}</div>
+        <div class="tStatus ${esc(status)}">${esc(status.replace(/_/g, ' '))}</div>
+      </div>
+      <div class="ticketMeta">${[t.category, msgs.length + ' message' + (msgs.length !== 1 ? 's' : '')].filter(Boolean).join(' · ')}</div>
+    </div>`;
+  }).join('');
+  listEl.querySelectorAll('.ticketItem').forEach(el => {
+    el.addEventListener('click', () => openTicket(el.getAttribute('data-tid')));
+  });
+  reportHeight();
+}
+
+function openTicket(ticketId) {
+  state.selectedTicketId = ticketId;
+  renderTicketsTab();
+  const ticket = state.tickets.find(t => t._id === ticketId);
+  if (!ticket) return;
+  const wrap = document.getElementById('ticketDetailWrap');
+  wrap.classList.remove('hidden');
+  const msgs = parseMsgs(ticket.messages);
+  const status = ticket.status || 'open';
+  wrap.innerHTML = `<div class="ticketDetail">
+    <div class="ticketDetailHead">
+      <div class="ticketDetailHeadInfo">
+        <div class="ticketDetailTitle">${esc(ticket.subject || 'Support Ticket')}</div>
+        <div class="ticketDetailSub">${esc(ticket.category || '')} · #${esc((ticket._id || '').slice(-8))}</div>
+      </div>
+      <div class="ticketDetailActions">
+        <select class="statusSel" id="tStatusSel">
+          <option value="open"${status === 'open' ? ' selected' : ''}>Open</option>
+          <option value="in_progress"${status === 'in_progress' ? ' selected' : ''}>In Progress</option>
+          <option value="resolved"${status === 'resolved' ? ' selected' : ''}>Resolved</option>
+          <option value="closed"${status === 'closed' ? ' selected' : ''}>Closed</option>
+        </select>
+        <button class="btn ghost sm" id="tStatusBtn" type="button">Update</button>
+        <button class="btn ghost sm" id="tCloseBtn" type="button">✕</button>
+      </div>
+    </div>
+    <div class="ticketMessages" id="tMsgs">
+      ${msgs.map(m => `<div class="msgBubble ${esc(m.sender || 'member')}">
+        <div class="msgSender">${m.sender === 'staff' ? esc(m.staffName || 'Staff') : 'Member'}</div>
+        ${esc(m.text || '')}
+        <div class="msgTime">${fmtDate(m.createdAt)}</div>
+      </div>`).join('')}
+    </div>
+    <div class="replyArea">
+      <textarea class="replyTextarea" id="tReplyText" placeholder="Write your reply to the member…" rows="3"></textarea>
+      <div class="replyActions">
+        <span style="font:700 11px/1 system-ui;color:#94a3b8">Reply will be visible to the member in their portal.</span>
+        <button class="btn primary sm" id="tSendBtn" type="button">Send Reply</button>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('tSendBtn').addEventListener('click', () => {
+    const msg = (document.getElementById('tReplyText').value || '').trim();
+    if (!msg) { showToast('Please write a reply first.', 'error'); return; }
+    postToWix({ type: 'replyToTicket', ticketId, message: msg });
+  });
+  document.getElementById('tStatusBtn').addEventListener('click', () => {
+    postToWix({ type: 'setTicketStatus', ticketId, status: document.getElementById('tStatusSel').value });
+  });
+  document.getElementById('tCloseBtn').addEventListener('click', () => {
+    state.selectedTicketId = null;
+    wrap.classList.add('hidden');
+    renderTicketsTab();
+  });
+
+  const msgsEl = document.getElementById('tMsgs');
+  if (msgsEl) msgsEl.scrollTop = msgsEl.scrollHeight;
+  reportHeight();
+}
+
+function parseMsgs(raw) {
+  if (!raw) return [];
+  try { return JSON.parse(raw); } catch (_) { return []; }
+}
+
+// ── Notifications tab ───────────────────────────────────────────────────────────
+function sendNotification() {
+  const c = state.selectedCustomer;
+  if (!c || !c.memberId) { showToast('Customer has no linked member account.', 'error'); return; }
+  const title = (document.getElementById('notifyTitle').value || '').trim();
+  const body = (document.getElementById('notifyBody').value || '').trim();
+  const type = (document.getElementById('notifyType').value || 'info');
+  if (!title || !body) { showToast('Please fill in title and message.', 'error'); return; }
+  postToWix({
+    type: 'createNotification',
+    data: {
+      memberId: c.memberId,
+      memberEmail: c.email || c.customerEmail || '',
+      type, title, body,
+      data: { customerId: c._id }
+    }
+  });
+}
+
+// ── Utils ───────────────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str == null ? '' : str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'toast' + (type ? ' ' + type : '');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function reportHeight() {
+  setTimeout(() => postToWix({ type: 'resizeShell', height: document.body.scrollHeight + 32 }), 50);
+}
+
+// ── Wire ────────────────────────────────────────────────────────────────────────
+function wire() {
+  // Top nav tabs
+  document.querySelectorAll('.tab[data-route]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!btn.hasAttribute('disabled')) postToWix({ type: 'navigate', route: btn.getAttribute('data-route') });
+    });
+  });
+
+  // Detail tabs
+  document.querySelectorAll('.dtab[data-dtab]').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.getAttribute('data-dtab')));
+  });
+
+  // Edit profile button
+  document.getElementById('editProfileBtn').addEventListener('click', () => {
+    state.editingProfile = !state.editingProfile;
+    renderProfileView();
+  });
+
+  // Search
+  const searchInput = document.getElementById('searchInput');
+  let searchTimer = null;
+  function doSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => postToWix({ type: 'searchCustomers', q: searchInput.value || '', limit: 40, skip: 0 }), 350);
+  }
+  searchInput.addEventListener('input', doSearch);
+  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(searchTimer); postToWix({ type: 'searchCustomers', q: searchInput.value || '', limit: 40, skip: 0 }); } });
+  document.getElementById('searchBtn').addEventListener('click', () => {
+    clearTimeout(searchTimer);
+    postToWix({ type: 'searchCustomers', q: searchInput.value || '', limit: 40, skip: 0 });
+  });
+
+  // Send notification
+  document.getElementById('sendNotifyBtn').addEventListener('click', sendNotification);
+
+  // User menu
+  const menuBtn = document.getElementById('userMenuBtn');
+  const menu = document.getElementById('userMenu');
+  menuBtn.addEventListener('click', e => { e.stopPropagation(); menu.classList.toggle('open'); });
+  document.addEventListener('click', e => { if (!menu.contains(e.target) && !menuBtn.contains(e.target)) menu.classList.remove('open'); });
+  menu.querySelectorAll('[data-menu-action]').forEach(el => {
+    el.addEventListener('click', () => { postToWix({ type: 'menuAction', action: el.getAttribute('data-menu-action') }); menu.classList.remove('open'); });
+  });
+
+  // Height observer
+  try {
+    const ro = new ResizeObserver(() => reportHeight());
+    ro.observe(document.body);
+  } catch (_) {}
+}
+
+wire();
+postToWix({ type: 'customersReady' });
+</script>
+</body>
+</html>
