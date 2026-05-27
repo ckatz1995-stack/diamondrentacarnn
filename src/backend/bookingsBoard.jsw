@@ -1,6 +1,7 @@
 import wixData from "wix-data";
 import { confirmAndAutoAssign } from "backend/fleetCalendar";
 import { requireStaffAccess } from "backend/staffAccess.jsw";
+import { notifyBookingConfirmed, notifyBookingCancelled } from 'backend/notificationTriggers.jsw';
 import { addDays, asDate, extractCode, pickLabel, safeNum, safeText } from "backend/utils";
 
 const BOOKING_LIMIT = 1000;
@@ -159,6 +160,10 @@ export async function setBookingBoardStatus({ authToken, bookingId, newStatus } 
       booking.confirmedAt = booking.confirmedAt || new Date();
       booking.statusChangedAt = new Date();
       await wixData.update("BookingsNew", booking, { suppressAuth: true });
+      // Notify only when confirmAndAutoAssign didn't already send one (no vehicle found / already assigned cases)
+      if (!(result.assigned === true && !result.alreadyAssigned)) {
+        notifyBookingConfirmed({ memberId: booking.memberId || '', email: booking.email || '', bookingNumber: booking.bookingNumber || '', bookingId: id }).catch(() => {});
+      }
       const message = result.assigned ? "Booking confirmed & vehicle assigned" : "Booking confirmed";
       return { success: true, message };
     }
@@ -168,6 +173,9 @@ export async function setBookingBoardStatus({ authToken, bookingId, newStatus } 
     booking.statusChangedAt = new Date();
     if (targetStatus === "Canceled") booking.canceledAt = new Date();
     await wixData.update("BookingsNew", booking, { suppressAuth: true });
+    if (targetStatus === "Canceled") {
+      notifyBookingCancelled({ memberId: booking.memberId || '', email: booking.email || '', bookingNumber: booking.bookingNumber || '', bookingId: id }).catch(() => {});
+    }
     return { success: true, message: `Booking ${targetStatus.toLowerCase()}` };
   } catch (error) {
     return { success: false, message: error?.message || String(error) };

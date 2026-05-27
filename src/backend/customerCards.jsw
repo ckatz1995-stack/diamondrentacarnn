@@ -361,7 +361,7 @@ export async function createMemberNotification({ authToken, memberId, memberEmai
       type: String(type || 'info'),
       title: String(title).trim().slice(0, 200),
       body: String(body).trim().slice(0, 1000),
-      read: false,
+      isRead: false,
       data: typeof data === 'object' ? JSON.stringify(data) : String(data || '')
     }, { suppressAuth: true });
     return { ok: true };

@@ -447,6 +447,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           </div>
           <div class="helper-note">Η τελική ανάλυση παραμένει ορατή πάνω στη σελίδα ώστε να γνωρίζει ο πελάτης ακριβώς τι αποστέλλει πριν ολοκληρώσει το αίτημα.</div>
           <label class="check-row"><input type="checkbox" required><span>Έχω διαβάσει και αποδέχομαι τους όρους, τις προϋποθέσεις και την πολιτική απορρήτου.</span></label>
+          <div id="submitError" role="alert" style="display:none;margin:12px 0 0;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:11px 14px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.4"></div>
           <div class="actions">
             <button class="btn btn-back" type="button">Πίσω</button>
             <button class="btn btn-submit" type="submit">Αποστολή αιτήματος</button>
@@ -455,6 +456,15 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
       </div>
     </section>
   </form>
+
+<div id="submitOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:1000;align-items:center;justify-content:center;flex-direction:column;backdrop-filter:blur(2px)">
+  <style>@keyframes subo-spin{to{transform:rotate(360deg)}}</style>
+  <div style="background:#fff;border-radius:20px;padding:32px 40px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.22);min-width:240px">
+    <div style="width:44px;height:44px;border:3px solid #e8d7ab;border-top-color:#3f748a;border-radius:50%;animation:subo-spin .8s linear infinite;margin:0 auto 16px"></div>
+    <div style="font-size:15px;font-weight:800;color:#231a10">Υποβολή κράτησης...</div>
+    <div style="font-size:13px;color:#a08050;margin-top:6px;font-weight:600">Παρακαλώ περιμένετε</div>
+  </div>
+</div>
 
 <footer class="footer">
   <div class="footer-grid">
@@ -488,6 +498,21 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 </footer>
 </div>
 <script>
+function showSubmitError(msg) {
+  const el = document.getElementById('submitError');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function hideSubmitError() {
+  const el = document.getElementById('submitError');
+  if (el) el.style.display = 'none';
+}
+function showSubmitOverlay(show) {
+  const el = document.getElementById('submitOverlay');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
 const PRICING_CATALOG_STORAGE_KEY = 'diamond-pricing-catalog-public-v1';
 const VEHICLE_CATEGORIES_STORAGE_KEY = 'diamond-vehicle-categories-catalog-v1';
 const BOOKING_CONTEXT_STORAGE_KEY = 'diamond-booking-context-v1';
@@ -1097,9 +1122,10 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
   const phone = (fd.get('phone') || '').toString().trim();
 
   if (!firstName || !lastName || !email || !phone) {
-    alert('Συμπλήρωσε όλα τα υποχρεωτικά πεδία.');
+    showSubmitError('Παρακαλώ συμπλήρωσε όνομα, επώνυμο, email και τηλέφωνο.');
     return;
   }
+  hideSubmitError();
 
   const fullName = `${firstName} ${lastName}`.trim();
   const billingType = (fd.get('docType') || 'receipt').toString();
@@ -1107,6 +1133,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
   const oldText = submitBtn.textContent;
   submitBtn.disabled = true;
   submitBtn.textContent = 'Υποβολή...';
+  showSubmitOverlay(true);
 
   try {
     const uiSurchargeNote = [
@@ -1218,12 +1245,14 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       total: summaryTotal
     });
 
+    showSubmitOverlay(false);
     goTo(`/success?booking=${encodeURIComponent(data.bookingNumber)}`);
   } catch (err) {
-    alert(err.message || 'Παρουσιάστηκε σφάλμα κατά την υποβολή.');
+    showSubmitError(err.message || 'Παρουσιάστηκε σφάλμα κατά την υποβολή. Δοκιμάστε ξανά.');
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = oldText;
+    showSubmitOverlay(false);
   }
 });
 
