@@ -1128,6 +1128,47 @@ function renderVehicle(v){
   } else {
     nightRow.hidden = true;
   }
+  callServerQuote();
+}
+
+async function callServerQuote(){
+  if(!vehicle || !state.vehicleId) return;
+  try{
+    const payload = {
+      vehicleId: state.vehicleId,
+      categoryId: extractCategoryCode(vehicle?.label || state.category || ''),
+      category: extractCategoryCode(vehicle?.label || state.category || ''),
+      pickupDateTime: state.pickup,
+      dropoffDateTime: state.dropoff,
+      selectedPackage: state.insuranceKey || 'cdw',
+      selectedExtras: Array.isArray(state.extrasKeys) ? state.extrasKeys : [],
+      driverAge: state.age,
+      pickuppoint: state.pickupLocation,
+      dropoffpoint: state.dropoffLocation
+    };
+    const res = await fetch(`${API_BASE}/computeQuote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(!data?.success) return;
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+    const hide = (id, hidden) => { const el = document.getElementById(id); if(el) el.hidden = hidden; };
+    set('baseCost', formatMoney(data.baseCost));
+    set('insuranceCost', formatMoney(data.insuranceCost));
+    hide('insuranceRow', !(data.insuranceCost > 0));
+    set('extrasCost', formatMoney(data.extrasCost));
+    hide('extrasRow', !(data.extrasCost > 0));
+    if(data.locationFee > 0){ set('locationFeeCost', formatMoney(data.locationFee)); hide('locationFeeRow', false); }
+    else hide('locationFeeRow', true);
+    if(data.ageFee > 0){ set('ageFeeCost', formatMoney(data.ageFee)); hide('ageFeeRow', false); }
+    else hide('ageFeeRow', true);
+    if(data.nightFee > 0){ set('nightFeeCost', formatMoney(data.nightFee)); hide('nightFeeRow', false); }
+    else hide('nightFeeRow', true);
+    set('grandTotal', formatMoney(data.totalPrice));
+    set('topPricePerDay', formatMoney(data.basePricePerDay || 0));
+  }catch(e){}
 }
 
 async function loadVehicle(){
