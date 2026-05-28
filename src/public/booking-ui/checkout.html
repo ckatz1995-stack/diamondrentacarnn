@@ -1146,7 +1146,7 @@ async function callServerQuote(){
       pickuppoint: state.pickupLocation,
       dropoffpoint: state.dropoffLocation
     };
-    const res = await fetch(`${API_BASE}/computeQuote`, {
+    const res = await fetch(`${currentSiteBase()}/_functions/computeQuote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
