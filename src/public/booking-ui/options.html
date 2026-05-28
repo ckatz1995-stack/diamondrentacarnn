@@ -810,6 +810,7 @@ html,body{overflow-x:hidden!important}
     function currentApiBase(){ return `${currentSiteBase()}/_functions`; }
     function currentTermsUrl(){ return `${currentSiteBase()}/rental-terms`; }
     let pricingCatalog = safeRead(PRICING_CATALOG_STORAGE_KEY) || null;
+    let _catalogFromApi = false;
 
 function getBusinessSettings(){
   return (pricingCatalog && pricingCatalog.businessSettings) ? pricingCatalog.businessSettings : {};
@@ -1113,6 +1114,20 @@ bindRouteLinks();
       }
       renderPricingChoices();
       return pricingCatalog;
+    }
+
+    async function fetchRealCatalog(){
+      try{
+        const res = await fetch(`${currentApiBase()}/pricing_catalog`, { cache:'no-store' });
+        const rawText = await res.text();
+        const json = JSON.parse(rawText);
+        if(!res.ok || !json?.success) return;
+        pricingCatalog = json;
+        _catalogFromApi = true;
+        safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
+        renderPricingChoices();
+        scheduleServerQuote();
+      }catch(e){}
     }
 
     function bindChoiceInputs(){
@@ -1711,18 +1726,17 @@ async function loadVehicle(){
         safeWrite(BOOKING_CONTEXT_STORAGE_KEY, embeddedContext);
         applyBookingContext(data);
         document.getElementById('insuranceLink').href = currentTermsUrl();
+        fetchRealCatalog();
         return;
       }
       if(data.type === 'pricing-catalog-data'){
-        pricingCatalog = data.catalog || pricingCatalog;
-        safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
         document.getElementById('insuranceLink').href = currentTermsUrl();
-        applyBusinessIdentity();
-        renderPricingChoices();
-        if(vehicle){
-          renderVehicle(vehicle);
-        } else {
-          updateTotals();
+        if(!_catalogFromApi){
+          pricingCatalog = data.catalog || pricingCatalog;
+          safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
+          applyBusinessIdentity();
+          renderPricingChoices();
+          if(vehicle){ renderVehicle(vehicle); } else { updateTotals(); }
         }
         return;
       }

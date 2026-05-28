@@ -24,22 +24,27 @@ async function resolveSession(customerId, sessionToken) {
 }
 
 function sanitizeBooking(b) {
+  const extras = b.selectedExtrasDetails
+    ? b.selectedExtrasDetails
+    : (typeof b.extras === 'string' && b.extras
+        ? b.extras.split(',').map(s => s.trim()).filter(Boolean)
+        : (Array.isArray(b.extras) ? b.extras : []));
   return {
     _id: b._id,
     bookingNumber: b.bookingNumber,
     status: b.status,
     pickupDateTime: b.pickupDateTime,
     dropoffDateTime: b.dropoffDateTime,
-    pickupLocation: b.pickupLocation,
-    dropoffLocation: b.dropoffLocation,
-    vehicleName: b.vehicleName || b.categoryName || '',
-    categoryId: b.categoryId || '',
-    insurance: b.insurance || '',
-    extras: b.extras || [],
-    basePrice: b.basePrice || 0,
+    pickupLocation: b.pickupLocation || b.pickuppoint || '',
+    dropoffLocation: b.dropoffLocation || b.dropoffpoint || '',
+    vehicleName: b.vehicleCategoryName || b.vehicleName || b.categoryName || '',
+    categoryId: b.categoryId || b.vehicleCategoryCode || '',
+    insurance: b.selectedPackage || b.insurance || '',
+    extras,
+    basePrice: b.basePricePerDay || b.basePrice || 0,
     totalPrice: b.totalPrice || b.finalPrice || 0,
     currency: 'EUR',
-    notes: b.notes || '',
+    notes: b.notes || b.internalMemo || '',
     driverName: b.customerName || b.firstName || '',
     driverEmail: b.customerEmail || b.email || '',
     driverPhone: b.customerPhone || b.phone || '',
