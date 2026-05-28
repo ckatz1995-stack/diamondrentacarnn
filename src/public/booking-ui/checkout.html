@@ -1405,13 +1405,13 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       dropoffLocation: state.dropoffLocation,
       insurance: insuranceLabel,
       extras: extrasLabel,
-      baseCost: summaryBaseCost,
-      insuranceCost: totals.insuranceCost,
-      extrasCost: totals.extrasCost,
-      ageFee: totals.ageFee,
-      nightFee: totals.nightFee,
-      locationFee: totals.locationFee,
-      total: summaryTotal
+      baseCost: data.baseCost ?? summaryBaseCost,
+      insuranceCost: data.insuranceCost ?? totals.insuranceCost,
+      extrasCost: data.extrasCost ?? totals.extrasCost,
+      ageFee: data.ageFee ?? totals.ageFee,
+      nightFee: data.nightFee ?? totals.nightFee,
+      locationFee: data.locationFee ?? totals.locationFee,
+      total: data.totalPrice ?? summaryTotal
     });
 
     clearTimeout(timeoutId);

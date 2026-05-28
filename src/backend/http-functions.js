@@ -225,7 +225,7 @@ export async function get_fleet_models(request){
   }
 }
 
-export async function post_createBooking(request){ try{ if(!isAllowedMutationOrigin(request)) return respondRestricted(request, {success:false,message:"Origin not allowed"}, badRequest); const payload=await request.body.json(); const result=await createBooking(payload||{}); if(!result?.success) return respondRestricted(request, {success:false,message:result?.message||"Booking failed"}, badRequest); return respondRestricted(request, {success:true, bookingNumber:result.bookingNumber, id:result._id}); }catch(err){ return respondRestricted(request, {success:false,message:err.message||String(err)}, serverError); } }
+export async function post_createBooking(request){ try{ if(!isAllowedMutationOrigin(request)) return respondRestricted(request, {success:false,message:"Origin not allowed"}, badRequest); const payload=await request.body.json(); const result=await createBooking(payload||{}); if(!result?.success) return respondRestricted(request, {success:false,message:result?.message||"Booking failed"}, badRequest); return respondRestricted(request, {success:true, bookingNumber:result.bookingNumber, id:result._id, totalPrice:result.totalPrice, baseCost:result.baseCost, insuranceCost:result.insuranceCost, extrasCost:result.extrasCost, ageFee:result.ageFee, nightFee:result.nightFee, locationFee:result.locationFee}); }catch(err){ return respondRestricted(request, {success:false,message:err.message||String(err)}, serverError); } }
 
 
 function htmlResponse(body, fn = ok){ return fn({ headers: {"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store","Access-Control-Allow-Origin":"*"}, body }); }
