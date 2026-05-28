@@ -1,6 +1,6 @@
 import wixData from "wix-data";
 import { ok, badRequest, serverError } from "wix-http-functions";
-import { createBooking } from "backend/bookingEngine";
+import { createBooking, computeQuote } from "backend/bookingEngine";
 import { INSURANCE_OPTIONS } from "backend/bookingConfig";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
 function respond(body, fn = ok){ return fn({ headers: {"Content-Type":"application/json","Cache-Control":"no-store","Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET, POST, OPTIONS","Access-Control-Allow-Headers":"Content-Type"}, body }); }
@@ -226,6 +226,8 @@ export async function get_fleet_models(request){
 }
 
 export async function post_createBooking(request){ try{ if(!isAllowedMutationOrigin(request)) return respondRestricted(request, {success:false,message:"Origin not allowed"}, badRequest); const payload=await request.body.json(); const result=await createBooking(payload||{}); if(!result?.success) return respondRestricted(request, {success:false,message:result?.message||"Booking failed"}, badRequest); return respondRestricted(request, {success:true, bookingNumber:result.bookingNumber, id:result._id, totalPrice:result.totalPrice, baseCost:result.baseCost, insuranceCost:result.insuranceCost, extrasCost:result.extrasCost, ageFee:result.ageFee, nightFee:result.nightFee, locationFee:result.locationFee}); }catch(err){ return respondRestricted(request, {success:false,message:err.message||String(err)}, serverError); } }
+export async function post_computeQuote(request){ try{ const payload=await request.body.json(); const result=await computeQuote(payload||{}); if(!result?.success) return respond({success:false,message:result?.message||"Quote failed"}, badRequest); return respond({success:true, totalPrice:result.totalPrice, basePricePerDay:result.basePricePerDay, billableDays:result.billableDays, baseCost:result.baseCost, insuranceCost:result.insuranceCost, extrasCost:result.extrasCost, ageFee:result.ageFee, nightFee:result.nightFee, locationFee:result.locationFee}); }catch(err){ return respond({success:false,message:err.message||String(err)}, serverError); } }
+export function options_computeQuote(request){ return respond({}); }
 
 
 function htmlResponse(body, fn = ok){ return fn({ headers: {"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store","Access-Control-Allow-Origin":"*"}, body }); }

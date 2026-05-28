@@ -1364,6 +1364,76 @@ async function fetchFleetModels(categoryCode, vehicleId){
       } else nightRow.hidden = true;
 
       persistSelection();
+      scheduleServerQuote();
+    }
+
+    let _quoteTimer = null;
+    function scheduleServerQuote(){
+      if(_quoteTimer) clearTimeout(_quoteTimer);
+      _quoteTimer = setTimeout(callServerQuote, 450);
+    }
+    async function callServerQuote(){
+      if(!vehicle || !state.vehicleId) return;
+      try{
+        const insuranceInput = selectedInsurance();
+        const extrasInputs = selectedExtras();
+        const payload = {
+          vehicleId: state.vehicleId,
+          categoryId: extractCategoryCode(vehicle?.label || state.category || ''),
+          category: extractCategoryCode(vehicle?.label || state.category || ''),
+          pickupDateTime: state.pickup,
+          dropoffDateTime: state.dropoff,
+          selectedPackage: insuranceInput?.dataset?.key || 'cdw',
+          selectedExtras: extrasInputs.map(function(el){ return el.dataset.key; }).filter(Boolean),
+          driverAge: state.age,
+          pickuppoint: state.pickupLocation,
+          dropoffpoint: state.dropoffLocation
+        };
+        const res = await fetch(currentApiBase() + '/computeQuote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(!data?.success) return;
+        applyServerQuote(data);
+      }catch(e){}
+    }
+    function applyServerQuote(q){
+      const days = diffDays(state.pickup, state.dropoff);
+      const dEl = document.getElementById('summaryDays');
+      if(dEl) dEl.textContent = q.billableDays || days;
+      const bEl = document.getElementById('baseLine');
+      if(bEl) bEl.textContent = formatMoney(q.baseCost);
+      const iEl = document.getElementById('insuranceLine');
+      if(iEl) iEl.textContent = formatMoney(q.insuranceCost);
+      const insuranceRow = document.getElementById('insuranceRow');
+      if(insuranceRow) insuranceRow.hidden = !(q.insuranceCost > 0);
+      const eEl = document.getElementById('extrasLine');
+      if(eEl) eEl.textContent = formatMoney(q.extrasCost);
+      const extrasRow = document.getElementById('extrasRow');
+      if(extrasRow) extrasRow.hidden = !(q.extrasCost > 0);
+      const locationRow = document.getElementById('locationRow');
+      const lEl = document.getElementById('locationLine');
+      if(q.locationFee > 0){ if(lEl) lEl.textContent = formatMoney(q.locationFee); if(locationRow) locationRow.hidden = false; }
+      else if(locationRow) locationRow.hidden = true;
+      const ageRow = document.getElementById('ageRow');
+      const aEl = document.getElementById('ageLine');
+      if(q.ageFee > 0){ if(aEl) aEl.textContent = formatMoney(q.ageFee); if(ageRow) ageRow.hidden = false; }
+      else if(ageRow) ageRow.hidden = true;
+      const nightRow = document.getElementById('nightRow');
+      const nEl = document.getElementById('nightLine');
+      if(q.nightFee > 0){ if(nEl) nEl.textContent = formatMoney(q.nightFee); if(nightRow) nightRow.hidden = false; }
+      else if(nightRow) nightRow.hidden = true;
+      const vatRate = vatRateDecimal();
+      const net = Number((q.totalPrice / (1 + vatRate)).toFixed(2));
+      const vat = Number((q.totalPrice - net).toFixed(2));
+      const netEl = document.getElementById('netLine');
+      if(netEl) netEl.textContent = formatMoney(net);
+      const vatEl = document.getElementById('vatLine');
+      if(vatEl) vatEl.textContent = formatMoney(vat);
+      const gtEl = document.getElementById('grandTotal');
+      if(gtEl) gtEl.textContent = formatMoney(q.totalPrice);
     }
 
     function renderFacts(specs){
