@@ -110,10 +110,86 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .hero,.summary,.next{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .btn-primary,.btn-gold{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
 </style>
+<script>
+/* DIAMOND STATE: BookingState utility — sessionStorage wrapper */
+window.BookingState=(function(){
+  var K='diamond_booking';
+  function r(){try{var v=sessionStorage.getItem(K);return v?JSON.parse(v):{}}catch(_){return{}}}
+  function w(o){try{sessionStorage.setItem(K,JSON.stringify(o))}catch(_){}}
+  return{
+    get:function(k){return r()[k]},
+    set:function(k,v){var o=r();o[k]=v;w(o)},
+    setMany:function(obj){var o=r();Object.keys(obj).forEach(function(k){o[k]=obj[k]});w(o)},
+    getAll:function(){return r()},
+    clear:function(){try{sessionStorage.removeItem(K)}catch(_){}},
+    invalidateSelection:function(){var o=r();delete o.vehicleCategory;delete o.vehicleId;delete o.basePrice;delete o.vehicleImage;w(o)}
+  };
+})();
+</script>
+<style>
+/* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
+/* DIAMOND MOBILE: Hamburger */
+.hamburger-btn{display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer;border-radius:8px;min-width:40px;min-height:40px;width:40px;height:40px;flex-shrink:0;transition:background .15s;padding:0;line-height:1}
+.hamburger-btn:hover,.hamburger-btn:focus-visible{background:rgba(255,255,255,.22);outline:none}
+.mobile-nav{overflow:hidden;max-height:0;transition:max-height .3s ease;background:rgba(20,40,48,.98);border-top:1px solid rgba(231,191,105,.12);width:100%}
+.mobile-nav.is-open{max-height:440px}
+.mobile-nav a{display:flex;align-items:center;color:rgba(255,255,255,.88);text-decoration:none;font-size:15px;font-weight:700;padding:0 22px;min-height:48px;border-bottom:1px solid rgba(255,255,255,.06);transition:background .12s}
+.mobile-nav a:last-child{border-bottom:none}
+.mobile-nav a:active,.mobile-nav a:hover{background:rgba(231,191,105,.09);color:#f6e19f}
+.header-phone-label{display:inline}
+@media(max-width:767px){
+  .header-nav{display:none!important}
+  .hamburger-btn{display:flex!important}
+  .brand-text span,.brand-text em{display:none}
+  .header-phone-label{display:none}
+  .header-phone{padding:9px 12px!important;min-width:40px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+}
+@media(prefers-reduced-motion:reduce){.mobile-nav{transition:none}}
+
+/* DIAMOND MOBILE: Success page responsive layout */
+@media(max-width:767px){
+  .hero{grid-template-columns:1fr!important;padding:16px!important}
+  .side-card{margin-top:0}
+  .summary-grid{grid-template-columns:1fr!important}
+  .vehicle-card{flex-direction:row!important;gap:14px!important}
+  .vehicle-shot{min-height:100px!important;flex:0 0 100px!important}
+  .info-grid{grid-template-columns:1fr 1fr!important}
+  .actions{flex-direction:column!important}
+  .actions .btn{width:100%!important;min-width:0!important}
+  .hero h1{font-size:28px!important}
+  .booking-no{font-size:24px!important}
+  .big{font-size:clamp(20px,5vw,32px)!important}
+}
+
+/* DIAMOND LOADING: Booking fallback panel */
+#bookingFallback{display:none}
+#bookingFallback h2{color:#fff!important}
+#bookingFallback p{color:rgba(255,255,255,.82)!important}
+</style>
 </head>
 <body>
-<header class="site-header"><div class="header-inner"><a class="brand" href="/"><div class="brand-logo-mark">◆</div><div class="brand-text"><strong>DIAMOND Rent A Car</strong><span>Thessaloniki</span></div></a><nav class="header-nav"><a href="/">Αρχική</a><a href="/categories">Οχήματα</a><a href="/options">Extras</a><a href="/rental-terms">Όροι ενοικίασης</a><a href="/booking">Ολοκλήρωση</a></nav><a class="header-phone" href="tel:+302310000000">+30 2310 000 000</a></div></header>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/"><div class="brand-logo-mark">◆</div><div class="brand-text"><strong>DIAMOND Rent A Car</strong><span>Thessaloniki</span></div></a>
+    <nav class="header-nav"><a href="/">Αρχική</a><a href="/categories">Οχήματα</a><a href="/options">Extras</a><a href="/rental-terms">Όροι ενοικίασης</a><a href="/booking">Ολοκλήρωση</a></nav>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Μενού" aria-expanded="false">☰</button>
+    <a class="header-phone" href="tel:+302310000000"><span aria-hidden="true">📞</span><span class="header-phone-label">+30 2310 000 000</span></a>
+  </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Κύρια πλοήγηση">
+    <a href="/">Αρχική</a>
+    <a href="/categories">Οχήματα</a>
+    <a href="/options">Extras</a>
+    <a href="/rental-terms">Όροι ενοικίασης</a>
+    <a href="/booking">Ολοκλήρωση</a>
+  </nav>
+</header>
 <div class="page"><div class="wrap">
+<!-- DIAMOND LOADING: Fallback shown when BookingState guard fails or page re-visited -->
+<div id="bookingFallback" class="next">
+  <h2>Κράτηση λήφθηκε</h2>
+  <p>Το αίτημα κράτησής σας υποβλήθηκε. Η ομάδα μας θα επικοινωνήσει σύντομα για επιβεβαίωση.</p>
+  <div class="actions"><a class="btn btn-primary" href="/">Νέα αναζήτηση</a></div>
+</div>
 <section class="hero"><div><span class="kicker">Η κράτηση στάλθηκε</span><h1>Το αίτημά σου καταχωρήθηκε επιτυχώς</h1><p>Η ομάδα της DIAMOND Rent A Car έλαβε το αίτημά σου και θα ακολουθήσει επιβεβαίωση διαθεσιμότητας και τελική επικοινωνία. Κράτησε τον αριθμό κράτησης για κάθε αναφορά.</p></div><div class="side-card"><div><h3>Αριθμός κράτησης</h3><div class="muted">Αποθήκευσε τον κωδικό σου. Θα τον χρειαστείς για επιβεβαίωση, αλλαγές ή οποιαδήποτε επικοινωνία με την ομάδα μας.</div></div><div class="big" id="sideBookingNo">—</div></div></section>
 <section class="summary"><div class="summary-grid"><div class="vehicle-card"><div class="vehicle-shot"><img id="vehicleImage" alt="Όχημα"/></div><div class="vehicle-title" id="vehicleName">Κατηγορία οχήματος</div><div class="vehicle-sub" id="vehicleLabel">ή παρόμοιο</div></div><div class="info-card"><div class="info-grid"><div class="mini"><span class="k">Παραλαβή</span><span class="v" id="pickupText">—</span></div><div class="mini"><span class="k">Επιστροφή</span><span class="v" id="dropoffText">—</span></div><div class="mini"><span class="k">Διάρκεια</span><span class="v" id="durationText">—</span></div><div class="mini"><span class="k">Ασφάλεια</span><span class="v" id="insuranceText">—</span></div><div class="mini"><span class="k">Extras</span><span class="v" id="extrasText">Χωρίς extras</span></div></div><div class="line"><span>Βασική χρέωση</span><strong id="baseCost">—</strong></div><div class="line" id="insuranceRow"><span>Ασφάλεια</span><strong id="insuranceCost">—</strong></div><div class="line" id="extrasRow"><span>Extras</span><strong id="extrasCost">—</strong></div><div class="line" id="locationFeeRow" hidden><span id="locationFeeLabel">Χρέωση τοποθεσιών</span><strong id="locationFeeCost">—</strong></div><div class="line" id="ageFeeRow" hidden><span id="ageFeeLabel">Επασφάλιστρο ηλικίας</span><strong id="ageFeeCost">—</strong></div><div class="line" id="nightFeeRow" hidden><span id="nightFeeLabel">Νυχτερινή χρέωση</span><strong id="nightFeeCost">—</strong></div><div class="total"><span>Τελικό σύνολο</span><strong id="grandTotal">—</strong></div></div></div></section>
 <section class="next"><h2>Επόμενα βήματα</h2><ul><li>Έλεγξε ότι κράτησες τον αριθμό κράτησης.</li><li>Θα ακολουθήσει επικοινωνία από την ομάδα μας για οριστική επιβεβαίωση.</li><li>Για αλλαγές ή διευκρινίσεις, χρησιμοποίησε τον αριθμό κράτησης στην επικοινωνία σου.</li></ul><div class="actions"><a class="btn btn-primary" href="/">Νέα αναζήτηση</a><a class="btn btn-gold" href="/categories">Πίσω στα οχήματα</a></div></section>
@@ -383,182 +459,72 @@ window.addEventListener('load', async () => { await loadSummary(true); notifyHei
 window.addEventListener('resize', notifyHeight);
 try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
 
-/* ===== MEMBER PORTAL AUTH ===== */
-(function memberPortalInit(){
-  var S='diamondMbrSess';
-  function rSess(){try{return JSON.parse(sessionStorage.getItem(S)||'null')}catch(_){return null}}
-  function wSess(v){try{sessionStorage.setItem(S,JSON.stringify(v))}catch(_){}}
-  function cSess(){try{sessionStorage.removeItem(S)}catch(_){}}
-
-  var css=document.createElement('style');
-  css.textContent='.mbr-area{position:relative;flex-shrink:0;margin-left:4px}.mbr-btn{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.22);color:#fff;font-size:13px;font-weight:800;padding:9px 15px;border-radius:999px;cursor:pointer;transition:background .2s;white-space:nowrap;font-family:inherit}.mbr-btn:hover{background:rgba(255,255,255,.25)}.mbr-btn.on{background:var(--gold,#e7bf69);color:#1f1a13;border-color:transparent}.mbr-btn svg{width:15px;height:15px;flex-shrink:0}.mbr-dd{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.18);min-width:210px;z-index:200;overflow:hidden;border:1px solid rgba(0,0,0,.07)}.mbr-dd.hidden{display:none}.mbr-dd-hdr{padding:12px 16px;background:#f7f3eb;border-bottom:1px solid rgba(0,0,0,.07)}.mbr-dd-hdr strong{display:block;font-size:14px;color:#1f1a13;font-weight:800}.mbr-dd-hdr span{display:block;font-size:12px;color:#999;margin-top:2px}.mbr-dd a{display:block;padding:11px 16px;font-size:14px;color:#1f1a13;font-weight:600;text-decoration:none;transition:background .15s}.mbr-dd a:hover{background:#f7f3eb}.mbr-dd hr{border:none;border-top:1px solid rgba(0,0,0,.07);margin:0}.mbr-dd .mbr-out{color:#b83c2e}.mbr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}.mbr-overlay.hidden{display:none}.mbr-modal{background:#fff;border-radius:16px;padding:32px;width:100%;max-width:400px;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.22)}.mbr-modal h3{margin:0 0 18px;font-size:21px;font-weight:900;color:#1f1a13}.mbr-tabs{display:flex;gap:0;border-bottom:2px solid #f0ece3;margin-bottom:22px}.mbr-tab{flex:1;background:none;border:none;padding:10px 0;font-size:14px;font-weight:700;color:#aaa;cursor:pointer;transition:color .2s;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px}.mbr-tab.active{color:var(--accent,#3f748a);border-bottom-color:var(--accent,#3f748a)}.mbr-panel{display:none}.mbr-panel.active{display:block}.mbr-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;line-height:1;padding:4px 6px}.mbr-close:hover{color:#333}.mbr-modal label{display:block;font-size:12px;font-weight:700;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}.mbr-modal input[type=email],.mbr-modal input[type=text],.mbr-modal input[type=password]{display:block;width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;transition:border .2s;font-family:inherit;box-sizing:border-box}.mbr-modal input:focus{border-color:var(--accent,#3f748a)}.mbr-err{display:none;color:#b83c2e;font-size:13px;margin:-6px 0 12px;padding:9px 12px;background:#fff2f0;border-radius:6px;border:1px solid #f5c6c6}.mbr-err.show{display:block}.mbr-ok{display:none;color:#1a7a45;font-size:13px;margin:-6px 0 12px;padding:9px 12px;background:#f0faf4;border-radius:6px;border:1px solid #b2dfc4}.mbr-ok.show{display:block}.mbr-submit{width:100%;padding:13px;background:var(--accent,#3f748a);color:#fff;font-size:15px;font-weight:800;border:none;border-radius:10px;cursor:pointer;transition:background .2s;font-family:inherit}.mbr-submit:hover:not([disabled]){background:var(--accent2,#2d6072)}.mbr-submit[disabled]{opacity:.6;cursor:not-allowed}';
-  document.head.appendChild(css);
-
-  var ph=document.querySelector('.header-phone');
-  if(ph){
-    ph.insertAdjacentHTML('afterend',
-      '<div class="mbr-area" id="mbrArea">'+
-        '<button class="mbr-btn" id="mbrBtn" type="button">'+
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+
-            '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'+
-          '</svg>'+
-          '<span id="mbrLbl">Σύνδεση</span>'+
-        '</button>'+
-        '<div class="mbr-dd hidden" id="mbrDd">'+
-          '<div class="mbr-dd-hdr"><strong id="mbrDdName">—</strong><span id="mbrDdEmail"></span></div>'+
-          '<a href="#" id="mbrDdBookings">Οι Κρατήσεις μου</a>'+
-          '<a href="#" id="mbrDdProfile">Το Προφίλ μου</a>'+
-          '<a href="#" id="mbrDdSettings">Ρυθμίσεις Λογαριασμού</a>'+
-          '<hr>'+
-          '<a href="#" id="mbrDdOut" class="mbr-out">Αποσύνδεση</a>'+
-        '</div>'+
-      '</div>');
-  }
-
-  document.body.insertAdjacentHTML('beforeend',
-    '<div class="mbr-overlay hidden" id="mbrOverlay">'+
-      '<div class="mbr-modal">'+
-        '<button class="mbr-close" id="mbrClose" type="button">&#215;</button>'+
-        '<h3 id="mbrModalTitle">Σύνδεση / Εγγραφή</h3>'+
-        '<div class="mbr-tabs">'+
-          '<button class="mbr-tab active" id="mbrTabLogin" type="button">Σύνδεση</button>'+
-          '<button class="mbr-tab" id="mbrTabReg" type="button">Εγγραφή</button>'+
-        '</div>'+
-        '<div class="mbr-panel active" id="mbrPanelLogin">'+
-          '<form id="mbrFormLogin" novalidate>'+
-            '<label>Email</label>'+
-            '<input id="mbrLoginEmail" type="email" autocomplete="email" placeholder="your@email.com"/>'+
-            '<label>Κωδικός</label>'+
-            '<input id="mbrLoginPass" type="password" autocomplete="current-password" placeholder="τουλάχιστον 6 χαρακτήρες"/>'+
-            '<div class="mbr-err" id="mbrLoginErr"></div>'+
-            '<button class="mbr-submit" id="mbrLoginSubmit" type="submit">Σύνδεση →</button>'+
-          '</form>'+
-        '</div>'+
-        '<div class="mbr-panel" id="mbrPanelReg">'+
-          '<form id="mbrFormReg" novalidate>'+
-            '<label>Όνομα</label>'+
-            '<input id="mbrRegFirst" type="text" autocomplete="given-name" placeholder="Πρώτο όνομα"/>'+
-            '<label>Επώνυμο</label>'+
-            '<input id="mbrRegLast" type="text" autocomplete="family-name" placeholder="Επώνυμο"/>'+
-            '<label>Email</label>'+
-            '<input id="mbrRegEmail" type="email" autocomplete="email" placeholder="your@email.com"/>'+
-            '<label>Κωδικός</label>'+
-            '<input id="mbrRegPass" type="password" autocomplete="new-password" placeholder="τουλάχιστον 6 χαρακτήρες"/>'+
-            '<label>Επανάληψη Κωδικού</label>'+
-            '<input id="mbrRegPass2" type="password" autocomplete="new-password" placeholder="Επανάληψη κωδικού"/>'+
-            '<div class="mbr-err" id="mbrRegErr"></div>'+
-            '<div class="mbr-ok" id="mbrRegOk"></div>'+
-            '<button class="mbr-submit" id="mbrRegSubmit" type="submit">Δημιουργία Λογαριασμού →</button>'+
-          '</form>'+
-        '</div>'+
-      '</div>'+
-    '</div>');
-
-  var ERR_MAP={invalid_credentials:'Λάθος email ή κωδικός.',email_exists:'Αυτό το email χρησιμοποιείται ήδη.',weak_password:'Ο κωδικός είναι πολύ αδύναμος.',not_found:'Δεν βρέθηκε λογαριασμός.',server_error:'Σφάλμα σύνδεσης. Δοκιμάστε ξανά.'};
-
-  function uiUpdate(){
-    var s=rSess(),btn=document.getElementById('mbrBtn'),lbl=document.getElementById('mbrLbl'),nm=document.getElementById('mbrDdName'),em=document.getElementById('mbrDdEmail');
-    if(!btn)return;
-    if(s&&s.name){
-      var n=s.name||s.email||'Μέλος';
-      lbl.textContent=n.split(' ')[0]||n;btn.classList.add('on');
-      if(nm)nm.textContent=s.name||'Μέλος';
-      if(em)em.textContent=s.email||'';
-    }else{lbl.textContent='Σύνδεση';btn.classList.remove('on');var dd=document.getElementById('mbrDd');if(dd)dd.classList.add('hidden');}
-  }
-
-  function showTab(tab){
-    document.getElementById('mbrTabLogin').classList.toggle('active',tab==='login');
-    document.getElementById('mbrTabReg').classList.toggle('active',tab==='reg');
-    document.getElementById('mbrPanelLogin').classList.toggle('active',tab==='login');
-    document.getElementById('mbrPanelReg').classList.toggle('active',tab==='reg');
-  }
-
-  function setErr(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.toggle('show',!!m);}}
-  function setOk(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.toggle('show',!!m);}}
-  function setBusy(id,b,label,busyLabel){var btn=document.getElementById(id);if(!btn)return;btn.disabled=b;btn.textContent=b?busyLabel:label;}
-
-  function closeModal(){
-    document.getElementById('mbrOverlay').classList.add('hidden');
-    setErr('mbrLoginErr','');setErr('mbrRegErr','');setOk('mbrRegOk','');
-    setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
-    setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμείνετε...');
-  }
-
-  document.getElementById('mbrBtn').addEventListener('click',function(e){
-    e.stopPropagation();
-    var s=rSess(),dd=document.getElementById('mbrDd');
-    if(s&&s.name){dd.classList.toggle('hidden');}
-    else{document.getElementById('mbrOverlay').classList.remove('hidden');showTab('login');setTimeout(function(){var i=document.getElementById('mbrLoginEmail');if(i)i.focus();},40);}
-  });
-  document.addEventListener('click',function(){var d=document.getElementById('mbrDd');if(d)d.classList.add('hidden');});
-  document.getElementById('mbrClose').addEventListener('click',closeModal);
-  document.getElementById('mbrOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
-  document.getElementById('mbrTabLogin').addEventListener('click',function(){showTab('login');});
-  document.getElementById('mbrTabReg').addEventListener('click',function(){showTab('reg');});
-
-  document.getElementById('mbrFormLogin').addEventListener('submit',function(e){
-    e.preventDefault();setErr('mbrLoginErr','');
-    var email=(document.getElementById('mbrLoginEmail').value||'').trim();
-    var pass=document.getElementById('mbrLoginPass').value||'';
-    if(!email||!pass){setErr('mbrLoginErr','Συμπληρώστε email και κωδικό.');return;}
-    setBusy('mbrLoginSubmit',true,'Σύνδεση →','Σύνδεση...');
-    try{window.parent.postMessage({type:'PORTAL_LOGIN',email:email,password:pass},'*');}catch(_){}
-  });
-
-  document.getElementById('mbrFormReg').addEventListener('submit',function(e){
-    e.preventDefault();setErr('mbrRegErr','');setOk('mbrRegOk','');
-    var first=(document.getElementById('mbrRegFirst').value||'').trim();
-    var last=(document.getElementById('mbrRegLast').value||'').trim();
-    var email=(document.getElementById('mbrRegEmail').value||'').trim();
-    var pass=document.getElementById('mbrRegPass').value||'';
-    var pass2=document.getElementById('mbrRegPass2').value||'';
-    if(!first||!last||!email||!pass){setErr('mbrRegErr','Συμπληρώστε όλα τα πεδία.');return;}
-    if(pass.length<6){setErr('mbrRegErr','Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες.');return;}
-    if(pass!==pass2){setErr('mbrRegErr','Οι κωδικοί δεν ταιριάζουν.');return;}
-    setBusy('mbrRegSubmit',true,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
-    try{window.parent.postMessage({type:'PORTAL_REGISTER',email:email,password:pass,firstName:first,lastName:last},'*');}catch(_){}
-  });
-
-  [['mbrDdBookings','/member-portal?tab=bookings'],['mbrDdProfile','/member-portal?tab=profile'],['mbrDdSettings','/member-portal?tab=profile']].forEach(function(p){
-    var el=document.getElementById(p[0]);
-    if(el)el.addEventListener('click',function(e){e.preventDefault();document.getElementById('mbrDd').classList.add('hidden');try{window.parent.postMessage({type:'wix-booking-nav',path:p[1]},'*');}catch(_){}});
-  });
-
-  document.getElementById('mbrDdOut').addEventListener('click',function(e){
-    e.preventDefault();document.getElementById('mbrDd').classList.add('hidden');
-    try{window.parent.postMessage({type:'PORTAL_SIGN_OUT'},'*');}catch(_){}
-    cSess();uiUpdate();
-  });
-
-  window.addEventListener('message',function(event){
-    var raw=event.data,d=null;
-    if(typeof raw==='string'){try{d=JSON.parse(raw);}catch(_){return;}}else{d=raw;}
-    if(!d||!d.type)return;
-    if(d.type==='PORTAL_AUTH_RESULT'){
-      setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
-      setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
-      if(d.ok){
-        if(d.pending){setOk('mbrRegOk','Ο λογαριασμός δημιουργήθηκε! Ελέγξτε το email σας για επιβεβαίωση.');}
-        else{if(d.member){wSess(d.member);}closeModal();uiUpdate();}
-      }else{
-        var errMsg=ERR_MAP[d.error]||ERR_MAP.server_error;
-        var isReg=document.getElementById('mbrPanelReg').classList.contains('active');
-        setErr(isReg?'mbrRegErr':'mbrLoginErr',errMsg);
-      }
+// DIAMOND LOADING: Guard against broken confirmation & prevent re-use
+(function(){
+  try{
+    // Check URL param first (normal flow: checkout navigates to /success?booking=...)
+    var qs = new URLSearchParams(location.search);
+    var bookingParam = qs.get('booking');
+    // Check diamond-last-booking storage key written by checkout.html on success
+    var stored = null;
+    try{ var r1 = sessionStorage.getItem('diamond-last-booking'); stored = r1 ? JSON.parse(r1) : null; }catch(_){}
+    if(!stored) try{ var r2 = localStorage.getItem('diamond-last-booking'); stored = r2 ? JSON.parse(r2) : null; }catch(_){}
+    var hasBooking = !!(bookingParam || (stored && stored.bookingNumber));
+    // Prevent re-use: if page already shown in this session, show fallback
+    var viewedKey = 'diamond-success-viewed-' + (bookingParam || (stored && stored.bookingNumber) || '');
+    var viewed = false;
+    try{ viewed = !!sessionStorage.getItem(viewedKey); }catch(_){}
+    var fallback = document.getElementById('bookingFallback');
+    var wrap = document.querySelector('.wrap');
+    if(!hasBooking || viewed){
+      if(fallback) fallback.style.display = '';
+      if(wrap) Array.from(wrap.children).forEach(function(el){
+        if(el.id !== 'bookingFallback') el.style.display = 'none';
+      });
       return;
     }
-    if(d.type==='PORTAL_SIGN_OUT_RESULT'){cSess();uiUpdate();return;}
-    if(d.type==='PORTAL_MEMBER_STATE'){
-      if(d.loggedIn&&d.member){wSess(d.member);uiUpdate();}
-      return;
-    }
-  });
-
-  uiUpdate();
-  setTimeout(function(){try{window.parent.postMessage({type:'REQUEST_MEMBER_STATE'},'*');}catch(_){}},150);
+    // First successful render — mark as viewed
+    try{ sessionStorage.setItem(viewedKey, '1'); }catch(_){}
+  }catch(_){}
 })();
-/* ===== END MEMBER PORTAL AUTH ===== */
+
+// DIAMOND LOADING: 'Νέα αναζήτηση' must clear BookingState before navigating
+(function(){
+  // Use capture phase so this fires before the bindRouteLinks handler
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('a.btn-primary[href="/"], a.btn[href="/"]');
+    if(!a) return;
+    try{ if(window.BookingState) BookingState.clear(); }catch(_){}
+    // Navigation proceeds via bindRouteLinks goTo() handler
+  }, true);
+})();
+
+// DIAMOND MOBILE: Hamburger menu toggle
+(function(){
+  var btn=document.getElementById('hamburgerBtn');
+  var nav=document.getElementById('mobileNav');
+  if(!btn||!nav)return;
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=nav.classList.toggle('is-open');
+    btn.textContent=open?'✕':'☰';
+    btn.setAttribute('aria-expanded',String(open));
+  });
+  document.addEventListener('click',function(e){
+    if(nav.classList.contains('is-open')&&!nav.contains(e.target)&&e.target!==btn){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    }
+  });
+  Array.from(nav.querySelectorAll('a')).forEach(function(a){
+    a.addEventListener('click',function(){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    });
+  });
+})();
 </script>
 </body>
 </html>

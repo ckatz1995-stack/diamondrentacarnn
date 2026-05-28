@@ -635,26 +635,80 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .cta{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
 .is-selected-card{outline:2.5px solid var(--gold,#e7bf69)!important;box-shadow:0 0 0 4px rgba(231,191,105,.18),0 22px 54px rgba(0,0,0,.20)!important}
 </style>
-<script>
-/* DIAMOND STATE: BookingState utility — shared across all booking-ui pages */
-window.BookingState=(function(){
-  var KEY='diamond_booking';
-  function _l(){try{return JSON.parse(sessionStorage.getItem(KEY)||'{}')}catch(e){try{sessionStorage.removeItem(KEY)}catch(_){}return {}}}
-  function _s(o){try{sessionStorage.setItem(KEY,JSON.stringify(o))}catch(_){}}
-  return{
-    set:function(k,v){var s=_l();s[k]=v;_s(s)},
-    get:function(k){var v=_l()[k];return v!==undefined?v:null},
-    setMany:function(o){var s=_l();Object.assign(s,o);_s(s)},
-    getAll:function(){return _l()},
-    clear:function(){try{sessionStorage.removeItem(KEY)}catch(_){}},
-    invalidateSelection:function(){
-      var s=_l();
-      ['vehicleCategory','vehicleId','basePrice','vehicleImage','selectedInsurance','selectedInsurancePrice','selectedExtras','totalPrice','billableDays'].forEach(function(k){delete s[k]});
-      _s(s);
-    }
-  };
-})();
-</script>
+<style>
+/* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
+/* DIAMOND MOBILE: Hamburger */
+.hamburger-btn{display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer;border-radius:8px;min-width:40px;min-height:40px;width:40px;height:40px;flex-shrink:0;transition:background .15s;padding:0;line-height:1}
+.hamburger-btn:hover,.hamburger-btn:focus-visible{background:rgba(255,255,255,.22);outline:none}
+.mobile-nav{overflow:hidden;max-height:0;transition:max-height .3s ease;background:rgba(20,40,48,.98);border-top:1px solid rgba(231,191,105,.12);width:100%}
+.mobile-nav.is-open{max-height:440px}
+.mobile-nav a{display:flex;align-items:center;color:rgba(255,255,255,.88);text-decoration:none;font-size:15px;font-weight:700;padding:0 22px;min-height:48px;border-bottom:1px solid rgba(255,255,255,.06);transition:background .12s}
+.mobile-nav a:last-child{border-bottom:none}
+.mobile-nav a:active,.mobile-nav a:hover{background:rgba(231,191,105,.09);color:#f6e19f}
+.header-phone-label{display:inline}
+@media(max-width:767px){
+  .header-nav{display:none!important}
+  .hamburger-btn{display:flex!important}
+  .brand-text span,.brand-text em{display:none}
+  .header-phone-label{display:none}
+  .header-phone{padding:9px 12px!important;min-width:40px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+}
+@media(prefers-reduced-motion:reduce){.mobile-nav{transition:none}}
+
+/* DIAMOND MOBILE: Vehicle cards single column */
+@media(max-width:767px){
+  .result-card .result-main{grid-template-columns:1fr!important;gap:0!important}
+  .media-col{min-height:140px!important}
+  .spec-grid{grid-template-columns:repeat(3,1fr)!important;flex-wrap:wrap}
+  .head-row{display:block!important}
+  .price-box{margin-top:8px;text-align:left}
+  .total-box{overflow-x:hidden!important}
+  .total-row{flex-wrap:wrap}
+}
+/* DIAMOND MOBILE: Collapsible search bar */
+.search-summary-bar{display:none;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.15);border-radius:12px;font-size:14px;font-weight:700;color:#fff;margin-bottom:10px}
+.search-summary-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-edit-btn{background:rgba(231,191,105,.22);border:1px solid rgba(231,191,105,.35);color:#f6e19f;font-size:13px;font-weight:800;padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;min-height:36px;font-family:inherit}
+.search-edit-btn:hover{background:rgba(231,191,105,.35)}
+.search-form-panel{transition:max-height .3s ease,opacity .25s ease;overflow:hidden}
+.search-form-panel.collapsed{max-height:0;opacity:0;pointer-events:none}
+@media(max-width:767px){
+  .search-summary-bar{display:flex}
+  .search-form-panel{max-height:none}
+  .search-form-panel.collapsed{max-height:0;opacity:0}
+}
+
+/* DIAMOND LOADING: Skeleton cards */
+.skeleton-list{display:none}
+.skeleton-list.active{display:block}
+.skeleton-card{background:linear-gradient(180deg,rgba(232,214,168,.85),rgba(210,185,130,.75));border:1px solid rgba(160,110,35,.14);border-radius:var(--radius-xl,28px);margin-bottom:16px;overflow:hidden;padding:18px}
+.skeleton-row{height:14px;border-radius:6px;margin-bottom:10px;background:linear-gradient(90deg,rgba(180,140,60,.18) 25%,rgba(220,185,100,.38) 50%,rgba(180,140,60,.18) 75%);background-size:200% 100%;animation:sk-shimmer 1.5s infinite}
+.skeleton-row.w-full{width:100%}
+.skeleton-row.w-60{width:60%}
+.skeleton-row.w-40{width:40%}
+.skeleton-row.h-big{height:120px;border-radius:12px;margin-bottom:14px}
+@keyframes sk-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.skeleton-row{animation:none;opacity:.5}}
+
+/* DIAMOND LOADING: Empty state */
+.empty-state-panel{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;background:linear-gradient(180deg,rgba(232,214,168,.85),rgba(210,185,130,.75));border:1px solid rgba(160,110,35,.14);border-radius:var(--radius-xl,28px)}
+.empty-state-panel.active{display:flex}
+.empty-state-icon{font-size:48px;margin-bottom:12px;opacity:.7}
+.empty-state-title{font-size:22px;font-weight:900;margin:0 0 8px;color:var(--text,#241a10)}
+.empty-state-sub{font-size:15px;color:var(--muted,#6c593a);margin:0 0 18px;font-weight:700}
+.empty-state-btn{background:linear-gradient(135deg,var(--blue,#3f758b),var(--blue-deep,#2e6072));color:#fff;border:none;border-radius:12px;padding:13px 24px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;min-height:44px}
+.empty-state-btn:hover{opacity:.9}
+
+/* DIAMOND LOADING: No-data guard banner */
+.no-data-banner{display:none;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.28);border-radius:12px;padding:14px 18px;color:#b83c2e;font-size:14px;font-weight:700;text-align:center;margin:16px 0}
+.no-data-banner.visible{display:block}
+.no-data-banner a{color:#b83c2e;font-weight:900}
+
+/* DIAMOND LOADING: Card fade-in transition */
+#vehicleList{transition:opacity .25s ease}
+#vehicleList.loading{opacity:0}
+#vehicleList.loaded{opacity:1}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -670,12 +724,30 @@ window.BookingState=(function(){
       <a href="/rental-terms">Όροι ενοικίασης</a>
       <a href="/booking">Ολοκλήρωση</a>
     </nav>
-    <a class="header-phone" href="tel:+302310000000">+30 2310 000 000</a>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Μενού" aria-expanded="false">☰</button>
+    <a class="header-phone" href="tel:+302310000000"><span aria-hidden="true">📞</span><span class="header-phone-label">+30 2310 000 000</span></a>
   </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Κύρια πλοήγηση">
+    <a href="/">Αρχική</a>
+    <a href="/categories">Οχήματα</a>
+    <a href="/options">Ασφάλειες &amp; extras</a>
+    <a href="/rental-terms">Όροι ενοικίασης</a>
+    <a href="/booking">Ολοκλήρωση</a>
+  </nav>
 </header>
 
 <div class="page">
+  <!-- DIAMOND LOADING: No-data guard -->
+  <div class="no-data-banner" id="noDataBanner">
+    Ξεκινήστε την αναζήτησή σας από την <a href="/">αρχική σελίδα</a>.
+  </div>
   <section class="search-wrap panel">
+    <!-- DIAMOND MOBILE: Summary bar shown on mobile when form is collapsed -->
+    <div class="search-summary-bar" id="searchSummaryBar">
+      <span class="search-summary-text" id="searchSummaryText">Αναζήτηση...</span>
+      <button class="search-edit-btn" id="searchEditBtn" type="button">Επεξεργασία</button>
+    </div>
+    <div class="search-form-panel" id="searchFormPanel">
     <div class="search-bar">
       <form id="searchForm">
         <div class="search-grid">
@@ -722,6 +794,7 @@ window.BookingState=(function(){
         </div>
       </form>
     </div>
+    </div><!-- end search-form-panel -->
   </section>
 
   <section class="filter-combined">
@@ -755,7 +828,35 @@ window.BookingState=(function(){
     <div class="helper-note" id="categoryHint">Επιλεγμένη κατηγορία: Όλες</div>
   </section>
 
-  <section class="list" id="list"></section>
+  <section class="list" id="list">
+  <!-- DIAMOND LOADING: Skeleton cards — shown while loading -->
+  <div class="skeleton-list active" id="skeletonList">
+    <div class="skeleton-card">
+      <div class="skeleton-row h-big w-full"></div>
+      <div class="skeleton-row w-60"></div>
+      <div class="skeleton-row w-40"></div>
+      <div class="skeleton-row w-full"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skeleton-row h-big w-full"></div>
+      <div class="skeleton-row w-60"></div>
+      <div class="skeleton-row w-40"></div>
+      <div class="skeleton-row w-full"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skeleton-row h-big w-full"></div>
+      <div class="skeleton-row w-60"></div>
+      <div class="skeleton-row w-40"></div>
+    </div>
+  </div>
+  <!-- DIAMOND LOADING: Empty state -->
+  <div class="empty-state-panel" id="emptyStatePanel">
+    <div class="empty-state-icon">🚗</div>
+    <h2 class="empty-state-title">Δεν βρέθηκαν διαθέσιμα οχήματα</h2>
+    <p class="empty-state-sub">Δοκιμάστε διαφορετικές ημερομηνίες ή επιλέξτε άλλη κατηγορία.</p>
+    <button class="empty-state-btn" id="emptyStateModifyBtn" type="button">Τροποποίηση αναζήτησης</button>
+  </div>
+  </section>
 </div>
 
 <footer class="footer">
@@ -1201,11 +1302,20 @@ function sortedVehicles(items, mode){
 }
 function render(){
   const filtered = sortedVehicles(vehicles, sortSelect.value);
+  // DIAMOND LOADING: Hide skeleton cards, reveal content
+  const skelList = document.getElementById('skeletonList');
+  const emptyPanel = document.getElementById('emptyStatePanel');
+  const listEl = document.getElementById('list');
+  if(skelList) skelList.classList.remove('active');
   if(!filtered.length){
-    list.innerHTML = `<div class="empty-card"><h2>Δεν βρέθηκαν διαθέσιμα ${escapeHtml(pageObjectLabel())}</h2><p>Δεν υπάρχουν ενεργά ${escapeHtml(pageObjectLabel())} οχημάτων για αυτή την αναζήτηση αυτή τη στιγμή.</p></div>`;
+    if(emptyPanel) emptyPanel.classList.add('active');
+    list.innerHTML = '';
+    // DIAMOND MOBILE: Update search summary bar
+    updateSearchSummaryBar();
     notifyHeight();
     return;
   }
+  if(emptyPanel) emptyPanel.classList.remove('active');
   const days = currentDays();
   const ageExtra = ageSurcharge(days, ageGroup.value);
   const nightRows = nightCharges();
@@ -1268,7 +1378,10 @@ function render(){
   notifyHeight();
 }
 function setLoading(message){
-  list.innerHTML = `<div class="empty-card"><h2>Φόρτωση ${escapeHtml(pageObjectLabel())}…</h2><p>${escapeHtml(message || `Ανακτούμε τα διαθέσιμα ${pageObjectLabel()} οχημάτων.`)}</p></div>`;
+  // DIAMOND LOADING: Show skeleton while loading instead of text placeholder
+  const skelList = document.getElementById('skeletonList');
+  if(skelList) skelList.classList.add('active');
+  list.innerHTML = '';
   notifyHeight();
 }
 function setError(message){
@@ -1450,24 +1563,95 @@ if(Array.isArray(embeddedVehicleItems)){
 loadVehicles();
 if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls();
 
-// DIAMOND STATE: Detect stale vehicle selection when search params have changed
+// DIAMOND LOADING: No-data guard — check URL params or stored search for search context
 (function(){
   try{
-    if(!window.BookingState) return;
-    var bs = BookingState.getAll();
-    if(!bs.searchHash) return;
+    // Check URL query params first (normal flow from index.html)
+    var qs = new URLSearchParams(location.search);
+    if(qs.get('pickup') || qs.get('dropoff') || qs.get('pickupDate')) return; // has search data — OK
+    // Check the storage key used by the existing flow
+    var stored = null;
+    try{ var raw = sessionStorage.getItem('diamond-booking-search-v1'); stored = raw ? JSON.parse(raw) : null; }catch(_){}
+    if(!stored) try{ var raw2 = localStorage.getItem('diamond-booking-search-v1'); stored = raw2 ? JSON.parse(raw2) : null; }catch(_){}
+    if(!stored) try{ var raw3 = sessionStorage.getItem('diamond_booking_search_v1'); stored = raw3 ? JSON.parse(raw3) : null; }catch(_){}
+    if(stored && (stored.pickup || stored.pickupDate || stored.pickupLocation)) return; // has search data — OK
+    // No search context at all — show banner but keep list visible (user can still search)
+    var banner = document.getElementById('noDataBanner');
+    if(banner) banner.classList.add('visible');
+  }catch(_){}
+})();
+
+// DIAMOND MOBILE: Search summary bar for mobile
+function updateSearchSummaryBar(){
+  try{
+    var summaryText = document.getElementById('searchSummaryText');
+    if(!summaryText) return;
     var pl = document.getElementById('pickupLocation');
     var dl = document.getElementById('dropoffLocation');
     var pd = document.getElementById('pickupDate');
     var dd = document.getElementById('dropoffDate');
-    var pt = document.getElementById('pickupTime');
-    var dt = document.getElementById('dropoffTime');
-    if(!pl||!pd||!dd) return;
-    var currentHash = [pl.value||'',dl?dl.value:'',pd.value||'',dd.value||'',pt?pt.value:'',dt?dt.value:''].join('|');
-    if(currentHash !== bs.searchHash) BookingState.invalidateSelection();
+    var days = typeof currentDays === 'function' ? currentDays() : '?';
+    var from = (pl && pl.value) ? pl.value.split(' ')[0] : 'Παραλαβή';
+    var to = (dl && dl.value) ? dl.value.split(' ')[0] : 'Επιστροφή';
+    summaryText.textContent = from + ' → ' + to + ' · ' + days + ' ημέρες';
   }catch(_){}
+}
+(function(){
+  var editBtn = document.getElementById('searchEditBtn');
+  var formPanel = document.getElementById('searchFormPanel');
+  var summaryBar = document.getElementById('searchSummaryBar');
+  if(!editBtn||!formPanel) return;
+  // DIAMOND MOBILE: On mobile, collapse the form by default, show summary bar
+  function initSearchPanel(){
+    if(window.innerWidth < 768){
+      formPanel.classList.add('collapsed');
+      updateSearchSummaryBar();
+    } else {
+      formPanel.classList.remove('collapsed');
+    }
+  }
+  initSearchPanel();
+  window.addEventListener('resize', initSearchPanel);
+  editBtn.addEventListener('click',function(){
+    formPanel.classList.remove('collapsed');
+    if(summaryBar) summaryBar.style.display = 'none';
+  });
+  // Also bind empty state "modify search" button
+  var emptyBtn = document.getElementById('emptyStateModifyBtn');
+  if(emptyBtn) emptyBtn.addEventListener('click',function(){
+    formPanel.classList.remove('collapsed');
+    if(summaryBar) summaryBar.style.display = 'none';
+    if(formPanel) formPanel.scrollIntoView({behavior:'smooth',block:'start'});
+  });
 })();
+updateSearchSummaryBar();
 
+// DIAMOND MOBILE: Hamburger menu toggle
+(function(){
+  var btn=document.getElementById('hamburgerBtn');
+  var nav=document.getElementById('mobileNav');
+  if(!btn||!nav)return;
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=nav.classList.toggle('is-open');
+    btn.textContent=open?'✕':'☰';
+    btn.setAttribute('aria-expanded',String(open));
+  });
+  document.addEventListener('click',function(e){
+    if(nav.classList.contains('is-open')&&!nav.contains(e.target)&&e.target!==btn){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    }
+  });
+  Array.from(nav.querySelectorAll('a')).forEach(function(a){
+    a.addEventListener('click',function(){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    });
+  });
+})();
 
 function escapeCustomUi(value){
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));

@@ -352,30 +352,65 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
 .summary-shell,.form-card,.section{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .btn-submit{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
-.field-error{display:none;color:#b83c2e;font-size:12px;font-weight:700;margin-top:3px;line-height:1.3}
-.field-error.visible{display:block}
-.label-error{color:#b83c2e!important;font-weight:800!important}
-input.input-error,select.input-error,textarea.input-error{border-color:#b83c2e!important;box-shadow:0 0 0 2px rgba(184,60,46,.18)!important}
-</style><script>
-/* DIAMOND STATE: BookingState utility — shared across all booking-ui pages */
-window.BookingState=(function(){
-  var KEY='diamond_booking';
-  function _l(){try{return JSON.parse(sessionStorage.getItem(KEY)||'{}')}catch(e){try{sessionStorage.removeItem(KEY)}catch(_){}return {}}}
-  function _s(o){try{sessionStorage.setItem(KEY,JSON.stringify(o))}catch(_){}}
-  return{
-    set:function(k,v){var s=_l();s[k]=v;_s(s)},
-    get:function(k){var v=_l()[k];return v!==undefined?v:null},
-    setMany:function(o){var s=_l();Object.assign(s,o);_s(s)},
-    getAll:function(){return _l()},
-    clear:function(){try{sessionStorage.removeItem(KEY)}catch(_){}},
-    invalidateSelection:function(){
-      var s=_l();
-      ['vehicleCategory','vehicleId','basePrice','vehicleImage','selectedInsurance','selectedInsurancePrice','selectedExtras','totalPrice','billableDays'].forEach(function(k){delete s[k]});
-      _s(s);
-    }
-  };
-})();
-</script></head><body>
+</style>
+<style>
+/* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
+/* DIAMOND MOBILE: Hamburger */
+.hamburger-btn{display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer;border-radius:8px;min-width:40px;min-height:40px;width:40px;height:40px;flex-shrink:0;transition:background .15s;padding:0;line-height:1}
+.hamburger-btn:hover,.hamburger-btn:focus-visible{background:rgba(255,255,255,.22);outline:none}
+.mobile-nav{overflow:hidden;max-height:0;transition:max-height .3s ease;background:rgba(20,40,48,.98);border-top:1px solid rgba(231,191,105,.12);width:100%}
+.mobile-nav.is-open{max-height:440px}
+.mobile-nav a{display:flex;align-items:center;color:rgba(255,255,255,.88);text-decoration:none;font-size:15px;font-weight:700;padding:0 22px;min-height:48px;border-bottom:1px solid rgba(255,255,255,.06);transition:background .12s}
+.mobile-nav a:last-child{border-bottom:none}
+.mobile-nav a:active,.mobile-nav a:hover{background:rgba(231,191,105,.09);color:#f6e19f}
+.header-phone-label{display:inline}
+@media(max-width:767px){
+  .header-nav{display:none!important}
+  .hamburger-btn{display:flex!important}
+  .brand-text span,.brand-text em{display:none}
+  .header-phone-label{display:none}
+  .header-phone{padding:9px 12px!important;min-width:40px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+}
+@media(prefers-reduced-motion:reduce){.mobile-nav{transition:none}}
+
+/* DIAMOND MOBILE: Order summary 4→2 cell grid */
+@media(max-width:767px){
+  .summary-grid{grid-template-columns:1fr!important}
+  .meta-grid{grid-template-columns:1fr 1fr!important}
+  .vehicle-visual{display:none!important}
+  /* Cost accordion */
+  .analysis-box .analysis-line:not(.big){display:none}
+  .analysis-box.expanded .analysis-line{display:flex!important}
+  .analysis-accordion-btn{display:flex!important}
+  /* Form fields full-width */
+  .grid{grid-template-columns:1fr!important}
+  .grid-4{grid-template-columns:1fr!important}
+  /* Invoice toggle full-width */
+  .invoice-choices{grid-template-columns:1fr 1fr!important;display:grid!important}
+  .invoice-choices .choice{text-align:center}
+  /* Submit button full-width */
+  .btn-submit{width:100%!important;min-height:52px!important;font-size:18px!important}
+  .actions{flex-direction:column-reverse!important}
+  .actions .btn{width:100%!important;min-height:48px!important}
+  /* Terms checkbox row */
+  .check-row{display:flex!important;align-items:flex-start!important;gap:10px!important;flex-wrap:nowrap!important}
+  .check-row input[type="checkbox"]{flex-shrink:0;width:20px;height:20px;margin-top:2px}
+  /* Invoice fields overflow fix */
+  .toggle-content{overflow-x:hidden!important}
+  .invoice-box{overflow-x:hidden!important}
+}
+
+/* DIAMOND MOBILE: Analysis accordion toggle button */
+.analysis-accordion-btn{display:none;width:100%;background:none;border:none;color:var(--accent,#3f748a);font-size:13px;font-weight:800;cursor:pointer;padding:8px 0;text-align:left;font-family:inherit;gap:6px;align-items:center}
+.analysis-accordion-btn:hover{opacity:.8}
+
+/* DIAMOND LOADING: Timeout / network error state */
+#submitTimeoutError{display:none;margin:12px 0 0;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:13px 16px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.5}
+#submitTimeoutError.visible{display:block}
+#submitTimeoutError .retry-btn{display:inline-block;margin-top:10px;background:var(--accent,#3f748a);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit}
+#submitTimeoutError .retry-btn:hover{opacity:.9}
+</style>
+</head><body>
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="/">
@@ -392,8 +427,16 @@ window.BookingState=(function(){
       <a href="/rental-terms">Όροι ενοικίασης</a>
       <a href="/booking">Ολοκλήρωση</a>
     </nav>
-    <a class="header-phone" href="tel:+302310000000">+30 2310 000 000</a>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Μενού" aria-expanded="false">☰</button>
+    <a class="header-phone" href="tel:+302310000000"><span aria-hidden="true">📞</span><span class="header-phone-label">+30 2310 000 000</span></a>
   </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Κύρια πλοήγηση">
+    <a href="/">Αρχική</a>
+    <a href="/categories">Οχήματα</a>
+    <a href="/options">Ασφάλειες &amp; extras</a>
+    <a href="/rental-terms">Όροι ενοικίασης</a>
+    <a href="/booking">Ολοκλήρωση</a>
+  </nav>
 </header>
 
 <div class="page">
@@ -421,8 +464,9 @@ window.BookingState=(function(){
           <div class="meta"><span class="k">Extras</span><span class="v" id="extrasText">Χωρίς extras</span></div>
         </div>
       </div>
-      <div class="analysis-box">
+      <div class="analysis-box" id="analysisBox">
         <h3>Οικονομική ανάλυση</h3>
+        <button class="analysis-accordion-btn" id="analysisAccordionBtn" type="button">▼ Εμφάνιση ανάλυσης κόστους</button>
         <div class="analysis-line"><span>Βασική χρέωση</span><span id="baseCost">0,00€</span></div>
         <div class="analysis-line" id="insuranceRow"><span>Ασφάλεια</span><span id="insuranceCost">0,00€</span></div>
         <div class="analysis-line" id="extrasRow"><span>Extras</span><span id="extrasCost">0,00€</span></div>
@@ -469,9 +513,13 @@ window.BookingState=(function(){
             <div class="toggle-content" id="invoiceFields"><div class="grid-4"><div class="field"><label>Επωνυμία επιχείρησης</label><input name="companyName" type="text"></div><div class="field"><label>Επάγγελμα / δραστηριότητα</label><input name="profession" type="text"></div><div class="field"><label>Α.Φ.Μ.</label><input name="vatNumber" type="text"></div><div class="field"><label>Δ.Ο.Υ.</label><input name="taxOffice" type="text"></div><div class="field"><label>Διεύθυνση / έδρα</label><input name="billingAddress" type="text"></div><div class="field"><label>Πόλη</label><input name="companyCity" type="text"></div><div class="field"><label>Τ.Κ.</label><input name="companyZip" type="text"></div><div class="field"><label>Τηλέφωνο έδρας</label><input name="companyPhone" type="text"></div><div class="field"><label>Email εταιρίας</label><input name="companyEmail" type="email"></div></div></div>
           </div>
           <div class="helper-note">Η τελική ανάλυση παραμένει ορατή πάνω στη σελίδα ώστε να γνωρίζει ο πελάτης ακριβώς τι αποστέλλει πριν ολοκληρώσει το αίτημα.</div>
-          <label class="check-row"><input id="termsCheck" type="checkbox" required><span>Έχω διαβάσει και αποδέχομαι τους όρους, τις προϋποθέσεις και την πολιτική απορρήτου.</span></label>
-          <span class="field-error" id="err-terms" style="margin-left:4px"></span>
+          <label class="check-row"><input type="checkbox" id="termsCheck" required><span>Έχω διαβάσει και αποδέχομαι τους όρους, τις προϋποθέσεις και την πολιτική απορρήτου.</span></label>
           <div id="submitError" role="alert" style="display:none;margin:12px 0 0;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:11px 14px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.4"></div>
+          <div id="submitTimeoutError" role="alert">
+            <span id="submitTimeoutMsg"></span>
+            <br>
+            <button class="retry-btn" id="retryBtn" type="button">Δοκιμάστε ξανά</button>
+          </div>
           <div class="actions">
             <button class="btn btn-back" type="button">Πίσω</button>
             <button class="btn btn-submit" type="submit">Αποστολή αιτήματος</button>
@@ -1280,7 +1328,22 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
   const oldText = submitBtn.textContent;
   submitBtn.disabled = true;
   submitBtn.textContent = 'Υποβολή...';
-  showSubmitOverlay(true);
+  // DIAMOND LOADING: Duplicate submission guard
+  form.dataset.submitting = 'true';
+
+  // DIAMOND LOADING: 15-second timeout handler
+  let submissionTimedOut = false;
+  const timeoutId = setTimeout(function(){
+    submissionTimedOut = true;
+    submitBtn.disabled = false;
+    submitBtn.textContent = oldText;
+    form.dataset.submitting = '';
+    const supportPhone = (window.BookingState && BookingState.get('supportPhone')) || '+30 2310 000 000';
+    const msgEl = document.getElementById('submitTimeoutMsg');
+    const errEl = document.getElementById('submitTimeoutError');
+    if(msgEl) msgEl.textContent = 'Το αίτημα αργεί περισσότερο από το αναμενόμενο. Η κράτησή σας ενδέχεται να έχει ληφθεί — μην υποβάλετε ξανά. Επικοινωνήστε μαζί μας στο ' + supportPhone + ' για επιβεβαίωση.';
+    if(errEl) errEl.classList.add('visible');
+  }, 15000);
 
   try {
     const uiSurchargeNote = [
@@ -1392,14 +1455,34 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       total: data.totalPrice ?? summaryTotal
     });
 
-    showSubmitOverlay(false);
+    clearTimeout(timeoutId);
+    // DIAMOND LOADING: Mark as submitted and save reference
+    if(window.BookingState){
+      BookingState.set('submitted', true);
+      BookingState.set('bookingReference', data.bookingNumber || data.id || '');
+      BookingState.set('totalPrice', totals.total || 0);
+    }
     goTo(`/success?booking=${encodeURIComponent(data.bookingNumber)}`);
   } catch (err) {
-    showSubmitError(err.message || 'Παρουσιάστηκε σφάλμα κατά την υποβολή. Δοκιμάστε ξανά.');
-  } finally {
+    clearTimeout(timeoutId);
+    if(submissionTimedOut) return;
     submitBtn.disabled = false;
     submitBtn.textContent = oldText;
-    showSubmitOverlay(false);
+    form.dataset.submitting = '';
+    // DIAMOND LOADING: Distinguish network errors from server errors
+    const isNetworkErr = err instanceof TypeError || (err.message && err.message.toLowerCase().includes('fetch'));
+    if(isNetworkErr){
+      const msgEl = document.getElementById('submitTimeoutMsg');
+      const errEl = document.getElementById('submitTimeoutError');
+      if(msgEl) msgEl.textContent = 'Δεν ήταν δυνατή η σύνδεση. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.';
+      if(errEl) errEl.classList.add('visible');
+    } else {
+      const submitErrEl = document.getElementById('submitError');
+      if(submitErrEl){ submitErrEl.textContent = err.message || 'Σφάλμα υποβολής. Δοκιμάστε ξανά.'; submitErrEl.style.display = 'block'; }
+      else { alert(err.message || 'Παρουσιάστηκε σφάλμα κατά την υποβολή.'); }
+    }
+  } finally {
+    // cleanup handled per-branch above; ensure button re-enabled if timed out path didn't run
   }
 });
 
@@ -1752,180 +1835,73 @@ window.addEventListener('load', () => { notifyHeight(); setTimeout(notifyHeight,
 window.addEventListener('resize', notifyHeight);
 try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
 
-/* ===== MEMBER PORTAL AUTH ===== */
-(function memberPortalInit(){
-  var S='diamondMbrSess';
-  function rSess(){try{return JSON.parse(sessionStorage.getItem(S)||'null')}catch(_){return null}}
-  function wSess(v){try{sessionStorage.setItem(S,JSON.stringify(v))}catch(_){}}
-  function cSess(){try{sessionStorage.removeItem(S)}catch(_){}}
-
-  var css=document.createElement('style');
-  css.textContent='.mbr-area{position:relative;flex-shrink:0;margin-left:4px}.mbr-btn{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.22);color:#fff;font-size:13px;font-weight:800;padding:9px 15px;border-radius:999px;cursor:pointer;transition:background .2s;white-space:nowrap;font-family:inherit}.mbr-btn:hover{background:rgba(255,255,255,.25)}.mbr-btn.on{background:var(--gold,#e7bf69);color:#1f1a13;border-color:transparent}.mbr-btn svg{width:15px;height:15px;flex-shrink:0}.mbr-dd{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.18);min-width:210px;z-index:200;overflow:hidden;border:1px solid rgba(0,0,0,.07)}.mbr-dd.hidden{display:none}.mbr-dd-hdr{padding:12px 16px;background:#f7f3eb;border-bottom:1px solid rgba(0,0,0,.07)}.mbr-dd-hdr strong{display:block;font-size:14px;color:#1f1a13;font-weight:800}.mbr-dd-hdr span{display:block;font-size:12px;color:#999;margin-top:2px}.mbr-dd a{display:block;padding:11px 16px;font-size:14px;color:#1f1a13;font-weight:600;text-decoration:none;transition:background .15s}.mbr-dd a:hover{background:#f7f3eb}.mbr-dd hr{border:none;border-top:1px solid rgba(0,0,0,.07);margin:0}.mbr-dd .mbr-out{color:#b83c2e}.mbr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}.mbr-overlay.hidden{display:none}.mbr-modal{background:#fff;border-radius:16px;padding:32px;width:100%;max-width:400px;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.22)}.mbr-modal h3{margin:0 0 18px;font-size:21px;font-weight:900;color:#1f1a13}.mbr-tabs{display:flex;gap:0;border-bottom:2px solid #f0ece3;margin-bottom:22px}.mbr-tab{flex:1;background:none;border:none;padding:10px 0;font-size:14px;font-weight:700;color:#aaa;cursor:pointer;transition:color .2s;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px}.mbr-tab.active{color:var(--accent,#3f748a);border-bottom-color:var(--accent,#3f748a)}.mbr-panel{display:none}.mbr-panel.active{display:block}.mbr-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;line-height:1;padding:4px 6px}.mbr-close:hover{color:#333}.mbr-modal label{display:block;font-size:12px;font-weight:700;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}.mbr-modal input[type=email],.mbr-modal input[type=text],.mbr-modal input[type=password]{display:block;width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;transition:border .2s;font-family:inherit;box-sizing:border-box}.mbr-modal input:focus{border-color:var(--accent,#3f748a)}.mbr-err{display:none;color:#b83c2e;font-size:13px;margin:-6px 0 12px;padding:9px 12px;background:#fff2f0;border-radius:6px;border:1px solid #f5c6c6}.mbr-err.show{display:block}.mbr-ok{display:none;color:#1a7a45;font-size:13px;margin:-6px 0 12px;padding:9px 12px;background:#f0faf4;border-radius:6px;border:1px solid #b2dfc4}.mbr-ok.show{display:block}.mbr-submit{width:100%;padding:13px;background:var(--accent,#3f748a);color:#fff;font-size:15px;font-weight:800;border:none;border-radius:10px;cursor:pointer;transition:background .2s;font-family:inherit}.mbr-submit:hover:not([disabled]){background:var(--accent2,#2d6072)}.mbr-submit[disabled]{opacity:.6;cursor:not-allowed}';
-  document.head.appendChild(css);
-
-  var ph=document.querySelector('.header-phone');
-  if(ph){
-    ph.insertAdjacentHTML('afterend',
-      '<div class="mbr-area" id="mbrArea">'+
-        '<button class="mbr-btn" id="mbrBtn" type="button">'+
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+
-            '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'+
-          '</svg>'+
-          '<span id="mbrLbl">Σύνδεση</span>'+
-        '</button>'+
-        '<div class="mbr-dd hidden" id="mbrDd">'+
-          '<div class="mbr-dd-hdr"><strong id="mbrDdName">—</strong><span id="mbrDdEmail"></span></div>'+
-          '<a href="#" id="mbrDdBookings">Οι Κρατήσεις μου</a>'+
-          '<a href="#" id="mbrDdProfile">Το Προφίλ μου</a>'+
-          '<a href="#" id="mbrDdSettings">Ρυθμίσεις Λογαριασμού</a>'+
-          '<hr>'+
-          '<a href="#" id="mbrDdOut" class="mbr-out">Αποσύνδεση</a>'+
-        '</div>'+
-      '</div>');
-  }
-
-  document.body.insertAdjacentHTML('beforeend',
-    '<div class="mbr-overlay hidden" id="mbrOverlay">'+
-      '<div class="mbr-modal">'+
-        '<button class="mbr-close" id="mbrClose" type="button">&#215;</button>'+
-        '<h3 id="mbrModalTitle">Σύνδεση / Εγγραφή</h3>'+
-        '<div class="mbr-tabs">'+
-          '<button class="mbr-tab active" id="mbrTabLogin" type="button">Σύνδεση</button>'+
-          '<button class="mbr-tab" id="mbrTabReg" type="button">Εγγραφή</button>'+
-        '</div>'+
-        '<div class="mbr-panel active" id="mbrPanelLogin">'+
-          '<form id="mbrFormLogin" novalidate>'+
-            '<label>Email</label>'+
-            '<input id="mbrLoginEmail" type="email" autocomplete="email" placeholder="your@email.com"/>'+
-            '<label>Κωδικός</label>'+
-            '<input id="mbrLoginPass" type="password" autocomplete="current-password" placeholder="τουλάχιστον 6 χαρακτήρες"/>'+
-            '<div class="mbr-err" id="mbrLoginErr"></div>'+
-            '<button class="mbr-submit" id="mbrLoginSubmit" type="submit">Σύνδεση →</button>'+
-          '</form>'+
-        '</div>'+
-        '<div class="mbr-panel" id="mbrPanelReg">'+
-          '<form id="mbrFormReg" novalidate>'+
-            '<label>Όνομα</label>'+
-            '<input id="mbrRegFirst" type="text" autocomplete="given-name" placeholder="Πρώτο όνομα"/>'+
-            '<label>Επώνυμο</label>'+
-            '<input id="mbrRegLast" type="text" autocomplete="family-name" placeholder="Επώνυμο"/>'+
-            '<label>Email</label>'+
-            '<input id="mbrRegEmail" type="email" autocomplete="email" placeholder="your@email.com"/>'+
-            '<label>Κωδικός</label>'+
-            '<input id="mbrRegPass" type="password" autocomplete="new-password" placeholder="τουλάχιστον 6 χαρακτήρες"/>'+
-            '<label>Επανάληψη Κωδικού</label>'+
-            '<input id="mbrRegPass2" type="password" autocomplete="new-password" placeholder="Επανάληψη κωδικού"/>'+
-            '<div class="mbr-err" id="mbrRegErr"></div>'+
-            '<div class="mbr-ok" id="mbrRegOk"></div>'+
-            '<button class="mbr-submit" id="mbrRegSubmit" type="submit">Δημιουργία Λογαριασμού →</button>'+
-          '</form>'+
-        '</div>'+
-      '</div>'+
-    '</div>');
-
-  var ERR_MAP={invalid_credentials:'Λάθος email ή κωδικός.',email_exists:'Αυτό το email χρησιμοποιείται ήδη.',weak_password:'Ο κωδικός είναι πολύ αδύναμος.',not_found:'Δεν βρέθηκε λογαριασμός.',server_error:'Σφάλμα σύνδεσης. Δοκιμάστε ξανά.'};
-
-  function uiUpdate(){
-    var s=rSess(),btn=document.getElementById('mbrBtn'),lbl=document.getElementById('mbrLbl'),nm=document.getElementById('mbrDdName'),em=document.getElementById('mbrDdEmail');
-    if(!btn)return;
-    if(s&&s.name){
-      var n=s.name||s.email||'Μέλος';
-      lbl.textContent=n.split(' ')[0]||n;btn.classList.add('on');
-      if(nm)nm.textContent=s.name||'Μέλος';
-      if(em)em.textContent=s.email||'';
-    }else{lbl.textContent='Σύνδεση';btn.classList.remove('on');var dd=document.getElementById('mbrDd');if(dd)dd.classList.add('hidden');}
-  }
-
-  function showTab(tab){
-    document.getElementById('mbrTabLogin').classList.toggle('active',tab==='login');
-    document.getElementById('mbrTabReg').classList.toggle('active',tab==='reg');
-    document.getElementById('mbrPanelLogin').classList.toggle('active',tab==='login');
-    document.getElementById('mbrPanelReg').classList.toggle('active',tab==='reg');
-  }
-
-  function setErr(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.toggle('show',!!m);}}
-  function setOk(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.toggle('show',!!m);}}
-  function setBusy(id,b,label,busyLabel){var btn=document.getElementById(id);if(!btn)return;btn.disabled=b;btn.textContent=b?busyLabel:label;}
-
-  function closeModal(){
-    document.getElementById('mbrOverlay').classList.add('hidden');
-    setErr('mbrLoginErr','');setErr('mbrRegErr','');setOk('mbrRegOk','');
-    setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
-    setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμείνετε...');
-  }
-
-  document.getElementById('mbrBtn').addEventListener('click',function(e){
-    e.stopPropagation();
-    var s=rSess(),dd=document.getElementById('mbrDd');
-    if(s&&s.name){dd.classList.toggle('hidden');}
-    else{document.getElementById('mbrOverlay').classList.remove('hidden');showTab('login');setTimeout(function(){var i=document.getElementById('mbrLoginEmail');if(i)i.focus();},40);}
+// DIAMOND LOADING: Retry button clears timeout error and re-enables submit
+(function(){
+  var retryBtn = document.getElementById('retryBtn');
+  var errEl = document.getElementById('submitTimeoutError');
+  var submitBtn = document.querySelector('.btn-submit');
+  var form = document.getElementById('checkoutForm');
+  if(!retryBtn) return;
+  retryBtn.addEventListener('click', function(){
+    if(errEl) errEl.classList.remove('visible');
+    if(submitBtn){ submitBtn.disabled = false; }
+    if(form) form.dataset.submitting = '';
+    var submitErrEl = document.getElementById('submitError');
+    if(submitErrEl){ submitErrEl.style.display = 'none'; submitErrEl.textContent = ''; }
   });
-  document.addEventListener('click',function(){var d=document.getElementById('mbrDd');if(d)d.classList.add('hidden');});
-  document.getElementById('mbrClose').addEventListener('click',closeModal);
-  document.getElementById('mbrOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
-  document.getElementById('mbrTabLogin').addEventListener('click',function(){showTab('login');});
-  document.getElementById('mbrTabReg').addEventListener('click',function(){showTab('reg');});
-
-  document.getElementById('mbrFormLogin').addEventListener('submit',function(e){
-    e.preventDefault();setErr('mbrLoginErr','');
-    var email=(document.getElementById('mbrLoginEmail').value||'').trim();
-    var pass=document.getElementById('mbrLoginPass').value||'';
-    if(!email||!pass){setErr('mbrLoginErr','Συμπληρώστε email και κωδικό.');return;}
-    setBusy('mbrLoginSubmit',true,'Σύνδεση →','Σύνδεση...');
-    try{window.parent.postMessage({type:'PORTAL_LOGIN',email:email,password:pass},'*');}catch(_){}
-  });
-
-  document.getElementById('mbrFormReg').addEventListener('submit',function(e){
-    e.preventDefault();setErr('mbrRegErr','');setOk('mbrRegOk','');
-    var first=(document.getElementById('mbrRegFirst').value||'').trim();
-    var last=(document.getElementById('mbrRegLast').value||'').trim();
-    var email=(document.getElementById('mbrRegEmail').value||'').trim();
-    var pass=document.getElementById('mbrRegPass').value||'';
-    var pass2=document.getElementById('mbrRegPass2').value||'';
-    if(!first||!last||!email||!pass){setErr('mbrRegErr','Συμπληρώστε όλα τα πεδία.');return;}
-    if(pass.length<6){setErr('mbrRegErr','Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες.');return;}
-    if(pass!==pass2){setErr('mbrRegErr','Οι κωδικοί δεν ταιριάζουν.');return;}
-    setBusy('mbrRegSubmit',true,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
-    try{window.parent.postMessage({type:'PORTAL_REGISTER',email:email,password:pass,firstName:first,lastName:last},'*');}catch(_){}
-  });
-
-  [['mbrDdBookings','/member-portal?tab=bookings'],['mbrDdProfile','/member-portal?tab=profile'],['mbrDdSettings','/member-portal?tab=profile']].forEach(function(p){
-    var el=document.getElementById(p[0]);
-    if(el)el.addEventListener('click',function(e){e.preventDefault();document.getElementById('mbrDd').classList.add('hidden');try{window.parent.postMessage({type:'wix-booking-nav',path:p[1]},'*');}catch(_){}});
-  });
-
-  document.getElementById('mbrDdOut').addEventListener('click',function(e){
-    e.preventDefault();document.getElementById('mbrDd').classList.add('hidden');
-    try{window.parent.postMessage({type:'PORTAL_SIGN_OUT'},'*');}catch(_){}
-    cSess();uiUpdate();
-  });
-
-  window.addEventListener('message',function(event){
-    var raw=event.data,d=null;
-    if(typeof raw==='string'){try{d=JSON.parse(raw);}catch(_){return;}}else{d=raw;}
-    if(!d||!d.type)return;
-    if(d.type==='PORTAL_AUTH_RESULT'){
-      setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
-      setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
-      if(d.ok){
-        if(d.pending){setOk('mbrRegOk','Ο λογαριασμός δημιουργήθηκε! Ελέγξτε το email σας για επιβεβαίωση.');}
-        else{if(d.member){wSess(d.member);}closeModal();uiUpdate();}
-      }else{
-        var errMsg=ERR_MAP[d.error]||ERR_MAP.server_error;
-        var isReg=document.getElementById('mbrPanelReg').classList.contains('active');
-        setErr(isReg?'mbrRegErr':'mbrLoginErr',errMsg);
-      }
-      return;
-    }
-    if(d.type==='PORTAL_SIGN_OUT_RESULT'){cSess();uiUpdate();return;}
-    if(d.type==='PORTAL_MEMBER_STATE'){
-      if(d.loggedIn&&d.member){wSess(d.member);uiUpdate();}
-      return;
-    }
-  });
-
-  uiUpdate();
-  setTimeout(function(){try{window.parent.postMessage({type:'REQUEST_MEMBER_STATE'},'*');}catch(_){}},150);
 })();
-/* ===== END MEMBER PORTAL AUTH ===== */
+
+// DIAMOND MOBILE: Cost analysis accordion on mobile
+(function(){
+  var btn = document.getElementById('analysisAccordionBtn');
+  var box = document.getElementById('analysisBox');
+  if(!btn||!box) return;
+  function syncAccordion(){
+    if(window.innerWidth < 768){
+      btn.style.display = 'flex';
+      if(!box.classList.contains('expanded')){
+        btn.textContent = '▼ Εμφάνιση ανάλυσης κόστους';
+      } else {
+        btn.textContent = '▲ Απόκρυψη ανάλυσης';
+      }
+    } else {
+      btn.style.display = 'none';
+      box.classList.add('expanded');
+    }
+  }
+  btn.addEventListener('click', function(){
+    box.classList.toggle('expanded');
+    syncAccordion();
+  });
+  window.addEventListener('resize', syncAccordion);
+  syncAccordion();
+})();
+
+// DIAMOND MOBILE: Hamburger menu toggle
+(function(){
+  var btn=document.getElementById('hamburgerBtn');
+  var nav=document.getElementById('mobileNav');
+  if(!btn||!nav)return;
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=nav.classList.toggle('is-open');
+    btn.textContent=open?'✕':'☰';
+    btn.setAttribute('aria-expanded',String(open));
+  });
+  document.addEventListener('click',function(e){
+    if(nav.classList.contains('is-open')&&!nav.contains(e.target)&&e.target!==btn){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    }
+  });
+  Array.from(nav.querySelectorAll('a')).forEach(function(a){
+    a.addEventListener('click',function(){
+      nav.classList.remove('is-open');
+      btn.textContent='☰';
+      btn.setAttribute('aria-expanded','false');
+    });
+  });
+})();
+
 </script></body></html>
