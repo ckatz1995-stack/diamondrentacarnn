@@ -462,22 +462,29 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
 // DIAMOND LOADING: Guard against broken confirmation & prevent re-use
 (function(){
   try{
-    if(!window.BookingState) return;
-    var ref = BookingState.get('bookingReference');
-    var total = BookingState.get('totalPrice');
-    var viewed = BookingState.get('successViewed');
+    // Check URL param first (normal flow: checkout navigates to /success?booking=...)
+    var qs = new URLSearchParams(location.search);
+    var bookingParam = qs.get('booking');
+    // Check diamond-last-booking storage key written by checkout.html on success
+    var stored = null;
+    try{ var r1 = sessionStorage.getItem('diamond-last-booking'); stored = r1 ? JSON.parse(r1) : null; }catch(_){}
+    if(!stored) try{ var r2 = localStorage.getItem('diamond-last-booking'); stored = r2 ? JSON.parse(r2) : null; }catch(_){}
+    var hasBooking = !!(bookingParam || (stored && stored.bookingNumber));
+    // Prevent re-use: if page already shown in this session, show fallback
+    var viewedKey = 'diamond-success-viewed-' + (bookingParam || (stored && stored.bookingNumber) || '');
+    var viewed = false;
+    try{ viewed = !!sessionStorage.getItem(viewedKey); }catch(_){}
     var fallback = document.getElementById('bookingFallback');
     var wrap = document.querySelector('.wrap');
-    if(!ref || !total || viewed){
+    if(!hasBooking || viewed){
       if(fallback) fallback.style.display = '';
-      // Hide all real content sections (everything except the fallback)
       if(wrap) Array.from(wrap.children).forEach(function(el){
         if(el.id !== 'bookingFallback') el.style.display = 'none';
       });
       return;
     }
     // First successful render — mark as viewed
-    BookingState.set('successViewed', true);
+    try{ sessionStorage.setItem(viewedKey, '1'); }catch(_){}
   }catch(_){}
 })();
 
