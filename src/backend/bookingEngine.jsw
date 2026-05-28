@@ -761,6 +761,57 @@ vehicleCategorySpecs: mapVehicleCategoryCatalogItem(vehicle).specs,
 }
 
 // ==========================
+// Quote: compute price without creating a booking
+// ==========================
+export async function computeQuote(data) {
+    try {
+        const { vehicleId, categoryId, category, pickupDateTime, dropoffDateTime, selectedPackage, selectedExtras, driverAge, pickuppoint, dropoffpoint } = data || {};
+        if (!vehicleId || !pickupDateTime || !dropoffDateTime) return { success: false, message: 'Missing required fields' };
+        const pickup = parseBusinessLocalDateTime(pickupDateTime);
+        const dropoff = parseBusinessLocalDateTime(dropoffDateTime);
+        if (!pickup || !dropoff || Number.isNaN(pickup.getTime()) || Number.isNaN(dropoff.getTime()) || dropoff <= pickup) return { success: false, message: 'Invalid dates' };
+        let pricingCatalog;
+        try { pricingCatalog = await getPricingCatalog({ scope: 'all' }); } catch (e) { pricingCatalog = getFallbackCatalogSnapshot(); }
+        const vehicle = await wixData.get("VehiclesNew", vehicleId, { suppressAuth: true });
+        const fallbackBasePricePerDay = toFiniteNumber(vehicle?.price, 0);
+        const rawCategoryId = cleanText(categoryId);
+        const rawVehicleId = cleanText(vehicleId);
+        const resolvedCategoryCode = extractCategoryCode((rawCategoryId && rawCategoryId !== rawVehicleId ? rawCategoryId : '') || category || vehicle?.category || vehicle?.Category || '');
+        const { billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1);
+        const insuranceMap = pricingCatalog?.maps?.insurance || {};
+        const extrasMap = pricingCatalog?.maps?.extras || {};
+        const dynamicPricing = resolveDynamicPricingRate({ categoryCode: resolvedCategoryCode, vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, dropoffDateTime: dropoff, catalog: pricingCatalog, fallbackPricePerDay: fallbackBasePricePerDay });
+        const basePricePerDay = toFiniteNumber(dynamicPricing?.pricePerDay, fallbackBasePricePerDay);
+        const pkg = cleanText(selectedPackage || 'cdw').toLowerCase();
+        const insuranceExtraPerDay = toFiniteNumber(insuranceMap[pkg], 0);
+        const extrasInput = Array.isArray(selectedExtras) ? selectedExtras : [];
+        let computedExtrasTotal = 0;
+        for (const rawExtra of extrasInput) {
+            const extraKey = cleanText(typeof rawExtra === 'object' ? (rawExtra.key || rawExtra.id || rawExtra.value || rawExtra.label || '') : rawExtra).trim();
+            if (!extraKey) continue;
+            const extraCfg = extrasMap[extraKey] || {};
+            const mode = cleanText(typeof rawExtra === 'object' ? (rawExtra.mode || rawExtra.billingMode || '') : '') || cleanText(extraCfg.billingMode || extraCfg.mode || 'perDay');
+            const unitPrice = Number(toFiniteNumber(typeof rawExtra === 'object' ? (rawExtra.pricePerDay ?? rawExtra.price ?? rawExtra.amount) : undefined, toFiniteNumber(extraCfg.price, 0)).toFixed(2));
+            computedExtrasTotal += Number((mode === 'perBooking' ? unitPrice : unitPrice * billableDays).toFixed(2));
+        }
+        const businessSettings = pricingCatalog?.businessSettings || {};
+        const automaticFees = computeAutomaticFees({ driverAge, pickupDateTime: pickup, dropoffDateTime: dropoff, businessSettings, feeRules: pricingCatalog?.feeRules || [] });
+        const finalAgeFee = Number(toFiniteNumber(automaticFees?.ageFee, deriveAgeFee(driverAge)).toFixed(2));
+        const finalNightFee = Number(toFiniteNumber(automaticFees?.nightFee, ((isNightShift(pickup) ? 15 : 0) + (isNightShift(dropoff) ? 15 : 0))).toFixed(2));
+        const finalBaseCost = Number((basePricePerDay * billableDays).toFixed(2));
+        const finalInsuranceCost = Number((insuranceExtraPerDay * billableDays).toFixed(2));
+        const finalExtrasCost = Number(computedExtrasTotal.toFixed(2));
+        const finalPickupLocationFee = Number(resolvePickupLocationFee(pricingCatalog, pickuppoint, 'pickup').toFixed(2));
+        const finalDropoffLocationFee = Number(resolvePickupLocationFee(pricingCatalog, dropoffpoint, 'dropoff').toFixed(2));
+        const finalLocationFee = Number((finalPickupLocationFee + finalDropoffLocationFee).toFixed(2));
+        const totalPrice = Number((finalBaseCost + finalInsuranceCost + finalExtrasCost + finalAgeFee + finalNightFee + finalLocationFee).toFixed(2));
+        return { success: true, totalPrice, basePricePerDay, billableDays, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee };
+    } catch (err) {
+        return { success: false, message: (err && err.message) ? err.message : String(err) };
+    }
+}
+
+// ==========================
 // Calendar: move/assign + overlap block + audit
 // ==========================
 export async function applyCalendarChange(change) {
