@@ -753,7 +753,7 @@ vehicleCategorySpecs: mapVehicleCategoryCatalogItem(vehicle).specs,
 
         const inserted = await wixData.insert("BookingsNew", booking, { suppressAuth: true });
         notifyBookingSubmitted({ memberId: userId || '', email: String(email), bookingNumber: inserted.bookingNumber, bookingId: inserted._id }).catch(() => {});
-        return { success: true, bookingNumber: inserted.bookingNumber, _id: inserted._id };
+        return { success: true, bookingNumber: inserted.bookingNumber, _id: inserted._id, totalPrice, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee };
 
     } catch (err) {
         return { success: false, message: (err && err.message) ? err.message : String(err) };
