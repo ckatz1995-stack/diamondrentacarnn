@@ -1686,22 +1686,26 @@ function notifyHeight(){
   try { parent.postMessage({ type:'wix-booking-height', height:h }, '*'); } catch (e) {}
 }
 
-// DIAMOND LOADING: No-data guard — check BookingState has vehicle selection
+// DIAMOND LOADING: No-data guard — check URL params or stored search for vehicle selection
 (function(){
   try{
-    if(!window.BookingState) return;
-    var bs = BookingState.getAll();
-    var hasVehicle = !!(bs.vehicleCategory || bs.basePrice);
-    if(!hasVehicle){
-      var banner = document.getElementById('noDataBanner');
-      if(banner) banner.classList.add('visible');
-      var choicesCard = document.querySelector('.choices-card');
-      if(choicesCard) choicesCard.style.display = 'none';
-      var heroCard = document.querySelector('.hero-card');
-      if(heroCard) heroCard.style.display = 'none';
-      var summaryCard = document.querySelector('.summary-card');
-      if(summaryCard) summaryCard.style.display = 'none';
-    }
+    // Check URL query param first (normal navigation from vehicles.html)
+    var qs = new URLSearchParams(location.search);
+    if(qs.get('vehicle') || qs.get('category')) return; // has vehicle data — OK
+    // Fall back to checking the booking storage key used by the existing flow
+    var stored = null;
+    try{ var raw = sessionStorage.getItem('diamond-booking-search-v1'); stored = raw ? JSON.parse(raw) : null; }catch(_){}
+    if(!stored) try{ var raw2 = localStorage.getItem('diamond-booking-search-v1'); stored = raw2 ? JSON.parse(raw2) : null; }catch(_){}
+    if(stored && (stored.vehicleId || stored.category)) return; // has vehicle data — OK
+    // No vehicle data found — show the guard banner
+    var banner = document.getElementById('noDataBanner');
+    if(banner) banner.classList.add('visible');
+    var choicesCard = document.querySelector('.choices-card');
+    if(choicesCard) choicesCard.style.display = 'none';
+    var heroCard = document.querySelector('.hero-card');
+    if(heroCard) heroCard.style.display = 'none';
+    var summaryCard = document.querySelector('.summary-card');
+    if(summaryCard) summaryCard.style.display = 'none';
   }catch(_){}
 })();
 

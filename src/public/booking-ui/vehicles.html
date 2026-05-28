@@ -1563,21 +1563,21 @@ if(Array.isArray(embeddedVehicleItems)){
 loadVehicles();
 if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls();
 
-// DIAMOND LOADING: No-data guard — check BookingState has search context
+// DIAMOND LOADING: No-data guard — check URL params or stored search for search context
 (function(){
   try{
-    if(!window.BookingState) return;
-    var bs = BookingState.getAll();
-    var hasSearch = !!(bs.pickupDate || bs.pickupLocation);
+    // Check URL query params first (normal flow from index.html)
+    var qs = new URLSearchParams(location.search);
+    if(qs.get('pickup') || qs.get('dropoff') || qs.get('pickupDate')) return; // has search data — OK
+    // Check the storage key used by the existing flow
+    var stored = null;
+    try{ var raw = sessionStorage.getItem('diamond-booking-search-v1'); stored = raw ? JSON.parse(raw) : null; }catch(_){}
+    if(!stored) try{ var raw2 = localStorage.getItem('diamond-booking-search-v1'); stored = raw2 ? JSON.parse(raw2) : null; }catch(_){}
+    if(!stored) try{ var raw3 = sessionStorage.getItem('diamond_booking_search_v1'); stored = raw3 ? JSON.parse(raw3) : null; }catch(_){}
+    if(stored && (stored.pickup || stored.pickupDate || stored.pickupLocation)) return; // has search data — OK
+    // No search context at all — show banner but keep list visible (user can still search)
     var banner = document.getElementById('noDataBanner');
-    if(!hasSearch && banner){
-      banner.classList.add('visible');
-      // Hide the vehicle list container
-      var listEl = document.getElementById('list');
-      if(listEl) listEl.style.display = 'none';
-      var skelList = document.getElementById('skeletonList');
-      if(skelList) skelList.classList.remove('active');
-    }
+    if(banner) banner.classList.add('visible');
   }catch(_){}
 })();
 
