@@ -1385,15 +1385,6 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
         dob: (fd.get('dob') || '').toString().trim(),
         notes: comments
       },
-      ageFee: totals.ageFee,
-      nightFee: totals.nightFee,
-      pickupLocationFee: locationFeeFor(state.pickupLocation, 'pickup'),
-      dropoffLocationFee: locationFeeFor(state.dropoffLocation, 'dropoff'),
-      locationFee: totals.locationFee,
-      baseCost: totals.baseCost,
-      insuranceCost: totals.insuranceCost,
-      extrasCost: totals.extrasCost,
-      total: totals.total,
       billingData: billingType === 'invoice' ? {
         invoiceType: 'invoice',
         companyName: (fd.get('companyName') || '').toString().trim(),
