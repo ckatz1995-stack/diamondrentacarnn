@@ -749,6 +749,7 @@ vehicleCategorySpecs: mapVehicleCategoryCatalogItem(vehicle).specs,
               transport: finalLocationFee,
               gross: totalPrice
             },
+            graceMinutes,
             source: 'createBooking'
         });
 
@@ -785,15 +786,19 @@ export async function computeQuote(data) {
         const dynamicPricing = resolveDynamicPricingRate({ categoryCode: resolvedCategoryCode, vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, dropoffDateTime: dropoff, catalog: pricingCatalog, fallbackPricePerDay: fallbackBasePricePerDay });
         const basePricePerDay = toFiniteNumber(dynamicPricing?.pricePerDay, fallbackBasePricePerDay);
         const pkg = cleanText(selectedPackage || 'cdw').toLowerCase();
+        const quoteWarnings = [];
+        if (pkg && pkg !== 'none' && pkg !== 'nodw' && !(pkg in insuranceMap)) quoteWarnings.push(`insurance:missing:${pkg}`);
         const insuranceExtraPerDay = toFiniteNumber(insuranceMap[pkg], 0);
         const extrasInput = Array.isArray(selectedExtras) ? selectedExtras : [];
         let computedExtrasTotal = 0;
         for (const rawExtra of extrasInput) {
             const extraKey = cleanText(typeof rawExtra === 'object' ? (rawExtra.key || rawExtra.id || rawExtra.value || rawExtra.label || '') : rawExtra).trim();
             if (!extraKey) continue;
-            const extraCfg = extrasMap[extraKey] || {};
-            const mode = cleanText(typeof rawExtra === 'object' ? (rawExtra.mode || rawExtra.billingMode || '') : '') || cleanText(extraCfg.billingMode || extraCfg.mode || 'perDay');
-            const unitPrice = Number(toFiniteNumber(typeof rawExtra === 'object' ? (rawExtra.pricePerDay ?? rawExtra.price ?? rawExtra.amount) : undefined, toFiniteNumber(extraCfg.price, 0)).toFixed(2));
+            const extraCfg = extrasMap[extraKey];
+            if (!extraCfg) quoteWarnings.push(`extra:missing:${extraKey}`);
+            const resolvedCfg = extraCfg || {};
+            const mode = cleanText(typeof rawExtra === 'object' ? (rawExtra.mode || rawExtra.billingMode || '') : '') || cleanText(resolvedCfg.billingMode || resolvedCfg.mode || 'perDay');
+            const unitPrice = Number(toFiniteNumber(typeof rawExtra === 'object' ? (rawExtra.pricePerDay ?? rawExtra.price ?? rawExtra.amount) : undefined, toFiniteNumber(resolvedCfg.price, 0)).toFixed(2));
             computedExtrasTotal += Number((mode === 'perBooking' ? unitPrice : unitPrice * billableDays).toFixed(2));
         }
         const businessSettings = pricingCatalog?.businessSettings || {};
@@ -807,7 +812,7 @@ export async function computeQuote(data) {
         const finalDropoffLocationFee = Number(resolvePickupLocationFee(pricingCatalog, dropoffpoint, 'dropoff').toFixed(2));
         const finalLocationFee = Number((finalPickupLocationFee + finalDropoffLocationFee).toFixed(2));
         const totalPrice = Number((finalBaseCost + finalInsuranceCost + finalExtrasCost + finalAgeFee + finalNightFee + finalLocationFee).toFixed(2));
-        return { success: true, totalPrice, basePricePerDay, billableDays, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee };
+        return { success: true, totalPrice, basePricePerDay, billableDays, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee, warnings: quoteWarnings };
     } catch (err) {
         return { success: false, message: (err && err.message) ? err.message : String(err) };
     }
