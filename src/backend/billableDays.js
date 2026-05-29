@@ -4,7 +4,7 @@ function asDate(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function computeBillableDaysDetailed(pickup, dropoff, fallbackDays = 1) {
+export function computeBillableDaysDetailed(pickup, dropoff, fallbackDays = 1, graceMinutes = 0) {
   const start = asDate(pickup);
   const end = asDate(dropoff);
   if (!start || !end || end <= start) {
@@ -13,12 +13,14 @@ export function computeBillableDaysDetailed(pickup, dropoff, fallbackDays = 1) {
   }
 
   const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+  const graceHours = Math.max(0, Number.isFinite(Number(graceMinutes)) ? Number(graceMinutes) / 60 : 0);
+  const effectiveHours = Math.max(0, hours - graceHours);
   return {
     hours,
-    billableDays: Math.max(1, Math.ceil(hours / 24))
+    billableDays: Math.max(1, Math.ceil(effectiveHours / 24))
   };
 }
 
-export function computeBillableDays(pickup, dropoff, fallbackDays = 1) {
-  return computeBillableDaysDetailed(pickup, dropoff, fallbackDays).billableDays;
+export function computeBillableDays(pickup, dropoff, fallbackDays = 1, graceMinutes = 0) {
+  return computeBillableDaysDetailed(pickup, dropoff, fallbackDays, graceMinutes).billableDays;
 }

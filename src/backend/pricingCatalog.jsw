@@ -30,6 +30,7 @@ const DEFAULT_BUSINESS_SETTINGS = bookingConfig?.DEFAULT_BUSINESS_SETTINGS || {
   vatRateDecimal: VAT_RATE,
   nightStartHour: 22,
   nightEndHour: 8,
+  billingGraceMinutes: 0,
   defaultDeposit: 300,
   companyName: 'DIAMOND Rent A Car',
   companyTagline: 'Ενοικίαση οχημάτων στη Θεσσαλονίκη με καθαρή διαδικασία και γρήγορη επιβεβαίωση.',
@@ -114,6 +115,7 @@ function normalizeBusinessSettings(item){
     vatRateDecimal: vatRate > 1 ? vatRate / 100 : vatRate || VAT_RATE,
     nightStartHour: toNumber(item?.nightStartHour, DEFAULT_BUSINESS_SETTINGS.nightStartHour),
     nightEndHour: toNumber(item?.nightEndHour, DEFAULT_BUSINESS_SETTINGS.nightEndHour),
+    billingGraceMinutes: toNumber(item?.billingGraceMinutes, DEFAULT_BUSINESS_SETTINGS.billingGraceMinutes),
     defaultDeposit: toNumber(item?.defaultDeposit, DEFAULT_BUSINESS_SETTINGS.defaultDeposit),
     companyName: text(item?.companyName, DEFAULT_BUSINESS_SETTINGS.companyName),
     companyTagline: text(item?.companyTagline, DEFAULT_BUSINESS_SETTINGS.companyTagline),
@@ -360,6 +362,8 @@ export function resolveDynamicPricingRate({ categoryCode = '', vehicleCategoryId
     const widthA = rangeA - minA;
     const widthB = rangeB - minB;
     if (widthA !== widthB) return widthA - widthB;
+    const priorityDiff = toNumber(b?.priority, 0) - toNumber(a?.priority, 0);
+    if (priorityDiff !== 0) return priorityDiff;
     return sortByOrder(a, b);
   });
   const rule = candidates[0] || null;
