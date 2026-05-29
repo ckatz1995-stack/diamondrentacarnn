@@ -1077,8 +1077,40 @@ const age = qp("age") || storedSearch.age || '23-69';
 
 let vehicles = [];
 let pricingCatalog = safeRead(PRICING_CATALOG_STORAGE_KEY, null);
+let _catalogFromApi = false;
+let embeddedContext = null;
 let vehiclesMeta = { displayMode: 'categories', modelsSource: 'fleet' };
 let embeddedVehicleItems = safeRead(VEHICLE_CATEGORIES_STORAGE_KEY, null);
+
+function parseSiteBaseFromUrl(value){
+  try {
+    const url = new URL(String(value || ''), location.href);
+    const parts = (url.pathname || '').split('/').filter(Boolean);
+    const siteSlug = parts[0] || '';
+    return `${url.origin}${siteSlug ? `/${siteSlug}` : ''}`;
+  } catch (err) { return ''; }
+}
+function currentSiteBase(){
+  return parseSiteBaseFromUrl(embeddedContext?.url || embeddedContext?.referrer || document.referrer || location.href) || location.origin;
+}
+function currentApiBase(){ return `${currentSiteBase()}/_functions`; }
+
+async function fetchRealCatalog(){
+  try{
+    const res = await fetch(`${currentApiBase()}/pricing_catalog`, { cache:'no-store' });
+    const rawText = await res.text();
+    const json = JSON.parse(rawText);
+    if(!res.ok || !json?.success) return;
+    pricingCatalog = json;
+    _catalogFromApi = true;
+    vehiclesMeta = { displayMode: String(pricingCatalog?.businessSettings?.vehiclesPageDisplayMode || 'categories').trim().toLowerCase() === 'models' ? 'models' : 'categories', modelsSource: String(pricingCatalog?.businessSettings?.vehiclesPageModelsSource || 'fleet').trim().toLowerCase() === 'vehicles' ? 'vehicles' : 'fleet' };
+    safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
+    populateLocationSelectsFromCatalog();
+    populateAgeSelectFromCatalog();
+    applyBusinessIdentity();
+    if(Array.isArray(vehicles) && vehicles.length) render();
+  }catch(e){}
+}
 
 function getVehiclesPageMeta(){
   const settings = getBusinessSettings();
@@ -1417,22 +1449,26 @@ window.addEventListener('message', (event) => {
   if (event.origin && !isTrustedParentOrigin(event.origin)) return;
   const data = parseMessage(event && event.data);
   if(!data) return;
-  if(data.type === 'booking-context' && data.query){
-    applyBookingContext(data.query || {});
+  if(data.type === 'booking-context'){
+    embeddedContext = data || embeddedContext;
+    if(data.query) applyBookingContext(data.query || {});
     updateState(false);
+    fetchRealCatalog();
     return;
   }
   if(data.type === 'pricing-catalog-data'){
-    pricingCatalog = data.catalog || pricingCatalog;
-    vehiclesMeta = { displayMode: String(pricingCatalog?.businessSettings?.vehiclesPageDisplayMode || 'categories').trim().toLowerCase() === 'models' ? 'models' : 'categories', modelsSource: String(pricingCatalog?.businessSettings?.vehiclesPageModelsSource || 'fleet').trim().toLowerCase() === 'vehicles' ? 'vehicles' : 'fleet' };
-    safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
-    populateLocationSelectsFromCatalog();
-    populateAgeSelectFromCatalog();
-    applyBookingContext(lastBookingContext || {});
-    applyBusinessIdentity();
-    if(Array.isArray(embeddedVehicleItems)) {
-      vehicles = filterVehiclesByCategory(embeddedVehicleItems, categorySelect.value || pendingCategory || category);
-      render();
+    if(!_catalogFromApi){
+      pricingCatalog = data.catalog || pricingCatalog;
+      vehiclesMeta = { displayMode: String(pricingCatalog?.businessSettings?.vehiclesPageDisplayMode || 'categories').trim().toLowerCase() === 'models' ? 'models' : 'categories', modelsSource: String(pricingCatalog?.businessSettings?.vehiclesPageModelsSource || 'fleet').trim().toLowerCase() === 'vehicles' ? 'vehicles' : 'fleet' };
+      safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
+      populateLocationSelectsFromCatalog();
+      populateAgeSelectFromCatalog();
+      applyBookingContext(lastBookingContext || {});
+      applyBusinessIdentity();
+      if(Array.isArray(embeddedVehicleItems)) {
+        vehicles = filterVehiclesByCategory(embeddedVehicleItems, categorySelect.value || pendingCategory || category);
+        render();
+      }
     }
     return;
   }
