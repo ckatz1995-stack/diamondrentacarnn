@@ -733,6 +733,7 @@ const LAST_BOOKING_KEY = 'diamond-last-booking';
 let embeddedCategoryItem = null;
 let pricingCatalog = safeRead(PRICING_CATALOG_STORAGE_KEY) || null;
 let pendingBookingSubmit = null;
+let lastServerQuote = null;
 
 function getBusinessSettings(){
   return (pricingCatalog && pricingCatalog.businessSettings) ? pricingCatalog.businessSettings : {};
@@ -1168,6 +1169,7 @@ async function callServerQuote(){
     else hide('nightFeeRow', true);
     set('grandTotal', formatMoney(data.totalPrice));
     set('topPricePerDay', formatMoney(data.basePricePerDay || 0));
+    lastServerQuote = data;
   }catch(e){}
 }
 
@@ -1437,13 +1439,13 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       dropoffLocation: state.dropoffLocation,
       insurance: insuranceLabel,
       extras: extrasLabel,
-      baseCost: data.baseCost ?? summaryBaseCost,
-      insuranceCost: data.insuranceCost ?? totals.insuranceCost,
-      extrasCost: data.extrasCost ?? totals.extrasCost,
-      ageFee: data.ageFee ?? totals.ageFee,
-      nightFee: data.nightFee ?? totals.nightFee,
-      locationFee: data.locationFee ?? totals.locationFee,
-      total: data.totalPrice ?? summaryTotal
+      baseCost: data.baseCost ?? lastServerQuote?.baseCost ?? summaryBaseCost,
+      insuranceCost: data.insuranceCost ?? lastServerQuote?.insuranceCost ?? totals.insuranceCost,
+      extrasCost: data.extrasCost ?? lastServerQuote?.extrasCost ?? totals.extrasCost,
+      ageFee: data.ageFee ?? lastServerQuote?.ageFee ?? totals.ageFee,
+      nightFee: data.nightFee ?? lastServerQuote?.nightFee ?? totals.nightFee,
+      locationFee: data.locationFee ?? lastServerQuote?.locationFee ?? totals.locationFee,
+      total: data.totalPrice ?? lastServerQuote?.totalPrice ?? summaryTotal
     });
 
     clearTimeout(timeoutId);
