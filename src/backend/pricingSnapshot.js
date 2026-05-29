@@ -31,11 +31,12 @@ function buildCatalogMaps(catalog = {}) {
   };
 }
 
-function normalizeExtraDetails(rawExtras, days, extrasByKey) {
+function normalizeExtraDetails(rawExtras, days, extrasByKey, warnings) {
   const source = Array.isArray(rawExtras) ? rawExtras : [];
   return source.map((item) => {
     if (typeof item === 'string') {
       const key = text(item, '');
+      if (key && !extrasByKey[key]) warnings.push(`extra:missing:${key}`);
       const cfg = extrasByKey[key] || {};
       const unitPrice = round2(cfg.price ?? cfg.pricePerDay ?? 0);
       const billingMode = text(cfg.billingMode || cfg.mode, 'perDay') === 'perBooking' ? 'perBooking' : 'perDay';
@@ -51,6 +52,7 @@ function normalizeExtraDetails(rawExtras, days, extrasByKey) {
     }
 
     const key = text(item?.key || item?.id || item?.value || item?.label || item?.name, '');
+    if (key && !extrasByKey[key]) warnings.push(`extra:missing:${key}`);
     const cfg = extrasByKey[key] || {};
     const billingMode = text(item?.billingMode || item?.mode || cfg.billingMode || cfg.mode, 'perDay') === 'perBooking' ? 'perBooking' : 'perDay';
     const unitPrice = round2(item?.unitPrice ?? item?.price ?? item?.pricePerDay ?? cfg.price ?? cfg.pricePerDay ?? 0);
@@ -67,13 +69,17 @@ function normalizeExtraDetails(rawExtras, days, extrasByKey) {
   }).filter((item) => item.key || item.label);
 }
 
-export function buildPricingSnapshot({ catalog = {}, booking = {}, selectedPackage, selectedExtrasDetails, charges = {}, capturedAt, source = 'booking-flow' } = {}) {
+export function buildPricingSnapshot({ catalog = {}, booking = {}, selectedPackage, selectedExtrasDetails, charges = {}, capturedAt, source = 'booking-flow', graceMinutes = 0 } = {}) {
   const businessSettings = catalog?.businessSettings || {};
   const { insuranceByKey, extrasByKey } = buildCatalogMaps(catalog);
   const days = Math.max(1, num(booking?.billableDays, computeBillableDays(booking?.pickupDateTime, booking?.dropoffDateTime, 1)));
   const packageKey = text(selectedPackage || booking?.selectedPackage, '').toLowerCase();
   const packageCfg = insuranceByKey[packageKey] || {};
-  const normalizedExtras = normalizeExtraDetails(selectedExtrasDetails || booking?.selectedExtrasDetails || booking?.selectedExtras, days, extrasByKey);
+  const warnings = [];
+  if (packageKey && packageKey !== 'none' && packageKey !== 'nodw' && !insuranceByKey[packageKey]) {
+    warnings.push(`insurance:missing:${packageKey}`);
+  }
+  const normalizedExtras = normalizeExtraDetails(selectedExtrasDetails || booking?.selectedExtrasDetails || booking?.selectedExtras, days, extrasByKey, warnings);
 
   const baseCost = round2(booking?.baseCost ?? charges?.rental ?? (num(booking?.basePricePerDay, 0) * days));
   const insuranceCost = round2(booking?.insuranceCost ?? charges?.insurance ?? (num(booking?.insuranceExtraPerDay, 0) * days));
@@ -90,8 +96,10 @@ export function buildPricingSnapshot({ catalog = {}, booking = {}, selectedPacka
   const netAmount = vatRate > 0 ? round2(grossTotal / (1 + vatRate)) : grossTotal;
   const vatAmount = round2(grossTotal - netAmount);
 
+  const snapshotBasePricePerDay = round2(booking?.basePricePerDay ?? (days > 0 ? baseCost / days : 0));
+  const snapshotInsuranceExtraPerDay = round2(booking?.insuranceExtraPerDay ?? (days > 0 ? insuranceCost / days : 0));
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     source,
     capturedAt: text(capturedAt, new Date().toISOString()),
     currency: text(businessSettings?.currency, 'EUR'),
@@ -99,8 +107,8 @@ export function buildPricingSnapshot({ catalog = {}, booking = {}, selectedPacka
     billableDays: days,
     pickupDateTime: booking?.pickupDateTime || null,
     dropoffDateTime: booking?.dropoffDateTime || null,
-    basePricePerDay: round2(booking?.basePricePerDay ?? (days > 0 ? baseCost / days : 0)),
-    insuranceExtraPerDay: round2(booking?.insuranceExtraPerDay ?? (days > 0 ? insuranceCost / days : 0)),
+    basePricePerDay: snapshotBasePricePerDay,
+    insuranceExtraPerDay: snapshotInsuranceExtraPerDay,
     selectedPackage: {
       key: packageKey,
       label: text(packageCfg?.label, packageKey ? packageKey.toUpperCase() : ''),
@@ -122,6 +130,17 @@ export function buildPricingSnapshot({ catalog = {}, booking = {}, selectedPacka
       net: netAmount,
       vat: vatAmount
     },
+    appliedRates: {
+      basePricePerDay: snapshotBasePricePerDay,
+      insuranceExtraPerDay: snapshotInsuranceExtraPerDay,
+      billableDays: days,
+      graceMinutes: num(graceMinutes, 0)
+    },
+    catalogRef: {
+      businessSettingsId: text(businessSettings?._id, ''),
+      catalogCapturedAt: text(catalog?.capturedAt || catalog?.businessSettings?.updatedAt, '')
+    },
+    warnings,
     refs: {
       businessSettingsId: text(businessSettings?._id, ''),
       insurancePlanId: text(packageCfg?._id, ''),
