@@ -1333,9 +1333,9 @@ function validateCheckoutFields(fd, state){
 
 document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  if (!vehicle) return;
-
   const form = e.currentTarget;
+  if (form.dataset.submitting === 'true') return;
+  if (!vehicle) return;
   const fd = new FormData(form);
   const errors = validateCheckoutFields(fd, state);
 
@@ -1366,10 +1366,14 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
   // DIAMOND LOADING: Duplicate submission guard
   form.dataset.submitting = 'true';
 
+  // DIAMOND LOADING: AbortController so the in-flight fetch is cancelled on timeout
+  const submitAbortCtrl = new AbortController();
+
   // DIAMOND LOADING: 15-second timeout handler
   let submissionTimedOut = false;
   const timeoutId = setTimeout(function(){
     submissionTimedOut = true;
+    submitAbortCtrl.abort();
     submitBtn.disabled = false;
     submitBtn.textContent = oldText;
     showSubmitOverlay(false);
@@ -1443,7 +1447,8 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       const res = await fetch(`${API_BASE}/createBooking`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: submitAbortCtrl.signal
       });
       const rawText = await res.text();
       try { data = JSON.parse(rawText); } catch (parseErr) { throw new Error(rawText || 'Αποτυχία υποβολής'); }
