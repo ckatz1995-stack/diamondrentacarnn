@@ -153,6 +153,25 @@ router.patch('/members/:id', validate(editMemberSchema), async (req, res, next) 
   }
 });
 
+// GET /api/admin/bookings/:id
+router.get('/bookings/:id', async (req, res, next) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('memberId', 'firstName lastName email phone loyaltyTier loyaltyPoints totalCompletedRentals createdAt')
+      .lean();
+
+    if (!booking) {
+      return res.status(404).json({ ok: false, error: 'not_found', message: 'Κράτηση δεν βρέθηκε' });
+    }
+
+    const review = await Review.findOne({ bookingId: booking._id }).lean();
+
+    res.json({ ok: true, booking, review: review || null });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/admin/bookings
 router.get('/bookings', async (req, res, next) => {
   try {

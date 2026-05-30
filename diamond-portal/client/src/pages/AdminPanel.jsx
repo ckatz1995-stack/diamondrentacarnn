@@ -299,7 +299,8 @@ export default function AdminPanel() {
                       return (
                         <tr
                           key={booking._id}
-                          className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isPending ? 'bg-amber-50 dark:bg-amber-900/10' : ''}`}
+                          onClick={e => { if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'BUTTON') navigate(`/admin/bookings/${booking._id}`); }}
+                          className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isPending ? 'bg-amber-50 dark:bg-amber-900/10' : ''}`}
                         >
                           <td className="px-4 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">
                             {booking.bookingNumber}

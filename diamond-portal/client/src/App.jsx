@@ -18,6 +18,7 @@ import Loyalty from './pages/Loyalty.jsx';
 import Notifications from './pages/Notifications.jsx';
 import Support from './pages/Support.jsx';
 import AdminPanel from './pages/AdminPanel.jsx';
+import AdminBookingDetail from './pages/AdminBookingDetail.jsx';
 import ProtectedRoute from './components/layout/ProtectedRoute.jsx';
 import DashboardLayout from './components/layout/DashboardLayout.jsx';
 
@@ -42,6 +43,7 @@ function AppRoutes() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/support" element={<Support />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin/bookings/:id" element={<AdminBookingDetail />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/bookings" replace />} />
