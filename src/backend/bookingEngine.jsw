@@ -1,5 +1,7 @@
 import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
+import { fetch as wixFetch } from 'wix-fetch';
+import { getSecret } from 'wix-secrets-backend';
 import { VAT_RATE } from 'backend/bookingConfig';
 import { notifyBookingSubmitted } from 'backend/notificationTriggers.jsw';
 import { getPricingCatalog, getFallbackCatalogSnapshot, computeAutomaticFees, resolveDynamicPricingRate } from 'backend/pricingCatalog.jsw';
@@ -759,6 +761,40 @@ vehicleCategorySpecs: mapVehicleCategoryCatalogItem(vehicle).specs,
 
         const inserted = await wixData.insert("BookingsNew", booking, { suppressAuth: true });
         notifyBookingSubmitted({ memberId: userId || '', email: String(email), bookingNumber: inserted.bookingNumber, bookingId: inserted._id }).catch(() => {});
+
+        // Push booking to the member portal (fire and forget — never blocks booking creation)
+        try {
+            const [portalUrl, portalSecret] = await Promise.all([
+                getSecret('PORTAL_WEBHOOK_URL').catch(() => ''),
+                getSecret('PORTAL_WEBHOOK_SECRET').catch(() => ''),
+            ]);
+            if (portalUrl && portalSecret) {
+                wixFetch(`${portalUrl}/api/sync/wix-booking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Webhook-Secret': portalSecret },
+                    body: JSON.stringify({
+                        bookingNumber: inserted.bookingNumber,
+                        wixId: inserted._id,
+                        email: String(email),
+                        customerName: String(customerName),
+                        customerPhone: String(phone),
+                        vehicleName: cleanText(vehicle.title || vehicle.Title || category || ''),
+                        categoryId: String(resolvedCategoryCode),
+                        pickupDateTime: pickup.toISOString(),
+                        dropoffDateTime: dropoff.toISOString(),
+                        pickupLocation: pickuppoint ? String(pickuppoint) : '',
+                        dropoffLocation: dropoffpoint ? String(dropoffpoint) : '',
+                        insurance: pkg,
+                        driverAge: driverAge ? String(driverAge) : '',
+                        totalPrice,
+                        status: 'Pending',
+                        notes: normalizedMainDriver.notes || '',
+                        extras: selectedExtrasDetails.map(e => ({ name: e.label, price: e.lineTotal })),
+                    }),
+                }).catch(() => {});
+            }
+        } catch (_) {}
+
         return { success: true, bookingNumber: inserted.bookingNumber, _id: inserted._id, totalPrice, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee };
 
     } catch (err) {

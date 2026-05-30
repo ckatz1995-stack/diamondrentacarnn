@@ -4,7 +4,12 @@ let counter = 0;
 
 const bookingSchema = new mongoose.Schema({
   bookingNumber: { type: String, unique: true },
-  memberId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  source: { type: String, enum: ['portal', 'wix'], default: 'portal' },
+  wixId: String,
+  memberId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  customerEmail: String,
+  customerName: String,
+  customerPhone: String,
   vehicleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vehicle' },
   vehicleName: String,
   categoryId: String,
@@ -51,5 +56,6 @@ bookingSchema.pre('save', async function (next) {
 
 bookingSchema.index({ memberId: 1, status: 1 });
 bookingSchema.index({ pickupDateTime: 1 });
+bookingSchema.index({ customerEmail: 1 });
 
 export const Booking = mongoose.model('Booking', bookingSchema);

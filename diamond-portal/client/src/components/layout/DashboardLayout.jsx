@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext.jsx';
 import api from '../../api/client.js';
 
 const NAV_ITEMS = [
+  { to: '/dashboard', icon: '🏠', label: 'Αρχική' },
   { to: '/bookings', icon: '📋', label: 'Κρατήσεις' },
   { to: '/analytics', icon: '📊', label: 'Ανάλυση' },
   { to: '/payments', icon: '💳', label: 'Πληρωμές' },
@@ -15,8 +16,8 @@ const NAV_ITEMS = [
 ];
 
 const MOBILE_NAV = [
+  { to: '/dashboard', icon: '🏠', label: 'Αρχική' },
   { to: '/bookings', icon: '📋', label: 'Κρατήσεις' },
-  { to: '/payments', icon: '💳', label: 'Πληρωμές' },
   { to: '/loyalty', icon: '🏆', label: 'Loyalty' },
   { to: '/notifications', icon: '🔔', label: 'Ειδοποιήσεις' },
   { to: '/profile', icon: '👤', label: 'Προφίλ' },

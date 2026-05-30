@@ -16,6 +16,7 @@ import notificationRoutes from './routes/notifications.js';
 import analyticsRoutes from './routes/analytics.js';
 import supportRoutes from './routes/support.js';
 import adminRoutes from './routes/admin.js';
+import syncRoutes from './routes/sync.js';
 import { requireAuth } from './middleware/auth.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -36,6 +37,7 @@ app.use('/uploads', express.static(uploadDir));
 
 // Public routes
 app.use('/api/auth', authRoutes);
+app.use('/api/sync', generalLimiter, syncRoutes);
 
 // Protected routes
 app.use('/api/bookings', requireAuth, generalLimiter, bookingRoutes);

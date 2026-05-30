@@ -32,7 +32,8 @@ function AppRoutes() {
       <Route path="/verify-email/:token" element={<VerifyEmail />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/" element={<Navigate to="/bookings" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/bookings/:id" element={<BookingDetail />} />
           <Route path="/profile" element={<Profile />} />
@@ -46,7 +47,7 @@ function AppRoutes() {
           <Route path="/admin/bookings/:id" element={<AdminBookingDetail />} />
         </Route>
       </Route>
-      <Route path="*" element={<Navigate to="/bookings" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

@@ -6,6 +6,7 @@ import { formatDate, formatDateTime } from '../utils/greekDates.js';
 import { formatEUR } from '../utils/currency.js';
 import { STATUS_LABELS, STATUS_CLASSES, TIER_LABELS, TIER_CLASSES } from '../utils/statusColors.js';
 import { Skeleton } from '../components/ui/Skeleton.jsx';
+import CreateBookingModal from '../components/admin/CreateBookingModal.jsx';
 import api from '../api/client.js';
 
 const TABS = [
@@ -51,6 +52,7 @@ export default function AdminPanel() {
   const [tickets, setTickets] = useState([]);
   const [ticketFilter, setTicketFilter] = useState('open');
   const [actionLoading, setActionLoading] = useState(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   if (user && user.role !== 'admin') {
     navigate('/bookings', { replace: true });
@@ -148,7 +150,8 @@ export default function AdminPanel() {
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl w-fit">
+      <div className="overflow-x-auto -mx-4 px-4 pb-1">
+      <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl w-fit min-w-max">
         {TABS.map(tab => (
           <button
             key={tab.key}
@@ -168,6 +171,7 @@ export default function AdminPanel() {
             )}
           </button>
         ))}
+      </div>
       </div>
 
       {/* Stats tab */}
@@ -245,7 +249,13 @@ export default function AdminPanel() {
       {activeTab === 'bookings' && (
         <div className="space-y-4">
           {/* Filters row */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <button
+              onClick={() => setCreateModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white text-sm font-bold rounded-xl hover:bg-brand-teal/90 transition-colors shrink-0"
+            >
+              <span>+</span> Νέα Κράτηση
+            </button>
             <input
               type="search"
               value={bookingSearch}
@@ -424,6 +434,12 @@ export default function AdminPanel() {
           </div>
         </div>
       )}
+
+      <CreateBookingModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onCreated={() => { fetchBookings(); fetchPendingCount(); }}
+      />
     </div>
   );
 }
