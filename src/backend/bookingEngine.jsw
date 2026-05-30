@@ -1,6 +1,7 @@
 import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { fetch as wixFetch } from 'wix-fetch';
+import { getSecret } from 'wix-secrets-backend';
 import { VAT_RATE } from 'backend/bookingConfig';
 import { notifyBookingSubmitted } from 'backend/notificationTriggers.jsw';
 import { getPricingCatalog, getFallbackCatalogSnapshot, computeAutomaticFees, resolveDynamicPricingRate } from 'backend/pricingCatalog.jsw';
@@ -763,8 +764,10 @@ vehicleCategorySpecs: mapVehicleCategoryCatalogItem(vehicle).specs,
 
         // Push booking to the member portal (fire and forget — never blocks booking creation)
         try {
-            const portalUrl = (typeof process !== 'undefined' && process?.env?.PORTAL_WEBHOOK_URL) || '';
-            const portalSecret = (typeof process !== 'undefined' && process?.env?.PORTAL_WEBHOOK_SECRET) || '';
+            const [portalUrl, portalSecret] = await Promise.all([
+                getSecret('PORTAL_WEBHOOK_URL').catch(() => ''),
+                getSecret('PORTAL_WEBHOOK_SECRET').catch(() => ''),
+            ]);
             if (portalUrl && portalSecret) {
                 wixFetch(`${portalUrl}/api/sync/wix-booking`, {
                     method: 'POST',
