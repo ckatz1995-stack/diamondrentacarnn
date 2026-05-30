@@ -48,30 +48,6 @@ export async function testTelegramNotification() {
   return result;
 }
 
-export async function testAllTelegramBots() {
-  async function probe(secretName, chatId, label) {
-    try {
-      const token = await getSecret(secretName);
-      if (!token) return { label, ok: false, error: 'secret not found' };
-      const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text: `✅ Test bot: ${label}` })
-      });
-      const json = await res.json();
-      return { label, ok: json.ok, chatId, apiResponse: json };
-    } catch (err) {
-      return { label, ok: false, error: err.message || String(err) };
-    }
-  }
-  const [main, edits, cancel] = await Promise.all([
-    probe('TELEGRAM_BOT_TOKEN',       CHAT_MAIN,   'main'),
-    probe('TELEGRAMEDITS_BOT_TOKEN',  CHAT_EDITS,  'edits'),
-    probe('TELEGRAMCANCELS_BOT_TOKEN', CHAT_CANCEL, 'cancels'),
-  ]);
-  return { main, edits, cancel };
-}
-
 export async function sendTelegramNotification(booking) {
   try {
     const lines = [
