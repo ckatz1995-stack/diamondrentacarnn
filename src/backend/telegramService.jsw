@@ -1,7 +1,10 @@
 import { fetch } from 'wix-fetch';
 import { getSecret } from 'wix-secrets-backend';
 
-const TELEGRAM_CHAT_ID = '1578329343';
+// Chat IDs per notification channel
+const CHAT_MAIN   = '1578329343'; // new bookings + reviews
+const CHAT_EDITS  = '8729284353'; // booking edits
+const CHAT_CANCEL = '8917515578'; // cancellations
 
 function formatDT(value) {
   if (!value) return '—';
@@ -10,6 +13,19 @@ function formatDT(value) {
     if (Number.isNaN(d.getTime())) return String(value);
     return d.toLocaleString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Athens' });
   } catch (_) { return String(value); }
+}
+
+async function _send(secretName, chatId, text) {
+  const token = await getSecret(secretName);
+  if (!token) return;
+  const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+  });
+  const json = await res.json();
+  if (!json.ok) console.error(`[telegram] sendMessage failed (${secretName})`, JSON.stringify(json));
+  else console.log(`[telegram] ok (${secretName}), message_id:`, json.result?.message_id);
 }
 
 export async function testTelegramNotification() {
@@ -22,7 +38,7 @@ export async function testTelegramNotification() {
     const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: '✅ Test από Diamond Rent A Car — σύνδεση Telegram επιβεβαιώθηκε!' })
+      body: JSON.stringify({ chat_id: CHAT_MAIN, text: '✅ Test από Diamond Rent A Car — σύνδεση Telegram επιβεβαιώθηκε!' })
     });
     result.apiStatus = res.status;
     result.apiResponse = await res.json();
@@ -34,8 +50,6 @@ export async function testTelegramNotification() {
 
 export async function sendTelegramNotification(booking) {
   try {
-    const token = await getSecret('TELEGRAM_BOT_TOKEN');
-    if (!token) return;
     const lines = [
       '🚗 <b>Νέα Κράτηση!</b>',
       '',
@@ -60,17 +74,7 @@ export async function sendTelegramNotification(booking) {
     lines.push('', `💶 Σύνολο: <b>${Number(booking.totalPrice || 0).toFixed(2)} €</b>`);
     const comments = String(booking.internalMemo || '').trim();
     if (comments) lines.push(`💬 Σχόλια: ${comments}`);
-    const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: lines.join('\n'), parse_mode: 'HTML' })
-    });
-    const json = await res.json();
-    if (!json.ok) {
-      console.error('[telegram] sendMessage failed', JSON.stringify(json));
-    } else {
-      console.log('[telegram] sendMessage ok, message_id:', json.result?.message_id);
-    }
+    await _send('TELEGRAM_BOT_TOKEN', CHAT_MAIN, lines.join('\n'));
   } catch (err) {
     console.error('[telegram] sendTelegramNotification error', err?.message || String(err));
   }
@@ -78,8 +82,6 @@ export async function sendTelegramNotification(booking) {
 
 export async function sendTelegramCancelNotification(booking) {
   try {
-    const token = await getSecret('TELEGRAM_BOT_TOKEN');
-    if (!token) return;
     const lines = [
       '❌ <b>Ακύρωση Κράτησης!</b>',
       '',
@@ -94,19 +96,12 @@ export async function sendTelegramCancelNotification(booking) {
       `💶 Σύνολο: <b>${Number(booking.totalPrice || 0).toFixed(2)} €</b>`,
     ];
     if (booking.cancelReason) lines.push(`💬 Λόγος: ${booking.cancelReason}`);
-    const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: lines.join('\n'), parse_mode: 'HTML' })
-    });
-    const json = await res.json();
-    if (!json.ok) console.error('[telegram] cancelNotification failed', JSON.stringify(json));
+    await _send('TELEGRAMCANCELS_BOT_TOKEN', CHAT_CANCEL, lines.join('\n'));
   } catch (err) { console.error('[telegram] sendTelegramCancelNotification error', err?.message || String(err)); }
 }
 
 export async function sendTelegramEditNotification(booking, changes) {
   try {
-    const token = await getSecret('TELEGRAM_BOT_TOKEN');
-    if (!token) return;
     const lines = [
       '✏️ <b>Τροποποίηση Κράτησης!</b>',
       '',
@@ -121,19 +116,12 @@ export async function sendTelegramEditNotification(booking, changes) {
     if (changes.pickupLocation) lines.push(`📍 Σημείο παραλαβής: ${changes.pickupLocation}`);
     if (changes.dropoffLocation) lines.push(`📍 Σημείο επιστροφής: ${changes.dropoffLocation}`);
     if (changes.notes !== undefined) lines.push(`💬 Σημειώσεις: ${changes.notes || '(αδειο)'}`);
-    const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: lines.join('\n'), parse_mode: 'HTML' })
-    });
-    const json = await res.json();
-    if (!json.ok) console.error('[telegram] editNotification failed', JSON.stringify(json));
+    await _send('TELEGRAMEDITS_BOT_TOKEN', CHAT_EDITS, lines.join('\n'));
   } catch (err) { console.error('[telegram] sendTelegramEditNotification error', err?.message || String(err)); }
 }
 
 export async function sendTelegramReviewNotification({ booking, rating, comment }) {
   try {
-    const token = await getSecret('TELEGRAM_BOT_TOKEN');
-    if (!token) return;
     const stars = '⭐'.repeat(Math.min(5, Math.max(1, Number(rating) || 5)));
     const lines = [
       `⭐ <b>Νέα Αξιολόγηση!</b>`,
@@ -143,11 +131,6 @@ export async function sendTelegramReviewNotification({ booking, rating, comment 
       `${stars} <b>${rating}/5</b>`,
     ];
     if (comment) lines.push(`💬 "${comment}"`);
-    const res = await fetch(`https://api.telegram.org/bot${String(token).trim()}/sendMessage`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: lines.join('\n'), parse_mode: 'HTML' })
-    });
-    const json = await res.json();
-    if (!json.ok) console.error('[telegram] reviewNotification failed', JSON.stringify(json));
+    await _send('TELEGRAM_BOT_TOKEN', CHAT_MAIN, lines.join('\n'));
   } catch (err) { console.error('[telegram] sendTelegramReviewNotification error', err?.message || String(err)); }
 }
