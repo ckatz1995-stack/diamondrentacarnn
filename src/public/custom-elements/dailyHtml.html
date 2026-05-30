@@ -385,6 +385,27 @@
 @media (max-width:1280px){.toolToolbar{padding:5px 7px}.toolPill{padding:4px 7px;font-size:9px}.toolThInner{padding:4px 14px 4px 6px}.toolThLabel{font-size:8px}.toolThSort,.toolThDrag{padding:2px 4px;font-size:8px}.toolCell{padding:6px 7px;min-height:40px}.toolMain{font-size:9.75px}.toolSub{font-size:8.25px}.deskGrid{gap:8px;padding:8px;min-height:clamp(560px,68vh,860px)}.deskCol{min-height:clamp(480px,58vh,720px)}.summaryCard .v{font-size:15px}.summaryCard .m{font-size:9.5px}.fullWrap{padding:8px}}
 @media (max-width:980px){.backroom-header{grid-template-columns:1fr}.backroom-brand{min-height:74px}.backroom-nav{justify-content:flex-start;padding:0 10px}.nav-btn{height:58px;font-size:12px}.backroom-user{min-width:0;justify-content:flex-start;flex-wrap:wrap;border-left:0;border-top:1px solid rgba(255,255,255,.06)}.deskGrid{grid-template-columns:1fr;min-height:clamp(620px,72vh,900px)}.deskCol{min-height:clamp(420px,48vh,620px)}.deskCompactHead,.deskCompactRow{grid-template-columns:74px 1.2fr 1fr auto}.summaryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.toolToolbar{align-items:flex-start}.toolTable{min-width:720px}.toolSidePanel{width:260px;min-width:260px}.toolSidePanel.is-collapsed{width:54px;min-width:54px}.fullWrap{padding:8px}}
     @media (max-width:640px){.wrap{padding:8px}.panel,.surface,.card{border-radius:18px}.summaryGrid{grid-template-columns:1fr}.controlsRow{align-items:stretch}.controlGroup{width:100%}.input.search{min-width:0;width:100%}.tabBar{gap:6px}.deskCompactHead{display:none}.deskCompactRow,.tableRow{grid-template-columns:1fr;gap:8px}.deskActionBar,.rowActions{margin-top:6px;justify-content:flex-start}.rowBtn{padding:7px 10px}.toolTable{min-width:620px}.toolSidePanel{width:220px;min-width:220px}.toolSidePanel.is-collapsed{width:50px;min-width:50px}.toolContextBar{align-items:flex-start}.toolContextActions{justify-content:flex-start;width:100%}.backroom-user{padding:10px}.top-chip{max-width:none}.fullWrap{padding:6px}}
+.tl-wrap{background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:16px;padding:10px 16px 12px;box-shadow:0 4px 14px rgba(15,23,42,.04)}
+.tl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap}
+.tl-title{font:900 10.5px/1 system-ui,-apple-system,sans-serif;color:#475569;letter-spacing:.06em;text-transform:uppercase}
+.tl-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.tl-leg-item{display:inline-flex;align-items:center;gap:5px;font:800 10px/1 system-ui,-apple-system,sans-serif;color:#64748b}
+.tl-leg-item::before{content:"";width:8px;height:8px;border-radius:999px;flex-shrink:0}
+.tl-leg-pickup::before{background:#059669}.tl-leg-dropoff::before{background:#dc2626}
+.tl-axis{position:relative;height:56px;margin:0 4px}
+.tl-line{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(15,23,42,.10);border-radius:999px;transform:translateY(-50%)}
+.tl-tick{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:0;pointer-events:none}
+.tl-tick::before{content:"";width:1px;height:10px;background:rgba(15,23,42,.14);margin-bottom:2px}
+.tl-tick span{font:800 8.5px/1 system-ui,-apple-system,sans-serif;color:#94a3b8;white-space:nowrap}
+.tl-events-upper{position:absolute;left:0;right:0;top:0;bottom:50%}
+.tl-events-lower{position:absolute;left:0;right:0;top:50%;bottom:0}
+.tl-dot{position:absolute;width:9px;height:9px;border-radius:999px;transform:translateX(-50%);cursor:pointer;transition:transform .14s ease,z-index 0s}
+.tl-dot:hover{transform:translateX(-50%) scale(1.7);z-index:10}
+.tl-pickup{bottom:3px;background:#059669;box-shadow:0 0 0 2px rgba(5,150,105,.22)}
+.tl-dropoff{top:3px;background:#dc2626;box-shadow:0 0 0 2px rgba(220,38,38,.18)}
+.tl-now-line{position:absolute;top:-6px;bottom:-6px;width:2px;background:#f59e0b;border-radius:999px;transform:translateX(-50%);z-index:5;pointer-events:none}
+.tl-now-line::after{content:"NOW";position:absolute;top:-16px;left:50%;transform:translateX(-50%);font:900 8px/1 system-ui,-apple-system,sans-serif;color:#f59e0b;white-space:nowrap;letter-spacing:.04em}
+.tl-empty{font:800 11px/1.4 system-ui,-apple-system,sans-serif;color:#94a3b8;text-align:center;padding:12px 0}
   </style>
 </head>
 <body>
@@ -461,6 +482,8 @@
       <div class="statusLine" id="status">BOOT…</div>
     </div>
   </section>
+
+  <div class="tl-wrap" id="timelineStrip" style="display:none"></div>
 
   <section class="board">
     <div class="panel" id="mainPanel">
@@ -1478,7 +1501,27 @@
   function field(k,v,full){ return `<div class="fieldBox ${full?'full':''}"><div class="fk">${esc(k)}</div><div class="fv">${esc(v || '—')}</div></div>`; }
   function renderInspector(){ if (!els.inspector) return; const item = selectedItem(); if (!item) { els.inspector.innerHTML = `<div class="fieldBox full"><div class="fk">Selected record</div><div class="fv">Δεν υπάρχει visible row για το current mode / filters.</div></div>`; return; } const key = state.selected.tab || (state.viewMode === 'desk' ? 'checkout' : state.activeTab); const actions = []; const gate = item && item.actionGate ? item.actionGate : {}; const reason = Array.isArray(gate.reasons) && gate.reasons.length ? gate.reasons.join(' • ') : 'Action unavailable for current state'; const disableIf = (cond) => cond ? ` disabled title="${esc(reason)}"` : ''; if (item.itemType !== 'fleet') { const contractBlocked = (key === 'checkout' && gate.checkoutEligible === false) || (key === 'checkin' && gate.checkinEligible === false); actions.push(`<button class="inspectorBtn primary" data-action="contract" type="button"${disableIf(contractBlocked)}>Open contract</button>`); actions.push(`<button class="inspectorBtn" data-action="fleet" type="button"${disableIf(gate.fleetEnabled === false)}>Open fleet</button>`); } if (resolveVehicleId(item)) actions.push(`<button class="inspectorBtn" data-action="vehicle" type="button"${disableIf(gate.vehicleEnabled === false)}>Open vehicle card</button>`); actions.push(`<button class="inspectorBtn" data-action="bookings" type="button"${disableIf(gate.bookingsEnabled === false)}>Open bookings</button>`); els.inspector.innerHTML = `<div class="fieldGrid">${field('Record', safe(item.bookingNumber || item.vehicleLabel || item.assignedVehicleLabel || item._id || item.id))}${field('Queue / tab', TAB_CONFIG[key]?.label || key)}${field('Status', statusLabel(item))}${field('Vehicle', safe(item.assignedVehicleLabel || item.vehicleLabel || 'Χωρίς όχημα'))}${field('Customer / station', safe(item.customerName || item.station || '—'))}${field('Time', key==='checkin' ? fmtDT(item.dropoffDateTime || item.end) : fmtDT(item.pickupDateTime || item.start))}${field('Payment', safe(item.paymentStatus || '—'))}${field('Outstanding', money(item.totalBalance || 0))}${field('Vehicle ops', [safe(item.vehicleOperationalStatus), item.vehicleReadyToGo === false ? 'Not ready' : '', item.vehicleHardHold ? 'Hard hold' : '', item.vehicleServiceBlocked ? 'Service blocked' : ''].filter(Boolean).join(' • ') || '—', true)}${field('Route', routeText(item), true)}${field('Contact', [safe(item.phone), safe(item.email)].filter(Boolean).join(' · ') || '—', true)}${field('Flight / extras', [safe(item.flightNumber), Array.isArray(item.selectedExtrasList)&&item.selectedExtrasList.length ? item.selectedExtrasList.join(', ') : safe(item.extras)].filter(Boolean).join(' • ') || '—', true)}${field('Notes', [safe(item.pickupComment), safe(item.dropoffComment), safe(item.remarks), safe(item.notes)].filter(Boolean).join(' • ') || '—', true)}</div><div class="inspectorActions">${actions.join('')}</div>`; }
   function updateModeUi(){ document.querySelectorAll('[data-view-mode]').forEach((btn)=> btn.classList.toggle('active', btn.getAttribute('data-view-mode')===state.viewMode)); if (els.modeChip) els.modeChip.textContent = state.viewMode === 'desk' ? 'Desk mode' : 'Full mode'; if (els.activeTabChip) els.activeTabChip.textContent = TAB_CONFIG[state.activeTab]?.label || '—'; const tabsWrap = $('fullOnlyTabsWrap'); if (tabsWrap) tabsWrap.classList.toggle('hidden', state.viewMode !== 'full'); if (els.deskView) els.deskView.classList.toggle('hidden', state.viewMode !== 'desk'); if (els.fullView) els.fullView.classList.toggle('hidden', state.viewMode !== 'full'); const mainPanel = $('mainPanel'); if (mainPanel) { mainPanel.classList.toggle('is-desk-mode', state.viewMode === 'desk'); mainPanel.classList.toggle('is-full-mode', state.viewMode !== 'desk'); } if (els.panelTitle && els.panelSub) { if (state.viewMode === 'desk') { els.panelTitle.textContent = 'Daily desk'; els.panelSub.textContent = 'Καθημερινό front-desk workspace με σταθερά μεγάλο table area για check-outs και check-ins, ανεξάρτητα από το πόσα rows φαίνονται.'; } else { els.panelTitle.textContent = TAB_CONFIG[state.activeTab]?.label || 'Full workspace'; els.panelSub.textContent = (TAB_CONFIG[state.activeTab]?.sub || 'Πλήρες operational dataset για την επιλεγμένη ημέρα.') + ' Το Daily δείχνει μόνο confirmed / live operational records.'; } } }
-  function render(){ renderStations(); renderSummary(); renderTabBar(); updateModeUi(); renderDesk(); renderFull(); renderInspector(); reportHeight(); }
+  function renderTimeline(){
+    const wrap = document.getElementById('timelineStrip');
+    if (!wrap) return;
+    const pickups = Array.isArray(state.data.tabs.checkout) ? state.data.tabs.checkout : [];
+    const dropoffs = Array.isArray(state.data.tabs.checkin) ? state.data.tabs.checkin : [];
+    if (!pickups.length && !dropoffs.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    const START_H = 6, END_H = 23;
+    function toPct(dt){ const d = new Date(dt); if (isNaN(d)) return -1; const h = d.getHours() + d.getMinutes()/60; return Math.max(0, Math.min(100, (h - START_H) / (END_H - START_H) * 100)); }
+    const TICK_HOURS = [6,8,10,12,14,16,18,20,22];
+    const ticks = TICK_HOURS.map(h => { const pct = (h - START_H) / (END_H - START_H) * 100; return `<div class="tl-tick" style="left:${pct}%"><span>${String(h).padStart(2,'0')}:00</span></div>`; }).join('');
+    const pickupDots = pickups.map(item => { const pct = toPct(item.pickupDateTime || item.start); if (pct < 0) return ''; return `<div class="tl-dot tl-pickup" style="left:${pct}%" title="${esc(safe(item.bookingNumber||''))} ${esc(safe(item.customerName||''))}"></div>`; }).join('');
+    const dropoffDots = dropoffs.map(item => { const pct = toPct(item.dropoffDateTime || item.end); if (pct < 0) return ''; return `<div class="tl-dot tl-dropoff" style="left:${pct}%" title="${esc(safe(item.bookingNumber||''))} ${esc(safe(item.customerName||''))}"></div>`; }).join('');
+    const todayStr = ymd(new Date());
+    const selDate = (els.datePick && els.datePick.value) || todayStr;
+    const nowH = new Date().getHours() + new Date().getMinutes()/60;
+    const nowPct = selDate === todayStr ? (nowH - START_H) / (END_H - START_H) * 100 : -1;
+    const nowLine = nowPct >= 0 && nowPct <= 100 ? `<div class="tl-now-line" style="left:${nowPct.toFixed(2)}%"></div>` : '';
+    wrap.innerHTML = `<div class="tl-header"><span class="tl-title">Ημερήσιο timeline</span><div class="tl-legend"><span class="tl-leg-item tl-leg-pickup">Check-outs ${pickups.length}</span><span class="tl-leg-item tl-leg-dropoff">Check-ins ${dropoffs.length}</span></div></div><div class="tl-axis"><div class="tl-line"></div>${ticks}<div class="tl-events-upper">${pickupDots}</div><div class="tl-events-lower">${dropoffDots}</div>${nowLine}</div>`;
+  }
+  function render(){ renderStations(); renderSummary(); renderTabBar(); updateModeUi(); renderDesk(); renderFull(); renderInspector(); renderTimeline(); reportHeight(); }
 
   function openContract(bookingId){ if (!bookingId) return; postToWix({ type:'openContract', bookingId }); }
   function resolveVehicleId(item){ return safe(item && (item.assignedVehicle || item.fleetVehicleId || item._id)); }

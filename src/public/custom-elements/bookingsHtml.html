@@ -156,6 +156,8 @@
     .st-Pending{background:rgba(180,138,79,.12);border-color:rgba(180,138,79,.24);color:#6c522e}
     .st-Confirmed{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22);color:#047857}
     .st-Canceled{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#b91c1c}
+    .st-Hold{background:rgba(37,99,235,.10);border-color:rgba(37,99,235,.22);color:#1d4ed8}
+    .st-Escalated{background:rgba(124,58,237,.10);border-color:rgba(124,58,237,.22);color:#6d28d9}
     .miniBar{display:none;align-items:center;justify-content:space-between;gap:8px;padding:0 10px 8px 10px}
     .row.selected .miniBar{display:flex}
     .miniMeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
@@ -1079,8 +1081,8 @@
   const sumPendingEl = document.getElementById('sumPending');
   const sumUnassignedEl = document.getElementById('sumUnassigned');
 
-  const FILTERS = ['All','Pending','Confirmed','Canceled'];
-  const FILTER_LABELS = { All:'Όλα', Pending:'Σε εκκρεμότητα', Confirmed:'Επιβεβαιωμένες', Canceled:'Ακυρωμένες' };
+  const FILTERS = ['All','Pending','Hold','Escalated','Confirmed','Canceled'];
+  const FILTER_LABELS = { All:'Όλα', Pending:'Σε εκκρεμότητα', Hold:'Hold', Escalated:'Escalated', Confirmed:'Επιβεβαιωμένες', Canceled:'Ακυρωμένες' };
   const FOCUS_DEFS = [
     { key:'all', label:'Όλα' },
     { key:'pending', label:'Pending' },
@@ -1138,14 +1140,16 @@
     if (!s) return 'Pending';
     if (s === 'confirmed' || s === 'επιβεβαίωσηed' || s === 'επιβεβαιωμενη' || s === 'επιβεβαιωμένη' || s.includes('confirm')) return 'Confirmed';
     if (s === 'canceled' || s === 'cancelled' || s === 'ακύρωσηed' || s === 'ακυρωσηed' || s === 'ακυρωμενη' || s === 'ακυρωμένη' || s.includes('cancel')) return 'Canceled';
+    if (s === 'hold' || s.includes('hold')) return 'Hold';
+    if (s === 'escalated' || s.includes('escalat')) return 'Escalated';
     return 'Pending';
   }
-  function statusLabel(st){ const s = normalizeStatusValue(st); return s === 'Confirmed' ? 'Επιβεβαιωμένη' : (s === 'Canceled' ? 'Ακυρωμένη' : 'Σε εκκρεμότητα'); }
+  function statusLabel(st){ const s = normalizeStatusValue(st); return s === 'Confirmed' ? 'Επιβεβαιωμένη' : (s === 'Canceled' ? 'Ακυρωμένη' : (s === 'Hold' ? 'Hold' : (s === 'Escalated' ? 'Escalated' : 'Σε εκκρεμότητα'))); }
   function setStatus(t){ statusEl.textContent = t || ''; reportHeight(); }
   function fmtDT(v){ const d = new Date(v); if (isNaN(d.getTime())) return '—'; return d.toLocaleString('el-GR',{ year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false }); }
   function shortDT(v){ const d = new Date(v); if (isNaN(d.getTime())) return '—'; return d.toLocaleString('el-GR',{ day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false }); }
   function eur(v){ const n = Number(v||0); return `${n.toLocaleString('el-GR',{ minimumFractionDigits:2, maximumFractionDigits:2 })}€`; }
-  function badgeClass(st){ const s = normalizeStatusValue(st); return s === 'Confirmed' ? 'st-Confirmed' : (s === 'Canceled' ? 'st-Canceled' : 'st-Pending'); }
+  function badgeClass(st){ const s = normalizeStatusValue(st); return s === 'Confirmed' ? 'st-Confirmed' : (s === 'Canceled' ? 'st-Canceled' : (s === 'Hold' ? 'st-Hold' : (s === 'Escalated' ? 'st-Escalated' : 'st-Pending'))); }
   function joinParts(parts){ return parts.filter(Boolean).join(' • '); }
   function reportHeight(extra=0){ const h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,document.body.offsetHeight); postToWix({ type:'resizeShell', height:h+12+Number(extra||0) }); }
   function toYMD(value){ const d = value instanceof Date ? value : new Date(value); if (isNaN(d.getTime())) return ''; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -1233,7 +1237,7 @@
   function focusCount(key){ const rows = Array.isArray(allItems) ? allItems : []; if (key === 'pending') return rows.filter((it)=> normalizeStatusValue(it.status) === 'Pending').length; if (key === 'unassigned') return rows.filter((it)=> !hasAssignedVehicle(it)).length; if (key === 'noContact') return rows.filter((it)=> !hasContactInfo(it)).length; if (key === 'airport') return rows.filter((it)=> isAirportRow(it)).length; if (key === 'travelDocs') return rows.filter((it)=> hasTravelDocsIssue(it)).length; if (key === 'today') return rows.filter((it)=> startsTodayRow(it)).length; if (key === 'recent') return rows.filter((it)=> createdWithinHours(it.createdAt, 24)).length; return rows.length; }
   function visibleCount(predicate){ const rows = Array.isArray(viewItems) ? viewItems : []; return rows.filter((it)=> predicate(it)).length; }
   function ageLabel(value){ const dt = new Date(value); if (isNaN(dt.getTime())) return '—'; const diff = Math.max(0, Date.now() - dt.getTime()); const hours = Math.floor(diff / 3600000); if (hours < 1) return '< 1h'; if (hours < 24) return `${hours}h`; const days = Math.floor(hours / 24); return `${days}d`; }
-  function buildReadinessChips(row){ const items = []; items.push(hasContactInfo(row) ? ['Contact OK','ok'] : ['No contact','danger']); items.push(hasAssignedVehicle(row) ? ['Vehicle assigned','ok'] : ['No vehicle','danger']); items.push(isAirportRow(row) ? ['Airport','warn'] : ['City / Local','']); items.push(hasTravelDocsIssue(row) ? ['Travel docs pending','warn'] : ((hasFlightInfo(row) || hasVoucherInfo(row)) ? ['Travel docs OK','ok'] : ['Travel docs —',''])); items.push(normalizeStatusValue(row.status) === 'Confirmed' ? ['Confirmed','ok'] : ['Pending','warn']); items.push(startsTodayRow(row) ? ['Pickup today','warn'] : [`Created ${ageLabel(row.createdAt)}`,'']); return items.map(([label, cls]) => `<span class="readinessChip${cls ? ' ' + cls : ''}">${esc(label)}</span>`).join(''); }
+  function buildReadinessChips(row){ const items = []; items.push(hasContactInfo(row) ? ['Contact OK','ok'] : ['No contact','danger']); items.push(hasAssignedVehicle(row) ? ['Vehicle assigned','ok'] : ['No vehicle','danger']); items.push(isAirportRow(row) ? ['Airport','warn'] : ['City / Local','']); items.push(hasTravelDocsIssue(row) ? ['Travel docs pending','warn'] : ((hasFlightInfo(row) || hasVoucherInfo(row)) ? ['Travel docs OK','ok'] : ['Travel docs —',''])); items.push(normalizeStatusValue(row.status) === 'Confirmed' ? ['Confirmed','ok'] : (normalizeStatusValue(row.status) === 'Hold' ? ['Hold',''] : (normalizeStatusValue(row.status) === 'Escalated' ? ['Escalated','warn'] : ['Pending','warn']))); items.push(startsTodayRow(row) ? ['Pickup today','warn'] : [`Created ${ageLabel(row.createdAt)}`,'']); return items.map(([label, cls]) => `<span class="readinessChip${cls ? ' ' + cls : ''}">${esc(label)}</span>`).join(''); }
   function modeLabel(){ return boardMode === 'followup' ? 'Follow-up desk' : (boardMode === 'pickups72' ? 'Pre-checkins 72h' : 'Όλο το dataset'); }
   function modeMatches(it){
     if (boardMode === 'followup') return normalizeStatusValue(it.status) === 'Pending' || !hasAssignedVehicle(it) || !hasContactInfo(it) || hasTravelDocsIssue(it) || createdWithinHours(it.createdAt, 24) || startsTodayRow(it) || !!it.overdue;
@@ -1654,6 +1658,7 @@
             <button class="inlineBtn primary" type="button" data-action="edit">Άνοιγμα ανάλυσης</button>
             <button class="inlineBtn soft" type="button" data-action="fleet">Στο Fleet</button>
             ${normalizeStatusValue(it.status) !== 'Confirmed' ? `<button class="inlineBtn ok" type="button" data-action="confirm">Επιβεβαίωση</button>` : ''}
+            ${normalizeStatusValue(it.status) === 'Pending' ? `<button class="inlineBtn soft" type="button" data-action="hold">Hold</button>` : ''}
             ${normalizeStatusValue(it.status) !== 'Canceled' ? `<button class="inlineBtn danger" type="button" data-action="cancel">Ακύρωση</button>` : ''}
           </div>
         </div>
@@ -1821,6 +1826,7 @@
       if (type === 'edit') { persistBoardContext(id); return openRouteInNewTab(buildContractUrl(id), { type:'openContract', bookingId:id }); }
       if (type === 'fleet') { const row = viewItems.find((it)=> String(it._id||'') === String(id)) || selectedOrFirstVisibleRow(); persistBoardContext(id); return openRouteInNewTab(buildFleetUrl(id, row), { type:'openOnFleet', bookingId:id, startDate: toYMD(row && row.pickupDateTime), endDate: toYMD(row && row.dropoffDateTime) }); }
       if (type === 'confirm') { pendingStatusFor = id; return postToWix({ type:'setStatus', bookingId:id, newStatus:'Confirmed' }); }
+      if (type === 'hold') { pendingStatusFor = id; return postToWix({ type:'setStatus', bookingId:id, newStatus:'Hold' }); }
       if (type === 'cancel') { pendingStatusFor = id; return postToWix({ type:'setStatus', bookingId:id, newStatus:'Canceled' }); }
       return;
     }
@@ -1833,7 +1839,7 @@
 
   document.querySelectorAll('.routeTab[data-route]').forEach((btn)=>{ btn.addEventListener('click', ()=>{ const route = btn.getAttribute('data-route'); if (route) postToWix({ type:'navigate', route }); }); });
   boardModeTabs?.addEventListener('click', (e)=>{ const btn = e.target.closest('[data-mode]'); if (!btn) return; const next = btn.getAttribute('data-mode'); if (!next || next === boardMode) return; boardMode = next; if (boardMode === 'followup') { if (filterStatus === 'Canceled') filterStatus = 'Pending'; if (boardFocus === 'all') boardFocus = 'pending'; } else if (boardMode === 'pickups72') { if (boardFocus === 'pending' || boardFocus === 'all') boardFocus = 'travelDocs'; } else if (!['all','pending','unassigned','noContact','airport','travelDocs','today','recent'].includes(boardFocus)) { boardFocus = 'all'; } renderPills(); render(); });
-  detailPane?.addEventListener('click', (e)=>{ const focusBtn = e.target.closest('[data-focus-id]'); if (focusBtn) { const id = focusBtn.getAttribute('data-focus-id') || ''; if (id) focusRow(id); return; } const btn = e.target.closest('[data-detail-action]'); if (!btn) return; const row = selectedOrFirstVisibleRow(); const act = btn.getAttribute('data-detail-action'); if (act === 'clear') { selectedId = ''; render(); return; } if (!row) return; if (act === 'analysis') { persistBoardContext(row._id); return openRouteInNewTab(buildContractUrl(row._id), { type:'openContract', bookingId:row._id }); } if (act === 'fleet') { persistBoardContext(row._id); return openRouteInNewTab(buildFleetUrl(row._id, row), { type:'openOnFleet', bookingId:row._id, startDate: toYMD(row.pickupDateTime), endDate: toYMD(row.dropoffDateTime) }); } if (act === 'daily') return openPickupDailyFromCurrent(); if (act === 'confirm') { pendingStatusFor = row._id; return postToWix({ type:'setStatus', bookingId:row._id, newStatus:'Confirmed' }); } if (act === 'cancel') { pendingStatusFor = row._id; return postToWix({ type:'setStatus', bookingId:row._id, newStatus:'Canceled' }); } });
+  detailPane?.addEventListener('click', (e)=>{ const focusBtn = e.target.closest('[data-focus-id]'); if (focusBtn) { const id = focusBtn.getAttribute('data-focus-id') || ''; if (id) focusRow(id); return; } const btn = e.target.closest('[data-detail-action]'); if (!btn) return; const row = selectedOrFirstVisibleRow(); const act = btn.getAttribute('data-detail-action'); if (act === 'clear') { selectedId = ''; render(); return; } if (!row) return; if (act === 'analysis') { persistBoardContext(row._id); return openRouteInNewTab(buildContractUrl(row._id), { type:'openContract', bookingId:row._id }); } if (act === 'fleet') { persistBoardContext(row._id); return openRouteInNewTab(buildFleetUrl(row._id, row), { type:'openOnFleet', bookingId:row._id, startDate: toYMD(row.pickupDateTime), endDate: toYMD(row.dropoffDateTime) }); } if (act === 'daily') return openPickupDailyFromCurrent(); if (act === 'confirm') { pendingStatusFor = row._id; return postToWix({ type:'setStatus', bookingId:row._id, newStatus:'Confirmed' }); } if (act === 'hold') { pendingStatusFor = row._id; return postToWix({ type:'setStatus', bookingId:row._id, newStatus:'Hold' }); } if (act === 'cancel') { pendingStatusFor = row._id; return postToWix({ type:'setStatus', bookingId:row._id, newStatus:'Canceled' }); } });
   if (userMenuBtn) userMenuBtn.addEventListener('click', (e)=>{ e.stopPropagation(); userMenu.classList.toggle('open'); reportHeight(userMenu.classList.contains('open') ? 320 : 0); });
   document.addEventListener('click', (e)=>{ if (userMenu && !e.target.closest('.userMenuWrap')) userMenu.classList.remove('open'); });
   document.querySelectorAll('[data-menu-action]').forEach((btn)=>{ btn.addEventListener('click', ()=>{ const action = btn.getAttribute('data-menu-action'); userMenu.classList.remove('open'); postToWix({ type:'menuAction', action }); }); });
