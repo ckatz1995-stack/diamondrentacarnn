@@ -330,15 +330,7 @@ export function computeAutomaticFees({ driverAge, pickupDateTime, dropoffDateTim
 export function getFallbackCatalogSnapshot(){ return buildCatalogSnapshot({ businessSettings: normalizeBusinessSettings(DEFAULT_BUSINESS_SETTINGS), insurancePlans: FALLBACK_INSURANCE_OPTIONS.map((item, index) => normalizeInsurance(item, (index + 1) * 10)), extraServices: FALLBACK_EXTRA_OPTIONS.map((item, index) => normalizeExtra(item, (index + 1) * 10)), feeRules: FALLBACK_FEE_RULES.map((item, index) => normalizeFeeRule(item, (index + 1) * 10)), pricingSeasons: [], categoryRateRules: [], pickupLocations: [] }); }
 export function clearPricingCatalogCache(){ cache = { public: null, all: null }; return true; }
 
-export function resolveDynamicPricingRate({ categoryCode = '', vehicleCategoryId = '', billableDays = 1, pickupDateTime = null, dropoffDateTime = null, catalog = null, fallbackPricePerDay = 0 } = {}) {
-  void dropoffDateTime;
-  const safeCatalog = catalog || {};
-  const seasons = Array.isArray(safeCatalog.pricingSeasons) ? safeCatalog.pricingSeasons : [];
-  const rules = Array.isArray(safeCatalog.categoryRateRules) ? safeCatalog.categoryRateRules : [];
-  const resolvedSeason = findActiveSeason(seasons, pickupDateTime);
-  const code = text(categoryCode, '').toUpperCase();
-  const categoryId = text(vehicleCategoryId, '');
-  const days = Math.max(1, Math.floor(toNumber(billableDays, 1)));
+function findCategoryRateRule(rules, resolvedSeason, code, categoryId, days) {
   const candidates = rules.filter((rule) => {
     if (!rule || rule.active === false) return false;
     if (code && text(rule.categoryCode, '').toUpperCase() && text(rule.categoryCode, '').toUpperCase() !== code) return false;
@@ -366,13 +358,44 @@ export function resolveDynamicPricingRate({ categoryCode = '', vehicleCategoryId
     if (priorityDiff !== 0) return priorityDiff;
     return sortByOrder(a, b);
   });
-  const rule = candidates[0] || null;
-  const pricePerDay = rule ? toNumber(rule.pricePerDay, fallbackPricePerDay) : toNumber(fallbackPricePerDay, 0);
+  return candidates[0] || null;
+}
+
+export function resolveDynamicPricingRate({ categoryCode = '', vehicleCategoryId = '', billableDays = 1, pickupDateTime = null, dropoffDateTime = null, catalog = null, fallbackPricePerDay = 0 } = {}) {
+  const safeCatalog = catalog || {};
+  const seasons = Array.isArray(safeCatalog.pricingSeasons) ? safeCatalog.pricingSeasons : [];
+  const rules = Array.isArray(safeCatalog.categoryRateRules) ? safeCatalog.categoryRateRules : [];
+  const code = text(categoryCode, '').toUpperCase();
+  const categoryId = text(vehicleCategoryId, '');
+  const days = Math.max(1, Math.floor(toNumber(billableDays, 1)));
+  const pickupDate = pickupDateTime instanceof Date && !isNaN(pickupDateTime.getTime()) ? pickupDateTime : null;
+  const dropoffDate = dropoffDateTime instanceof Date && !isNaN(dropoffDateTime.getTime()) ? dropoffDateTime : null;
+  const primarySeason = findActiveSeason(seasons, pickupDate || pickupDateTime);
+  const primaryRule = findCategoryRateRule(rules, primarySeason, code, categoryId, days);
+  let pricePerDay = primaryRule ? toNumber(primaryRule.pricePerDay, fallbackPricePerDay) : toNumber(fallbackPricePerDay, 0);
+
+  // Cross-season: if the rental spans a season boundary, compute a weighted daily average
+  // so each calendar day is charged at its own season's rate rather than all at pickup rate.
+  if (pickupDate && dropoffDate && seasons.length > 0 && days > 1) {
+    const MS_PER_DAY = 86400000;
+    const firstSeasonKey = primarySeason?.key || null;
+    let crossSeason = false;
+    let totalCost = 0;
+    for (let d = 0; d < days; d++) {
+      const dayDate = new Date(pickupDate.getTime() + d * MS_PER_DAY);
+      const daySeason = findActiveSeason(seasons, dayDate);
+      if (!crossSeason && (daySeason?.key || null) !== firstSeasonKey) crossSeason = true;
+      const dayRule = findCategoryRateRule(rules, daySeason, code, categoryId, days);
+      totalCost += dayRule ? toNumber(dayRule.pricePerDay, fallbackPricePerDay) : toNumber(fallbackPricePerDay, 0);
+    }
+    if (crossSeason) pricePerDay = Math.round(totalCost / days * 100) / 100;
+  }
+
   return {
     pricePerDay,
-    source: rule ? 'dynamicRule' : 'vehicleBasePrice',
-    season: resolvedSeason ? { key: resolvedSeason.key, label: resolvedSeason.label, startDate: resolvedSeason.startDate, endDate: resolvedSeason.endDate } : null,
-    rule: rule ? { key: rule.key, label: rule.label, minDays: rule.minDays, maxDays: rule.maxDays, seasonKey: rule.seasonKey, categoryCode: rule.categoryCode || code || '', pricePerDay: toNumber(rule.pricePerDay, 0) } : null
+    source: primaryRule ? 'dynamicRule' : 'vehicleBasePrice',
+    season: primarySeason ? { key: primarySeason.key, label: primarySeason.label, startDate: primarySeason.startDate, endDate: primarySeason.endDate } : null,
+    rule: primaryRule ? { key: primaryRule.key, label: primaryRule.label, minDays: primaryRule.minDays, maxDays: primaryRule.maxDays, seasonKey: primaryRule.seasonKey, categoryCode: primaryRule.categoryCode || code || '', pricePerDay: toNumber(primaryRule.pricePerDay, 0) } : null
   };
 }
 
