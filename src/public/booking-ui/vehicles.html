@@ -748,6 +748,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .bp-step.active .bp-label{color:#fff;font-weight:900}
 .bp-connector.done{background:rgba(255,255,255,.38)}
 @media(max-width:400px){.bp-label{display:none}.bp-connector{min-width:12px}}
+.date-range-error{display:none;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.28);border-radius:10px;padding:10px 14px;color:#b83c2e;font-size:13px;font-weight:700;margin:8px 0 4px}
+.date-range-error.visible{display:block}
 </style>
 <div class="booking-progress"><div class="bp-inner"><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Αναζήτηση</span></div><div class="bp-connector done"></div><div class="bp-step active"><div class="bp-dot">2</div><span class="bp-label">Οχήματα</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">3</div><span class="bp-label">Extras</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">4</div><span class="bp-label">Ολοκλήρωση</span></div></div></div>
 
@@ -805,6 +807,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           </div>
         </div>
         <div class="panel-footer">
+          <div id="dateRangeError" class="date-range-error" role="alert"></div>
           <div class="search-note">Η λίστα και το σύνολο ενημερώνονται άμεσα μόλις αλλάζει ημερομηνία, ώρα, ηλικιακή ομάδα ή φίλτρο κατηγορίας.</div>
         </div>
       </form>
@@ -1115,6 +1118,7 @@ function currentApiBase(){ return `${currentSiteBase()}/_functions`; }
 function triggerServerQuotes(){
   if(isEmbedded() && !embeddedContext) return;
   if(!vehicles || !vehicles.length) return;
+  if(!validateDateRange()) return;
   clearTimeout(_quotesDebounceTimer);
   _quotesDebounceTimer = setTimeout(scheduleServerQuotes, 80);
 }
@@ -1602,10 +1606,32 @@ function updateState(updateUrl = true){
     history.replaceState({}, '', url);
   }
 }
+function validateDateRange(){
+  const pd = document.getElementById('pickupDate').value;
+  const pt = document.getElementById('pickupTime').value || '00:00';
+  const dd = document.getElementById('dropoffDate').value;
+  const dt = document.getElementById('dropoffTime').value || '00:00';
+  const errEl = document.getElementById('dateRangeError');
+  if(!pd || !dd){ if(errEl){ errEl.classList.remove('visible'); errEl.textContent=''; } return true; }
+  const pickup = new Date(`${pd}T${pt}:00`);
+  const dropoff = new Date(`${dd}T${dt}:00`);
+  const diffMs = dropoff - pickup;
+  if(isNaN(diffMs) || diffMs <= 0){
+    const msg = diffMs <= 0 ? 'Η ημερομηνία επιστροφής πρέπει να είναι μετά την παραλαβή.' : 'Μη έγκυρες ημερομηνίες.';
+    if(errEl){ errEl.textContent = msg; errEl.classList.add('visible'); }
+    return false;
+  }
+  if(diffMs < 3600000 * 23){
+    if(errEl){ errEl.textContent = '⚠ Η ελάχιστη διάρκεια ενοικίασης είναι 1 ημέρα.'; errEl.classList.add('visible'); }
+    return false;
+  }
+  if(errEl){ errEl.classList.remove('visible'); errEl.textContent=''; }
+  return true;
+}
 sortSelect.addEventListener("change", () => { updateState(); render(); });
 ageGroup.addEventListener('change', () => { updateState(); render(); triggerServerQuotes(); });
 ['pickupDate','pickupTime','dropoffDate','dropoffTime','pickupLocation','dropoffLocation'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => { updateState(); render(); triggerServerQuotes(); });
+  document.getElementById(id).addEventListener('change', () => { updateState(); validateDateRange(); render(); triggerServerQuotes(); });
 });
 categorySelect.addEventListener("change", () => {
   updateState();
@@ -1617,6 +1643,7 @@ categorySelect.addEventListener("change", () => {
   }
 });
 function goBooking(vehicleId, vehicleCategoryCode){
+  if(!validateDateRange()) return;
   const pickupIso = new Date(`${document.getElementById("pickupDate").value}T${document.getElementById("pickupTime").value}:00`);
   const dropoffIso = new Date(`${document.getElementById("dropoffDate").value}T${document.getElementById("dropoffTime").value}:00`);
   const pickupLocation = document.getElementById('pickupLocation').value;
