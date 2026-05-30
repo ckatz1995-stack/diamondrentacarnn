@@ -40,6 +40,23 @@ const editBookingSchema = z.object({
   insurance: z.string().optional(),
 });
 
+const createBookingSchema = z.object({
+  customerEmail: z.string().email().optional().or(z.literal('')),
+  customerName: z.string().optional(),
+  customerPhone: z.string().optional(),
+  vehicleName: z.string().min(1, 'Απαιτείται όνομα οχήματος'),
+  pickupDateTime: z.string().min(1),
+  dropoffDateTime: z.string().min(1),
+  pickupLocation: z.string().optional(),
+  dropoffLocation: z.string().optional(),
+  totalPrice: z.number().min(0).default(0),
+  insurance: z.string().optional(),
+  driverAge: z.string().optional(),
+  notes: z.string().optional(),
+  staffNotes: z.string().optional(),
+  status: z.enum(['Pending', 'Confirmed', 'Active', 'Completed', 'Canceled']).default('Pending'),
+});
+
 const broadcastSchema = z.object({
   type: z.enum(['booking_confirmed', 'booking_changed', 'trip_reminder', 'review_request',
                 'loyalty_milestone', 'promo', 'support_reply']),
@@ -148,6 +165,35 @@ router.patch('/members/:id', validate(editMemberSchema), async (req, res, next) 
     logger.info('Admin updated member', { adminId: req.user._id, memberId: req.params.id });
 
     res.json({ ok: true, member: updated, message: 'Το μέλος ενημερώθηκε' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/admin/bookings
+router.post('/bookings', validate(createBookingSchema), async (req, res, next) => {
+  try {
+    const { customerEmail, ...rest } = req.body;
+    const normalizedEmail = customerEmail ? customerEmail.toLowerCase().trim() : null;
+
+    let memberId = null;
+    if (normalizedEmail) {
+      const member = await User.findOne({ email: normalizedEmail }).select('_id').lean();
+      if (member) memberId = member._id;
+    }
+
+    const booking = await Booking.create({
+      source: 'portal',
+      ...(memberId && { memberId }),
+      ...(normalizedEmail && { customerEmail: normalizedEmail }),
+      ...rest,
+      pickupDateTime: new Date(rest.pickupDateTime),
+      dropoffDateTime: new Date(rest.dropoffDateTime),
+    });
+
+    logger.info('Admin created booking', { adminId: req.user._id, bookingNumber: booking.bookingNumber });
+
+    res.status(201).json({ ok: true, booking });
   } catch (err) {
     next(err);
   }
