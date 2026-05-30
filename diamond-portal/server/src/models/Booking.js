@@ -11,7 +11,7 @@ const bookingSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['Pending', 'Confirmed', 'Active', 'Completed', 'Canceled'],
-    default: 'Confirmed',
+    default: 'Pending',
   },
   pickupDateTime: { type: Date, required: true },
   dropoffDateTime: { type: Date, required: true },
