@@ -1560,8 +1560,11 @@ async function loadVehicles(){
     return;
   }
   setLoading(`Ανακτούμε τα διαθέσιμα ${pageObjectLabel()} οχημάτων.`);
+  const loadCtrl = new AbortController();
+  const loadTimer = setTimeout(() => loadCtrl.abort(), 10000);
   try{
-    const res = await fetch(`${API_BASE}/vehicles?category=${encodeURIComponent(categorySelect.value || category)}`);
+    const res = await fetch(`${API_BASE}/vehicles?category=${encodeURIComponent(categorySelect.value || category)}`, { signal: loadCtrl.signal });
+    clearTimeout(loadTimer);
     const data = await res.json();
     if(!data.success) throw new Error(data.message || "Vehicle load failed");
     embeddedVehicleItems = data.items || [];
@@ -1570,7 +1573,8 @@ async function loadVehicles(){
     render();
     triggerServerQuotes();
   }catch(err){
-    setError(err.message || `Δεν ήταν δυνατή η φόρτωση ${pageObjectLabel()}.`);
+    clearTimeout(loadTimer);
+    setError(err.name === 'AbortError' ? `Η φόρτωση ${pageObjectLabel()} έληξε χρονικά. Ελέγξτε τη σύνδεσή σας και ανανεώστε τη σελίδα.` : (err.message || `Δεν ήταν δυνατή η φόρτωση ${pageObjectLabel()}.`));
   }
 }
 function updateState(updateUrl = true){
