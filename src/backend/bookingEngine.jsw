@@ -557,7 +557,7 @@ export async function createBooking(data) {
 
         const fallbackBasePricePerDay = toFiniteNumber(vehicle.price, 0);
         const graceMinutes = toFiniteNumber(businessSettings?.billingGraceMinutes, 0);
-        const { hours, billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1, graceMinutes);
+        const { hours, billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1, graceMinutes, BUSINESS_TIMEZONE);
 
         const insuranceMap = pricingCatalog?.maps?.insurance || {};
         const extrasMap = pricingCatalog?.maps?.extras || {};
@@ -780,7 +780,7 @@ export async function computeQuote(data) {
         const rawVehicleId = cleanText(vehicleId);
         const resolvedCategoryCode = extractCategoryCode((rawCategoryId && rawCategoryId !== rawVehicleId ? rawCategoryId : '') || category || vehicle?.category || vehicle?.Category || '');
         const graceMinutes = toFiniteNumber((pricingCatalog?.businessSettings || {}).billingGraceMinutes, 0);
-        const { billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1, graceMinutes);
+        const { billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1, graceMinutes, BUSINESS_TIMEZONE);
         const insuranceMap = pricingCatalog?.maps?.insurance || {};
         const extrasMap = pricingCatalog?.maps?.extras || {};
         const dynamicPricing = resolveDynamicPricingRate({ categoryCode: resolvedCategoryCode, vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, dropoffDateTime: dropoff, catalog: pricingCatalog, fallbackPricePerDay: fallbackBasePricePerDay });
