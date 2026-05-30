@@ -5,8 +5,91 @@ const router = express.Router();
 
 const CO2_KG_PER_DAY = 0.21 * 200; // 0.21 kg/km * avg 200km/day = 42 kg/day
 
-// GET /api/analytics/summary
-router.get('/summary', async (req, res, next) => {
+// GET /api/analytics — unified endpoint used by the frontend
+router.get('/', async (req, res, next) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    const filter = { memberId: req.user._id };
+    if (startDate || endDate) {
+      filter.pickupDateTime = {};
+      if (startDate) filter.pickupDateTime.$gte = new Date(startDate);
+      if (endDate) filter.pickupDateTime.$lte = new Date(endDate);
+    }
+
+    const allBookings = await Booking.find(filter).lean();
+    const completed = allBookings.filter(b => b.status === 'Completed');
+    const now = new Date();
+
+    // Summary
+    const totalSpend = completed.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+    const totalDays = completed.reduce((sum, b) => {
+      const days = Math.ceil((new Date(b.dropoffDateTime) - new Date(b.pickupDateTime)) / 86400000);
+      return sum + (isNaN(days) ? 0 : days);
+    }, 0);
+
+    // Monthly spend — last 12 months
+    const monthlyMap = {};
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+      monthlyMap[key] = { month: d.getMonth() + 1, year: d.getFullYear(), amount: 0 };
+    }
+    completed.forEach(b => {
+      const d = new Date(b.pickupDateTime);
+      const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+      if (monthlyMap[key]) monthlyMap[key].amount += b.totalPrice || 0;
+    });
+    const monthlySpend = Object.values(monthlyMap).map(m => ({
+      ...m,
+      amount: Math.round(m.amount * 100) / 100,
+    }));
+
+    // Category breakdown
+    const categoryMap = {};
+    completed.forEach(b => {
+      const cat = b.categoryId || 'Άλλο';
+      categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+    });
+    const categoryBreakdown = Object.entries(categoryMap)
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
+
+    // Top pickup locations (excl. canceled)
+    const locationMap = {};
+    allBookings.filter(b => b.status !== 'Canceled').forEach(b => {
+      const loc = b.pickupLocation || 'Άγνωστη';
+      if (!locationMap[loc]) locationMap[loc] = { location: loc, count: 0, totalSpend: 0 };
+      locationMap[loc].count++;
+      locationMap[loc].totalSpend += b.totalPrice || 0;
+    });
+    const topLocations = Object.values(locationMap)
+      .map(l => ({ ...l, totalSpend: Math.round(l.totalSpend * 100) / 100 }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    res.json({
+      ok: true,
+      analytics: {
+        totalSpend: Math.round(totalSpend * 100) / 100,
+        totalDays,
+        totalTrips: completed.length,
+        co2Kg: Math.round(totalDays * CO2_KG_PER_DAY),
+        upcomingBookings: allBookings.filter(b =>
+          ['Confirmed', 'Pending'].includes(b.status) && new Date(b.pickupDateTime) > now
+        ).length,
+        canceledBookings: allBookings.filter(b => b.status === 'Canceled').length,
+        monthlySpend,
+        categoryBreakdown,
+        topLocations,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
   try {
     const bookings = await Booking.find({ memberId: req.user._id }).lean();
 
