@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { User } from '../models/User.js';
+import { Booking } from '../models/Booking.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import { validate } from '../middleware/validate.js';
 import { loginLimiter, registerLimiter } from '../middleware/rateLimiter.js';
@@ -71,6 +72,12 @@ router.post('/register', registerLimiter, validate(registerSchema), async (req, 
       $push: { refreshTokens: { token: refreshToken, device: req.headers['user-agent'] || 'unknown' } },
     });
 
+    // Link any Wix bookings that arrived before this portal account existed
+    Booking.updateMany(
+      { customerEmail: email.toLowerCase(), memberId: { $exists: false }, source: 'wix' },
+      { memberId: user._id }
+    ).catch(() => {});
+
     const verifyLink = `${env.CLIENT_URL}/verify-email/${emailVerifyToken}`;
     sendWelcomeEmail(user, verifyLink).catch(err => logger.error('Welcome email failed', { error: err.message }));
 
@@ -119,6 +126,12 @@ router.post('/login', loginLimiter, validate(loginSchema), async (req, res, next
     tokens.push({ token: refreshToken, device: req.headers['user-agent'] || 'unknown' });
 
     await User.findByIdAndUpdate(user._id, { refreshTokens: tokens });
+
+    // Retroactively link any unlinked Wix bookings (email may have been added to Wix after portal account)
+    Booking.updateMany(
+      { customerEmail: user.email.toLowerCase(), memberId: { $exists: false }, source: 'wix' },
+      { memberId: user._id }
+    ).catch(() => {});
 
     logger.info('User logged in', { userId: user._id });
 
