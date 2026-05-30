@@ -1366,8 +1366,6 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     const originCity = (fd.get('originCity') || '').toString().trim();
     const residenceCity = (fd.get('city') || '').toString().trim();
 
-    const totals = computeCheckoutTotals(vehicle);
-
     const payload = {
       vehicleId: state.vehicleId || vehicle.id,
       categoryId: extractCategoryCode(vehicle.label || state.category || ''),
@@ -1434,8 +1432,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
 
     const insuranceLabel = state.insurance || 'CDW';
     const extrasLabel = state.extras || 'Χωρίς extras';
-    const summaryBaseCost = totals.baseCost;
-    const summaryTotal = totals.total;
+    const sq = lastServerQuote || {};
     saveLastBooking({
       bookingId: data.id || '',
       bookingNumber: data.bookingNumber || '',
@@ -1448,13 +1445,13 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       dropoffLocation: state.dropoffLocation,
       insurance: insuranceLabel,
       extras: extrasLabel,
-      baseCost: data.baseCost ?? lastServerQuote?.baseCost ?? summaryBaseCost,
-      insuranceCost: data.insuranceCost ?? lastServerQuote?.insuranceCost ?? totals.insuranceCost,
-      extrasCost: data.extrasCost ?? lastServerQuote?.extrasCost ?? totals.extrasCost,
-      ageFee: data.ageFee ?? lastServerQuote?.ageFee ?? totals.ageFee,
-      nightFee: data.nightFee ?? lastServerQuote?.nightFee ?? totals.nightFee,
-      locationFee: data.locationFee ?? lastServerQuote?.locationFee ?? totals.locationFee,
-      total: data.totalPrice ?? lastServerQuote?.totalPrice ?? summaryTotal
+      baseCost: data.baseCost ?? sq.baseCost ?? 0,
+      insuranceCost: data.insuranceCost ?? sq.insuranceCost ?? 0,
+      extrasCost: data.extrasCost ?? sq.extrasCost ?? 0,
+      ageFee: data.ageFee ?? sq.ageFee ?? 0,
+      nightFee: data.nightFee ?? sq.nightFee ?? 0,
+      locationFee: data.locationFee ?? sq.locationFee ?? 0,
+      total: data.totalPrice ?? sq.totalPrice ?? 0
     });
 
     clearTimeout(timeoutId);
@@ -1462,7 +1459,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     if(window.BookingState){
       BookingState.set('submitted', true);
       BookingState.set('bookingReference', data.bookingNumber || data.id || '');
-      BookingState.set('totalPrice', totals.total || 0);
+      BookingState.set('totalPrice', data.totalPrice ?? sq.totalPrice ?? 0);
     }
     goTo(`/success?booking=${encodeURIComponent(data.bookingNumber)}`);
   } catch (err) {
