@@ -438,6 +438,21 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     <a href="/booking">Ολοκλήρωση</a>
   </nav>
 </header>
+<style>
+.booking-progress{background:rgba(0,0,0,.12);border-bottom:1px solid rgba(255,255,255,.08);padding:0 16px}
+.bp-inner{display:flex;align-items:center;justify-content:center;gap:0;max-width:560px;margin:0 auto;padding:8px 0}
+.bp-step{display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto}
+.bp-dot{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.22);color:rgba(255,255,255,.50);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.bp-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.45);white-space:nowrap}
+.bp-connector{flex:1 1 auto;height:2px;background:rgba(255,255,255,.16);margin:0 6px 18px;min-width:20px}
+.bp-step.done .bp-dot{background:rgba(255,255,255,.26);border-color:rgba(255,255,255,.40);color:#fff}
+.bp-step.done .bp-label{color:rgba(255,255,255,.72)}
+.bp-step.active .bp-dot{background:#e7bf69;border-color:#f6e19f;color:#4a3816;box-shadow:0 0 0 3px rgba(231,191,105,.28)}
+.bp-step.active .bp-label{color:#fff;font-weight:900}
+.bp-connector.done{background:rgba(255,255,255,.38)}
+@media(max-width:400px){.bp-label{display:none}.bp-connector{min-width:12px}}
+</style>
+<div class="booking-progress"><div class="bp-inner"><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Αναζήτηση</span></div><div class="bp-connector done"></div><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Οχήματα</span></div><div class="bp-connector done"></div><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Extras</span></div><div class="bp-connector done"></div><div class="bp-step active"><div class="bp-dot">4</div><span class="bp-label">Ολοκλήρωση</span></div></div></div>
 
 <div class="page">
   <section class="summary-shell">
@@ -486,15 +501,15 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         <div class="form-card">
           <h3 class="card-title">Στοιχεία επικοινωνίας</h3>
           <div class="grid">
-            <div class="field"><label id="lbl-firstName">Όνομα *</label><input id="firstName" name="firstName" type="text" required><span class="field-error" id="err-firstName"></span></div>
-            <div class="field"><label id="lbl-lastName">Επώνυμο *</label><input id="lastName" name="lastName" type="text" required><span class="field-error" id="err-lastName"></span></div>
-            <div class="field"><label id="lbl-dob">Ημερομηνία γέννησης</label><input id="dob" name="dob" type="date"><span class="field-error" id="err-dob"></span></div>
-            <div class="field"><label id="lbl-phone">Τηλέφωνο *</label><input id="phone" name="phone" type="tel" required><span class="field-error" id="err-phone"></span></div>
-            <div class="field"><label id="lbl-email">Email *</label><input id="email" name="email" type="email" required><span class="field-error" id="err-email"></span></div>
-            <div class="field"><label>Χώρα</label><input name="country" type="text"></div>
-            <div class="field"><label>Διεύθυνση</label><input name="address" type="text"></div>
-            <div class="field"><label>Πόλη κατοικίας</label><input name="city" type="text"></div>
-            <div class="field"><label>Τ.Κ.</label><input name="billingZip" type="text"></div>
+            <div class="field"><label id="lbl-firstName">Όνομα *</label><input id="firstName" name="firstName" type="text" required autocomplete="given-name"><span class="field-error" id="err-firstName"></span></div>
+            <div class="field"><label id="lbl-lastName">Επώνυμο *</label><input id="lastName" name="lastName" type="text" required autocomplete="family-name"><span class="field-error" id="err-lastName"></span></div>
+            <div class="field"><label id="lbl-dob">Ημερομηνία γέννησης</label><input id="dob" name="dob" type="date" autocomplete="bday"><span class="field-error" id="err-dob"></span></div>
+            <div class="field"><label id="lbl-phone">Τηλέφωνο *</label><input id="phone" name="phone" type="tel" required autocomplete="tel"><span class="field-error" id="err-phone"></span></div>
+            <div class="field"><label id="lbl-email">Email *</label><input id="email" name="email" type="email" required autocomplete="email"><span class="field-error" id="err-email"></span></div>
+            <div class="field"><label>Χώρα</label><input name="country" type="text" autocomplete="country-name"></div>
+            <div class="field"><label>Διεύθυνση</label><input name="address" type="text" autocomplete="street-address"></div>
+            <div class="field"><label>Πόλη κατοικίας</label><input name="city" type="text" autocomplete="address-level2"></div>
+            <div class="field"><label>Τ.Κ.</label><input name="billingZip" type="text" autocomplete="postal-code"></div>
             <div class="field" id="flightNumberField"><label id="flightNumberLabel">Αριθμός πτήσης</label><input id="flightNumber" name="flightNumber" type="text"><span class="field-error" id="err-flightNumber"></span></div>
             <div class="field" id="originCityField"><label id="originCityLabel">Πόλη άφιξης</label><input name="originCity" type="text" placeholder="π.χ. Αθήνα"></div>
             <div class="field" id="dropoffInfoField" style="display:none"><label id="dropoffInfoLabel">Πτήση Επιστροφής</label><input name="dropoffInfo" type="text"></div>
@@ -520,6 +535,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
             <br>
             <button class="retry-btn" id="retryBtn" type="button">Δοκιμάστε ξανά</button>
           </div>
+          <p style="text-align:center;font-size:13px;font-weight:700;color:#6a5739;background:rgba(255,255,255,.42);border-radius:12px;padding:9px 14px;margin:0 0 10px">Θα επιβεβαιώσουμε εντός 2 ωρών από την υποβολή.</p>
           <div class="actions">
             <button class="btn btn-back" type="button">Πίσω</button>
             <button class="btn btn-submit" type="submit">Αποστολή αιτήματος</button>
@@ -1339,6 +1355,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
   const oldText = submitBtn.textContent;
   submitBtn.disabled = true;
   submitBtn.textContent = 'Υποβολή...';
+  showSubmitOverlay(true);
   // DIAMOND LOADING: Duplicate submission guard
   form.dataset.submitting = 'true';
 
@@ -1348,6 +1365,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     submissionTimedOut = true;
     submitBtn.disabled = false;
     submitBtn.textContent = oldText;
+    showSubmitOverlay(false);
     form.dataset.submitting = '';
     const supportPhone = (window.BookingState && BookingState.get('supportPhone')) || '+30 2310 000 000';
     const msgEl = document.getElementById('submitTimeoutMsg');
@@ -1462,6 +1480,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     if(submissionTimedOut) return;
     submitBtn.disabled = false;
     submitBtn.textContent = oldText;
+    showSubmitOverlay(false);
     form.dataset.submitting = '';
     // DIAMOND LOADING: Distinguish network errors from server errors
     const isNetworkErr = err instanceof TypeError || (err.message && err.message.toLowerCase().includes('fetch'));
