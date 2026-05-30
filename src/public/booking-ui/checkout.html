@@ -1357,11 +1357,6 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
   }, 15000);
 
   try {
-    const uiSurchargeNote = [
-      state.ageFee > 0 ? `Επασφάλιστρο ηλικίας: ${formatMoney(state.ageFee)}` : '',
-      state.nightFee > 0 ? `Νυχτερινή χρέωση: ${formatMoney(state.nightFee)}` : ''
-    ].filter(Boolean).join(' | ');
-
     const comments = (fd.get('comments') || '').toString().trim();
     const originCity = (fd.get('originCity') || '').toString().trim();
     const residenceCity = (fd.get('city') || '').toString().trim();
@@ -1383,7 +1378,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       flightNumber: (fd.get('flightNumber') || '').toString().trim(),
       dropoffInfo: (fd.get('dropoffInfo') || '').toString().trim(),
       originCity,
-      customerComments: [comments, uiSurchargeNote].filter(Boolean).join(' | '),
+      customerComments: comments,
       customerData: {
         fullName,
         email,

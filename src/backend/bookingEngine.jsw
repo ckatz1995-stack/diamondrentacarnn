@@ -536,7 +536,10 @@ export async function createBooking(data) {
         const fleetCount = await getActiveFleetCountByCategoryKeys(fleetCategoryKeys);
         const overlaps = await countOverlappingBookingsByCategoryKeys(fleetCategoryKeys, pickup, dropoff, null);
 
-        if (fleetCount > 0 && overlaps >= fleetCount && !allowOverbooking) {
+        // When fleet is not configured (fleetCount=0) fall back to capacity=1 so
+        // a second overlapping booking is still blocked even without FleetNew records.
+        const effectiveCapacity = fleetCount > 0 ? fleetCount : 1;
+        if (!allowOverbooking && overlaps >= effectiveCapacity) {
             return { success: false, message: "Δεν υπάρχει διαθεσιμότητα για τις συγκεκριμένες ημερομηνίες/ώρες." };
         }
 
@@ -690,6 +693,7 @@ vehicleCategorySpecs: mapVehicleCategoryCatalogItem(vehicle).specs,
             basePriceSource: String(dynamicPricing?.source || 'vehicleBasePrice'),
             pricingSeasonKey: String(dynamicPricing?.season?.key || ''),
             pricingSeasonLabel: String(dynamicPricing?.season?.label || ''),
+            crossSeasonPricing: dynamicPricing?.crossSeason === true,
             pricingRuleKey: String(dynamicPricing?.rule?.key || ''),
             pricingRuleLabel: String(dynamicPricing?.rule?.label || ''),
             insuranceExtraPerDay,
