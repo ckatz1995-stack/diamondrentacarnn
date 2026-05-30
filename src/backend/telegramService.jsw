@@ -1,10 +1,10 @@
 import { fetch } from 'wix-fetch';
 import { getSecret } from 'wix-secrets-backend';
 
-// Chat IDs per notification channel
-const CHAT_MAIN   = '1578329343'; // new bookings + reviews
-const CHAT_EDITS  = '8729284353'; // booking edits
-const CHAT_CANCEL = '8917515578'; // cancellations
+// Chat IDs per notification channel — all bots deliver to the same recipient
+const CHAT_MAIN   = '1578329343';
+const CHAT_EDITS  = '1578329343';
+const CHAT_CANCEL = '1578329343';
 
 function formatDT(value) {
   if (!value) return '—';
