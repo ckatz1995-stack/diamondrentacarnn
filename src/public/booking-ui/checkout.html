@@ -454,8 +454,15 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .bp-step.active .bp-label{color:#fff;font-weight:900}
 .bp-connector.done{background:rgba(255,255,255,.38)}
 @media(max-width:400px){.bp-label{display:none}.bp-connector{min-width:12px}}
+.no-data-banner{display:none;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.28);border-radius:12px;padding:16px 20px;color:#b83c2e;font-size:14px;font-weight:700;text-align:center;margin:16px 16px 0}
+.no-data-banner.visible{display:block}
+.no-data-banner a{color:#b83c2e;font-weight:900}
 </style>
 <div class="booking-progress"><div class="bp-inner"><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Αναζήτηση</span></div><div class="bp-connector done"></div><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Οχήματα</span></div><div class="bp-connector done"></div><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Extras</span></div><div class="bp-connector done"></div><div class="bp-step active"><div class="bp-dot">4</div><span class="bp-label">Ολοκλήρωση</span></div></div></div>
+
+<div class="no-data-banner" id="noDataBanner">
+  Παρακαλώ επιλέξτε πρώτα ένα <a href="/categories">όχημα</a> για να συνεχίσετε με την κράτησή σας.
+</div>
 
 <div class="page">
   <section class="summary-shell">
@@ -1927,6 +1934,24 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
       btn.setAttribute('aria-expanded','false');
     });
   });
+})();
+
+// DIAMOND LOADING: No-data guard — require vehicle selection before showing checkout form
+(function(){
+  try{
+    var qs = new URLSearchParams(location.search);
+    if(qs.get('vehicle') || qs.get('vehicleId')) return;
+    var stored = null;
+    try{ var r1 = sessionStorage.getItem('diamond-options'); stored = r1 ? JSON.parse(r1) : null; }catch(_){}
+    if(!stored) try{ var r2 = localStorage.getItem('diamond-options'); stored = r2 ? JSON.parse(r2) : null; }catch(_){}
+    if(stored && (stored.vehicleId || (stored.vehicle && stored.vehicle.id))) return;
+    var banner = document.getElementById('noDataBanner');
+    if(banner) banner.classList.add('visible');
+    var form = document.getElementById('checkoutForm');
+    if(form) form.style.display = 'none';
+    var shell = document.querySelector('.summary-shell');
+    if(shell) shell.style.display = 'none';
+  }catch(_){}
 })();
 
 </script></body></html>
