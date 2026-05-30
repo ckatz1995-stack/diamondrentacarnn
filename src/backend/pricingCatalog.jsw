@@ -389,11 +389,21 @@ export function resolveDynamicPricingRate({ categoryCode = '', vehicleCategoryId
       totalCost += dayRule ? toNumber(dayRule.pricePerDay, fallbackPricePerDay) : toNumber(fallbackPricePerDay, 0);
     }
     if (crossSeason) pricePerDay = Math.round(totalCost / days * 100) / 100;
+    if (crossSeason) {
+      return {
+        pricePerDay,
+        source: 'dynamicRule',
+        crossSeason: true,
+        season: primarySeason ? { key: primarySeason.key, label: primarySeason.label, startDate: primarySeason.startDate, endDate: primarySeason.endDate } : null,
+        rule: primaryRule ? { key: primaryRule.key, label: primaryRule.label, minDays: primaryRule.minDays, maxDays: primaryRule.maxDays, seasonKey: primaryRule.seasonKey, categoryCode: primaryRule.categoryCode || code || '', pricePerDay: toNumber(primaryRule.pricePerDay, 0) } : null
+      };
+    }
   }
 
   return {
     pricePerDay,
     source: primaryRule ? 'dynamicRule' : 'vehicleBasePrice',
+    crossSeason: false,
     season: primarySeason ? { key: primarySeason.key, label: primarySeason.label, startDate: primarySeason.startDate, endDate: primarySeason.endDate } : null,
     rule: primaryRule ? { key: primaryRule.key, label: primaryRule.label, minDays: primaryRule.minDays, maxDays: primaryRule.maxDays, seasonKey: primaryRule.seasonKey, categoryCode: primaryRule.categoryCode || code || '', pricePerDay: toNumber(primaryRule.pricePerDay, 0) } : null
   };

@@ -1382,6 +1382,7 @@ async function fetchFleetModels(categoryCode, vehicleId){
 
     let _quoteTimer = null;
     let _localTotalFallback = null;
+    let lastServerQuote = null;
     function scheduleServerQuote(){
       if(_quoteTimer) clearTimeout(_quoteTimer);
       _quoteTimer = setTimeout(callServerQuote, 0);
@@ -1421,6 +1422,7 @@ async function fetchFleetModels(categoryCode, vehicleId){
       }
     }
     function applyServerQuote(q){
+      lastServerQuote = q;
       const days = diffDays(state.pickup, state.dropoff);
       const dEl = document.getElementById('summaryDays');
       if(dEl) dEl.textContent = q.billableDays || days;
@@ -1664,10 +1666,10 @@ async function loadVehicle(){
           pricePerDay: Number(insuranceInput?.value || 0)
         },
         extras,
-        ageFee: ageFeeFor(state.age),
-        nightFee: nightFeeFor(state.pickup, 'nightPickup') + nightFeeFor(state.dropoff, 'nightDropoff'),
-        locationFee: Number((locationFeeFor(state.pickupLocation, 'pickup') + locationFeeFor(state.dropoffLocation, 'dropoff')).toFixed(2)),
-        basePricePerDay: resolveDynamicDailyPrice(vehicle, days),
+        ageFee: lastServerQuote ? Number(lastServerQuote.ageFee || 0) : ageFeeFor(state.age),
+        nightFee: lastServerQuote ? Number(lastServerQuote.nightFee || 0) : (nightFeeFor(state.pickup, 'nightPickup') + nightFeeFor(state.dropoff, 'nightDropoff')),
+        locationFee: lastServerQuote ? Number(lastServerQuote.locationFee || 0) : Number((locationFeeFor(state.pickupLocation, 'pickup') + locationFeeFor(state.dropoffLocation, 'dropoff')).toFixed(2)),
+        basePricePerDay: lastServerQuote ? Number(lastServerQuote.basePricePerDay || 0) : resolveDynamicDailyPrice(vehicle, days),
         vatRate: vatRateDecimal()
       };
       for(const store of [sessionStorage, localStorage]){
@@ -1683,7 +1685,7 @@ async function loadVehicle(){
       const insuranceTotal = payload.insurance.pricePerDay * days;
       const extrasTotal = payload.extras.reduce((sum, x) => sum + ((x.mode === 'perBooking') ? Number(x.price || x.pricePerDay || 0) : Number(x.price || x.pricePerDay || 0) * days), 0);
       const baseCost = Number((Number(payload.basePricePerDay || resolveDynamicDailyPrice(vehicle, days)) * days).toFixed(2));
-      const total = baseCost + insuranceTotal + extrasTotal + Number(payload.ageFee || 0) + Number(payload.nightFee || 0) + Number(payload.locationFee || 0);
+      const total = lastServerQuote ? Number(lastServerQuote.totalPrice || 0) : baseCost + insuranceTotal + extrasTotal + Number(payload.ageFee || 0) + Number(payload.nightFee || 0) + Number(payload.locationFee || 0);
 
       // DIAMOND STATE: Save selected insurance, extras, totals to BookingState before checkout
       if(window.BookingState){
