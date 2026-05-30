@@ -156,6 +156,8 @@
     .st-Pending{background:rgba(180,138,79,.12);border-color:rgba(180,138,79,.24);color:#6c522e}
     .st-Confirmed{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22);color:#047857}
     .st-Canceled{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#b91c1c}
+    .st-Hold{background:rgba(37,99,235,.10);border-color:rgba(37,99,235,.22);color:#1d4ed8}
+    .st-Escalated{background:rgba(124,58,237,.10);border-color:rgba(124,58,237,.22);color:#6d28d9}
     .miniBar{display:none;align-items:center;justify-content:space-between;gap:8px;padding:0 10px 8px 10px}
     .row.selected .miniBar{display:flex}
     .miniMeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
@@ -1079,8 +1081,8 @@
   const sumPendingEl = document.getElementById('sumPending');
   const sumUnassignedEl = document.getElementById('sumUnassigned');
 
-  const FILTERS = ['All','Pending','Confirmed','Canceled'];
-  const FILTER_LABELS = { All:'Όλα', Pending:'Σε εκκρεμότητα', Confirmed:'Επιβεβαιωμένες', Canceled:'Ακυρωμένες' };
+  const FILTERS = ['All','Pending','Hold','Escalated','Confirmed','Canceled'];
+  const FILTER_LABELS = { All:'Όλα', Pending:'Σε εκκρεμότητα', Hold:'Hold', Escalated:'Escalated', Confirmed:'Επιβεβαιωμένες', Canceled:'Ακυρωμένες' };
   const FOCUS_DEFS = [
     { key:'all', label:'Όλα' },
     { key:'pending', label:'Pending' },
@@ -1138,14 +1140,16 @@
     if (!s) return 'Pending';
     if (s === 'confirmed' || s === 'επιβεβαίωσηed' || s === 'επιβεβαιωμενη' || s === 'επιβεβαιωμένη' || s.includes('confirm')) return 'Confirmed';
     if (s === 'canceled' || s === 'cancelled' || s === 'ακύρωσηed' || s === 'ακυρωσηed' || s === 'ακυρωμενη' || s === 'ακυρωμένη' || s.includes('cancel')) return 'Canceled';
+    if (s === 'hold' || s.includes('hold')) return 'Hold';
+    if (s === 'escalated' || s.includes('escalat')) return 'Escalated';
     return 'Pending';
   }
-  function statusLabel(st){ const s = normalizeStatusValue(st); return s === 'Confirmed' ? 'Επιβεβαιωμένη' : (s === 'Canceled' ? 'Ακυρωμένη' : 'Σε εκκρεμότητα'); }
+  function statusLabel(st){ const s = normalizeStatusValue(st); return s === 'Confirmed' ? 'Επιβεβαιωμένη' : (s === 'Canceled' ? 'Ακυρωμένη' : (s === 'Hold' ? 'Hold' : (s === 'Escalated' ? 'Escalated' : 'Σε εκκρεμότητα'))); }
   function setStatus(t){ statusEl.textContent = t || ''; reportHeight(); }
   function fmtDT(v){ const d = new Date(v); if (isNaN(d.getTime())) return '—'; return d.toLocaleString('el-GR',{ year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false }); }
   function shortDT(v){ const d = new Date(v); if (isNaN(d.getTime())) return '—'; return d.toLocaleString('el-GR',{ day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false }); }
   function eur(v){ const n = Number(v||0); return `${n.toLocaleString('el-GR',{ minimumFractionDigits:2, maximumFractionDigits:2 })}€`; }
-  function badgeClass(st){ const s = normalizeStatusValue(st); return s === 'Confirmed' ? 'st-Confirmed' : (s === 'Canceled' ? 'st-Canceled' : 'st-Pending'); }
+  function badgeClass(st){ const s = normalizeStatusValue(st); return s === 'Confirmed' ? 'st-Confirmed' : (s === 'Canceled' ? 'st-Canceled' : (s === 'Hold' ? 'st-Hold' : (s === 'Escalated' ? 'st-Escalated' : 'st-Pending'))); }
   function joinParts(parts){ return parts.filter(Boolean).join(' • '); }
   function reportHeight(extra=0){ const h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,document.body.offsetHeight); postToWix({ type:'resizeShell', height:h+12+Number(extra||0) }); }
   function toYMD(value){ const d = value instanceof Date ? value : new Date(value); if (isNaN(d.getTime())) return ''; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -1233,7 +1237,7 @@
   function focusCount(key){ const rows = Array.isArray(allItems) ? allItems : []; if (key === 'pending') return rows.filter((it)=> normalizeStatusValue(it.status) === 'Pending').length; if (key === 'unassigned') return rows.filter((it)=> !hasAssignedVehicle(it)).length; if (key === 'noContact') return rows.filter((it)=> !hasContactInfo(it)).length; if (key === 'airport') return rows.filter((it)=> isAirportRow(it)).length; if (key === 'travelDocs') return rows.filter((it)=> hasTravelDocsIssue(it)).length; if (key === 'today') return rows.filter((it)=> startsTodayRow(it)).length; if (key === 'recent') return rows.filter((it)=> createdWithinHours(it.createdAt, 24)).length; return rows.length; }
   function visibleCount(predicate){ const rows = Array.isArray(viewItems) ? viewItems : []; return rows.filter((it)=> predicate(it)).length; }
   function ageLabel(value){ const dt = new Date(value); if (isNaN(dt.getTime())) return '—'; const diff = Math.max(0, Date.now() - dt.getTime()); const hours = Math.floor(diff / 3600000); if (hours < 1) return '< 1h'; if (hours < 24) return `${hours}h`; const days = Math.floor(hours / 24); return `${days}d`; }
-  function buildReadinessChips(row){ const items = []; items.push(hasContactInfo(row) ? ['Contact OK','ok'] : ['No contact','danger']); items.push(hasAssignedVehicle(row) ? ['Vehicle assigned','ok'] : ['No vehicle','danger']); items.push(isAirportRow(row) ? ['Airport','warn'] : ['City / Local','']); items.push(hasTravelDocsIssue(row) ? ['Travel docs pending','warn'] : ((hasFlightInfo(row) || hasVoucherInfo(row)) ? ['Travel docs OK','ok'] : ['Travel docs —',''])); items.push(normalizeStatusValue(row.status) === 'Confirmed' ? ['Confirmed','ok'] : ['Pending','warn']); items.push(startsTodayRow(row) ? ['Pickup today','warn'] : [`Created ${ageLabel(row.createdAt)}`,'']); return items.map(([label, cls]) => `<span class="readinessChip${cls ? ' ' + cls : ''}">${esc(label)}</span>`).join(''); }
+  function buildReadinessChips(row){ const items = []; items.push(hasContactInfo(row) ? ['Contact OK','ok'] : ['No contact','danger']); items.push(hasAssignedVehicle(row) ? ['Vehicle assigned','ok'] : ['No vehicle','danger']); items.push(isAirportRow(row) ? ['Airport','warn'] : ['City / Local','']); items.push(hasTravelDocsIssue(row) ? ['Travel docs pending','warn'] : ((hasFlightInfo(row) || hasVoucherInfo(row)) ? ['Travel docs OK','ok'] : ['Travel docs —',''])); items.push(normalizeStatusValue(row.status) === 'Confirmed' ? ['Confirmed','ok'] : (normalizeStatusValue(row.status) === 'Hold' ? ['Hold',''] : (normalizeStatusValue(row.status) === 'Escalated' ? ['Escalated','warn'] : ['Pending','warn']))); items.push(startsTodayRow(row) ? ['Pickup today','warn'] : [`Created ${ageLabel(row.createdAt)}`,'']); return items.map(([label, cls]) => `<span class="readinessChip${cls ? ' ' + cls : ''}">${esc(label)}</span>`).join(''); }
   function modeLabel(){ return boardMode === 'followup' ? 'Follow-up desk' : (boardMode === 'pickups72' ? 'Pre-checkins 72h' : 'Όλο το dataset'); }
   function modeMatches(it){
     if (boardMode === 'followup') return normalizeStatusValue(it.status) === 'Pending' || !hasAssignedVehicle(it) || !hasContactInfo(it) || hasTravelDocsIssue(it) || createdWithinHours(it.createdAt, 24) || startsTodayRow(it) || !!it.overdue;
