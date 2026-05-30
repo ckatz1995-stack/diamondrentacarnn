@@ -75,6 +75,8 @@ button:hover,.btn:hover,.header-phone:hover{transform:translateY(-1px)}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#5e4e31;padding-left:4px}
+.field label .req{color:#b83c2e;font-size:10px;margin-left:1px}
+.req-legend{margin:0 0 12px;font-size:11px;color:#8a6a42;font-weight:700}
 .field input,.field textarea{width:100%;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.82);padding:12px;color:#241b11}
 .field input{height:48px}
 .field textarea{min-height:96px;resize:vertical}
@@ -510,15 +512,16 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     <section class="section">
       <h2 class="section-title">Στοιχεία οδηγού</h2>
       <p class="section-sub">Συμπλήρωσε τα βασικά στοιχεία για να ολοκληρωθεί σωστά η αποστολή του αιτήματος κράτησης.</p>
+      <p class="req-legend"><span class="req">*</span> Υποχρεωτικό πεδίο</p>
       <div class="form-shell">
         <div class="form-card">
           <h3 class="card-title">Στοιχεία επικοινωνίας</h3>
           <div class="grid">
-            <div class="field"><label id="lbl-firstName">Όνομα *</label><input id="firstName" name="firstName" type="text" required autocomplete="given-name"><span class="field-error" id="err-firstName"></span></div>
-            <div class="field"><label id="lbl-lastName">Επώνυμο *</label><input id="lastName" name="lastName" type="text" required autocomplete="family-name"><span class="field-error" id="err-lastName"></span></div>
+            <div class="field"><label id="lbl-firstName">Όνομα <span class="req">*</span></label><input id="firstName" name="firstName" type="text" required autocomplete="given-name"><span class="field-error" id="err-firstName"></span></div>
+            <div class="field"><label id="lbl-lastName">Επώνυμο <span class="req">*</span></label><input id="lastName" name="lastName" type="text" required autocomplete="family-name"><span class="field-error" id="err-lastName"></span></div>
             <div class="field"><label id="lbl-dob">Ημερομηνία γέννησης</label><input id="dob" name="dob" type="date" autocomplete="bday"><span class="field-error" id="err-dob"></span></div>
-            <div class="field"><label id="lbl-phone">Τηλέφωνο *</label><input id="phone" name="phone" type="tel" required autocomplete="tel"><span class="field-error" id="err-phone"></span></div>
-            <div class="field"><label id="lbl-email">Email *</label><input id="email" name="email" type="email" required autocomplete="email"><span class="field-error" id="err-email"></span></div>
+            <div class="field"><label id="lbl-phone">Τηλέφωνο <span class="req">*</span></label><input id="phone" name="phone" type="tel" required autocomplete="tel"><span class="field-error" id="err-phone"></span></div>
+            <div class="field"><label id="lbl-email">Email <span class="req">*</span></label><input id="email" name="email" type="email" required autocomplete="email"><span class="field-error" id="err-email"></span></div>
             <div class="field"><label>Χώρα</label><input name="country" type="text" autocomplete="country-name"></div>
             <div class="field"><label>Διεύθυνση</label><input name="address" type="text" autocomplete="street-address"></div>
             <div class="field"><label>Πόλη κατοικίας</label><input name="city" type="text" autocomplete="address-level2"></div>
@@ -538,7 +541,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
               <label class="choice"><input type="radio" name="docType" value="receipt" checked><div>Απόδειξη<small>Χωρίς επιπλέον εταιρικά στοιχεία.</small></div></label>
               <label class="choice"><input type="radio" name="docType" value="invoice"><div>Τιμολόγιο<small>Εμφάνιση εταιρικών στοιχείων για έκδοση τιμολογίου.</small></div></label>
             </div>
-            <div class="toggle-content" id="invoiceFields"><div class="grid-4"><div class="field"><label id="lbl-companyName">Επωνυμία επιχείρησης *</label><input id="companyName" name="companyName" type="text"><span class="field-error" id="err-companyName"></span></div><div class="field"><label>Επάγγελμα / δραστηριότητα</label><input name="profession" type="text"></div><div class="field"><label id="lbl-vatNumber">Α.Φ.Μ. *</label><input id="vatNumber" name="vatNumber" type="text"><span class="field-error" id="err-vatNumber"></span></div><div class="field"><label>Δ.Ο.Υ.</label><input name="taxOffice" type="text"></div><div class="field"><label>Διεύθυνση / έδρα</label><input name="billingAddress" type="text"></div><div class="field"><label>Πόλη</label><input name="companyCity" type="text"></div><div class="field"><label>Τ.Κ.</label><input name="companyZip" type="text"></div><div class="field"><label>Τηλέφωνο έδρας</label><input name="companyPhone" type="text"></div><div class="field"><label>Email εταιρίας</label><input name="companyEmail" type="email"></div></div></div>
+            <div class="toggle-content" id="invoiceFields"><div class="grid-4"><div class="field"><label id="lbl-companyName">Επωνυμία επιχείρησης <span class="req">*</span></label><input id="companyName" name="companyName" type="text"><span class="field-error" id="err-companyName"></span></div><div class="field"><label>Επάγγελμα / δραστηριότητα</label><input name="profession" type="text"></div><div class="field"><label id="lbl-vatNumber">Α.Φ.Μ. <span class="req">*</span></label><input id="vatNumber" name="vatNumber" type="text"><span class="field-error" id="err-vatNumber"></span></div><div class="field"><label>Δ.Ο.Υ.</label><input name="taxOffice" type="text"></div><div class="field"><label>Διεύθυνση / έδρα</label><input name="billingAddress" type="text"></div><div class="field"><label>Πόλη</label><input name="companyCity" type="text"></div><div class="field"><label>Τ.Κ.</label><input name="companyZip" type="text"></div><div class="field"><label>Τηλέφωνο έδρας</label><input name="companyPhone" type="text"></div><div class="field"><label>Email εταιρίας</label><input name="companyEmail" type="email"></div></div></div>
           </div>
           <div class="helper-note">Η τελική ανάλυση παραμένει ορατή πάνω στη σελίδα ώστε να γνωρίζει ο πελάτης ακριβώς τι αποστέλλει πριν ολοκληρώσει το αίτημα.</div>
           <label class="check-row"><input type="checkbox" id="termsCheck" required><span>Έχω διαβάσει και αποδέχομαι τους όρους, τις προϋποθέσεις και την πολιτική απορρήτου.</span></label><span class="field-error" id="err-terms"></span>
