@@ -734,6 +734,7 @@ let embeddedCategoryItem = null;
 let pricingCatalog = safeRead(PRICING_CATALOG_STORAGE_KEY) || null;
 let pendingBookingSubmit = null;
 let lastServerQuote = null;
+let _localGrandTotalFallback = null;
 
 function getBusinessSettings(){
   return (pricingCatalog && pricingCatalog.businessSettings) ? pricingCatalog.businessSettings : {};
@@ -1101,7 +1102,8 @@ function renderVehicle(v){
   if (insuranceRow) insuranceRow.hidden = !(totals.insuranceCost > 0);
   const extrasRow = document.getElementById('extrasRow');
   if (extrasRow) extrasRow.hidden = !(totals.extrasCost > 0);
-  document.getElementById('grandTotal').textContent = formatMoney(grandTotal);
+  _localGrandTotalFallback = grandTotal;
+  document.getElementById('grandTotal').textContent = '—';
 
   const ageRow = document.getElementById('ageFeeRow');
   if (totals.ageFee > 0) {
@@ -1153,7 +1155,11 @@ async function callServerQuote(){
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if(!data?.success) return;
+    if(!data?.success){
+      const el = document.getElementById('grandTotal');
+      if(el && el.textContent === '—' && _localGrandTotalFallback !== null) el.textContent = formatMoney(_localGrandTotalFallback);
+      return;
+    }
     const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
     const hide = (id, hidden) => { const el = document.getElementById(id); if(el) el.hidden = hidden; };
     set('baseCost', formatMoney(data.baseCost));
@@ -1170,7 +1176,10 @@ async function callServerQuote(){
     set('grandTotal', formatMoney(data.totalPrice));
     set('topPricePerDay', formatMoney(data.basePricePerDay || 0));
     lastServerQuote = data;
-  }catch(e){}
+  }catch(e){
+    const el = document.getElementById('grandTotal');
+    if(el && el.textContent === '—' && _localGrandTotalFallback !== null) el.textContent = formatMoney(_localGrandTotalFallback);
+  }
 }
 
 async function loadVehicle(){
