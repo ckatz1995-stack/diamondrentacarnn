@@ -652,6 +652,10 @@ html,body{overflow-x:hidden!important}
             <div class="side-label">Διάστημα ενοικίασης</div>
             <div class="date-text" id="dateRangeText">10/03/2026, 23:00<br>έως<br>18/03/2026, 06:00</div>
             <div class="days-chip"><span id="daysText">8</span> ημέρες</div>
+            <div style="margin-top:4px;display:grid;gap:6px">
+              <div id="editSearchSummary" style="font-size:12px;font-weight:800;color:#5b4829;background:rgba(255,255,255,.42);border:1px solid rgba(80,56,22,.10);border-radius:10px;padding:7px 10px;line-height:1.5;display:none"></div>
+              <a href="javascript:history.back()" style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:800;color:#5b4829;text-decoration:none;background:rgba(255,255,255,.55);border:1px solid rgba(80,56,22,.12);border-radius:12px;padding:9px 12px">✏️ Αλλαγή αναζήτησης</a>
+            </div>
           </div>
         </div>
       </div>
@@ -686,6 +690,42 @@ html,body{overflow-x:hidden!important}
             <h3 class="section-title">Ασφάλειες</h3>
             <a class="insurance-link" href="#" target="_blank" rel="noopener" onclick="event.preventDefault();document.getElementById('insuranceLink').click();">Λεπτομέρειες</a>
           </div>
+<style>
+.ins-compare{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.ins-col{position:relative;display:flex;flex-direction:column;gap:7px;padding:14px 12px;border-radius:18px;border:2px solid rgba(80,56,22,.12);background:rgba(255,255,255,.42);cursor:pointer;text-align:left;font:inherit;transition:border-color .15s,background .15s;width:100%}
+.ins-col:hover{border-color:rgba(63,116,138,.35);background:rgba(255,255,255,.65)}
+.ins-col.is-active{border-color:rgba(231,191,105,.60)!important;background:linear-gradient(160deg,rgba(26,50,60,.94),rgba(20,40,48,.98))!important;color:#fff}
+.ins-col.is-active .ins-feats li{color:rgba(255,255,255,.80)}
+.ins-col.is-active .ins-p{color:#f6e19f}
+.ins-col.is-active .ins-badge{background:rgba(231,191,105,.20);border-color:rgba(231,191,105,.40);color:#f6e19f}
+.ins-rec{border-color:rgba(63,116,138,.28)!important}
+.ins-badge{display:inline-block;background:rgba(231,191,105,.20);border:1px solid rgba(231,191,105,.38);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:900;color:#8a6a28;letter-spacing:.04em;margin-bottom:2px}
+.ins-name{font-size:17px;font-weight:950;letter-spacing:-.01em}
+.ins-p{font-size:21px;font-weight:950;letter-spacing:-.03em;color:#2d6072}
+.ins-p small{font-size:11px;font-weight:800;opacity:.72;margin-left:2px}
+.ins-feats{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:4px}
+.ins-feats li{font-size:11.5px;font-weight:700;color:#5b4829}
+@media(max-width:860px){.ins-compare{grid-template-columns:1fr}}
+@media(max-width:860px){.ins-col{flex-direction:row;align-items:center;gap:14px;flex-wrap:wrap}.ins-feats{display:none}}
+</style>
+<div class="ins-compare">
+  <button class="ins-col" data-pick="cdw" type="button">
+    <span class="ins-name">CDW</span>
+    <span class="ins-p">0€<small>/ημέρα</small></span>
+    <ul class="ins-feats"><li>✓ Βασική κάλυψη ζημιών</li><li>✓ Κλοπή</li><li>— Franchise ισχύει</li></ul>
+  </button>
+  <button class="ins-col ins-rec" data-pick="scdw" type="button">
+    <span class="ins-badge">⭐ Προτεινόμενο</span>
+    <span class="ins-name">SCDW</span>
+    <span class="ins-p">+12€<small>/ημέρα</small></span>
+    <ul class="ins-feats"><li>✓ Μειωμένη ευθύνη</li><li>✓ Κλοπή</li><li>✓ Μικρότερο franchise</li></ul>
+  </button>
+  <button class="ins-col" data-pick="full" type="button">
+    <span class="ins-name">FULL</span>
+    <span class="ins-p">+20€<small>/ημέρα</small></span>
+    <ul class="ins-feats"><li>✓ Πλήρης κάλυψη</li><li>✓ Κλοπή</li><li>✓ Μηδενικό franchise</li></ul>
+  </button>
+</div>
           <div class="insurance-list" id="insuranceList">
             <label class="insurance-item active">
               <input type="radio" name="insurance" value="0" data-key="cdw" data-label="CDW" checked>
@@ -2083,6 +2123,31 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
 })();
 /* ===== END MEMBER PORTAL AUTH ===== */
 
+(function(){
+  var cols=document.querySelectorAll('.ins-col[data-pick]');
+  function syncActive(){var checked=document.querySelector('input[name="insurance"]:checked');var key=checked?checked.getAttribute('data-key'):'';cols.forEach(function(c){c.classList.toggle('is-active',c.getAttribute('data-pick')===key);});}
+  cols.forEach(function(col){col.addEventListener('click',function(){var key=col.getAttribute('data-pick');var radio=document.querySelector('input[name="insurance"][data-key="'+key+'"]');if(radio){radio.checked=true;radio.dispatchEvent(new Event('change',{bubbles:true}));}syncActive();});});
+  document.querySelectorAll('input[name="insurance"]').forEach(function(r){r.addEventListener('change',syncActive);});
+  syncActive();
+})();
+(function(){
+  try{
+    var el=document.getElementById('editSearchSummary');
+    if(!el||!window.BookingState) return;
+    var s=BookingState.getAll();
+    var pl=s.pickupLocation||s.pickup_location||'';
+    var dl=s.dropoffLocation||s.dropoff_location||'';
+    var pu=s.pickup||s.pickupDate||'';
+    var dr=s.dropoff||s.dropoffDate||'';
+    function fmtDt(v){try{if(!v)return '';var d=new Date(v);if(isNaN(d))return String(v);return d.toLocaleDateString('el-GR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(_){return String(v);}}
+    var lines=[];
+    if(pl)lines.push('📍 '+pl);
+    if(dl&&dl!==pl)lines.push('🏁 '+dl);
+    if(pu)lines.push('↑ '+fmtDt(pu));
+    if(dr)lines.push('↓ '+fmtDt(dr));
+    if(lines.length){el.innerHTML=lines.join('<br>');el.style.display='block';}
+  }catch(_){}
+})();
 </script>
 </body>
 </html>
