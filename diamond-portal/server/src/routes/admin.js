@@ -9,7 +9,7 @@ import { LoyaltyTransaction } from '../models/LoyaltyTransaction.js';
 import { requireAdmin } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { awardPoints, computeTier, updateTierFromRentals } from '../services/loyaltyService.js';
-import { sendSupportReply } from '../services/emailService.js';
+import { sendSupportReply, sendBookingConfirmation } from '../services/emailService.js';
 import { createNotification } from '../services/notificationService.js';
 import { logger } from '../utils/logger.js';
 
@@ -205,6 +205,20 @@ router.patch('/bookings/:id', validate(editBookingSchema), async (req, res, next
     const prevStatus = booking.status;
     Object.assign(booking, req.body);
     await booking.save();
+
+    // Notify member when staff confirms booking
+    if (prevStatus !== 'Confirmed' && booking.status === 'Confirmed') {
+      const member = await User.findById(booking.memberId).lean();
+      if (member) {
+        await createNotification(
+          booking.memberId,
+          'booking_confirmed',
+          'Κράτηση Επιβεβαιώθηκε',
+          `Η κράτηση #${booking.bookingNumber} επιβεβαιώθηκε. Μπορείτε να παραλάβετε το όχημά σας σύμφωνα με τα στοιχεία της κράτησης.`
+        );
+        sendBookingConfirmation(member, booking).catch(() => {});
+      }
+    }
 
     // If booking just completed, update member stats
     if (prevStatus !== 'Completed' && booking.status === 'Completed') {
