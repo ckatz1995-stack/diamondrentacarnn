@@ -1,10 +1,12 @@
 import wixLocation from 'wix-location';
 import { getPublicAuthHealth } from 'backend/staffAccess.jsw';
+import { getHomepageKpis } from 'backend/bookingsBoard';
 import { buildUserContext, clearSessionToken, logoutBackroom, readBackroomSession } from 'public/backroomAuth';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 import { APP_ROUTES as ROUTES } from 'public/appRoutes';
 import { collapseHtmlSiblings } from 'public/pageVisibility';
 const HOME_IDS = ['#homeHtml', '#bpage1'];
+let sessionToken = '';
 const MIN_HEIGHT = 720;
 const MAX_HEIGHT = 3200;
 
@@ -22,6 +24,7 @@ $w.onReady(async function () {
   if (!initialState?.authenticated) {
     return redirectToLogin();
   }
+  sessionToken = initialState.sessionToken || '';
 
   html.onMessage(async (event) => {
     const origin = String(event?.origin || '').trim();
@@ -57,6 +60,11 @@ $w.onReady(async function () {
       return;
     }
 
+    if (msg.type === 'requestKpiData') {
+      await loadKpis();
+      return;
+    }
+
     if (msg.type === 'menuAction') {
       const action = String(msg.action || '');
       if (action === 'reload') return wixLocation.to(ROUTES.home);
@@ -69,6 +77,7 @@ $w.onReady(async function () {
   });
 
   await refreshAuthState();
+  await loadKpis();
 });
 
 function redirectToLogin() {
@@ -76,8 +85,19 @@ function redirectToLogin() {
   wixLocation.to(`${ROUTES.login}?next=${encodeURIComponent(nextPath)}`);
 }
 
+async function loadKpis() {
+  if (!sessionToken) return;
+  try {
+    const res = await getHomepageKpis({ authToken: sessionToken });
+    post({ type: 'kpiData', pending: res.pending || 0, todayPickups: res.todayPickups || 0, todayDropoffs: res.todayDropoffs || 0 });
+  } catch (error) {
+    logSuppressed('loadKpis failed', error);
+  }
+}
+
 async function refreshAuthState(message = '') {
   const state = await readBackroomSession({ touch: true });
+  if (state?.sessionToken) sessionToken = state.sessionToken;
   const denied = String((wixLocation.query || {}).denied || '') === '1';
   const nextPath = String((wixLocation.query || {}).next || '').trim();
   const authHealth = await getPublicAuthHealth().catch(() => null);

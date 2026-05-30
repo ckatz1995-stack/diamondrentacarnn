@@ -890,6 +890,31 @@
     .columnsGhostBtn{border-radius:999px}
     .columnsSearchInput{border-radius:11px}
 
+    /* New Booking modal */
+    .nbOverlay{position:fixed;inset:0;background:rgba(15,23,42,.46);backdrop-filter:blur(3px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px}
+    .nbOverlay.hidden{display:none!important}
+    .nbModal{width:100%;max-width:560px;max-height:90vh;overflow-y:auto;background:#fff;border-radius:22px;box-shadow:0 28px 60px rgba(15,23,42,.22);display:flex;flex-direction:column}
+    .nbHeader{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid rgba(15,23,42,.07)}
+    .nbTitle{font:1000 15px/1 system-ui,-apple-system,sans-serif;color:#0f172a}
+    .nbClose{appearance:none;border:1px solid rgba(15,23,42,.10);background:#fff;border-radius:999px;width:28px;height:28px;font-size:12px;cursor:pointer;display:grid;place-items:center;color:#475569;flex-shrink:0}
+    .nbClose:hover{background:#f8fafc}
+    .nbForm{padding:14px 18px 18px;display:grid;gap:10px}
+    .nbRow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .nbRow.full{grid-template-columns:1fr}
+    .nbField{display:grid;gap:4px}
+    .nbLabel{font:900 10px/1 system-ui,-apple-system,sans-serif;color:#6c522e;text-transform:uppercase;letter-spacing:.06em}
+    .nbLabel .nbReq{color:#b91c1c}
+    .nbInput,.nbSelect,.nbTextarea{width:100%;padding:8px 10px;border:1px solid rgba(15,23,42,.12);border-radius:12px;font:800 12px/1.3 system-ui,-apple-system,sans-serif;color:#0f172a;background:#fff;outline:none;box-sizing:border-box}
+    .nbInput:focus,.nbSelect:focus,.nbTextarea:focus{border-color:#8e6d3d;box-shadow:0 0 0 3px rgba(180,138,79,.12)}
+    .nbTextarea{resize:vertical;min-height:52px}
+    .nbError{font:800 10px/1.3 system-ui,-apple-system,sans-serif;color:#b91c1c;display:none}
+    .nbError.show{display:block}
+    .nbFooter{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:10px 18px 16px;border-top:1px solid rgba(15,23,42,.07)}
+    .nbCancelBtn{appearance:none;border:1px solid rgba(15,23,42,.10);background:#fff;color:#475569;border-radius:12px;padding:9px 14px;font:900 11.5px/1 system-ui,-apple-system,sans-serif;cursor:pointer}
+    .nbSubmitBtn{appearance:none;border:0;background:linear-gradient(135deg,#a8844a,#8e6d3d);color:#fff;border-radius:12px;padding:9px 16px;font:900 11.5px/1 system-ui,-apple-system,sans-serif;cursor:pointer;box-shadow:0 10px 22px rgba(108,82,46,.18)}
+    .nbSubmitBtn:disabled{opacity:.55;cursor:not-allowed}
+    @media(max-width:560px){.nbRow{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -952,6 +977,7 @@
         </div>
       </div>
       <div class="controlsRight">
+        <button class="btn btnPrimary" id="newBookingBtn" type="button">+ Νέα Κράτηση</button>
         <button class="btn" id="clear" type="button">Καθαρισμός</button>
         <div class="statusLine" id="status">BOOT…</div>
       </div>
@@ -1834,6 +1860,183 @@
   window.addEventListener('resize', ()=>reportHeight());
   postToWix({ type:'requestUserContext' });
   postToWix({ type:'bookingsReady', startDate: activeRange.startDate, endDate: activeRange.endDate });
+
+  // ── New Booking modal ──
+  (function(){
+    const overlay = document.getElementById('nbOverlay');
+    const form    = document.getElementById('nbForm');
+    const submitBtn = document.getElementById('nbSubmit');
+    const nbErr   = document.getElementById('nbGlobalErr');
+
+    function openModal(){
+      if (!overlay) return;
+      form && form.reset();
+      // default dates to today/tomorrow
+      try {
+        const now = new Date();
+        const pad = n => String(n).padStart(2,'0');
+        const local = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate()+1);
+        const piEl = document.getElementById('nbPickup');
+        const diEl = document.getElementById('nbDropoff');
+        if (piEl) piEl.value = local(now);
+        if (diEl) diEl.value = local(tomorrow);
+      } catch(_){}
+      if (nbErr) { nbErr.textContent=''; nbErr.classList.remove('show'); }
+      overlay.classList.remove('hidden');
+      reportHeight(200);
+    }
+    function closeModal(){
+      if (!overlay) return;
+      overlay.classList.add('hidden');
+      reportHeight();
+    }
+
+    document.getElementById('newBookingBtn')?.addEventListener('click', openModal);
+    document.getElementById('nbClose')?.addEventListener('click', closeModal);
+    document.getElementById('nbCancelBtn')?.addEventListener('click', closeModal);
+    overlay?.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+    form?.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('nbName')?.value.trim() || '';
+      const pickup = document.getElementById('nbPickup')?.value || '';
+      const dropoff = document.getElementById('nbDropoff')?.value || '';
+      if (!name) { showNbErr('Απαιτείται όνομα πελάτη'); return; }
+      if (!pickup) { showNbErr('Απαιτείται ημ/νία παραλαβής'); return; }
+      if (!dropoff) { showNbErr('Απαιτείται ημ/νία επιστροφής'); return; }
+      if (new Date(dropoff) <= new Date(pickup)) { showNbErr('Η επιστροφή πρέπει να είναι μετά την παραλαβή'); return; }
+
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitBtn) submitBtn.textContent = 'Αποθήκευση…';
+
+      postToWix({
+        type: 'createBooking',
+        bookingData: {
+          customerName: name,
+          phone: document.getElementById('nbPhone')?.value.trim() || '',
+          email: document.getElementById('nbEmail')?.value.trim() || '',
+          pickupDateTime: new Date(pickup).toISOString(),
+          dropoffDateTime: new Date(dropoff).toISOString(),
+          pickuppoint: document.getElementById('nbPickupPoint')?.value.trim() || '',
+          dropoffpoint: document.getElementById('nbDropoffPoint')?.value.trim() || '',
+          bookedCategoryCode: document.getElementById('nbCategory')?.value.trim() || '',
+          totalPrice: parseFloat(document.getElementById('nbPrice')?.value || '0') || 0,
+          selectedPackage: document.getElementById('nbPackage')?.value || 'full',
+          driverAgeBand: document.getElementById('nbDriverAge')?.value.trim() || '',
+          internalMemo: document.getElementById('nbMemo')?.value.trim() || '',
+          status: document.getElementById('nbStatus')?.value || 'Pending',
+        }
+      });
+    });
+
+    function showNbErr(msg){ if (nbErr){ nbErr.textContent = msg; nbErr.classList.add('show'); } }
+
+    // listen for result
+    const origListener = window._nbOrigListener;
+    window.addEventListener('message', evt => {
+      if (evt.origin && !isTrustedParentOrigin(evt.origin)) return;
+      const d = evt.data || {};
+      if (d.type === 'bookingCreateResult') {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Δημιουργία'; }
+        if (d.success) {
+          closeModal();
+          setStatus(d.message || 'Κράτηση δημιουργήθηκε');
+        } else {
+          showNbErr(d.message || 'Σφάλμα κατά την αποθήκευση');
+        }
+      }
+    });
+  })();
 </script>
+
+<!-- New Booking Modal -->
+<div id="nbOverlay" class="nbOverlay hidden" role="dialog" aria-modal="true">
+  <div class="nbModal">
+    <div class="nbHeader">
+      <span class="nbTitle">+ Νέα Κράτηση</span>
+      <button class="nbClose" id="nbClose" type="button" aria-label="Κλείσιμο">✕</button>
+    </div>
+    <form id="nbForm" autocomplete="off" novalidate class="nbForm">
+      <div class="nbRow">
+        <div class="nbField">
+          <label class="nbLabel" for="nbName">Όνομα πελάτη <span class="nbReq">*</span></label>
+          <input class="nbInput" id="nbName" type="text" placeholder="π.χ. Γιάννης Παπαδόπουλος" />
+        </div>
+        <div class="nbField">
+          <label class="nbLabel" for="nbPhone">Τηλέφωνο</label>
+          <input class="nbInput" id="nbPhone" type="tel" placeholder="+30 6912 345678" />
+        </div>
+      </div>
+      <div class="nbRow full">
+        <div class="nbField">
+          <label class="nbLabel" for="nbEmail">Email</label>
+          <input class="nbInput" id="nbEmail" type="email" placeholder="customer@email.com" />
+        </div>
+      </div>
+      <div class="nbRow">
+        <div class="nbField">
+          <label class="nbLabel" for="nbPickup">Παραλαβή <span class="nbReq">*</span></label>
+          <input class="nbInput" id="nbPickup" type="datetime-local" />
+        </div>
+        <div class="nbField">
+          <label class="nbLabel" for="nbDropoff">Επιστροφή <span class="nbReq">*</span></label>
+          <input class="nbInput" id="nbDropoff" type="datetime-local" />
+        </div>
+      </div>
+      <div class="nbRow">
+        <div class="nbField">
+          <label class="nbLabel" for="nbPickupPoint">Σημείο παραλαβής</label>
+          <input class="nbInput" id="nbPickupPoint" type="text" placeholder="π.χ. Αεροδρόμιο ΜΑΚ" />
+        </div>
+        <div class="nbField">
+          <label class="nbLabel" for="nbDropoffPoint">Σημείο επιστροφής</label>
+          <input class="nbInput" id="nbDropoffPoint" type="text" placeholder="π.χ. Γραφείο ΘΕΣ" />
+        </div>
+      </div>
+      <div class="nbRow">
+        <div class="nbField">
+          <label class="nbLabel" for="nbCategory">Κατηγορία οχήματος</label>
+          <input class="nbInput" id="nbCategory" type="text" placeholder="π.χ. A, B, C" />
+        </div>
+        <div class="nbField">
+          <label class="nbLabel" for="nbPrice">Συνολικό ποσό (€)</label>
+          <input class="nbInput" id="nbPrice" type="number" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+      <div class="nbRow">
+        <div class="nbField">
+          <label class="nbLabel" for="nbPackage">Πακέτο</label>
+          <select class="nbSelect" id="nbPackage">
+            <option value="full">Full</option>
+            <option value="basic">Basic</option>
+          </select>
+        </div>
+        <div class="nbField">
+          <label class="nbLabel" for="nbDriverAge">Ηλικία οδηγού</label>
+          <input class="nbInput" id="nbDriverAge" type="text" placeholder="π.χ. 25-65" />
+        </div>
+      </div>
+      <div class="nbRow">
+        <div class="nbField">
+          <label class="nbLabel" for="nbStatus">Κατάσταση</label>
+          <select class="nbSelect" id="nbStatus">
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+          </select>
+        </div>
+        <div class="nbField">
+          <label class="nbLabel" for="nbMemo">Σημειώσεις προσωπικού</label>
+          <input class="nbInput" id="nbMemo" type="text" placeholder="Εσωτερική σημείωση…" />
+        </div>
+      </div>
+      <div id="nbGlobalErr" class="nbError"></div>
+    </form>
+    <div class="nbFooter">
+      <button class="nbCancelBtn" id="nbCancelBtn" type="button">Ακύρωση</button>
+      <button class="nbSubmitBtn" id="nbSubmit" type="submit" form="nbForm">Δημιουργία</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
