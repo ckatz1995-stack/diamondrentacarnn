@@ -33,23 +33,46 @@ router.get('/bookings/:id/invoice', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-router.get('/', requireAuth, async (req, res, next) => {
+// Voucher list — all non-canceled bookings that have a booking number
+router.get('/vouchers', requireAuth, async (req, res, next) => {
   try {
     const bookings = await Booking.find({
       memberId: req.user._id,
       status: { $in: ['Confirmed', 'Active', 'Completed'] },
-    }).sort({ pickupDateTime: -1 });
+    }).sort({ pickupDateTime: -1 }).lean();
 
     res.json({
       ok: true,
-      documents: bookings.map(b => ({
+      vouchers: bookings.map(b => ({
+        _id: b._id,
         bookingId: b._id,
         bookingNumber: b.bookingNumber,
-        vehicleName: b.vehicleName,
-        pickupDateTime: b.pickupDateTime,
-        dropoffDateTime: b.dropoffDateTime,
-        totalPrice: b.totalPrice,
+        vehicle: b.vehicleName,
+        date: b.pickupDateTime,
         status: b.status,
+      })),
+    });
+  } catch (err) { next(err); }
+});
+
+// Invoice list — completed bookings only
+router.get('/invoices', requireAuth, async (req, res, next) => {
+  try {
+    const bookings = await Booking.find({
+      memberId: req.user._id,
+      status: 'Completed',
+    }).sort({ dropoffDateTime: -1 }).lean();
+
+    res.json({
+      ok: true,
+      invoices: bookings.map(b => ({
+        _id: b._id,
+        bookingId: b._id,
+        bookingNumber: b.bookingNumber,
+        invoiceNumber: `INV-${b.bookingNumber}`,
+        vehicle: b.vehicleName,
+        date: b.dropoffDateTime || b.updatedAt,
+        totalPrice: b.totalPrice,
       })),
     });
   } catch (err) { next(err); }
