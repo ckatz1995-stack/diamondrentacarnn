@@ -1618,6 +1618,9 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .bp-step.active .bp-label{color:#fff;font-weight:900}
 .bp-connector.done{background:rgba(255,255,255,.38)}
 @media(max-width:400px){.bp-label{display:none}.bp-connector{min-width:12px}}
+.duration-strip{display:flex;justify-content:center;margin:2px 0 6px}
+.duration-chip{background:rgba(63,116,138,.12);border:1.5px solid rgba(63,116,138,.20);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:900;color:#2d6072;transition:background .2s,border-color .2s,color .2s}
+.duration-chip.is-warn{background:rgba(184,60,46,.09);border-color:rgba(184,60,46,.28);color:#b83c2e}
 </style>
 <div class="booking-progress"><div class="bp-inner"><div class="bp-step active"><div class="bp-dot">1</div><span class="bp-label">Αναζήτηση</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">2</div><span class="bp-label">Οχήματα</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">3</div><span class="bp-label">Extras</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">4</div><span class="bp-label">Ολοκλήρωση</span></div></div></div>
 
@@ -1682,6 +1685,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
                 <select id="pickupTime"></select>
               </div>
             </div>
+            <div class="duration-strip"><div id="durationChip" class="duration-chip">—</div></div>
 
             <div class="grid">
               <div class="field">
@@ -2308,6 +2312,26 @@ function syncDropoff(forceDefault=false){
     buildTimeOptions(dropoffTime, minForDropoff, fmtTimeValue(minDropoff));
   }
   if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['dropoffDate','dropoffTime']);
+  updateDurationChip();
+}
+
+function updateDurationChip(){
+  const chip = document.getElementById('durationChip');
+  if (!chip) return;
+  const pickup = normalizeDateTime(document.getElementById('pickupDate'), document.getElementById('pickupTime'));
+  const dropoff = normalizeDateTime(document.getElementById('dropoffDate'), document.getElementById('dropoffTime'));
+  if (!pickup || !dropoff || isNaN(pickup.getTime()) || isNaN(dropoff.getTime())) { chip.textContent='—'; chip.className='duration-chip'; return; }
+  const diffMs = dropoff - pickup;
+  if (diffMs <= 0) { chip.textContent='⚠ Λάθος ημερομηνία'; chip.className='duration-chip is-warn'; return; }
+  const diffH = diffMs / 3600000;
+  const diffD = Math.ceil(diffH / 24);
+  if (diffH < 24) {
+    chip.textContent = '⚠ ' + Math.round(diffH) + 'ω · ελάχιστο 1 ημέρα';
+    chip.className = 'duration-chip is-warn';
+  } else {
+    chip.textContent = diffD + (diffD === 1 ? ' ημέρα' : ' ημέρες');
+    chip.className = 'duration-chip';
+  }
 }
 
 function syncPickupOptions(){
