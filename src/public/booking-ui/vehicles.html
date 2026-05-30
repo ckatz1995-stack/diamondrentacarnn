@@ -1081,6 +1081,8 @@ let _catalogFromApi = false;
 let embeddedContext = null;
 let vehiclesMeta = { displayMode: 'categories', modelsSource: 'fleet' };
 let embeddedVehicleItems = safeRead(VEHICLE_CATEGORIES_STORAGE_KEY, null);
+let vehicleServerQuotes = {};
+let _quotesDebounceTimer = null;
 
 function parseSiteBaseFromUrl(value){
   try {
@@ -1094,6 +1096,48 @@ function currentSiteBase(){
   return parseSiteBaseFromUrl(embeddedContext?.url || embeddedContext?.referrer || document.referrer || location.href) || location.origin;
 }
 function currentApiBase(){ return `${currentSiteBase()}/_functions`; }
+
+function triggerServerQuotes(){
+  if(isEmbedded() && !embeddedContext) return;
+  if(!vehicles || !vehicles.length) return;
+  clearTimeout(_quotesDebounceTimer);
+  _quotesDebounceTimer = setTimeout(scheduleServerQuotes, 80);
+}
+
+async function scheduleServerQuotes(){
+  if(isEmbedded() && !embeddedContext) return;
+  const pickupDate = document.getElementById('pickupDate');
+  const pickupTime = document.getElementById('pickupTime');
+  const dropoffDate = document.getElementById('dropoffDate');
+  const dropoffTime = document.getElementById('dropoffTime');
+  if(!pickupDate || !pickupTime || !dropoffDate || !dropoffTime) return;
+  const pickup = `${pickupDate.value}T${pickupTime.value}:00`;
+  const dropoff = `${dropoffDate.value}T${dropoffTime.value}:00`;
+  if(!pickupDate.value || !dropoffDate.value) return;
+  const ageVal = (document.getElementById('ageGroup') || {}).value || '23-69';
+  const pickupLoc = (document.getElementById('pickupLocation') || {}).value || '';
+  const dropoffLoc = (document.getElementById('dropoffLocation') || {}).value || '';
+  const seen = new Set();
+  const newQuotes = {};
+  await Promise.all((vehicles || []).map(async (v) => {
+    const id = String(v.vehicleCategoryId || v.id || '');
+    if(!id || seen.has(id)) return;
+    seen.add(id);
+    try{
+      const res = await fetch(`${currentApiBase()}/computeQuote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vehicleId: id, categoryId: extractCategoryCode(v.categoryCode || v.label || v.category || ''), category: extractCategoryCode(v.categoryCode || v.label || v.category || ''), pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: 'cdw', selectedExtras: [], driverAge: ageVal, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc })
+      });
+      const data = await res.json();
+      if(data?.success) newQuotes[id] = data;
+    }catch(e){}
+  }));
+  if(Object.keys(newQuotes).length){
+    vehicleServerQuotes = { ...vehicleServerQuotes, ...newQuotes };
+    if(Array.isArray(vehicles) && vehicles.length) render();
+  }
+}
 
 async function fetchRealCatalog(){
   try{
@@ -1356,10 +1400,12 @@ function render(){
   // DIAMOND STATE: Read previously selected category for card highlight
   const bsSelectedCat = (window.BookingState ? BookingState.get('vehicleCategory') : null) || '';
   list.innerHTML = filtered.map(vehicle => {
-    const dailyPrice = resolveDynamicDailyPrice(vehicle, days);
+    const vehicleId = String(vehicle.vehicleCategoryId || vehicle.id || '');
+    const serverQuote = vehicleServerQuotes[vehicleId] || null;
+    const dailyPrice = serverQuote ? Number(serverQuote.basePricePerDay || 0) : resolveDynamicDailyPrice(vehicle, days);
     const baseTotal = Number((dailyPrice * days).toFixed(2));
     const locationExtra = Number((locationFeeFor(document.getElementById('pickupLocation').value, 'pickup') + locationFeeFor(document.getElementById('dropoffLocation').value, 'dropoff')).toFixed(2));
-    const grandTotal = baseTotal + ageExtra + nightExtra + locationExtra;
+    const grandTotal = serverQuote ? Number(serverQuote.totalPrice || 0) : (baseTotal + ageExtra + nightExtra + locationExtra);
     const catCode = extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || '');
     const isSelected = bsSelectedCat && catCode === bsSelectedCat;
     const specs = vehicle.specs || {};
@@ -1454,6 +1500,7 @@ window.addEventListener('message', (event) => {
     if(data.query) applyBookingContext(data.query || {});
     updateState(false);
     fetchRealCatalog();
+    triggerServerQuotes();
     return;
   }
   if(data.type === 'pricing-catalog-data'){
@@ -1480,6 +1527,7 @@ window.addEventListener('message', (event) => {
     syncCategoryOptions(embeddedVehicleItems);
     vehicles = filterVehiclesByCategory(embeddedVehicleItems, categorySelect.value || pendingCategory || category);
     render();
+    triggerServerQuotes();
     return;
   }
   if(data.type === 'vehicles-data-error'){
@@ -1502,6 +1550,7 @@ async function loadVehicles(){
     syncCategoryOptions(embeddedVehicleItems);
     vehicles = filterVehiclesByCategory(embeddedVehicleItems, categorySelect.value || pendingCategory || category);
     render();
+    triggerServerQuotes();
   }catch(err){
     setError(err.message || `Δεν ήταν δυνατή η φόρτωση ${pageObjectLabel()}.`);
   }
@@ -1532,9 +1581,9 @@ function updateState(updateUrl = true){
   }
 }
 sortSelect.addEventListener("change", () => { updateState(); render(); });
-ageGroup.addEventListener('change', () => { updateState(); render(); });
+ageGroup.addEventListener('change', () => { updateState(); render(); triggerServerQuotes(); });
 ['pickupDate','pickupTime','dropoffDate','dropoffTime','pickupLocation','dropoffLocation'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => { updateState(); render(); });
+  document.getElementById(id).addEventListener('change', () => { updateState(); render(); triggerServerQuotes(); });
 });
 categorySelect.addEventListener("change", () => {
   updateState();
