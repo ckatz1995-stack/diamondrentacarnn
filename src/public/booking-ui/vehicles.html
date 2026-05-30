@@ -1424,7 +1424,7 @@ function render(){
                 <p class="vehicle-copy">${escapeHtml(copy)}</p>
               </div>
               <div class="price-box">
-                <span class="amount">${fmtMoney(dailyPrice)}</span>
+                <span class="amount">${serverQuote ? fmtMoney(dailyPrice) : '—'}</span>
                 <span class="sub">ανά ημέρα</span>
               </div>
             </div>
@@ -1441,12 +1441,12 @@ function render(){
         <div class="result-bottom">
           <div class="total-box">
             <div class="total-stack">
-              <div class="total-row"><span class="k">Τιμή / ημέρα</span><span class="v">${fmtMoney(dailyPrice)}</span></div>
+              <div class="total-row"><span class="k">Τιμή / ημέρα</span><span class="v">${serverQuote ? fmtMoney(dailyPrice) : '—'}</span></div>
               <div class="total-row"><span class="k">Ημέρες</span><span class="v">${days}</span></div>
-              ${ageExtra > 0 ? `<div class="total-row"><span class="k">${ageLabel(ageGroup.value)}</span><span class="v">${fmtMoney(ageExtra)}</span></div>` : ''}
-              ${nightRows.map(item => `<div class=\"total-row\"><span class=\"k\">${item.label}</span><span class=\"v\">${fmtMoney(item.amount)}</span></div>`).join('')}
-              ${locationExtra > 0 ? `<div class=\"total-row\"><span class=\"k\">Χρέωση τοποθεσιών</span><span class=\"v\">${fmtMoney(locationExtra)}</span></div>` : ''}
-              <div class=\"total-row grand\"><span class=\"k\">Σύνολο</span><span class=\"v\">${fmtMoney(grandTotal)}</span></div>
+              ${serverQuote && ageExtra > 0 ? `<div class="total-row"><span class="k">${ageLabel(ageGroup.value)}</span><span class="v">${fmtMoney(ageExtra)}</span></div>` : ''}
+              ${serverQuote ? nightRows.map(item => `<div class=\"total-row\"><span class=\"k\">${item.label}</span><span class=\"v\">${fmtMoney(item.amount)}</span></div>`).join('') : ''}
+              ${serverQuote && locationExtra > 0 ? `<div class=\"total-row\"><span class=\"k\">Χρέωση τοποθεσιών</span><span class=\"v\">${fmtMoney(locationExtra)}</span></div>` : ''}
+              <div class=\"total-row grand\"><span class=\"k\">Σύνολο</span><span class=\"v\">${serverQuote ? fmtMoney(grandTotal) : '—'}</span></div>
             </div>
           </div>
           <div class="card-footer"><button class="cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${escapeHtml(selectionButtonLabel())}</button></div>

@@ -1348,11 +1348,9 @@ async function fetchFleetModels(categoryCode, vehicleId){
       document.getElementById('netLine').textContent = formatMoney(net);
       document.getElementById('vatLine').textContent = formatMoney(vat);
       const gtEl = document.getElementById('grandTotal');
-      gtEl.textContent = formatMoney(total);
-      // DIAMOND STATE: Flash grand total on change to signal recalculation
+      _localTotalFallback = total;
+      gtEl.textContent = '—';
       gtEl.classList.remove('diamond-total-flash');
-      void gtEl.offsetWidth;
-      gtEl.classList.add('diamond-total-flash');
 
       const locationRow = document.getElementById('locationRow');
       if(locationTotal > 0){
@@ -1383,9 +1381,10 @@ async function fetchFleetModels(categoryCode, vehicleId){
     }
 
     let _quoteTimer = null;
+    let _localTotalFallback = null;
     function scheduleServerQuote(){
       if(_quoteTimer) clearTimeout(_quoteTimer);
-      _quoteTimer = setTimeout(callServerQuote, 450);
+      _quoteTimer = setTimeout(callServerQuote, 0);
     }
     async function callServerQuote(){
       if(!vehicle || !state.vehicleId) return;
@@ -1410,9 +1409,16 @@ async function fetchFleetModels(categoryCode, vehicleId){
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if(!data?.success) return;
+        if(!data?.success){
+          const gtEl = document.getElementById('grandTotal');
+          if(gtEl && gtEl.textContent === '—' && _localTotalFallback !== null) gtEl.textContent = formatMoney(_localTotalFallback);
+          return;
+        }
         applyServerQuote(data);
-      }catch(e){}
+      }catch(e){
+        const gtEl = document.getElementById('grandTotal');
+        if(gtEl && gtEl.textContent === '—' && _localTotalFallback !== null) gtEl.textContent = formatMoney(_localTotalFallback);
+      }
     }
     function applyServerQuote(q){
       const days = diffDays(state.pickup, state.dropoff);
@@ -1448,7 +1454,12 @@ async function fetchFleetModels(categoryCode, vehicleId){
       const vatEl = document.getElementById('vatLine');
       if(vatEl) vatEl.textContent = formatMoney(vat);
       const gtEl = document.getElementById('grandTotal');
-      if(gtEl) gtEl.textContent = formatMoney(q.totalPrice);
+      if(gtEl){
+        gtEl.textContent = formatMoney(q.totalPrice);
+        gtEl.classList.remove('diamond-total-flash');
+        void gtEl.offsetWidth;
+        gtEl.classList.add('diamond-total-flash');
+      }
     }
 
     function renderFacts(specs){
