@@ -1,4 +1,4 @@
-import { transporter } from '../config/email.js';
+import { sgMail } from '../config/email.js';
 import { env } from '../config/env.js';
 import { logger } from '../utils/logger.js';
 import { formatGreekDate, formatGreekDateTime, formatEUR } from '../utils/greekText.js';
@@ -73,12 +73,7 @@ function wrapEmail(content, title) {
 
 async function sendMail(to, subject, html) {
   try {
-    await transporter.sendMail({
-      from: env.FROM_EMAIL,
-      to,
-      subject,
-      html,
-    });
+    await sgMail.send({ from: env.FROM_EMAIL, to, subject, html });
     logger.info('Email sent', { to, subject });
   } catch (err) {
     logger.error('Email send failed', { to, subject, error: err.message });
