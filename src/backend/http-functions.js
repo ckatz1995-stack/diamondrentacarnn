@@ -3,7 +3,6 @@ import { ok, badRequest, serverError } from "wix-http-functions";
 import { createBooking, computeQuote } from "backend/bookingEngine";
 import { INSURANCE_OPTIONS } from "backend/bookingConfig";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
-import { testAllTelegramBots } from "backend/telegramService";
 function respond(body, fn = ok){ return fn({ headers: {"Content-Type":"application/json","Cache-Control":"no-store","Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET, POST, OPTIONS","Access-Control-Allow-Headers":"Content-Type"}, body }); }
 function readOrigin(request){ const origin = String(request?.headers?.origin || '').trim(); if (origin) return origin; const referer = String(request?.headers?.referer || '').trim(); if (!referer) return ''; try { return new URL(referer).origin; } catch (_) { return ''; } }
 function parseCsv(value){ return String(value || '').split(',').map((item) => item.trim()).filter(Boolean); }
@@ -370,15 +369,5 @@ export function options_pricing_catalog(request){
 
 export function get_ping(request){
   return ok({ headers: {"Content-Type":"application/json","Access-Control-Allow-Origin":"*"}, body: JSON.stringify({ ok: true, ts: Date.now() }) });
-}
-
-// Temporary debug endpoint — remove after verifying Telegram bot chat IDs
-export async function get_testTelegram(request) {
-  try {
-    const result = await testAllTelegramBots();
-    return ok({ headers: { "Content-Type": "application/json" }, body: JSON.stringify(result, null, 2) });
-  } catch (err) {
-    return serverError({ headers: { "Content-Type": "application/json" }, body: JSON.stringify({ error: err.message || String(err) }) });
-  }
 }
 
