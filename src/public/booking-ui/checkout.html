@@ -62,6 +62,9 @@ button:hover,.btn:hover,.header-phone:hover{transform:translateY(-1px)}
 .analysis-line:last-of-type{border-bottom:none}
 .analysis-line.big{margin-top:auto;padding-top:10px;border-top:1px solid rgba(255,255,255,.18);font-size:15px}
 .analysis-line.big strong{font-size:28px;line-height:.95}
+.fee-tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.22);font-size:9px;font-style:normal;cursor:default;flex-shrink:0;position:relative;vertical-align:middle}
+.fee-tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;font-size:11px;font-weight:600;line-height:1.45;padding:7px 10px;border-radius:8px;white-space:normal;width:200px;text-align:left;pointer-events:none;opacity:0;transition:opacity .18s;z-index:20;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.fee-tip:hover::after,.fee-tip:focus::after{opacity:1}
 .section{padding:14px 14px 16px;margin-bottom:16px}
 .section-title{margin:0 0 6px;font-size:22px;line-height:1}
 .section-sub{margin:0 0 10px;color:var(--muted);font-size:13px;font-weight:700;line-height:1.42}
@@ -496,8 +499,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         <div class="analysis-line" id="insuranceRow"><span>Ασφάλεια</span><span id="insuranceCost">0,00€</span></div>
         <div class="analysis-line" id="extrasRow"><span>Extras</span><span id="extrasCost">0,00€</span></div>
         <div class="analysis-line" id="locationFeeRow" hidden><span id="locationFeeLabel">Χρέωση τοποθεσιών</span><span id="locationFeeCost">0,00€</span></div>
-        <div class="analysis-line" id="ageFeeRow" hidden><span id="ageFeeLabel">Επασφάλιστρο ηλικίας</span><span id="ageFeeCost">0,00€</span></div>
-        <div class="analysis-line" id="nightFeeRow" hidden><span id="nightFeeLabel">Νυχτερινή χρέωση</span><span id="nightFeeCost">0,00€</span></div>
+        <div class="analysis-line" id="ageFeeRow" hidden><span style="display:inline-flex;align-items:center;gap:4px"><span id="ageFeeLabel">Επασφάλιστρο ηλικίας</span><span class="fee-tip" tabindex="0" data-tip="Επιπλέον χρέωση για οδηγούς κάτω των 25 ή άνω των 70 ετών.">ℹ</span></span><span id="ageFeeCost">0,00€</span></div>
+        <div class="analysis-line" id="nightFeeRow" hidden><span style="display:inline-flex;align-items:center;gap:4px"><span id="nightFeeLabel">Νυχτερινή χρέωση</span><span class="fee-tip" tabindex="0" data-tip="Χρέωση για παραλαβή ή επιστροφή μεταξύ 22:00–08:00.">ℹ</span></span><span id="nightFeeCost">0,00€</span></div>
         <div class="analysis-line big"><span>Τελικό σύνολο</span><strong id="grandTotal">0,00€</strong></div>
       </div>
     </div>
