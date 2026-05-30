@@ -1425,6 +1425,8 @@ function render(){
     const isSelected = bsSelectedCat && catCode === bsSelectedCat;
     const specs = vehicle.specs || {};
     const copy = cardCopy(vehicle);
+    const dailyDisp = dailyPrice > 0 ? fmtMoney(dailyPrice) : '—';
+    const totalDisp = grandTotal > 0 ? fmtMoney(grandTotal) : '—';
     return `
       <article class="result-card${isSelected ? ' is-selected-card' : ''}">
         <div class="result-main">
@@ -1439,7 +1441,7 @@ function render(){
                 <p class="vehicle-copy">${escapeHtml(copy)}</p>
               </div>
               <div class="price-box">
-                <span class="amount">${serverQuote ? fmtMoney(dailyPrice) : '—'}</span>
+                <span class="amount">${dailyDisp}</span>
                 <span class="sub">ανά ημέρα</span>
               </div>
             </div>
@@ -1456,13 +1458,13 @@ function render(){
         <div class="result-bottom">
           <div class="total-box">
             <div class="total-stack">
-              <div class="total-row"><span class="k">Τιμή / ημέρα</span><span class="v">${serverQuote ? fmtMoney(dailyPrice) : '—'}</span></div>
+              <div class="total-row"><span class="k">Τιμή / ημέρα</span><span class="v">${dailyDisp}</span></div>
               <div class="total-row"><span class="k">Ημέρες</span><span class="v">${serverQuote ? (serverQuote.billableDays || days) : days}</span></div>
               ${serverQuote && serverQuote.insuranceCost > 0 ? `<div class="total-row"><span class="k">Ασφάλεια CDW</span><span class="v">${fmtMoney(serverQuote.insuranceCost)}</span></div>` : ''}
               ${serverQuote && serverQuote.ageFee > 0 ? `<div class="total-row"><span class="k">${ageLabel(ageGroup.value)}</span><span class="v">${fmtMoney(serverQuote.ageFee)}</span></div>` : ''}
               ${serverQuote && serverQuote.nightFee > 0 ? `<div class="total-row"><span class="k">Νυχτερινή χρέωση</span><span class="v">${fmtMoney(serverQuote.nightFee)}</span></div>` : ''}
               ${serverQuote && serverQuote.locationFee > 0 ? `<div class=\"total-row\"><span class=\"k\">Χρέωση τοποθεσιών</span><span class=\"v\">${fmtMoney(serverQuote.locationFee)}</span></div>` : ''}
-              <div class=\"total-row grand\"><span class=\"k\">Σύνολο</span><span class=\"v\">${serverQuote ? fmtMoney(grandTotal) : '—'}</span></div>
+              <div class=\"total-row grand\"><span class=\"k\">Σύνολο</span><span class=\"v\">${totalDisp}</span></div>
             </div>
           </div>
           <div class="card-footer"><button class="cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${escapeHtml(selectionButtonLabel())}</button></div>

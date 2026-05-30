@@ -570,6 +570,11 @@ html,body{overflow-x:hidden!important}
 .no-data-banner{display:none;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.28);border-radius:12px;padding:14px 18px;color:#b83c2e;font-size:14px;font-weight:700;text-align:center;margin:0 0 16px}
 .no-data-banner.visible{display:block}
 .no-data-banner a{color:#b83c2e;font-weight:900}
+.opts-layout{display:flex;align-items:flex-start;gap:20px}
+.opts-main{flex:1 1 0;min-width:0;display:grid;gap:16px}
+.opts-aside{flex:0 0 340px;position:sticky;top:96px;align-self:start}
+.opts-aside .summary-card{margin:0!important}
+@media(max-width:1100px){.opts-layout{display:block}.opts-aside{position:static;margin-top:16px}}
 </style>
 
 </head>
@@ -634,6 +639,7 @@ html,body{overflow-x:hidden!important}
     <div class="no-data-banner" id="noDataBanner">
       Παρακαλώ επιλέξτε πρώτα ένα <a href="/categories">όχημα</a>.
     </div>
+    <div class="opts-layout"><div class="opts-main">
     <section class="hero-card">
       <div class="hero-grid">
         <div class="vehicle-media">
@@ -781,6 +787,7 @@ html,body{overflow-x:hidden!important}
         </div>
       </div>
     </section>
+    </div><aside class="opts-aside">
 
     <section class="summary-card">
       <h3>Σύνοψη κράτησης</h3>
@@ -810,6 +817,7 @@ html,body{overflow-x:hidden!important}
         <button class="continue-btn" id="continueBtn" type="button">Συνέχεια →</button>
       </div>
     </section>
+    </aside></div>
   </div>
 
 
