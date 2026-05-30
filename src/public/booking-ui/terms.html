@@ -96,6 +96,11 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
 .hero,.section-card{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .btn-primary{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
+.section-card h2{cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.section-card h2::after{content:'▾';font-size:16px;opacity:.5;transition:transform .28s ease;flex-shrink:0;font-weight:400}
+.section-card.is-collapsed h2::after{transform:rotate(-90deg)}
+.section-card .copy{overflow:hidden;max-height:4000px;transition:max-height .38s ease,opacity .28s ease;opacity:1}
+.section-card.is-collapsed .copy{max-height:0!important;opacity:0}
 </style>
 </head>
 <body>
@@ -533,4 +538,17 @@ setTimeout(() => {
   setTimeout(function(){try{window.parent.postMessage({type:'REQUEST_MEMBER_STATE'},'*');}catch(_){}},150);
 })();
 /* ===== END MEMBER PORTAL AUTH ===== */
+
+// Tier 3 N: FAQ accordion for terms sections
+(function(){
+  document.querySelectorAll('.section-card').forEach(function(card){
+    var h2 = card.querySelector('h2');
+    if (!h2) return;
+    h2.setAttribute('role','button');
+    h2.setAttribute('tabindex','0');
+    function toggle(){ card.classList.toggle('is-collapsed'); }
+    h2.addEventListener('click', toggle);
+    h2.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); } });
+  });
+})();
 </script></body></html>

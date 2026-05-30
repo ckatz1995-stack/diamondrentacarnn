@@ -587,6 +587,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div>
   </div>
 </footer>
+<style>#waFloat{position:fixed;bottom:24px;right:20px;z-index:9999;display:flex;align-items:center;gap:8px;background:#25D366;color:#fff;font-weight:900;font-size:13px;padding:12px 16px;border-radius:999px;box-shadow:0 6px 22px rgba(0,0,0,.30);text-decoration:none;transition:transform .15s,box-shadow .15s}#waFloat:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.34)}@media(max-width:620px){#waFloat .wa-text{display:none}#waFloat{padding:14px}}</style>
+<a id="waFloat" href="https://wa.me/302310000000" target="_blank" rel="noopener noreferrer" title="Επικοινωνία μέσω WhatsApp" aria-label="Επικοινωνία μέσω WhatsApp"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.561 4.141 1.54 5.873L0 24l6.352-1.518A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.814 9.814 0 01-5.001-1.363l-.358-.213-3.712.974 1.006-3.607-.234-.374A9.795 9.795 0 012.182 12C2.182 6.577 6.577 2.182 12 2.182S21.818 6.577 21.818 12 17.423 21.818 12 21.818z"/></svg><span class="wa-text">WhatsApp</span></a>
 </div>
 <script>
 function showSubmitError(msg) {
@@ -787,6 +789,8 @@ function applyBusinessIdentity(){
   if (footerBottomSpan) footerBottomSpan.textContent = `© ${companyName} · ${companyCity} · ${footerNote}`;
   const introTagline = document.querySelector('.intro-tagline');
   if (introTagline && companyTagline) introTagline.textContent = companyTagline;
+  const waBtn = document.getElementById('waFloat');
+  if (waBtn) { const waPhone = companyPhone.replace(/\s+/g, '').replace(/^\+/, ''); waBtn.href = `https://wa.me/${waPhone}`; }
 }
 applyBusinessIdentity();
 
