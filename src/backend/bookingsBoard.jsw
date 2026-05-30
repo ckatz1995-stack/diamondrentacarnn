@@ -181,3 +181,83 @@ export async function setBookingBoardStatus({ authToken, bookingId, newStatus } 
     return { success: false, message: error?.message || String(error) };
   }
 }
+
+export async function getHomepageKpis({ authToken } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: "bookings", action: "View" });
+  try {
+    const todayStart = startOfDay(new Date());
+    const tomorrowStart = addDays(todayStart, 1);
+    const [pendingRes, pickupRes, dropoffRes] = await Promise.all([
+      wixData.query("BookingsNew").eq("status", "Pending").limit(1).find({ suppressAuth: true }),
+      wixData.query("BookingsNew").ge("pickupDateTime", todayStart).lt("pickupDateTime", tomorrowStart).ne("status", "Canceled").limit(1).find({ suppressAuth: true }),
+      wixData.query("BookingsNew").ge("dropoffDateTime", todayStart).lt("dropoffDateTime", tomorrowStart).ne("status", "Canceled").limit(1).find({ suppressAuth: true }),
+    ]);
+    return {
+      success: true,
+      pending: pendingRes.totalCount || 0,
+      todayPickups: pickupRes.totalCount || 0,
+      todayDropoffs: dropoffRes.totalCount || 0,
+    };
+  } catch (error) {
+    return { success: false, pending: 0, todayPickups: 0, todayDropoffs: 0 };
+  }
+}
+
+export async function createStaffBooking({ authToken, bookingData } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: "bookings", action: "Edit" });
+  try {
+    const { customerName, phone, email, pickupDateTime, dropoffDateTime,
+            pickuppoint, dropoffpoint, bookedCategoryCode, totalPrice,
+            selectedPackage, driverAgeBand, originCity, flightNumber, internalMemo, status } = bookingData || {};
+
+    if (!safeText(customerName)) return { success: false, message: "Απαιτείται όνομα πελάτη" };
+    const pickup = new Date(pickupDateTime);
+    const dropoff = new Date(dropoffDateTime);
+    if (isNaN(pickup.getTime()) || isNaN(dropoff.getTime())) return { success: false, message: "Μη έγκυρες ημερομηνίες" };
+    if (dropoff.getTime() <= pickup.getTime()) return { success: false, message: "Η επιστροφή πρέπει να είναι μετά την παραλαβή" };
+
+    // Generate next booking number
+    const year = new Date().getFullYear();
+    const existing = await wixData.query("BookingsNew")
+      .startsWith("bookingNumber", `RNT-${year}-`)
+      .descending("_createdDate")
+      .limit(1)
+      .find({ suppressAuth: true });
+    let nextNum = 1;
+    if (existing.items?.length) {
+      const lastNum = parseInt((existing.items[0].bookingNumber || '').split('-')[2] || '0', 10);
+      if (!isNaN(lastNum) && lastNum >= nextNum) nextNum = lastNum + 1;
+    }
+    const bookingNumber = `RNT-${year}-${String(nextNum).padStart(4, '0')}`;
+
+    const item = {
+      bookingNumber,
+      status: safeText(status || 'Pending'),
+      customerName: safeText(customerName),
+      phone: safeText(phone || ''),
+      email: safeText(email || ''),
+      pickupDateTime: pickup,
+      dropoffDateTime: dropoff,
+      pickuppoint: safeText(pickuppoint || ''),
+      dropoffpoint: safeText(dropoffpoint || ''),
+      bookedCategoryCode: safeText(bookedCategoryCode || ''),
+      totalPrice: safeNum(totalPrice),
+      selectedPackage: safeText(selectedPackage || 'full'),
+      driverAgeBand: safeText(driverAgeBand || ''),
+      originCity: safeText(originCity || ''),
+      flightNumber: safeText(flightNumber || ''),
+      internalMemo: safeText(internalMemo || ''),
+      source: 'backroom',
+    };
+
+    const created = await wixData.insert("BookingsNew", item, { suppressAuth: true });
+    const todayStart = startOfDay(new Date());
+    return {
+      success: true,
+      message: `Η κράτηση ${bookingNumber} δημιουργήθηκε`,
+      booking: mapBooking(created, new Map(), todayStart, addDays(todayStart, 1)),
+    };
+  } catch (error) {
+    return { success: false, message: error?.message || String(error) };
+  }
+}

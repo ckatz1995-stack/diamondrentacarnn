@@ -1,6 +1,6 @@
 
 import wixLocation from "wix-location";
-import { getBookingsBoardData, setBookingBoardStatus } from "backend/bookingsBoard";
+import { getBookingsBoardData, setBookingBoardStatus, createStaffBooking } from "backend/bookingsBoard";
 import { buildUserContext, logoutBackroom, requireBackroomAccess } from "public/backroomAuth";
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from "public/bridgeUtils";
 import { APP_ROUTES as ROUTES } from "public/appRoutes";
@@ -117,6 +117,13 @@ $w.onReady(async function () {
       post({ type: "toast", message: result?.success ? (result.message || "OK") : `Error: ${result?.message || "Failed"}` });
       if (msg.bookingId) pendingOpenBookingId = String(msg.bookingId);
       await loadBoard(true);
+      return;
+    }
+
+    if (msg.type === "createBooking") {
+      const result = await createStaffBooking({ authToken: authState.sessionToken, bookingData: msg.bookingData });
+      post({ type: "bookingCreateResult", success: !!result?.success, message: result?.message || "Error" });
+      if (result?.success) await loadBoard(false);
       return;
     }
   });
