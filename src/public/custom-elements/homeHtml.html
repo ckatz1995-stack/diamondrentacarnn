@@ -185,27 +185,43 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 
 
 /* ── Briefing card ── */
-.briefCard{padding:18px 20px;background:linear-gradient(135deg,rgba(154,110,30,.06),rgba(42,107,130,.04));border:1px solid var(--gold-border);border-radius:var(--r-lg);border-top:2px solid var(--gold);display:grid;gap:14px}
-.briefRow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.briefCard{background:linear-gradient(135deg,rgba(154,110,30,.06),rgba(42,107,130,.04));border:1px solid var(--gold-border);border-radius:var(--r-lg);border-top:2px solid var(--gold);display:flex;align-items:stretch;overflow:hidden}
+.briefLeft{flex:0 0 200px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;justify-content:center;border-right:1px solid var(--border2)}
+.briefRight{flex:1;padding:14px 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:stretch}
 .briefUser{display:flex;align-items:center;gap:12px}
 .briefBadge{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--gold-bg);border:1px solid var(--gold-border);font:900 20px/1 system-ui;color:var(--gold)}
 .briefInfo{display:flex;flex-direction:column;gap:4px}
-.briefName{font:900 16px/1 system-ui;color:var(--text)}
+.briefName{font:900 17px/1 system-ui;color:var(--text)}
 .briefRole{font:700 12px/1 system-ui;color:var(--sub)}
-.briefStatus{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--r-pill);border:1px solid var(--border2);background:rgba(0,0,0,.03);font:700 13px/1.2 system-ui;color:var(--sub)}
+.briefStatus{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:var(--r-pill);border:1px solid var(--border2);background:rgba(0,0,0,.03);font:700 12px/1.2 system-ui;color:var(--sub);align-self:flex-start}
 .briefStatus.ok{background:rgba(16,185,129,.08);color:#065F46;border-color:rgba(16,185,129,.22)}
 .briefStatus.warn{background:rgba(245,158,11,.08);color:#B45309;border-color:rgba(245,158,11,.22)}
 .briefStatus.error{background:rgba(239,68,68,.08);color:#B91C1C;border-color:rgba(239,68,68,.22)}
+.briefRight .patternCard{padding:16px;border-radius:12px;background:var(--surface2);border:1px solid var(--border2);display:flex;flex-direction:column;gap:5px;justify-content:space-between;transition:border-color .15s}
+.briefRight .patternCard:hover{border-color:var(--gold-border)}
+.briefRight .patternKick{font:900 10px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.briefRight .patternValue{font:900 28px/1 system-ui;letter-spacing:-.03em;color:var(--gold)}
+.briefRight .patternMeta{font:700 11px/1.3 system-ui;color:var(--sub)}
 
 /* ── Quick nav tiles ── */
-.quickNav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-.navTile{appearance:none;border:1px solid var(--border2);background:var(--surface2);border-radius:var(--r);padding:14px 12px;cursor:pointer;text-align:center;transition:border-color .15s,transform .15s;display:flex;flex-direction:column;align-items:center;gap:6px}
-.navTile:hover{border-color:var(--gold-border);transform:translateY(-2px)}
+.quickNav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.navTile{appearance:none;border:1px solid var(--border2);background:var(--surface2);border-radius:var(--r);padding:16px 12px;cursor:pointer;text-align:center;transition:border-color .15s,transform .15s,box-shadow .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:104px}
+.navTile:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.07)}
 .navTile.locked{opacity:.36;filter:grayscale(.6);pointer-events:none}
-.navTile .navIcon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(0,0,0,.05);font-size:18px}
-.navTile .navLabel{font:900 12px/1 system-ui;color:var(--text)}
+.navTile .navIcon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(0,0,0,.05);flex-shrink:0;transition:background .15s}
+.navTile .navIcon svg{width:20px;height:20px;display:block}
+.navTile .navLabel{font:900 13px/1 system-ui;color:var(--text)}
 .navTile .navSub{font:700 10px/1.3 system-ui;color:var(--muted)}
-.navTile.primary .navIcon{background:var(--gold-bg);border:1px solid var(--gold-border)}
+.navTile[data-route-card="daily"] .navIcon{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold)}
+.navTile[data-route-card="daily"]:hover{border-color:var(--gold-border);box-shadow:0 6px 18px rgba(154,110,30,.12)}
+.navTile[data-route-card="fleet"] .navIcon{background:rgba(14,165,233,.10);border:1px solid rgba(14,165,233,.22);color:#0369A1}
+.navTile[data-route-card="fleet"]:hover{border-color:rgba(14,165,233,.32);box-shadow:0 6px 18px rgba(14,165,233,.10)}
+.navTile[data-route-card="bookings"] .navIcon{background:rgba(99,102,241,.10);border:1px solid rgba(99,102,241,.22);color:#4338CA}
+.navTile[data-route-card="bookings"]:hover{border-color:rgba(99,102,241,.32);box-shadow:0 6px 18px rgba(99,102,241,.10)}
+.navTile[data-route-card="customers"] .navIcon{background:rgba(20,184,166,.10);border:1px solid rgba(20,184,166,.22);color:#0F766E}
+.navTile[data-route-card="customers"]:hover{border-color:rgba(20,184,166,.32);box-shadow:0 6px 18px rgba(20,184,166,.10)}
+.navTile[data-route-card="settings"] .navIcon{background:rgba(100,116,139,.10);border:1px solid rgba(100,116,139,.22);color:#475569}
+.navTile[data-route-card="settings"]:hover{border-color:rgba(100,116,139,.32);box-shadow:0 6px 18px rgba(100,116,139,.08)}
 
 /* ── Macro row ── */
 .macroRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;border-radius:var(--r);background:var(--surface2);border:1px solid var(--border2)}
@@ -223,8 +239,8 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 .resumeTitle{font:900 13px/1.2 system-ui;color:var(--text)}
 .resumeMeta{font:700 11px/1.3 system-ui;color:var(--sub);margin-top:3px}
 
-@media(max-width:900px){.quickNav{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:600px){.quickNav{grid-template-columns:repeat(2,minmax(0,1fr))}.macroRow{flex-direction:column;align-items:flex-start}}
+@media(max-width:900px){.quickNav{grid-template-columns:repeat(3,minmax(0,1fr))}.briefCard{flex-direction:column}.briefLeft{border-right:none;border-bottom:1px solid var(--border2);flex-direction:row;align-items:center;justify-content:space-between;flex:unset}.briefRight{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.quickNav{grid-template-columns:repeat(2,minmax(0,1fr))}.macroRow{flex-direction:column;align-items:flex-start}.briefRight{grid-template-columns:1fr}}
 
 /* ── KPI alert pulse ── */
 @keyframes kpiAlertPulse{0%,100%{box-shadow:0 0 0 0 rgba(154,110,30,.4)}60%{box-shadow:0 0 0 10px rgba(154,110,30,0)}}
@@ -279,7 +295,7 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 
         <!-- Shift briefing card -->
         <div class="briefCard">
-          <div class="briefRow">
+          <div class="briefLeft">
             <div class="briefUser">
               <div class="briefBadge" id="userBadge">G</div>
               <div class="briefInfo">
@@ -289,9 +305,8 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
             </div>
             <div class="briefStatus" id="statusValue">Not signed in</div>
           </div>
-
           <!-- Live KPI strip -->
-          <div class="patternStrip" id="liveKpiBar" style="margin:0">
+          <div class="briefRight" id="liveKpiBar">
             <div class="patternCard" id="kpiPendingCard">
               <div class="patternKick">Εκκρεμείς κρατήσεις</div>
               <div class="patternValue" id="kpiPending">—</div>
@@ -321,28 +336,28 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 
         <!-- Quick navigation tiles -->
         <div class="quickNav" style="margin-top:14px">
-          <button class="navTile primary" data-route-card="daily" type="button">
-            <div class="navIcon">📋</div>
+          <button class="navTile" data-route-card="daily" type="button">
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
             <div class="navLabel">Daily</div>
             <div class="navSub">Shift desk</div>
           </button>
           <button class="navTile" data-route-card="fleet" type="button">
-            <div class="navIcon">🚗</div>
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2"/><circle cx="7" cy="20" r="1"/><circle cx="15" cy="20" r="1"/></svg></div>
             <div class="navLabel">Fleet</div>
             <div class="navSub">Vehicles</div>
           </button>
           <button class="navTile" data-route-card="bookings" type="button">
-            <div class="navIcon">📂</div>
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
             <div class="navLabel">Bookings</div>
             <div class="navSub">All reservations</div>
           </button>
           <button class="navTile" data-route-card="customers" type="button">
-            <div class="navIcon">👤</div>
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
             <div class="navLabel">Customers</div>
             <div class="navSub">Profiles</div>
           </button>
           <button class="navTile" data-route-card="settings" type="button">
-            <div class="navIcon">⚙️</div>
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
             <div class="navLabel">Settings</div>
             <div class="navSub">Admin tools</div>
           </button>
