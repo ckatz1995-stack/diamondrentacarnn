@@ -963,6 +963,7 @@ bindRouteLinks();
 const PAGE_ROUTES = { home: ROUTES.home, categories: ROUTES.categories, options: ROUTES.options, booking: ROUTES.booking };
 const BOOKING_STORAGE_KEY = "diamond-booking-search-v1";
 const LEGACY_BOOKING_STORAGE_KEY = "diamond_booking_search_v1";
+const CAT_RESTORE_KEY = "diamond-vehicles-category-v1";
 const PRICING_CATALOG_STORAGE_KEY = "diamond-pricing-catalog-public-v1";
 const VEHICLE_CATEGORIES_STORAGE_KEY = "diamond-vehicle-categories-catalog-v1";
 function qp(name){ return new URLSearchParams(location.search).get(name); }
@@ -1091,7 +1092,8 @@ const pickup = qp("pickup") || storedSearch.pickup || serializeLocalDateTime(new
 const dropoff = qp("dropoff") || storedSearch.dropoff || serializeLocalDateTime(new Date(Date.now() + 86400000));
 const pickupLocation = qp("pickupLocation") || storedSearch.pickupLocation || 'Αεροδρόμιο Μακεδονία Θεσσαλονίκη';
 const dropoffLocation = qp("dropoffLocation") || storedSearch.dropoffLocation || 'Αεροδρόμιο Μακεδονία Θεσσαλονίκη';
-const category = qp("category") || storedSearch.category || "all";
+const _catStored = (function(){ try{ return sessionStorage.getItem(CAT_RESTORE_KEY) || localStorage.getItem(CAT_RESTORE_KEY) || ''; }catch(_){ return ''; } })();
+const category = qp("category") || _catStored || storedSearch.category || "all";
 const age = qp("age") || storedSearch.age || '23-69';
 
 let vehicles = [];
@@ -1121,7 +1123,7 @@ function triggerServerQuotes(){
   if(!vehicles || !vehicles.length) return;
   if(!validateDateRange()) return;
   clearTimeout(_quotesDebounceTimer);
-  _quotesDebounceTimer = setTimeout(scheduleServerQuotes, 80);
+  _quotesDebounceTimer = setTimeout(scheduleServerQuotes, 300);
 }
 
 async function scheduleServerQuotes(){
@@ -1635,6 +1637,8 @@ ageGroup.addEventListener('change', () => { updateState(); render(); triggerServ
   document.getElementById(id).addEventListener('change', () => { updateState(); validateDateRange(); render(); triggerServerQuotes(); });
 });
 categorySelect.addEventListener("change", () => {
+  try{ sessionStorage.setItem(CAT_RESTORE_KEY, categorySelect.value); }catch(_){}
+  try{ localStorage.setItem(CAT_RESTORE_KEY, categorySelect.value); }catch(_){}
   updateState();
   if(Array.isArray(embeddedVehicleItems)){
     vehicles = filterVehiclesByCategory(embeddedVehicleItems, categorySelect.value);
