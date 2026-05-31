@@ -108,23 +108,25 @@
     .heroChip.primary{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
 
     /* ── Controls bar ── */
-    .controls{padding:8px 10px;display:grid;gap:8px;background:var(--surface)}
-    .controlsRow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .controls{padding:10px 12px;display:grid;gap:8px;background:var(--surface)}
+    .controlsRow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .controlGroup{display:flex;gap:5px;align-items:center;flex-wrap:wrap;padding:4px 6px;border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,.02)}
     .controlLabel{font:900 10px/1 system-ui,-apple-system,sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
     .input,.select{appearance:none;border:1px solid var(--border2);background:var(--surface2);border-radius:10px;padding:7px 9px;font:800 11px/1.2 system-ui,-apple-system,sans-serif;color:var(--text);outline:none}
     .input:focus,.select:focus{border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(154,110,30,.12)}
-    .input.search{min-width:220px;flex:1 1 240px}
+    .input.search{min-width:220px;flex:1 1 240px;border-radius:12px}
     .btn{border:1px solid var(--border2);background:rgba(0,0,0,.04);color:var(--sub);box-shadow:none}
-    .btnPrimary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent}
+    .btnPrimary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent;box-shadow:0 2px 8px rgba(154,110,30,.22)}
     .btn:hover,.tabBtn:hover,.modeBtn:hover,.routeTab:hover,.topAction:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
-    .modeBtn,.tabBtn{color:var(--sub);background:rgba(0,0,0,.04);border:1px solid var(--border2)}
-    .modeBtn.active,.tabBtn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
+    .btnPrimary:hover{box-shadow:0 4px 14px rgba(154,110,30,.34)!important}
+    .modeBtn,.tabBtn{color:var(--sub);background:rgba(0,0,0,.04);border:1px solid var(--border2);transition:all .14s}
+    .modeBtn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold);box-shadow:0 2px 8px rgba(154,110,30,.18);font-weight:900}
+    .tabBtn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold);box-shadow:0 2px 8px rgba(154,110,30,.14);font-weight:900}
     .tabBtn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:8px 10px;font-size:10.5px;box-shadow:none}
     .tabBtn .countPill{margin-left:auto}
     .togglePill{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:var(--r-pill);border:1px solid var(--border2);background:rgba(0,0,0,.03);font:900 11px/1 system-ui,-apple-system,sans-serif;color:var(--sub)}
     .togglePill input{accent-color:var(--gold)}
-    .statusLine{padding:7px 10px;border:1px solid var(--gold-border);border-radius:12px;background:var(--gold-bg);font:900 10px/1.35 system-ui,-apple-system,sans-serif;color:var(--gold);min-width:220px;white-space:pre-wrap}
+    .statusLine{padding:5px 10px;border:1px solid var(--border2);border-radius:10px;background:rgba(0,0,0,.03);font:800 10px/1.35 system-ui,-apple-system,sans-serif;color:var(--sub);min-width:0;max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .tabBar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
     .controlGroup.slim{padding:0;border:none;background:transparent}
 
@@ -514,8 +516,8 @@
 
   <section class="summaryGrid" id="summaryGrid"></section>
 
-  <section class="surface controls" style="padding:8px 10px">
-    <div class="controlsRow" style="flex-wrap:wrap;gap:6px;align-items:center">
+  <section class="surface controls">
+    <div class="controlsRow">
       <div class="controlGroup" style="flex:0 0 auto">
         <button class="btn" id="btnPrev" type="button">&#8592;</button>
         <input class="input" id="datePick" type="date" style="width:136px" />
@@ -542,7 +544,7 @@
         <button class="btn" id="printBtn" type="button" title="Print">Print</button>
       </div>
     </div>
-    <div class="statusLine" id="status" style="margin-top:6px;font-size:10px;padding:5px 10px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">BOOT&#8230;</div>
+    <div class="statusLine" id="status" style="margin-top:4px">BOOT&#8230;</div>
   </section>
 
   <div class="tl-wrap" id="timelineStrip" style="display:none"></div>

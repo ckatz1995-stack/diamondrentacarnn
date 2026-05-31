@@ -127,11 +127,12 @@
     .rangeQuick{padding:7px 10px}
     .btn{appearance:none;border:1px solid var(--border2);background:rgba(0,0,0,.04);border-radius:13px;padding:8px 10px;font:900 11.5px/1 system-ui,-apple-system,sans-serif;cursor:pointer;color:var(--sub)}
     .btn:hover{box-shadow:var(--shadow)}
-    .btnPrimary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent}
+    .btnPrimary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent;box-shadow:0 2px 8px rgba(154,110,30,.22)}
+    .btnPrimary:hover{box-shadow:0 4px 14px rgba(154,110,30,.34)!important}
     .pills{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .pill{appearance:none;border:1px solid var(--border2);background:rgba(0,0,0,.04);border-radius:var(--r-pill);padding:7px 11px;font:900 11px/1 system-ui,-apple-system,sans-serif;cursor:pointer;color:var(--sub)}
-    .pill.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
-    .statusLine{padding:6px 8px;border:1px solid var(--gold-border);border-radius:var(--r-pill);background:var(--gold-bg);font:900 9.5px/1.2 system-ui,-apple-system,sans-serif;color:var(--gold);min-width:auto;max-width:none}
+    .pill.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold);box-shadow:0 2px 8px rgba(154,110,30,.12);font-weight:900}
+    .statusLine{padding:5px 10px;border:1px solid var(--border2);border-radius:var(--r-pill);background:rgba(0,0,0,.03);font:800 9.5px/1.2 system-ui,-apple-system,sans-serif;color:var(--sub);min-width:auto;max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
     /* ── Summary KPI grid ── */
     .summaryGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:10px}
@@ -224,8 +225,8 @@
 
     /* ── Bookings mode tabs / focus pills ── */
     .bookingsModeTabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0}
-    .bookingsModeBtn{border:1px solid var(--border2);background:rgba(0,0,0,.04);color:var(--sub);border-radius:var(--r-pill);padding:9px 12px;font:900 11px/1 system-ui,-apple-system,sans-serif;cursor:pointer}
-    .bookingsModeBtn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
+    .bookingsModeBtn{border:1px solid var(--border2);background:rgba(0,0,0,.04);color:var(--sub);border-radius:var(--r-pill);padding:9px 12px;font:900 11px/1 system-ui,-apple-system,sans-serif;cursor:pointer;transition:all .14s}
+    .bookingsModeBtn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold);box-shadow:0 2px 8px rgba(154,110,30,.18);font-weight:900}
     .modeHelper{font:800 11px/1.45 system-ui,-apple-system,sans-serif;color:var(--sub)}
     .focusToolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0;padding:0;border:0;background:transparent}
     .focusPills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -297,22 +298,23 @@
     .row:hover{box-shadow:inset 0 1px 0 rgba(0,0,0,.03)}
 
     /* ── Bookings flat toolbar ── */
-    .bkCtrl{display:grid;gap:8px}
-    .bkCtrlMain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-radius:var(--r-lg);border:1px solid var(--border2);background:var(--surface2)}
+    .bkCtrl{display:grid;gap:10px}
+    .bkCtrlMain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-radius:var(--r-lg);border:1px solid var(--border2);background:var(--surface2)}
     .bkSearch{flex:1 1 240px;min-width:0;border-radius:14px;padding:7px 11px}
+    .bkSearch input{font-size:12px}
     .bkDateGroup{display:flex;align-items:center;gap:6px;flex:0 1 auto;flex-wrap:wrap}
     .ctrlLbl{font:900 9.5px/1 system-ui;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
     .bkCtrlRight{display:flex;align-items:center;gap:6px;margin-left:auto;flex:0 0 auto}
-    .bkCtrlFilters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 12px;border-radius:var(--r);border:1px solid var(--border);background:rgba(255,255,255,.02)}
+    .bkCtrlFilters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border-radius:var(--r);border:1px solid var(--border2);background:rgba(0,0,0,.025)}
     .bkSep{width:1px;height:18px;background:var(--border2);flex:0 0 auto}
     .bkCtrlTail{display:flex;align-items:center;gap:8px;margin-left:auto;flex:0 0 auto}
-    .bkCtrlTail .statusLine{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px}
+    .bkCtrlTail .statusLine{max-width:260px}
     .bookingsModeTabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-    .bookingsModeBtn{appearance:none;border:1px solid var(--border2);background:rgba(0,0,0,.04);color:var(--sub);border-radius:var(--r-pill);padding:7px 10px;font:900 10.5px/1 system-ui;cursor:pointer}
-    .bookingsModeBtn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
+    .bookingsModeBtn{appearance:none;border:1px solid var(--border2);background:rgba(0,0,0,.04);color:var(--sub);border-radius:var(--r-pill);padding:8px 12px;font:900 10.5px/1 system-ui;cursor:pointer;transition:all .14s}
+    .bookingsModeBtn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold);box-shadow:0 2px 8px rgba(154,110,30,.18);font-weight:900}
     .pills,.focusPills,.queueStrip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
     .pill,.focusPill,.queueKpi{appearance:none;border:1px solid var(--border2);background:rgba(0,0,0,.04);color:var(--sub);border-radius:var(--r-pill);padding:7px 10px;font:900 10.5px/1 system-ui;cursor:pointer}
-    .pill.active,.focusPill.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
+    .pill.active,.focusPill.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold);box-shadow:0 2px 8px rgba(154,110,30,.12);font-weight:900}
     .focusPill .count,.pill .count,.bookingsModeBtn .count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:var(--r-pill);background:rgba(0,0,0,.07);color:inherit;font-size:10px;font-weight:900}
     .focusPill.active .count,.bookingsModeBtn.active .count,.pill.active .count{background:rgba(154,110,30,.2);color:var(--gold)}
     .queueKpi{gap:6px;padding:6px 9px;cursor:default;background:rgba(0,0,0,.02)}
