@@ -294,7 +294,7 @@
     #fullRows > .toolTableShell .toolTableWrap{height:100%;min-height:0}
     .toolTableTopbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:6px 8px;min-height:38px;border-bottom:1px solid var(--border);background:var(--surface2)}
     .toolTableShell.table-clean .toolToolbar,.toolTableShell.table-clean .toolContextBar{display:none}
-    .tableRow{display:grid;grid-template-columns:110px 1.25fr 1fr 1fr 1.1fr;gap:10px;padding:12px;border-bottom:1px solid var(--border);cursor:pointer;background:var(--surface);align-items:start}
+    .tableRow{display:grid;grid-template-columns:110px 1.25fr 1fr 1fr 1.1fr;gap:10px;padding:12px;border-bottom:1px solid var(--border);cursor:pointer;background:var(--surface);align-items:start;position:relative;transition:background .14s}
     .tableShell{display:grid;gap:0;border:1px solid var(--border2);border-radius:18px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
     .tableShellTop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface2)}
     .tableShellTitle{font:900 12px/1.1 system-ui,-apple-system,sans-serif;color:var(--text)}
@@ -346,7 +346,11 @@
     .bookActionBtn.primary{background:linear-gradient(135deg,var(--gold),#C8952E);border-color:transparent;color:#1a1208}
     .bookingsTableNote{padding:10px 12px;border-bottom:1px solid var(--border);background:var(--gold-bg);font:800 11px/1.4 system-ui,-apple-system,sans-serif;color:var(--gold);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
     .bookingsCountPill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:var(--r-pill);background:rgba(0,0,0,.04);border:1px solid var(--border);font:900 10px/1 system-ui,-apple-system,sans-serif;color:var(--sub)}
-    .tableRow:hover{background:rgba(0,0,0,.02)}.tableRow.selected{background:var(--gold-bg)}
+    .tableRow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--row-accent,var(--gold));opacity:.22;transition:opacity .14s}
+    .tableRow:has(.chip.ok){--row-accent:#10B981}
+    .tableRow:has(.chip.info){--row-accent:#3B82F6}
+    .tableRow:hover{background:rgba(0,0,0,.02)}.tableRow:hover::before{opacity:.55}
+    .tableRow.selected{background:var(--gold-bg)}.tableRow.selected::before{opacity:1}
     .cellMain{font:900 11.5px/1.35 system-ui,-apple-system,sans-serif;color:var(--text)}.cellSub{display:block;margin-top:3px;font:800 10.5px/1.4 system-ui,-apple-system,sans-serif;color:var(--sub)}
     .opsWrap{display:grid;gap:4px;align-content:start}.rowActions{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
     .empty{padding:16px 12px;font:800 11px/1.5 system-ui,-apple-system,sans-serif;color:var(--sub)}
