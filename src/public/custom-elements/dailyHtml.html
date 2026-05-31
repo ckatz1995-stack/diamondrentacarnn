@@ -445,6 +445,16 @@
     @media (max-width:980px){.backroom-header{grid-template-columns:1fr}.backroom-brand{min-height:74px}.backroom-nav{justify-content:flex-start;padding:0 10px}.nav-btn{height:58px;font-size:12px}.backroom-user{min-width:0;justify-content:flex-start;flex-wrap:wrap;border-left:0;border-top:1px solid var(--border)}.deskGrid{grid-template-columns:1fr;min-height:clamp(620px,72vh,900px)}.deskCol{min-height:clamp(420px,48vh,620px)}.summaryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.toolSidePanel{width:260px;min-width:260px}}
     @media(max-width:900px){html{overflow-x:hidden}}
     @media (max-width:640px){.wrap{padding:8px}.panel,.surface,.card{border-radius:18px}.summaryGrid{grid-template-columns:1fr}.controlsRow{align-items:stretch}.controlGroup{width:100%}.input.search{min-width:0;width:100%}.tabBar{gap:6px}.deskCompactRow,.tableRow{grid-template-columns:1fr;gap:8px}.deskActionBar,.rowActions{margin-top:6px;justify-content:flex-start}.toolSidePanel{width:220px;min-width:220px}.fullWrap{padding:6px}}
+    /* ── Section head ── */
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px}
+    .sh-left{display:flex;align-items:center;gap:9px}
+    .sh-icon{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold);flex-shrink:0}
+    .sh-icon svg{width:13px;height:13px;display:block}
+    .sh-text{display:flex;flex-direction:column;gap:2px}
+    .sh-title{font:900 11px/1 system-ui;color:var(--text);letter-spacing:.06em;text-transform:uppercase}
+    .sh-sub{font:700 10.5px/1 system-ui;color:var(--muted)}
+    .sh-right{display:flex;align-items:center;gap:6px}
+    .sh-badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-pill);background:rgba(0,0,0,.04);border:1px solid var(--border2);font:800 10.5px/1 system-ui;color:var(--sub);flex-shrink:0}
   </style>
 </head>
 <body>
@@ -495,6 +505,13 @@
     </div>
     <main class="shell-content">
 
+  <div class="section-head" style="margin-top:0">
+    <div class="sh-left">
+      <div class="sh-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="sh-text"><div class="sh-title">Today at a glance</div><div class="sh-sub">Live summary for selected date</div></div>
+    </div>
+  </div>
+
   <section class="summaryGrid" id="summaryGrid"></section>
 
   <section class="surface controls" style="padding:8px 10px">
@@ -529,6 +546,14 @@
   </section>
 
   <div class="tl-wrap" id="timelineStrip" style="display:none"></div>
+
+  <div class="section-head">
+    <div class="sh-left">
+      <div class="sh-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+      <div class="sh-text"><div class="sh-title">Operations board</div><div class="sh-sub">Check-outs &amp; check-ins for the day</div></div>
+    </div>
+    <div class="sh-right"><span class="sh-badge" id="boardCountBadge">—</span></div>
+  </div>
 
   <section class="board">
     <div class="panel" id="mainPanel">
@@ -1543,8 +1568,8 @@
   }
   function renderStations(){ const current = state.station || 'all'; els.station.innerHTML = `<option value="all">Όλες</option>` + (state.data.stations || []).map((s)=> `<option value="${esc(s)}" ${s===current?'selected':''}>${esc(s)}</option>`).join(''); }
   function renderTabBar(){ const fullTabs = ['checkout','checkin','requests','bookings','overdue','available','grounded']; if (!fullTabs.includes(state.activeTab)) state.activeTab = 'checkout'; els.tabBar.innerHTML = fullTabs.map((key)=>`<button class="tabBtn ${state.activeTab===key?'active':''}" data-tab-key="${key}" type="button">${esc(TAB_CONFIG[key].label)} <span class="countPill">${esc((state.data.summary[key] || 0))}</span></button>`).join(''); }
-  function renderDesk(){ const out = deskItems('out'); const inn = deskItems('in'); if (els.deskOutCount) els.deskOutCount.textContent = String(out.length); if (els.deskInCount) els.deskInCount.textContent = String(inn.length); if (els.deskOut) els.deskOut.innerHTML = renderOpsTable(out,'checkout','desk','deskout'); if (els.deskIn) els.deskIn.innerHTML = renderOpsTable(inn,'checkin','desk','deskin'); if (els.visiblePill) els.visiblePill.textContent = `${out.length + inn.length} visible`; }
-  function renderFull(){ const tab = ['checkout','checkin','requests','bookings','overdue','available','grounded'].includes(state.activeTab) ? state.activeTab : 'checkout'; if (tab !== state.activeTab) state.activeTab = tab; const rows = currentTabItems(state.activeTab); if (els.fullRows) els.fullRows.innerHTML = state.activeTab === 'bookings' ? renderBookingsTable(rows, 'bookings') : renderOpsTable(rows, state.activeTab); if (els.visiblePill) els.visiblePill.textContent = `${rows.length} visible`; }
+  function renderDesk(){ const out = deskItems('out'); const inn = deskItems('in'); if (els.deskOutCount) els.deskOutCount.textContent = String(out.length); if (els.deskInCount) els.deskInCount.textContent = String(inn.length); if (els.deskOut) els.deskOut.innerHTML = renderOpsTable(out,'checkout','desk','deskout'); if (els.deskIn) els.deskIn.innerHTML = renderOpsTable(inn,'checkin','desk','deskin'); if (els.visiblePill) els.visiblePill.textContent = `${out.length + inn.length} visible`; const _bb=document.getElementById('boardCountBadge');if(_bb)_bb.textContent=`${out.length+inn.length} visible`; }
+  function renderFull(){ const tab = ['checkout','checkin','requests','bookings','overdue','available','grounded'].includes(state.activeTab) ? state.activeTab : 'checkout'; if (tab !== state.activeTab) state.activeTab = tab; const rows = currentTabItems(state.activeTab); if (els.fullRows) els.fullRows.innerHTML = state.activeTab === 'bookings' ? renderBookingsTable(rows, 'bookings') : renderOpsTable(rows, state.activeTab); if (els.visiblePill) els.visiblePill.textContent = `${rows.length} visible`; const _bb2=document.getElementById('boardCountBadge');if(_bb2)_bb2.textContent=`${rows.length} visible`; }
   function field(k,v,full){ return `<div class="fieldBox ${full?'full':''}"><div class="fk">${esc(k)}</div><div class="fv">${esc(v || '—')}</div></div>`; }
   function renderInspector(){ if (!els.inspector) return; const item = selectedItem(); if (!item) { els.inspector.innerHTML = `<div class="fieldBox full"><div class="fk">Selected record</div><div class="fv">Δεν υπάρχει visible row για το current mode / filters.</div></div>`; return; } const key = state.selected.tab || (state.viewMode === 'desk' ? 'checkout' : state.activeTab); const actions = []; const gate = item && item.actionGate ? item.actionGate : {}; const reason = Array.isArray(gate.reasons) && gate.reasons.length ? gate.reasons.join(' • ') : 'Action unavailable for current state'; const disableIf = (cond) => cond ? ` disabled title="${esc(reason)}"` : ''; if (item.itemType !== 'fleet') { const contractBlocked = (key === 'checkout' && gate.checkoutEligible === false) || (key === 'checkin' && gate.checkinEligible === false); actions.push(`<button class="inspectorBtn primary" data-action="contract" type="button"${disableIf(contractBlocked)}>Open contract</button>`); actions.push(`<button class="inspectorBtn" data-action="fleet" type="button"${disableIf(gate.fleetEnabled === false)}>Open fleet</button>`); } if (resolveVehicleId(item)) actions.push(`<button class="inspectorBtn" data-action="vehicle" type="button"${disableIf(gate.vehicleEnabled === false)}>Open vehicle card</button>`); actions.push(`<button class="inspectorBtn" data-action="bookings" type="button"${disableIf(gate.bookingsEnabled === false)}>Open bookings</button>`); els.inspector.innerHTML = `<div class="fieldGrid">${field('Record', safe(item.bookingNumber || item.vehicleLabel || item.assignedVehicleLabel || item._id || item.id))}${field('Queue / tab', TAB_CONFIG[key]?.label || key)}${field('Status', statusLabel(item))}${field('Vehicle', safe(item.assignedVehicleLabel || item.vehicleLabel || 'Χωρίς όχημα'))}${field('Customer / station', safe(item.customerName || item.station || '—'))}${field('Time', key==='checkin' ? fmtDT(item.dropoffDateTime || item.end) : fmtDT(item.pickupDateTime || item.start))}${field('Payment', safe(item.paymentStatus || '—'))}${field('Outstanding', money(item.totalBalance || 0))}${field('Vehicle ops', [safe(item.vehicleOperationalStatus), item.vehicleReadyToGo === false ? 'Not ready' : '', item.vehicleHardHold ? 'Hard hold' : '', item.vehicleServiceBlocked ? 'Service blocked' : ''].filter(Boolean).join(' • ') || '—', true)}${field('Route', routeText(item), true)}${field('Contact', [safe(item.phone), safe(item.email)].filter(Boolean).join(' · ') || '—', true)}${field('Flight / extras', [safe(item.flightNumber), Array.isArray(item.selectedExtrasList)&&item.selectedExtrasList.length ? item.selectedExtrasList.join(', ') : safe(item.extras)].filter(Boolean).join(' • ') || '—', true)}${field('Notes', [safe(item.pickupComment), safe(item.dropoffComment), safe(item.remarks), safe(item.notes)].filter(Boolean).join(' • ') || '—', true)}</div><div class="inspectorActions">${actions.join('')}</div>`; }
   function updateModeUi(){ document.querySelectorAll('[data-view-mode]').forEach((btn)=> btn.classList.toggle('active', btn.getAttribute('data-view-mode')===state.viewMode)); if (els.modeChip) els.modeChip.textContent = state.viewMode === 'desk' ? 'Desk mode' : 'Full mode'; if (els.activeTabChip) els.activeTabChip.textContent = TAB_CONFIG[state.activeTab]?.label || '—'; const tabsWrap = $('fullOnlyTabsWrap'); if (tabsWrap) tabsWrap.classList.toggle('hidden', state.viewMode !== 'full'); if (els.deskView) els.deskView.classList.toggle('hidden', state.viewMode !== 'desk'); if (els.fullView) els.fullView.classList.toggle('hidden', state.viewMode !== 'full'); const mainPanel = $('mainPanel'); if (mainPanel) { mainPanel.classList.toggle('is-desk-mode', state.viewMode === 'desk'); mainPanel.classList.toggle('is-full-mode', state.viewMode !== 'desk'); } if (els.panelTitle && els.panelSub) { if (state.viewMode === 'desk') { els.panelTitle.textContent = 'Daily desk'; els.panelSub.textContent = 'Καθημερινό front-desk workspace με σταθερά μεγάλο table area για check-outs και check-ins, ανεξάρτητα από το πόσα rows φαίνονται.'; } else { els.panelTitle.textContent = TAB_CONFIG[state.activeTab]?.label || 'Full workspace'; els.panelSub.textContent = (TAB_CONFIG[state.activeTab]?.sub || 'Πλήρες operational dataset για την επιλεγμένη ημέρα.') + ' Το Daily δείχνει μόνο confirmed / live operational records.'; } } }
