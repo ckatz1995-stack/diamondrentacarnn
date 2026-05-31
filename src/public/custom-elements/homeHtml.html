@@ -99,8 +99,10 @@ body{overflow:hidden}
 
 /* ── Command deck ── */
 .commandDeck{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
-.commandCard{padding:16px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);display:grid;gap:8px;min-height:140px;transition:border-color .15s,transform .15s}
-.commandCard:hover{border-color:var(--gold-border);transform:translateY(-1px)}
+.commandCard{position:relative;overflow:hidden;padding:16px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);display:grid;gap:8px;min-height:140px;transition:border-color .15s,transform .15s,box-shadow .15s}
+.commandCard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);opacity:.5;transition:opacity .15s}
+.commandCard:hover{border-color:var(--gold-border);transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.commandCard:hover::before{opacity:1}
 .commandCard.locked{opacity:.42;filter:grayscale(.5);pointer-events:none}
 .commandKick{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 .commandTitle{font-size:15px;font-weight:900;letter-spacing:-.01em;color:var(--text)}
