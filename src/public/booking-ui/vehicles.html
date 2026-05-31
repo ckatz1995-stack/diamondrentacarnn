@@ -665,17 +665,15 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .total-box{overflow-x:hidden!important}
   .total-row{flex-wrap:wrap}
 }
-/* DIAMOND MOBILE: Collapsible search bar */
-.search-summary-bar{display:none;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.15);border-radius:12px;font-size:14px;font-weight:700;color:#fff;margin-bottom:10px}
-.search-summary-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.search-edit-btn{background:rgba(231,191,105,.22);border:1px solid rgba(231,191,105,.35);color:#f6e19f;font-size:13px;font-weight:800;padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;min-height:44px;font-family:inherit}
-.search-edit-btn:hover{background:rgba(231,191,105,.35)}
-.search-form-panel{transition:max-height .3s ease,opacity .25s ease;overflow:hidden}
+/* DIAMOND: Compact editable search summary */
+.search-summary-bar{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.78);border:1px solid rgba(160,110,35,.14);border-radius:16px;font-size:14px;font-weight:800;color:#2b2114;margin-bottom:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.68)}
+.search-summary-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-edit-btn{background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));border:0;color:#2a1d09;font-size:13px;font-weight:900;padding:8px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:42px;font-family:inherit;box-shadow:0 8px 18px rgba(160,110,35,.18)}
+.search-edit-btn:hover{filter:brightness(1.04)}
+.search-form-panel{transition:max-height .3s ease,opacity .25s ease;overflow:hidden;max-height:520px;opacity:1}
 .search-form-panel.collapsed{max-height:0;opacity:0;pointer-events:none}
 @media(max-width:767px){
-  .search-summary-bar{display:flex}
-  .search-form-panel{max-height:none}
-  .search-form-panel.collapsed{max-height:0;opacity:0}
+  .search-summary-bar{font-size:13px;padding:10px 12px}
   .field input,.field select{font-size:16px}
 }
 
@@ -760,10 +758,10 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     Ξεκινήστε την αναζήτησή σας από την <a href="/">αρχική σελίδα</a>.
   </div>
   <section class="search-wrap panel">
-    <!-- DIAMOND MOBILE: Summary bar shown on mobile when form is collapsed -->
+    <!-- Compact edit summary: customers can adjust search without returning home -->
     <div class="search-summary-bar" id="searchSummaryBar">
-      <span class="search-summary-text" id="searchSummaryText">Αναζήτηση...</span>
-      <button class="search-edit-btn" id="searchEditBtn" type="button">Επεξεργασία</button>
+      <span class="search-summary-text" id="searchSummaryText">Η αναζήτησή σου...</span>
+      <button class="search-edit-btn" id="searchEditBtn" type="button" aria-expanded="false">Αλλαγή αναζήτησης</button>
     </div>
     <div class="search-form-panel" id="searchFormPanel">
     <div class="search-bar">
@@ -1720,7 +1718,7 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
   }catch(_){}
 })();
 
-// DIAMOND MOBILE: Search summary bar for mobile
+// DIAMOND: Compact search editor summary
 function updateSearchSummaryBar(){
   try{
     var summaryText = document.getElementById('searchSummaryText');
@@ -1728,38 +1726,35 @@ function updateSearchSummaryBar(){
     var pl = document.getElementById('pickupLocation');
     var dl = document.getElementById('dropoffLocation');
     var pd = document.getElementById('pickupDate');
+    var pt = document.getElementById('pickupTime');
     var dd = document.getElementById('dropoffDate');
+    var dt = document.getElementById('dropoffTime');
     var days = typeof currentDays === 'function' ? currentDays() : '?';
-    var from = (pl && pl.value) ? pl.value.split(' ')[0] : 'Παραλαβή';
-    var to = (dl && dl.value) ? dl.value.split(' ')[0] : 'Επιστροφή';
-    summaryText.textContent = from + ' → ' + to + ' · ' + days + ' ημέρες';
+    var from = (pl && pl.value) ? pl.value : 'Παραλαβή';
+    var to = (dl && dl.value) ? dl.value : 'Επιστροφή';
+    var pickupWhen = ((pd && pd.value) ? pd.value : 'ημ/νία') + ((pt && pt.value) ? ' ' + pt.value : '');
+    var dropoffWhen = ((dd && dd.value) ? dd.value : 'ημ/νία') + ((dt && dt.value) ? ' ' + dt.value : '');
+    summaryText.textContent = from + ' · ' + pickupWhen + ' → ' + to + ' · ' + dropoffWhen + ' · ' + days + ' ημέρες';
   }catch(_){}
 }
 (function(){
   var editBtn = document.getElementById('searchEditBtn');
   var formPanel = document.getElementById('searchFormPanel');
-  var summaryBar = document.getElementById('searchSummaryBar');
   if(!editBtn||!formPanel) return;
-  // DIAMOND MOBILE: On mobile, collapse the form by default, show summary bar
-  function initSearchPanel(){
-    if(window.innerWidth < 768){
-      formPanel.classList.add('collapsed');
-      updateSearchSummaryBar();
-    } else {
-      formPanel.classList.remove('collapsed');
-    }
+  function setSearchPanel(open){
+    formPanel.classList.toggle('collapsed', !open);
+    editBtn.textContent = open ? 'Κλείσιμο αλλαγών' : 'Αλλαγή αναζήτησης';
+    editBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    updateSearchSummaryBar();
   }
-  initSearchPanel();
-  window.addEventListener('resize', initSearchPanel);
+  setSearchPanel(false);
   editBtn.addEventListener('click',function(){
-    formPanel.classList.remove('collapsed');
-    if(summaryBar) summaryBar.style.display = 'none';
+    setSearchPanel(formPanel.classList.contains('collapsed'));
   });
   // Also bind empty state "modify search" button
   var emptyBtn = document.getElementById('emptyStateModifyBtn');
   if(emptyBtn) emptyBtn.addEventListener('click',function(){
-    formPanel.classList.remove('collapsed');
-    if(summaryBar) summaryBar.style.display = 'none';
+    setSearchPanel(true);
     if(formPanel) formPanel.scrollIntoView({behavior:'smooth',block:'start'});
   });
 })();
