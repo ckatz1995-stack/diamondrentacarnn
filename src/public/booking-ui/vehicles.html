@@ -110,6 +110,15 @@ button:hover,.cta:hover,.header-phone:hover{
   gap:9px 12px;
   align-items:end;
 }
+.search-options-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px 12px;
+  align-items:end;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(160,110,35,.10);
+}
 .field{display:flex;flex-direction:column;gap:4px}
 .field label{
   font-size:10px;
@@ -371,7 +380,8 @@ button:hover,.cta:hover,.header-phone:hover{
 .header-nav a{font-size:13px;padding:9px 12px}
 .header-phone{padding:10px 15px;font-size:14px}
 .search-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px}
-.filter-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.search-options-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px}
+.filter-row{grid-template-columns:minmax(260px,420px);gap:10px}
 .result-main{grid-template-columns:215px minmax(0,1fr)}
 .media-col{min-height:196px;padding:14px}
 .vehicle-image{max-width:190px;max-height:132px}
@@ -384,8 +394,8 @@ button:hover,.cta:hover,.header-phone:hover{
 .spec-grid{gap:8px}.spec{padding:10px 11px}.spec .v{font-size:15px}
 .total-box{padding:14px 16px}.total-row .k{font-size:13px}.total-row .v{font-size:18px}.total-row.grand .k{font-size:20px}.total-row.grand .v{font-size:34px}
 .cta{height:56px;font-size:18px}
-@media (max-width:1024px){.header-inner{flex-wrap:wrap;justify-content:center}.header-nav{order:3;width:100%;justify-content:center}.header-phone{width:100%;text-align:center}.search-grid{grid-template-columns:1fr 1fr}.filter-row{grid-template-columns:1fr}.result-main{grid-template-columns:1fr}.media-col{min-height:180px}.head-row{grid-template-columns:1fr}.price-box{text-align:left}.spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.filter-row,.spec-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.content-col{padding:14px}.vehicle-title{font-size:28px}.total-row.grand .v{font-size:30px}.cta{height:54px;font-size:17px}}
+@media (max-width:1024px){.header-inner{flex-wrap:wrap;justify-content:center}.header-nav{order:3;width:100%;justify-content:center}.header-phone{width:100%;text-align:center}.search-grid,.search-options-grid{grid-template-columns:1fr 1fr}.filter-row{grid-template-columns:1fr}.result-main{grid-template-columns:1fr}.media-col{min-height:180px}.head-row{grid-template-columns:1fr}.price-box{text-align:left}.spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.search-options-grid,.filter-row,.spec-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.content-col{padding:14px}.vehicle-title{font-size:28px}.total-row.grand .v{font-size:30px}.cta{height:54px;font-size:17px}}
 
 
 @media (max-width:760px){.page{width:min(var(--container), calc(100vw - 8px))}.footer-grid{grid-template-columns:1fr}.footer-bottom{padding:0 16px 18px}}
@@ -665,17 +675,15 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .total-box{overflow-x:hidden!important}
   .total-row{flex-wrap:wrap}
 }
-/* DIAMOND MOBILE: Collapsible search bar */
-.search-summary-bar{display:none;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.15);border-radius:12px;font-size:14px;font-weight:700;color:#fff;margin-bottom:10px}
-.search-summary-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.search-edit-btn{background:rgba(231,191,105,.22);border:1px solid rgba(231,191,105,.35);color:#f6e19f;font-size:13px;font-weight:800;padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;min-height:44px;font-family:inherit}
-.search-edit-btn:hover{background:rgba(231,191,105,.35)}
-.search-form-panel{transition:max-height .3s ease,opacity .25s ease;overflow:hidden}
+/* DIAMOND: Compact editable search summary */
+.search-summary-bar{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.78);border:1px solid rgba(160,110,35,.14);border-radius:16px;font-size:14px;font-weight:800;color:#2b2114;margin-bottom:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.68)}
+.search-summary-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-edit-btn{background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));border:0;color:#2a1d09;font-size:13px;font-weight:900;padding:8px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:42px;font-family:inherit;box-shadow:0 8px 18px rgba(160,110,35,.18)}
+.search-edit-btn:hover{filter:brightness(1.04)}
+.search-form-panel{transition:max-height .3s ease,opacity .25s ease;overflow:hidden;max-height:520px;opacity:1}
 .search-form-panel.collapsed{max-height:0;opacity:0;pointer-events:none}
 @media(max-width:767px){
-  .search-summary-bar{display:flex}
-  .search-form-panel{max-height:none}
-  .search-form-panel.collapsed{max-height:0;opacity:0}
+  .search-summary-bar{font-size:13px;padding:10px 12px}
   .field input,.field select{font-size:16px}
 }
 
@@ -760,10 +768,10 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     Ξεκινήστε την αναζήτησή σας από την <a href="/">αρχική σελίδα</a>.
   </div>
   <section class="search-wrap panel">
-    <!-- DIAMOND MOBILE: Summary bar shown on mobile when form is collapsed -->
+    <!-- Compact edit summary: customers can adjust search without returning home -->
     <div class="search-summary-bar" id="searchSummaryBar">
-      <span class="search-summary-text" id="searchSummaryText">Αναζήτηση...</span>
-      <button class="search-edit-btn" id="searchEditBtn" type="button">Επεξεργασία</button>
+      <span class="search-summary-text" id="searchSummaryText">Η αναζήτησή σου...</span>
+      <button class="search-edit-btn" id="searchEditBtn" type="button" aria-expanded="false">Αλλαγή αναζήτησης</button>
     </div>
     <div class="search-form-panel" id="searchFormPanel">
     <div class="search-bar">
@@ -807,6 +815,26 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
             <select id="dropoffTime" class="time-select" required></select>
           </div>
         </div>
+        <div class="search-options-grid">
+          <div class="field">
+            <label>Κατηγορίες οχημάτων</label>
+            <select id="category">
+              <option value="all">Όλες οι κατηγορίες</option>
+              <option value="A">Κατηγορία A</option>
+              <option value="B">Κατηγορία B</option>
+              <option value="LX">Κατηγορία LX</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ηλικία οδηγού</label>
+            <select id="ageGroup">
+              <option value="23-69">23-69</option>
+              <option value="19-22">19-22</option>
+              <option value="70+">70+</option>
+            </select>
+          </div>
+        </div>
+        <div class="helper-note" id="categoryHint">Επιλεγμένη κατηγορία: Όλες</div>
         <div class="panel-footer">
           <div id="dateRangeError" class="date-range-error" role="alert"></div>
           <div class="search-note">Η λίστα και το σύνολο ενημερώνονται άμεσα μόλις αλλάζει ημερομηνία, ώρα, ηλικιακή ομάδα ή φίλτρο κατηγορίας.</div>
@@ -816,27 +844,10 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div><!-- end search-form-panel -->
   </section>
 
-  <section class="filter-combined">
+  <section class="filter-combined" aria-label="Ταξινόμηση αποτελεσμάτων">
     <div class="filter-row">
       <div class="filter-slot">
-        <p class="filter-title">Κατηγορίες οχημάτων</p>
-        <select id="category">
-          <option value="all">Όλες οι κατηγορίες</option>
-          <option value="A">Κατηγορία A</option>
-          <option value="B">Κατηγορία B</option>
-          <option value="LX">Κατηγορία LX</option>
-        </select>
-      </div>
-      <div class="filter-slot">
-        <p class="filter-title">Ηλικία οδηγού</p>
-        <select id="ageGroup">
-          <option value="23-69">23-69</option>
-          <option value="19-22">19-22</option>
-          <option value="70+">70+</option>
-        </select>
-      </div>
-      <div class="filter-slot">
-        <p class="filter-title">Ταξινόμηση</p>
+        <p class="filter-title">Ταξινόμηση αποτελεσμάτων</p>
         <select id="sortSelect">
           <option value="priceAsc">Τιμή: Χαμηλότερη → Υψηλό</option>
           <option value="priceDesc">Τιμή: Υψηλότερη → Χαμηλό</option>
@@ -844,7 +855,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         </select>
       </div>
     </div>
-    <div class="helper-note" id="categoryHint">Επιλεγμένη κατηγορία: Όλες</div>
   </section>
 
   <section class="list" id="list">
@@ -1720,7 +1730,7 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
   }catch(_){}
 })();
 
-// DIAMOND MOBILE: Search summary bar for mobile
+// DIAMOND: Compact search editor summary
 function updateSearchSummaryBar(){
   try{
     var summaryText = document.getElementById('searchSummaryText');
@@ -1728,38 +1738,39 @@ function updateSearchSummaryBar(){
     var pl = document.getElementById('pickupLocation');
     var dl = document.getElementById('dropoffLocation');
     var pd = document.getElementById('pickupDate');
+    var pt = document.getElementById('pickupTime');
     var dd = document.getElementById('dropoffDate');
+    var dt = document.getElementById('dropoffTime');
+    var categoryEl = document.getElementById('category');
+    var ageEl = document.getElementById('ageGroup');
     var days = typeof currentDays === 'function' ? currentDays() : '?';
-    var from = (pl && pl.value) ? pl.value.split(' ')[0] : 'Παραλαβή';
-    var to = (dl && dl.value) ? dl.value.split(' ')[0] : 'Επιστροφή';
-    summaryText.textContent = from + ' → ' + to + ' · ' + days + ' ημέρες';
+    var from = (pl && pl.value) ? pl.value : 'Παραλαβή';
+    var to = (dl && dl.value) ? dl.value : 'Επιστροφή';
+    var pickupWhen = ((pd && pd.value) ? pd.value : 'ημ/νία') + ((pt && pt.value) ? ' ' + pt.value : '');
+    var dropoffWhen = ((dd && dd.value) ? dd.value : 'ημ/νία') + ((dt && dt.value) ? ' ' + dt.value : '');
+    var categoryText = categoryEl ? categoryEl.options[categoryEl.selectedIndex]?.text || categoryEl.value : 'Όλες οι κατηγορίες';
+    var ageText = ageEl && ageEl.value ? ageEl.value : '23-69';
+    summaryText.textContent = from + ' · ' + pickupWhen + ' → ' + to + ' · ' + dropoffWhen + ' · ' + categoryText + ' · Ηλικία ' + ageText + ' · ' + days + ' ημέρες';
   }catch(_){}
 }
 (function(){
   var editBtn = document.getElementById('searchEditBtn');
   var formPanel = document.getElementById('searchFormPanel');
-  var summaryBar = document.getElementById('searchSummaryBar');
   if(!editBtn||!formPanel) return;
-  // DIAMOND MOBILE: On mobile, collapse the form by default, show summary bar
-  function initSearchPanel(){
-    if(window.innerWidth < 768){
-      formPanel.classList.add('collapsed');
-      updateSearchSummaryBar();
-    } else {
-      formPanel.classList.remove('collapsed');
-    }
+  function setSearchPanel(open){
+    formPanel.classList.toggle('collapsed', !open);
+    editBtn.textContent = open ? 'Κλείσιμο αλλαγών' : 'Αλλαγή αναζήτησης';
+    editBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    updateSearchSummaryBar();
   }
-  initSearchPanel();
-  window.addEventListener('resize', initSearchPanel);
+  setSearchPanel(false);
   editBtn.addEventListener('click',function(){
-    formPanel.classList.remove('collapsed');
-    if(summaryBar) summaryBar.style.display = 'none';
+    setSearchPanel(formPanel.classList.contains('collapsed'));
   });
   // Also bind empty state "modify search" button
   var emptyBtn = document.getElementById('emptyStateModifyBtn');
   if(emptyBtn) emptyBtn.addEventListener('click',function(){
-    formPanel.classList.remove('collapsed');
-    if(summaryBar) summaryBar.style.display = 'none';
+    setSearchPanel(true);
     if(formPanel) formPanel.scrollIntoView({behavior:'smooth',block:'start'});
   });
 })();
