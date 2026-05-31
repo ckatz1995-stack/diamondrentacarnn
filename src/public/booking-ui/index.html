@@ -1631,6 +1631,52 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   color:rgba(255,255,255,.86)!important;
 }
 
+
+/* Section intros — place the second text beside the title */
+.section-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,.95fr) minmax(280px,.85fr)!important;
+  align-items:end!important;
+  column-gap:36px!important;
+  row-gap:8px!important;
+}
+.section-head .section-kicker,
+.section-head h3{
+  grid-column:1!important;
+}
+.section-head h3{
+  margin-bottom:0!important;
+}
+.section-head p{
+  grid-column:2!important;
+  grid-row:1 / span 2!important;
+  align-self:end!important;
+  max-width:none!important;
+}
+.cta-strip-copy{
+  display:grid!important;
+  grid-template-columns:minmax(0,.8fr) minmax(260px,1fr)!important;
+  align-items:center!important;
+  gap:28px!important;
+}
+.cta-strip-copy h2{
+  margin-bottom:0!important;
+}
+
+@media(max-width:860px){
+  .section-head,
+  .cta-strip-copy{
+    display:block!important;
+  }
+  .section-head p{
+    max-width:none!important;
+    margin-top:10px!important;
+  }
+  .cta-strip-copy p{
+    margin-top:10px!important;
+  }
+}
+
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
