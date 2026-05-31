@@ -1689,38 +1689,38 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 }
 
 
-/* Hero intro — polished glass copy block over the photo */
-.hero::before{
-  background:
-    linear-gradient(90deg,rgba(8,22,28,.66) 0%,rgba(8,22,28,.42) 34%,rgba(8,22,28,.10) 62%,rgba(0,0,0,.08) 100%),
-    linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.18) 100%)!important;
-}
+/* Hero intro — free text layout over the photo */
 .intro-panel{
   width:100%!important;
-  max-width:520px!important;
-  padding:24px 24px 22px!important;
-  border-radius:26px!important;
-  background:linear-gradient(135deg,rgba(17,38,47,.64),rgba(17,38,47,.30))!important;
-  border:1px solid rgba(255,255,255,.18)!important;
-  backdrop-filter:blur(8px)!important;
-  box-shadow:0 22px 46px rgba(0,0,0,.22)!important;
+  max-width:820px!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  backdrop-filter:none!important;
+  box-shadow:none!important;
 }
 .intro-copy{
-  max-width:none!important;
+  max-width:820px!important;
+  display:grid!important;
+  grid-template-columns:minmax(280px,.95fr) minmax(260px,.82fr)!important;
+  align-items:end!important;
+  column-gap:30px!important;
+  row-gap:10px!important;
 }
 .hero-badge{
-  margin-bottom:18px!important;
+  grid-column:1 / -1!important;
+  justify-self:start!important;
+  margin-bottom:8px!important;
 }
 .wordmark{
-  margin-bottom:12px!important;
+  grid-column:1!important;
+  grid-row:2 / span 3!important;
+  margin:0!important;
 }
 .wordmark-copy h1{
-  font-size:clamp(44px,5.6vw,70px)!important;
-  line-height:.92!important;
+  font-size:clamp(46px,5.8vw,74px)!important;
+  line-height:.9!important;
   letter-spacing:-.055em!important;
-}
-.wordmark-copy h1 span{
-  margin-top:5px!important;
 }
 .wordmark-copy .sub{
   margin-top:9px!important;
@@ -1728,38 +1728,54 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   letter-spacing:.26em!important;
 }
 .hero-editorial{
-  margin-top:12px!important;
-  max-width:430px!important;
+  margin-top:14px!important;
+  max-width:390px!important;
 }
 .intro-tagline{
-  margin-top:16px!important;
-  max-width:450px!important;
-  font-size:clamp(19px,1.85vw,25px)!important;
-  line-height:1.22!important;
+  grid-column:2!important;
+  grid-row:2!important;
+  margin:0!important;
+  max-width:360px!important;
+  font-size:clamp(19px,1.8vw,24px)!important;
+  line-height:1.26!important;
 }
 .intro-text{
-  max-width:440px!important;
+  grid-column:2!important;
+  grid-row:3!important;
+  margin:10px 0 0!important;
+  max-width:360px!important;
   font-size:14.5px!important;
   line-height:1.58!important;
-  color:rgba(255,255,255,.88)!important;
+  color:rgba(255,255,255,.90)!important;
 }
 .hero-trust{
+  grid-column:1 / -1!important;
   gap:10px!important;
-  margin-top:20px!important;
+  margin-top:14px!important;
 }
 .hero-trust-item{
-  padding:7px 10px!important;
-  border-radius:999px!important;
-  background:rgba(255,255,255,.10)!important;
-  border:1px solid rgba(255,255,255,.16)!important;
+  padding:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  border:0!important;
 }
-@media(max-width:860px){
+@media(max-width:900px){
   .intro-panel{
     max-width:100%!important;
-    padding:20px 18px!important;
   }
-  .wordmark-copy h1{
-    font-size:clamp(34px,10vw,54px)!important;
+  .intro-copy{
+    display:block!important;
+    max-width:520px!important;
+  }
+  .wordmark{
+    margin-bottom:12px!important;
+  }
+  .intro-tagline,
+  .intro-text{
+    max-width:100%!important;
+  }
+  .hero-trust{
+    margin-top:18px!important;
   }
 }
 
