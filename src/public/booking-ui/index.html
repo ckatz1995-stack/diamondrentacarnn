@@ -1688,6 +1688,81 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   }
 }
 
+
+/* Hero intro — polished glass copy block over the photo */
+.hero::before{
+  background:
+    linear-gradient(90deg,rgba(8,22,28,.66) 0%,rgba(8,22,28,.42) 34%,rgba(8,22,28,.10) 62%,rgba(0,0,0,.08) 100%),
+    linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.18) 100%)!important;
+}
+.intro-panel{
+  width:100%!important;
+  max-width:520px!important;
+  padding:24px 24px 22px!important;
+  border-radius:26px!important;
+  background:linear-gradient(135deg,rgba(17,38,47,.64),rgba(17,38,47,.30))!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  backdrop-filter:blur(8px)!important;
+  box-shadow:0 22px 46px rgba(0,0,0,.22)!important;
+}
+.intro-copy{
+  max-width:none!important;
+}
+.hero-badge{
+  margin-bottom:18px!important;
+}
+.wordmark{
+  margin-bottom:12px!important;
+}
+.wordmark-copy h1{
+  font-size:clamp(44px,5.6vw,70px)!important;
+  line-height:.92!important;
+  letter-spacing:-.055em!important;
+}
+.wordmark-copy h1 span{
+  margin-top:5px!important;
+}
+.wordmark-copy .sub{
+  margin-top:9px!important;
+  font-size:11px!important;
+  letter-spacing:.26em!important;
+}
+.hero-editorial{
+  margin-top:12px!important;
+  max-width:430px!important;
+}
+.intro-tagline{
+  margin-top:16px!important;
+  max-width:450px!important;
+  font-size:clamp(19px,1.85vw,25px)!important;
+  line-height:1.22!important;
+}
+.intro-text{
+  max-width:440px!important;
+  font-size:14.5px!important;
+  line-height:1.58!important;
+  color:rgba(255,255,255,.88)!important;
+}
+.hero-trust{
+  gap:10px!important;
+  margin-top:20px!important;
+}
+.hero-trust-item{
+  padding:7px 10px!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.10)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+}
+@media(max-width:860px){
+  .intro-panel{
+    max-width:100%!important;
+    padding:20px 18px!important;
+  }
+  .wordmark-copy h1{
+    font-size:clamp(34px,10vw,54px)!important;
+  }
+}
+
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -1793,8 +1868,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
               <div class="hero-editorial">Οδήγησε τη Βόρεια Ελλάδα, <em>με τον τρόπο σου.</em></div>
               </div>
             </div>
-            <div class="intro-tagline">Ενοικίαση οχήματος στη Θεσσαλονίκη με καθαρή διαδικασία και γρήγορη επιβεβαίωση από την ομάδα μας.</div>
-            <p class="intro-text">Συμπλήρωσε παραλαβή και επιστροφή, δες τις διαθέσιμες κατηγορίες και στείλε το αίτημά σου μέσα από μια σύντομη, ξεκάθαρη ροή.</p>
+            <div class="intro-tagline">Καθαρή κράτηση, γρήγορη επιβεβαίωση και προσωπική εξυπηρέτηση στη Θεσσαλονίκη.</div>
+            <p class="intro-text">Διάλεξε παραλαβή και επιστροφή, δες διαθέσιμες κατηγορίες και στείλε το αίτημά σου μέσα σε λίγα βήματα.</p>
             <div class="hero-trust">
               <span class="hero-trust-item"><span class="hero-trust-check">✓</span>Χωρίς εγγύηση</span>
               <span class="hero-trust-item"><span class="hero-trust-check">✓</span>Γρήγορη επιβεβαίωση</span>
