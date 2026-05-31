@@ -24,8 +24,14 @@ body{overflow:hidden}
 .shell{display:flex;height:100vh;overflow:hidden}
 .shell-main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
 .shell-content{flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg);padding:14px 18px}
-.shell-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--border);flex:0 0 auto;min-height:52px;position:relative;z-index:20}
+.shell-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex:0 0 auto;min-height:62px;position:relative;z-index:20}
 .shell-topdate{font:700 12px/1 system-ui;color:var(--muted)}
+.shell-page-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.shell-page-name{display:flex;align-items:center;gap:9px;font:900 15px/1.2 system-ui,-apple-system,sans-serif;color:var(--text);letter-spacing:-.01em}
+.shell-page-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--gold-bg);border:1px solid var(--gold-border);flex:0 0 28px;color:var(--gold)}
+.shell-page-icon svg{width:14px;height:14px}
+.shell-page-sub{font:700 11px/1 system-ui;color:var(--muted);padding-left:37px}
+.shell-top-right{display:flex;align-items:center;gap:12px;flex:0 0 auto}
 .sb{width:var(--sb-w);flex:0 0 var(--sb-w);display:flex;flex-direction:column;height:100vh;overflow:hidden;background:linear-gradient(175deg,#3D2A14 0%,#5A3F1E 50%,#7A5830 100%);position:relative}
 .sb-brand{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;flex:0 0 auto;border-bottom:1px solid rgba(255,255,255,.08)}
 .sb-logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#C8952E,#A8844A);color:#1A0E00;font:900 17px/1 system-ui;box-shadow:0 4px 14px rgba(200,149,46,.35);flex:0 0 36px}
@@ -252,10 +258,16 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 </nav>
   <div class="shell-main">
     <div class="shell-top">
-      <span class="shell-topdate" id="todayMeta">—</span>
-      <div class="userWrap">
+      <div class="shell-page-info">
+        <div class="shell-page-name"><span class="shell-page-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Myroom</div>
+        <div class="shell-page-sub">Private backoffice workspace</div>
+      </div>
+      <div class="shell-top-right">
+        <span class="shell-topdate" id="todayMeta">—</span>
+        <div class="userWrap">
         <button class="userBtn" id="userMenuBtn" type="button"><span class="userBadge" id="userBadge">G</span><span class="userText"><span class="userName" id="userName">Guest</span><span class="userRole" id="userRole">Not signed in</span></span><span class="caret">▾</span></button>
         <div class="menu" id="userMenu"><div class="menuHead"><div class="userName" id="menuUserName">Guest</div><div class="userRole" id="menuUserRole">Not signed in</div></div><button class="menuItem" data-menu-action="reload" type="button">Ανανέωση</button><button class="menuItem danger" data-menu-action="logout" type="button">Αποσύνδεση</button></div>
+      </div>
       </div>
     </div>
     <main class="shell-content">
