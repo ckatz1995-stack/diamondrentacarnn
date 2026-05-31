@@ -257,16 +257,22 @@
     /* ── Desk grid ── */
     .deskGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;align-items:stretch;min-height:var(--workspace-h);height:100%;grid-auto-rows:minmax(0,1fr)}
     .deskCol{border:1px solid var(--border2);border-radius:16px;background:var(--surface);overflow:visible;min-width:0;display:grid;grid-template-rows:auto minmax(0,1fr);height:100%;min-height:var(--desk-col-h);position:relative}
+    .deskGrid > .deskCol:first-child{border-top:3px solid var(--gold)}
+    .deskGrid > .deskCol:last-child{border-top:3px solid #10B981}
     .deskCompactHead{display:none}
     .deskCompactRows{display:grid;gap:0;min-height:0;height:100%;overflow:hidden;padding:10px}
     .deskCompactRows > .toolTableShell{height:100%;min-height:0}
     .deskCompactRows > .toolTableShell .toolBodyShell{min-height:0}
     .deskCompactRows > .toolTableShell .toolTableViewport{height:100%;min-height:0}.deskCompactRows > .toolTableShell .toolTableWrap{height:100%;min-height:100%}
-    .deskCompactRow{display:grid;grid-template-columns:96px minmax(0,1.25fr) minmax(0,.95fr) auto;gap:10px;padding:11px 12px;border-bottom:1px solid var(--border);align-items:start;cursor:pointer;background:var(--surface)}
-    .deskCompactRow:hover{background:rgba(0,0,0,.02)}
-    .deskCompactRow.selected{background:var(--gold-bg)}
+    .deskCompactRow{display:grid;grid-template-columns:96px minmax(0,1.25fr) minmax(0,.95fr) auto;gap:10px;padding:11px 12px;border-bottom:1px solid var(--border);align-items:start;cursor:pointer;background:var(--surface);position:relative;transition:background .14s}
+    .deskCompactRow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--row-accent,var(--gold));opacity:.22;transition:opacity .14s}
+    .deskCompactRow:has(.deskFlag.ok){--row-accent:#10B981}
+    .deskCompactRow:has(.deskFlag.warn){--row-accent:#F59E0B}
+    .deskCompactRow:has(.deskFlag.info){--row-accent:#3B82F6}
+    .deskCompactRow:hover{background:rgba(0,0,0,.02)}.deskCompactRow:hover::before{opacity:.55}
+    .deskCompactRow.selected{background:var(--gold-bg)}.deskCompactRow.selected::before{opacity:1}
     .deskTimeBox{display:grid;gap:6px;justify-items:start}
-    .deskTimeMain{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:7px 10px;border-radius:12px;background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold);font:900 12px/1 system-ui,-apple-system,sans-serif}
+    .deskTimeMain{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:7px 10px;border-radius:12px;background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold);font:900 12px/1 system-ui,-apple-system,sans-serif;box-shadow:0 1px 4px rgba(154,110,30,.15)}
     .deskTimeSub{font:900 10px/1.2 system-ui,-apple-system,sans-serif;color:var(--sub)}
     .deskMainCell{display:grid;gap:4px;min-width:0}
     .deskMainTop{font:900 12.5px/1.25 system-ui,-apple-system,sans-serif;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -276,9 +282,10 @@
     .deskFlag.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.22);color:#B45309}
     .deskFlag.info{background:rgba(59,130,246,.10);border-color:rgba(59,130,246,.22);color:#1D4ED8}
     .deskFlag.ok{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22);color:#065F46}
+    .deskFlag::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.65;flex-shrink:0}
     .deskActionBar{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
     .deskHead{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2)}
-    .deskHead strong{font-size:13px;color:var(--text)}.countPill{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:var(--r-pill);border:1px solid var(--border);background:rgba(0,0,0,.03);font:900 10.5px/1 system-ui,-apple-system,sans-serif;color:var(--sub)}
+    .deskHead strong{font:900 11px/1 system-ui,-apple-system,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}.countPill{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:var(--r-pill);border:1px solid var(--border);background:rgba(0,0,0,.03);font:900 10.5px/1 system-ui,-apple-system,sans-serif;color:var(--sub)}
     .deskCol .toolTableShell{height:100%;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
     .deskCol .toolTableWrap{height:100%;overflow:auto;min-height:100%}
     .deskCol .toolTable{min-width:980px}
