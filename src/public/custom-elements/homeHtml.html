@@ -4,64 +4,81 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-/* ── DIAMOND BACKROOM: Dark Professional Theme ── */
+/* ── DIAMOND BACKROOM: Sidebar Edition ── */
 :root{
-  --bg:#F6F2EA;--surface:#FFFFFF;--surface2:#EDE8DC;
-  --border:rgba(130,100,55,.09);--border2:rgba(130,100,55,.16);
-  --text:#1A1208;--sub:#5C4E38;--muted:#9C8A72;
-  --gold:#9A6E1E;--gold2:#C8952E;
-  --gold-bg:rgba(154,110,30,.09);--gold-border:rgba(154,110,30,.22);
+  --bg:#F0F4FA;--surface:#FFFFFF;--surface2:#E8EEF7;
+  --border:rgba(15,23,42,.08);--border2:rgba(15,23,42,.15);
+  --text:#0F172A;--sub:#475569;--muted:#94A3B8;
+  --gold:#A8844A;--gold2:#6C522E;
+  --gold-bg:rgba(180,138,79,.10);--gold-border:rgba(168,132,74,.22);
   --teal:#2A6B82;--danger:#991B1B;--ok:#166534;
-  --shadow:0 2px 14px rgba(90,65,25,.09);--shadow-lg:0 8px 36px rgba(90,65,25,.14);
-  --r:16px;--r-lg:20px;--r-pill:999px;
+  --shadow:0 2px 12px rgba(15,23,42,.06);--shadow-lg:0 8px 28px rgba(15,23,42,.14);
+  --r:14px;--r-lg:18px;--r-pill:999px;--sb-w:220px;
 }
+/* ── Base ── */
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
-.page{padding:12px;display:flex;flex-direction:column;gap:12px;max-width:1440px;margin:0 auto}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+body{overflow:hidden}
 .hidden{display:none!important}
-
-/* ── Header ── */
-.topbar{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-lg);padding:0;overflow:visible;box-shadow:var(--shadow)}
-.toprow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch}
-.leftScroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.leftLine{min-width:860px;display:flex;align-items:center;gap:10px;padding:12px 14px;white-space:nowrap}
-.brand{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:var(--gold-bg);border:1px solid var(--gold-border);flex:0 0 auto}
-.logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1208;font:900 17px/1 system-ui;box-shadow:0 4px 12px rgba(154,110,30,.28)}
-.brandText{display:flex;flex-direction:column;line-height:1.1}
-.brandTitle{font-size:15px;font-weight:900;color:var(--text);letter-spacing:-.01em}
-.brandSub{font-size:11px;color:var(--muted);font-weight:700;margin-top:1px}
-.tabs{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}
-.tab{appearance:none;border:1px solid var(--border2);background:transparent;color:var(--sub);border-radius:var(--r-pill);padding:9px 14px;font:800 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;cursor:pointer;transition:all .15s}
-.tab:hover{background:rgba(0,0,0,.05);color:var(--text)}
-.tab.active{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent;font-weight:900;box-shadow:0 4px 14px rgba(154,110,30,.25)}
-.tab[disabled]{opacity:.32;cursor:not-allowed}
-.meta{display:flex;align-items:center;gap:10px;padding:12px 14px;border-left:1px solid var(--border);position:relative;z-index:3}
-.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:var(--r-pill);border:1px solid var(--border2);background:rgba(0,0,0,.03);font:800 12px/1.2 system-ui;color:var(--sub)}
-.userWrap{position:relative;display:inline-flex;align-items:center;flex:0 0 auto;overflow:visible;z-index:6}
-.userBtn{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border:1px solid var(--border2);background:rgba(0,0,0,.03);border-radius:var(--r-pill);cursor:pointer;font:900 12px/1.1 system-ui;color:var(--text);transition:all .15s}
-.userBtn:hover{background:rgba(0,0,0,.07);border-color:rgba(255,255,255,.18)}
+/* ── Shell & Sidebar layout ── */
+.shell{display:flex;height:100vh;overflow:hidden}
+.shell-main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.shell-content{flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg);padding:14px 18px}
+.shell-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex:0 0 auto;min-height:62px;position:relative;z-index:20}
+.shell-topdate{font:700 12px/1 system-ui;color:var(--muted)}
+.shell-page-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.shell-page-name{display:flex;align-items:center;gap:9px;font:900 15px/1.2 system-ui,-apple-system,sans-serif;color:var(--text);letter-spacing:-.01em}
+.shell-page-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--gold-bg);border:1px solid var(--gold-border);flex:0 0 28px;color:var(--gold)}
+.shell-page-icon svg{width:14px;height:14px}
+.shell-page-sub{font:700 11px/1 system-ui;color:var(--muted);padding-left:37px}
+.shell-top-right{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.sb{width:var(--sb-w);flex:0 0 var(--sb-w);display:flex;flex-direction:column;height:100vh;overflow:hidden;background:linear-gradient(175deg,#3D2A14 0%,#5A3F1E 50%,#7A5830 100%);position:relative}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;flex:0 0 auto;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#C8952E,#A8844A);color:#1A0E00;font:900 17px/1 system-ui;box-shadow:0 4px 14px rgba(200,149,46,.35);flex:0 0 36px}
+.sb-brand-text{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.sb-brand-name{font:900 13px/1.2 system-ui;color:#FEFCF7;letter-spacing:-.01em}
+.sb-brand-sub{font:700 10px/1 system-ui;color:rgba(255,255,255,.45);margin-top:2px}
+.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 8px;display:flex;flex-direction:column;gap:2px;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{display:none}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:rgba(255,255,255,.62);cursor:pointer;transition:all .16s;text-align:left;width:100%;font:700 13px/1.2 system-ui,-apple-system,sans-serif;appearance:none}
+.sb-item:hover{background:rgba(255,255,255,.08);color:#FEFCF7;border-color:rgba(255,255,255,.1)}
+.sb-item.active{background:rgba(200,149,46,.18);color:#F5CC72;border-color:rgba(200,149,46,.28);font-weight:900}
+.sb-item svg{flex:0 0 18px;width:18px;height:18px;opacity:.75}
+.sb-item.active svg{opacity:1}
+.sb-item-label{flex:1;min-width:0;font-size:13px}
+.sb-divider{height:1px;background:rgba(255,255,255,.07);margin:6px 8px}
+.sb-footer{flex:0 0 auto;padding:12px 8px;border-top:1px solid rgba(255,255,255,.08)}
+.shell-content::-webkit-scrollbar{width:5px}
+.shell-content::-webkit-scrollbar-track{background:transparent}
+.shell-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+.userWrap,.userMenuWrap{position:relative;display:inline-flex;align-items:center;flex:0 0 auto;overflow:visible;z-index:6}
+.userBtn,.userMenuBtn{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border:1px solid var(--border2);background:rgba(15,23,42,.04);border-radius:var(--r-pill);cursor:pointer;font:900 12px/1.1 system-ui;color:var(--text);transition:all .15s}
+.userBtn:hover,.userMenuBtn:hover{background:rgba(15,23,42,.08)}
 .userBadge{width:28px;height:28px;border-radius:var(--r-pill);display:grid;place-items:center;background:var(--gold-bg);color:var(--gold);font:900 13px/1 system-ui;border:1px solid var(--gold-border)}
 .userText{display:flex;flex-direction:column;align-items:flex-start}
-.userName{font-weight:900;font-size:13px}
+.userName{font-weight:900;font-size:13px;color:var(--text)}
 .userRole{font-size:11px;color:var(--muted);font-weight:700}
 .caret{font-size:10px;color:var(--muted)}
-.menu{position:absolute;right:0;top:calc(100% + 8px);min-width:220px;background:var(--surface);border:1px solid var(--border2);border-radius:14px;box-shadow:var(--shadow-lg);display:none;z-index:999999;overflow:hidden}
-.menu.open{display:block}
-.menuHead{padding:12px 14px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border)}
-.menuItem{padding:11px 14px;font:800 13px/1.2 system-ui;color:var(--text);background:transparent;border:0;border-bottom:1px solid var(--border);text-align:left;cursor:pointer;width:100%;transition:background .12s}
-.menuItem:last-child{border-bottom:none}
-.menuItem:hover{background:rgba(0,0,0,.05)}
-.menuItem.danger{color:#B91C1C}
-.menuItem.danger:hover{background:rgba(239,68,68,.08)}
-
+.menu,.userMenu{position:absolute;right:0;top:calc(100% + 8px);min-width:220px;background:var(--surface);border:1px solid var(--border2);border-radius:14px;box-shadow:var(--shadow-lg);display:none;z-index:999999;overflow:hidden}
+.menu.open,.userMenu.open{display:block}
+.menuHead,.userMenuHead{padding:12px 14px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border)}
+.menuItem,.userMenuItem{padding:11px 14px;font:800 13px/1.2 system-ui;color:var(--text);background:transparent;border:0;border-bottom:1px solid var(--border);text-align:left;cursor:pointer;width:100%;transition:background .12s}
+.menuItem:last-child,.userMenuItem:last-child{border-bottom:none}
+.menuItem:hover,.userMenuItem:hover{background:rgba(15,23,42,.05)}
+.menuItem.danger,.userMenuItem.danger{color:#B91C1C}
+.menuItem.danger:hover,.userMenuItem.danger:hover{background:rgba(239,68,68,.08)}
+@media(max-width:900px){
+  .sb{width:60px;flex:0 0 60px}
+  .sb-brand-text,.sb-item-label,.sb-brand-sub{display:none}
+  .sb-brand{justify-content:center;padding:14px 0}
+  .sb-item{justify-content:center;padding:10px}
+  .sb-item svg{flex:0 0 22px;width:22px;height:22px}
+  .shell-content{padding:10px 12px}
+}
 /* ── Page grid ── */
 .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow)}
 
-/* ── Hero ── */
-.hero{padding:22px;background:linear-gradient(135deg,rgba(154,110,30,.07),rgba(63,116,138,.05));border:1px solid var(--gold-border);border-radius:var(--r);border-top:2px solid var(--gold)}
-.hero h1{margin:0 0 8px;font-size:26px;line-height:1.1;letter-spacing:-.02em;color:var(--text)}
-.hero p{margin:0;color:var(--sub);font-size:15px;font-weight:700;line-height:1.6}
 
 /* ── Notice ── */
 .note{padding:11px 14px;border-radius:12px;background:rgba(0,0,0,.03);border:1px solid var(--border2);font:700 13px/1.45 system-ui;color:var(--sub)}
@@ -71,30 +88,14 @@ html,body{margin:0;min-height:100%;background:var(--bg);font-family:system-ui,-a
 .helperList{margin:0;padding-left:18px;color:var(--sub);font:700 13px/1.5 system-ui}
 .helperList li{margin:4px 0}
 
-/* ── KPI digest ── */
-.digest{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
-.kpi{padding:14px;border-radius:14px;background:rgba(0,0,0,.03);border:1px solid var(--border2)}
-.kpiLabel{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.kpiValue{font-size:17px;font-weight:900;margin-top:6px;color:var(--text)}
 
 /* ── Live KPI bar ── */
-.patternStrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 2px}
 .patternCard{padding:14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);display:grid;gap:4px;transition:border-color .15s}
 .patternCard:hover{border-color:var(--gold-border)}
 .patternKick{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .patternValue{font-size:22px;font-weight:900;letter-spacing:-.02em;color:var(--gold)}
 .patternMeta{font-size:11px;font-weight:700;color:var(--sub)}
 
-/* ── Entry rail ── */
-.entryRail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
-.entryCard{padding:16px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);display:grid;gap:8px;transition:border-color .15s,transform .15s}
-.entryCard:hover{border-color:var(--gold-border);transform:translateY(-1px)}
-.entryKicker{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
-.entryTitle{font-size:16px;font-weight:900;letter-spacing:-.01em;color:var(--text)}
-.entryText{font-size:13px;line-height:1.55;font-weight:700;color:var(--sub)}
-.entryMeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.entryPill{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--r-pill);border:1px solid var(--border2);background:rgba(0,0,0,.03);font:800 11px/1.1 system-ui;color:var(--sub)}
-.entryPill.primary{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
 
 /* ── Command deck ── */
 .commandDeck{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
@@ -113,14 +114,6 @@ html,body{margin:0;min-height:100%;background:var(--bg);font-family:system-ui,-a
 .commandBtn.primary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent;box-shadow:0 4px 12px rgba(154,110,30,.20)}
 .commandBtn.primary:hover{box-shadow:0 6px 18px rgba(154,110,30,.32)}
 
-/* ── Dash sections ── */
-.dash{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.section{padding:16px;border-radius:var(--r);background:var(--surface2);border:1px solid var(--border2);cursor:pointer;transition:border-color .15s,transform .15s;display:grid;align-content:start;gap:6px;min-height:96px}
-.section:hover{border-color:var(--gold-border);transform:translateY(-1px)}
-.section.locked{opacity:.42;filter:grayscale(.5);pointer-events:none}
-.section.locked .sectionTitle::after{content:" • locked";color:#B45309;font-size:11px;font-weight:900}
-.sectionTitle{font-size:14px;font-weight:900;color:var(--text)}
-.sectionText{font-size:13px;color:var(--sub);line-height:1.55;font-weight:700;max-width:36ch}
 
 /* ── Auth card (login form) ── */
 .authCard{display:flex;flex-direction:column;gap:14px}
@@ -151,40 +144,52 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 
 /* ── Responsive ── */
 @media(max-width:980px){
-  .grid,.dash{grid-template-columns:1fr}
-  .digest,.patternStrip,.entryRail,.commandDeck{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .hero h1{font-size:22px}
-  .leftLine{min-width:720px}
+  .grid{grid-template-columns:1fr}
+  .commandDeck{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media(max-width:780px){html{overflow-x:hidden}.leftLine{min-width:640px}}
 @media(max-width:640px){
-  .digest,.patternStrip,.entryRail,.commandDeck{grid-template-columns:1fr}
-  .leftLine{min-width:500px}
+  .commandDeck{grid-template-columns:1fr}
 }
 
 
 /* ── Briefing card ── */
-.briefCard{padding:18px 20px;background:linear-gradient(135deg,rgba(154,110,30,.06),rgba(42,107,130,.04));border:1px solid var(--gold-border);border-radius:var(--r-lg);border-top:2px solid var(--gold);display:grid;gap:14px}
-.briefRow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.briefCard{background:linear-gradient(135deg,rgba(154,110,30,.06),rgba(42,107,130,.04));border:1px solid var(--gold-border);border-radius:var(--r-lg);border-top:2px solid var(--gold);display:flex;align-items:stretch;overflow:hidden}
+.briefLeft{flex:0 0 200px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;justify-content:center;border-right:1px solid var(--border2)}
+.briefRight{flex:1;padding:14px 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:stretch}
 .briefUser{display:flex;align-items:center;gap:12px}
 .briefBadge{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--gold-bg);border:1px solid var(--gold-border);font:900 20px/1 system-ui;color:var(--gold)}
 .briefInfo{display:flex;flex-direction:column;gap:4px}
-.briefName{font:900 16px/1 system-ui;color:var(--text)}
+.briefName{font:900 17px/1 system-ui;color:var(--text)}
 .briefRole{font:700 12px/1 system-ui;color:var(--sub)}
-.briefStatus{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--r-pill);border:1px solid var(--border2);background:rgba(0,0,0,.03);font:700 13px/1.2 system-ui;color:var(--sub)}
+.briefStatus{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:var(--r-pill);border:1px solid var(--border2);background:rgba(0,0,0,.03);font:700 12px/1.2 system-ui;color:var(--sub);align-self:flex-start}
 .briefStatus.ok{background:rgba(16,185,129,.08);color:#065F46;border-color:rgba(16,185,129,.22)}
 .briefStatus.warn{background:rgba(245,158,11,.08);color:#B45309;border-color:rgba(245,158,11,.22)}
 .briefStatus.error{background:rgba(239,68,68,.08);color:#B91C1C;border-color:rgba(239,68,68,.22)}
+.briefRight .patternCard{padding:16px;border-radius:12px;background:var(--surface2);border:1px solid var(--border2);display:flex;flex-direction:column;gap:5px;justify-content:space-between;transition:border-color .15s}
+.briefRight .patternCard:hover{border-color:var(--gold-border)}
+.briefRight .patternKick{font:900 10px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.briefRight .patternValue{font:900 28px/1 system-ui;letter-spacing:-.03em;color:var(--gold)}
+.briefRight .patternMeta{font:700 11px/1.3 system-ui;color:var(--sub)}
 
 /* ── Quick nav tiles ── */
-.quickNav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-.navTile{appearance:none;border:1px solid var(--border2);background:var(--surface2);border-radius:var(--r);padding:14px 12px;cursor:pointer;text-align:center;transition:border-color .15s,transform .15s;display:flex;flex-direction:column;align-items:center;gap:6px}
-.navTile:hover{border-color:var(--gold-border);transform:translateY(-2px)}
+.quickNav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.navTile{appearance:none;border:1px solid var(--border2);background:var(--surface2);border-radius:var(--r);padding:16px 12px;cursor:pointer;text-align:center;transition:border-color .15s,transform .15s,box-shadow .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:104px}
+.navTile:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.07)}
 .navTile.locked{opacity:.36;filter:grayscale(.6);pointer-events:none}
-.navTile .navIcon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(0,0,0,.05);font-size:18px}
-.navTile .navLabel{font:900 12px/1 system-ui;color:var(--text)}
+.navTile .navIcon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(0,0,0,.05);flex-shrink:0;transition:background .15s}
+.navTile .navIcon svg{width:20px;height:20px;display:block}
+.navTile .navLabel{font:900 13px/1 system-ui;color:var(--text)}
 .navTile .navSub{font:700 10px/1.3 system-ui;color:var(--muted)}
-.navTile.primary .navIcon{background:var(--gold-bg);border:1px solid var(--gold-border)}
+.navTile[data-route-card="daily"] .navIcon{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold)}
+.navTile[data-route-card="daily"]:hover{border-color:var(--gold-border);box-shadow:0 6px 18px rgba(154,110,30,.12)}
+.navTile[data-route-card="fleet"] .navIcon{background:rgba(14,165,233,.10);border:1px solid rgba(14,165,233,.22);color:#0369A1}
+.navTile[data-route-card="fleet"]:hover{border-color:rgba(14,165,233,.32);box-shadow:0 6px 18px rgba(14,165,233,.10)}
+.navTile[data-route-card="bookings"] .navIcon{background:rgba(99,102,241,.10);border:1px solid rgba(99,102,241,.22);color:#4338CA}
+.navTile[data-route-card="bookings"]:hover{border-color:rgba(99,102,241,.32);box-shadow:0 6px 18px rgba(99,102,241,.10)}
+.navTile[data-route-card="customers"] .navIcon{background:rgba(20,184,166,.10);border:1px solid rgba(20,184,166,.22);color:#0F766E}
+.navTile[data-route-card="customers"]:hover{border-color:rgba(20,184,166,.32);box-shadow:0 6px 18px rgba(20,184,166,.10)}
+.navTile[data-route-card="settings"] .navIcon{background:rgba(100,116,139,.10);border:1px solid rgba(100,116,139,.22);color:#475569}
+.navTile[data-route-card="settings"]:hover{border-color:rgba(100,116,139,.32);box-shadow:0 6px 18px rgba(100,116,139,.08)}
 
 /* ── Macro row ── */
 .macroRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;border-radius:var(--r);background:var(--surface2);border:1px solid var(--border2)}
@@ -202,8 +207,19 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 .resumeTitle{font:900 13px/1.2 system-ui;color:var(--text)}
 .resumeMeta{font:700 11px/1.3 system-ui;color:var(--sub);margin-top:3px}
 
-@media(max-width:900px){.quickNav{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:600px){.quickNav{grid-template-columns:repeat(2,minmax(0,1fr))}.macroRow{flex-direction:column;align-items:flex-start}}
+@media(max-width:900px){.quickNav{grid-template-columns:repeat(3,minmax(0,1fr))}.briefCard{flex-direction:column}.briefLeft{border-right:none;border-bottom:1px solid var(--border2);flex-direction:row;align-items:center;justify-content:space-between;flex:unset}.briefRight{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.quickNav{grid-template-columns:repeat(2,minmax(0,1fr))}.macroRow{flex-direction:column;align-items:flex-start}.briefRight{grid-template-columns:1fr}}
+
+/* ── Section head ── */
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px}
+.sh-left{display:flex;align-items:center;gap:9px}
+.sh-icon{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold);flex-shrink:0}
+.sh-icon svg{width:13px;height:13px;display:block}
+.sh-text{display:flex;flex-direction:column;gap:2px}
+.sh-title{font:900 11px/1 system-ui;color:var(--text);letter-spacing:.06em;text-transform:uppercase}
+.sh-sub{font:700 10.5px/1 system-ui;color:var(--muted)}
+.sh-right{display:flex;align-items:center;gap:6px}
+.sh-badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-pill);background:rgba(0,0,0,.04);border:1px solid var(--border2);font:800 10.5px/1 system-ui;color:var(--sub);flex-shrink:0}
 
 /* ── KPI alert pulse ── */
 @keyframes kpiAlertPulse{0%,100%{box-shadow:0 0 0 0 rgba(154,110,30,.4)}60%{box-shadow:0 0 0 10px rgba(154,110,30,0)}}
@@ -212,39 +228,61 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 </style>
 </head>
 <body>
-  <div class="page">
-    <div class="topbar">
-      <div class="toprow">
-        <div class="leftScroll"><div class="leftLine">
-          <div class="brand"><div class="logo">D</div><div class="brandText"><span class="brandTitle">DIAMOND Backroom</span><span class="brandSub">Private backoffice • custom access</span></div></div>
-          <div class="tabs">
-            <button class="tab active" data-route="home" type="button">Myroom</button>
-            <button class="tab" data-route="daily" type="button">Daily</button>
-            <button class="tab" data-route="fleet" type="button">Fleet</button>
-            <button class="tab" data-route="bookings" type="button">Bookings</button>
-            <button class="tab" data-route="customers" type="button">Customers</button>
-            <button class="tab" data-route="settings" type="button">Settings</button>
-          </div>
-        </div></div>
-        <div class="meta">
-          <span class="chip" id="todayMeta">—</span>
-          <div class="userWrap">
-            <button class="userBtn" id="userMenuBtn" type="button"><span class="userBadge" id="userBadge">G</span><span class="userText"><span class="userName" id="userName">Guest</span><span class="userRole" id="userRole">Not signed in</span></span><span class="caret">▾</span></button>
-            <div class="menu" id="userMenu"><div class="menuHead"><div class="userName" id="menuUserName">Guest</div><div class="userRole" id="menuUserRole">Not signed in</div></div><button class="menuItem" data-menu-action="reload" type="button">Ανανέωση</button><button class="menuItem danger" data-menu-action="logout" type="button">Αποσύνδεση</button></div>
-          </div>
-        </div>
+<div class="shell">
+<nav class="sb">
+  <div class="sb-brand">
+    <div class="sb-logo">D</div>
+    <div class="sb-brand-text">
+      <span class="sb-brand-name">DIAMOND</span>
+      <span class="sb-brand-sub">Backroom</span>
+    </div>
+  </div>
+  <div class="sb-nav">
+      <button class="sb-item active" data-route="home" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="sb-item-label">Myroom</span></button>
+      <button class="sb-item" data-route="daily" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span class="sb-item-label">Daily</span></button>
+      <button class="sb-item" data-route="bookings" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span class="sb-item-label">Bookings</span></button>
+      <div class="sb-divider"></div>
+      <button class="sb-item" data-route="fleet" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2"/><circle cx="7" cy="20" r="1"/><circle cx="15" cy="20" r="1"/></svg><span class="sb-item-label">Fleet</span></button>
+      <button class="sb-item" data-route="fleetCal" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg><span class="sb-item-label">Fleet Cal</span></button>
+      <button class="sb-item" data-route="customers" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="sb-item-label">Customers</span></button>
+      <button class="sb-item" data-route="pricing" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="sb-item-label">Pricing</span></button>
+      <div class="sb-divider"></div>
+      <button class="sb-item" data-route="settings" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="sb-item-label">Settings</span></button>
+  </div>
+  <div class="sb-footer"></div>
+</nav>
+  <div class="shell-main">
+    <div class="shell-top">
+      <div class="shell-page-info">
+        <div class="shell-page-name"><span class="shell-page-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Myroom</div>
+        <div class="shell-page-sub">Private backoffice workspace</div>
+      </div>
+      <div class="shell-top-right">
+        <span class="shell-topdate" id="todayMeta">—</span>
+        <div class="userWrap">
+        <button class="userBtn" id="userMenuBtn" type="button"><span class="userBadge" id="userBadge">G</span><span class="userText"><span class="userName" id="userName">Guest</span><span class="userRole" id="userRole">Not signed in</span></span><span class="caret">▾</span></button>
+        <div class="menu" id="userMenu"><div class="menuHead"><div class="userName" id="menuUserName">Guest</div><div class="userRole" id="menuUserRole">Not signed in</div></div><button class="menuItem" data-menu-action="reload" type="button">Ανανέωση</button><button class="menuItem danger" data-menu-action="logout" type="button">Αποσύνδεση</button></div>
+      </div>
       </div>
     </div>
-
-    <div class="grid">
+    <main class="shell-content">
+      <div class="grid">
       <div class="panel" id="dashboardPanel">
 
         <!-- Auth notice / status banner -->
         <div class="note" id="authNotice" style="margin-bottom:14px">Το private session είναι ενεργό και ακολουθεί σε όλο το backroom.</div>
 
+        <!-- Section: Workspace -->
+        <div class="section-head" style="margin-top:14px">
+          <div class="sh-left">
+            <div class="sh-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+            <div class="sh-text"><div class="sh-title">Workspace</div><div class="sh-sub">Shift briefing &amp; live KPIs</div></div>
+          </div>
+        </div>
+
         <!-- Shift briefing card -->
         <div class="briefCard">
-          <div class="briefRow">
+          <div class="briefLeft">
             <div class="briefUser">
               <div class="briefBadge" id="userBadge">G</div>
               <div class="briefInfo">
@@ -254,9 +292,8 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
             </div>
             <div class="briefStatus" id="statusValue">Not signed in</div>
           </div>
-
           <!-- Live KPI strip -->
-          <div class="patternStrip" id="liveKpiBar" style="margin:0">
+          <div class="briefRight" id="liveKpiBar">
             <div class="patternCard" id="kpiPendingCard">
               <div class="patternKick">Εκκρεμείς κρατήσεις</div>
               <div class="patternValue" id="kpiPending">—</div>
@@ -284,30 +321,38 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
           <button class="commandBtn primary" type="button" id="resumeWorkspaceBtn">Συνέχεια →</button>
         </div>
 
+        <!-- Section: Navigate -->
+        <div class="section-head">
+          <div class="sh-left">
+            <div class="sh-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+            <div class="sh-text"><div class="sh-title">Navigate</div><div class="sh-sub">Jump to any module</div></div>
+          </div>
+        </div>
+
         <!-- Quick navigation tiles -->
-        <div class="quickNav" style="margin-top:14px">
-          <button class="navTile primary" data-route-card="daily" type="button">
-            <div class="navIcon">📋</div>
+        <div class="quickNav" style="margin-top:0">
+          <button class="navTile" data-route-card="daily" type="button">
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
             <div class="navLabel">Daily</div>
             <div class="navSub">Shift desk</div>
           </button>
           <button class="navTile" data-route-card="fleet" type="button">
-            <div class="navIcon">🚗</div>
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2"/><circle cx="7" cy="20" r="1"/><circle cx="15" cy="20" r="1"/></svg></div>
             <div class="navLabel">Fleet</div>
             <div class="navSub">Vehicles</div>
           </button>
           <button class="navTile" data-route-card="bookings" type="button">
-            <div class="navIcon">📂</div>
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
             <div class="navLabel">Bookings</div>
             <div class="navSub">All reservations</div>
           </button>
           <button class="navTile" data-route-card="customers" type="button">
-            <div class="navIcon">👤</div>
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
             <div class="navLabel">Customers</div>
             <div class="navSub">Profiles</div>
           </button>
           <button class="navTile" data-route-card="settings" type="button">
-            <div class="navIcon">⚙️</div>
+            <div class="navIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
             <div class="navLabel">Settings</div>
             <div class="navSub">Admin tools</div>
           </button>
@@ -334,7 +379,9 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 
       </div>
     </div>
+    </main>
   </div>
+</div>
 <script>
 const state = { authenticated:false, user:'Guest', role:'Not signed in', errorMessage:'', nextPath:'', permissions:{} };
 function postToWix(msg){ try{ window.parent.postMessage(msg,'*'); }catch(_){} }
@@ -397,7 +444,7 @@ function setTabsEnabled(flag){ document.querySelectorAll('.tab[data-route]').for
 function setNotice(message='',tone=''){ const box=document.getElementById('authNotice'); if(!box) return; box.className='note'; if(tone) box.classList.add(tone); box.textContent=message||'Το private session είναι ενεργό και ακολουθεί σε όλο το backroom.'; }
 function renderAuthHealth(){ const box=document.getElementById('authHealthInfo'); if(!box) return; const h=state.authHealth||null; if(!h){ box.className='note'; box.textContent='Δεν υπάρχουν ακόμη στοιχεία health για το custom auth.'; return; } const collections=h.collections||{}; const rows=Object.keys(collections).map(key=>{ const c=collections[key]||{}; return `<li>${escapeHtml(c.collectionName||key)} · ${c.ok?'OK':'ERROR'}${c.error?` · ${escapeHtml(c.error)}`:''}</li>`; }).join(''); const missing=Array.isArray(h.missingCollections)&&h.missingCollections.length ? `<div style="margin-top:6px"><strong>Missing/problem collections:</strong> ${h.missingCollections.map(escapeHtml).join(', ')}</div>` : ''; box.className='note '+(h.ok?'ok':'error'); box.innerHTML=`<strong>Auth health</strong><div style="height:6px"></div><div>Users: ${Number(h.usersCount||0)} · Roles: ${Number(h.rolesCount||0)} · Credentials: ${Number(h.credentialsCount||0)}</div><div style="margin-top:6px">${escapeHtml(h.notes||'')}</div>${missing}<div style="height:6px"></div><ul class="helperList">${rows||'<li>Δεν βρέθηκαν στοιχεία.</li>'}</ul>`; }
 function applyAuthState(payload={}){ state.authenticated=!!payload.authenticated; state.user=payload.user||'Guest'; state.role=payload.role||'Not signed in'; state.nextPath=payload.nextPath||''; state.permissions=payload.permissions||{}; state.authHealth=payload.authHealth||state.authHealth||null; setUserContext({name:state.user,role:state.role}); setTabsEnabled(state.authenticated); const status=document.getElementById('statusValue'); if(status) status.textContent=state.authenticated?'Signed in':'Not signed in'; const next=document.getElementById('digestNext'); if(next) next.textContent=payload.nextPath||'Backroom'; if(payload.denied) setNotice('Δεν έχεις δικαίωμα για τη σελίδα που ζήτησες. Συνδέσου με λογαριασμό που έχει το σωστό role.','error'); else if(payload.errorMessage) setNotice(payload.errorMessage, payload.authenticated ? 'ok':'error'); else setNotice('Το private session είναι ενεργό και ακολουθεί σε όλο το backroom.','ok'); renderAuthHealth(); renderResumeWorkspace(); reportHeight(); }
-function wire(){ document.querySelectorAll('.tab[data-route]').forEach(btn=>btn.addEventListener('click',()=>{ if(btn.hasAttribute('disabled')){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτή την ενότητα.' : 'Συνδέσου πρώτα για να ανοίξουν οι καρτέλες του backroom.','error'); return; } postToWix({ type:'navigate', route:btn.getAttribute('data-route') }); })); document.querySelectorAll('[data-route-card]').forEach(card=>card.addEventListener('click',()=>{ const route=card.getAttribute('data-route-card'); if(!canAccessRoute(route)){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτή την ενότητα.' : 'Συνδέσου πρώτα για να ανοίξουν οι ιδιωτικές ενότητες.','error'); return; } postToWix({ type:'navigate', route }); })); const historyDeck=document.getElementById('workspaceHistoryDeck'); if(historyDeck){ historyDeck.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-history-route]'); const card=e.target.closest('[data-history-route-card]'); const route=(btn&&btn.getAttribute('data-history-route')) || (card&&card.getAttribute('data-history-route-card')) || ''; if(!route) return; if(!canAccessRoute(route)){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το workspace.' : 'Συνδέσου πρώτα για να συνεχίσεις από saved workspace.','error'); return; } postToWix({ type:'navigate', route }); }); } const pinnedDeck=document.getElementById('pinnedWorkspaceDeck'); if(pinnedDeck){ pinnedDeck.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-history-route]'); const card=e.target.closest('[data-history-route-card]'); const route=(btn&&btn.getAttribute('data-history-route')) || (card&&card.getAttribute('data-history-route-card')) || ''; if(!route) return; if(!canAccessRoute(route)){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το pinned workspace.' : 'Συνδέσου πρώτα για να ανοίξεις pinned workspace.','error'); return; } postToWix({ type:'navigate', route }); }); } const savedDeck=document.getElementById('savedWorkspaceDeck'); if(savedDeck){ savedDeck.addEventListener('click',(e)=>{ const openBtn=e.target.closest('[data-saved-open]'); const removeBtn=e.target.closest('[data-saved-remove]'); const card=e.target.closest('[data-saved-card]'); const idxRaw=(openBtn&&openBtn.getAttribute('data-saved-open')) || (removeBtn&&removeBtn.getAttribute('data-saved-remove')) || (card&&card.getAttribute('data-saved-card')) || ''; const idx=Number(idxRaw); if(!Number.isInteger(idx) || idx<0) return; const list=readSavedViews().filter((item)=>canAccessRoute(String(item.route||''))); const entry=list[idx]; if(!entry) return; if(removeBtn){ try{ const all=readSavedViews(); const targetId=String(entry.id||''); const next=all.filter((item)=> String(item&&item.id||'')!==targetId); localStorage.setItem(SAVED_VIEWS_KEY, JSON.stringify(next)); }catch(_){} renderResumeWorkspace(); setNotice('Το saved view αφαιρέθηκε από τη Myroom.','ok'); return; } if(!canAccessRoute(String(entry.route||''))){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το saved view.' : 'Συνδέσου πρώτα για να ανοίξεις saved view.','error'); return; } openWorkspaceEntry(entry); }); } const opsDeck=document.getElementById('opsSnapshotDeck'); if(opsDeck){ opsDeck.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-history-route]'); const card=e.target.closest('[data-history-route-card]'); const route=(btn&&btn.getAttribute('data-history-route')) || (card&&card.getAttribute('data-history-route-card')) || ''; if(!route) return; if(!canAccessRoute(route)){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το snapshot route.' : 'Συνδέσου πρώτα για να ανοίξεις saved snapshot.','error'); return; } postToWix({ type:'navigate', route }); }); } const handoffDeck=document.getElementById('handoffQueueDeck'); if(handoffDeck){ handoffDeck.addEventListener('click',(e)=>{ const openBtn=e.target.closest('[data-queue-open]'); const removeBtn=e.target.closest('[data-queue-remove]'); const card=e.target.closest('[data-queue-card]'); const idxRaw=(openBtn&&openBtn.getAttribute('data-queue-open')) || (removeBtn&&removeBtn.getAttribute('data-queue-remove')) || (card&&card.getAttribute('data-queue-card')) || ''; const idx=Number(idxRaw); if(!Number.isInteger(idx) || idx<0) return; const list=readHandoffQueue().filter((item)=>canAccessRoute(String(item.route||''))); const entry=list[idx]; if(!entry) return; if(removeBtn){ try{ const all=readHandoffQueue(); const targetId=String(entry.id||''); const next=all.filter((item)=> String(item&&item.id||'')!==targetId); localStorage.setItem(HANDOFF_QUEUE_KEY, JSON.stringify(next)); }catch(_){} renderResumeWorkspace(); setNotice('Το queued item αφαιρέθηκε από το handoff queue.','ok'); return; } if(!canAccessRoute(String(entry.route||''))){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το queued route.' : 'Συνδέσου πρώτα για να ανοίξεις queued follow-up.','error'); return; } openWorkspaceEntry(entry); }); } const resumeBtn=document.getElementById('resumeWorkspaceBtn'); if(resumeBtn){ resumeBtn.addEventListener('click',()=>{ const info=readResumeWorkspace(); const route=(info&&info.route)||''; if(!route || !canAccessRoute(route)){ setNotice(state.authenticated ? 'Δεν υπάρχει διαθέσιμο saved workspace για τον ρόλο σου.' : 'Συνδέσου πρώτα για να συνεχίσεις από saved workspace.','error'); return; } postToWix({ type:'navigate', route }); }); } const meta=document.getElementById('todayMeta'); if(meta){ try{ meta.textContent=new Date().toLocaleDateString('el-GR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}catch(_){} } const btn=document.getElementById('userMenuBtn'); const menu=document.getElementById('userMenu'); if(btn&&menu){ btn.addEventListener('click',(e)=>{ e.stopPropagation(); menu.classList.toggle('open'); reportHeight(menu.classList.contains('open') ? 300 : 0); }); document.addEventListener('click',(e)=>{ if(!menu.contains(e.target)&&!btn.contains(e.target)){ menu.classList.remove('open'); reportHeight(); }}); menu.querySelectorAll('[data-menu-action]').forEach(node=>node.addEventListener('click',()=>{ postToWix({ type:'menuAction', action:node.getAttribute('data-menu-action') }); menu.classList.remove('open'); reportHeight(); })); }
+function wire(){ document.querySelectorAll('.sb-item[data-route]').forEach(btn=>btn.addEventListener('click',()=>{ const route=btn.getAttribute('data-route'); if(route) postToWix({ type:'navigate', route }); })); document.querySelectorAll('.tab[data-route]').forEach(btn=>btn.addEventListener('click',()=>{ if(btn.hasAttribute('disabled')){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτή την ενότητα.' : 'Συνδέσου πρώτα για να ανοίξουν οι καρτέλες του backroom.','error'); return; } postToWix({ type:'navigate', route:btn.getAttribute('data-route') }); })); document.querySelectorAll('[data-route-card]').forEach(card=>card.addEventListener('click',()=>{ const route=card.getAttribute('data-route-card'); if(!canAccessRoute(route)){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτή την ενότητα.' : 'Συνδέσου πρώτα για να ανοίξουν οι ιδιωτικές ενότητες.','error'); return; } postToWix({ type:'navigate', route }); })); const historyDeck=document.getElementById('workspaceHistoryDeck'); if(historyDeck){ historyDeck.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-history-route]'); const card=e.target.closest('[data-history-route-card]'); const route=(btn&&btn.getAttribute('data-history-route')) || (card&&card.getAttribute('data-history-route-card')) || ''; if(!route) return; if(!canAccessRoute(route)){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το workspace.' : 'Συνδέσου πρώτα για να συνεχίσεις από saved workspace.','error'); return; } postToWix({ type:'navigate', route }); }); } const pinnedDeck=document.getElementById('pinnedWorkspaceDeck'); if(pinnedDeck){ pinnedDeck.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-history-route]'); const card=e.target.closest('[data-history-route-card]'); const route=(btn&&btn.getAttribute('data-history-route')) || (card&&card.getAttribute('data-history-route-card')) || ''; if(!route) return; if(!canAccessRoute(route)){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το pinned workspace.' : 'Συνδέσου πρώτα για να ανοίξεις pinned workspace.','error'); return; } postToWix({ type:'navigate', route }); }); } const savedDeck=document.getElementById('savedWorkspaceDeck'); if(savedDeck){ savedDeck.addEventListener('click',(e)=>{ const openBtn=e.target.closest('[data-saved-open]'); const removeBtn=e.target.closest('[data-saved-remove]'); const card=e.target.closest('[data-saved-card]'); const idxRaw=(openBtn&&openBtn.getAttribute('data-saved-open')) || (removeBtn&&removeBtn.getAttribute('data-saved-remove')) || (card&&card.getAttribute('data-saved-card')) || ''; const idx=Number(idxRaw); if(!Number.isInteger(idx) || idx<0) return; const list=readSavedViews().filter((item)=>canAccessRoute(String(item.route||''))); const entry=list[idx]; if(!entry) return; if(removeBtn){ try{ const all=readSavedViews(); const targetId=String(entry.id||''); const next=all.filter((item)=> String(item&&item.id||'')!==targetId); localStorage.setItem(SAVED_VIEWS_KEY, JSON.stringify(next)); }catch(_){} renderResumeWorkspace(); setNotice('Το saved view αφαιρέθηκε από τη Myroom.','ok'); return; } if(!canAccessRoute(String(entry.route||''))){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το saved view.' : 'Συνδέσου πρώτα για να ανοίξεις saved view.','error'); return; } openWorkspaceEntry(entry); }); } const opsDeck=document.getElementById('opsSnapshotDeck'); if(opsDeck){ opsDeck.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-history-route]'); const card=e.target.closest('[data-history-route-card]'); const route=(btn&&btn.getAttribute('data-history-route')) || (card&&card.getAttribute('data-history-route-card')) || ''; if(!route) return; if(!canAccessRoute(route)){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το snapshot route.' : 'Συνδέσου πρώτα για να ανοίξεις saved snapshot.','error'); return; } postToWix({ type:'navigate', route }); }); } const handoffDeck=document.getElementById('handoffQueueDeck'); if(handoffDeck){ handoffDeck.addEventListener('click',(e)=>{ const openBtn=e.target.closest('[data-queue-open]'); const removeBtn=e.target.closest('[data-queue-remove]'); const card=e.target.closest('[data-queue-card]'); const idxRaw=(openBtn&&openBtn.getAttribute('data-queue-open')) || (removeBtn&&removeBtn.getAttribute('data-queue-remove')) || (card&&card.getAttribute('data-queue-card')) || ''; const idx=Number(idxRaw); if(!Number.isInteger(idx) || idx<0) return; const list=readHandoffQueue().filter((item)=>canAccessRoute(String(item.route||''))); const entry=list[idx]; if(!entry) return; if(removeBtn){ try{ const all=readHandoffQueue(); const targetId=String(entry.id||''); const next=all.filter((item)=> String(item&&item.id||'')!==targetId); localStorage.setItem(HANDOFF_QUEUE_KEY, JSON.stringify(next)); }catch(_){} renderResumeWorkspace(); setNotice('Το queued item αφαιρέθηκε από το handoff queue.','ok'); return; } if(!canAccessRoute(String(entry.route||''))){ setNotice(state.authenticated ? 'Ο ρόλος σου δεν έχει πρόσβαση σε αυτό το queued route.' : 'Συνδέσου πρώτα για να ανοίξεις queued follow-up.','error'); return; } openWorkspaceEntry(entry); }); } const resumeBtn=document.getElementById('resumeWorkspaceBtn'); if(resumeBtn){ resumeBtn.addEventListener('click',()=>{ const info=readResumeWorkspace(); const route=(info&&info.route)||''; if(!route || !canAccessRoute(route)){ setNotice(state.authenticated ? 'Δεν υπάρχει διαθέσιμο saved workspace για τον ρόλο σου.' : 'Συνδέσου πρώτα για να συνεχίσεις από saved workspace.','error'); return; } postToWix({ type:'navigate', route }); }); } const meta=document.getElementById('todayMeta'); if(meta){ try{ meta.textContent=new Date().toLocaleDateString('el-GR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}catch(_){} } const btn=document.getElementById('userMenuBtn'); const menu=document.getElementById('userMenu'); if(btn&&menu){ btn.addEventListener('click',(e)=>{ e.stopPropagation(); menu.classList.toggle('open'); reportHeight(menu.classList.contains('open') ? 300 : 0); }); document.addEventListener('click',(e)=>{ if(!menu.contains(e.target)&&!btn.contains(e.target)){ menu.classList.remove('open'); reportHeight(); }}); menu.querySelectorAll('[data-menu-action]').forEach(node=>node.addEventListener('click',()=>{ postToWix({ type:'menuAction', action:node.getAttribute('data-menu-action') }); menu.classList.remove('open'); reportHeight(); })); }
 const TRUSTED_PARENT_SUFFIXES=['wix.com','wixsite.com','parastorage.com','wixstatic.com'];function isTrustedParentOrigin(origin){const raw=String(origin||'').trim().toLowerCase();if(!raw)return true;try{const host=new URL(raw).hostname.toLowerCase();if(!host) return false; if(TRUSTED_PARENT_SUFFIXES.some(s=>host===s||host.endsWith('.'+s))) return true; try{ const ref=document.referrer; if(ref){ const rh=new URL(ref).hostname.toLowerCase(); if(rh&&host===rh) return true; } }catch(_){} return false;}catch(_){return false;}}
 window.addEventListener('message',(event)=>{ if(event.origin&&!isTrustedParentOrigin(event.origin))return; const data=event&&event.data; if(!data||!data.type) return; if(data.type==='authState') applyAuthState(data); if(data.type==='userContext') setUserContext(data); if(data.type==='kpiData') applyKpiData(data); });
 postToWix({ type:'homeReady' }); postToWix({ type:'requestKpiData' }); reportHeight(); }
