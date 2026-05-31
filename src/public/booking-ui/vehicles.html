@@ -110,6 +110,15 @@ button:hover,.cta:hover,.header-phone:hover{
   gap:9px 12px;
   align-items:end;
 }
+.search-options-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px 12px;
+  align-items:end;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(160,110,35,.10);
+}
 .field{display:flex;flex-direction:column;gap:4px}
 .field label{
   font-size:10px;
@@ -371,7 +380,8 @@ button:hover,.cta:hover,.header-phone:hover{
 .header-nav a{font-size:13px;padding:9px 12px}
 .header-phone{padding:10px 15px;font-size:14px}
 .search-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px}
-.filter-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.search-options-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px}
+.filter-row{grid-template-columns:minmax(260px,420px);gap:10px}
 .result-main{grid-template-columns:215px minmax(0,1fr)}
 .media-col{min-height:196px;padding:14px}
 .vehicle-image{max-width:190px;max-height:132px}
@@ -384,8 +394,8 @@ button:hover,.cta:hover,.header-phone:hover{
 .spec-grid{gap:8px}.spec{padding:10px 11px}.spec .v{font-size:15px}
 .total-box{padding:14px 16px}.total-row .k{font-size:13px}.total-row .v{font-size:18px}.total-row.grand .k{font-size:20px}.total-row.grand .v{font-size:34px}
 .cta{height:56px;font-size:18px}
-@media (max-width:1024px){.header-inner{flex-wrap:wrap;justify-content:center}.header-nav{order:3;width:100%;justify-content:center}.header-phone{width:100%;text-align:center}.search-grid{grid-template-columns:1fr 1fr}.filter-row{grid-template-columns:1fr}.result-main{grid-template-columns:1fr}.media-col{min-height:180px}.head-row{grid-template-columns:1fr}.price-box{text-align:left}.spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.filter-row,.spec-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.content-col{padding:14px}.vehicle-title{font-size:28px}.total-row.grand .v{font-size:30px}.cta{height:54px;font-size:17px}}
+@media (max-width:1024px){.header-inner{flex-wrap:wrap;justify-content:center}.header-nav{order:3;width:100%;justify-content:center}.header-phone{width:100%;text-align:center}.search-grid,.search-options-grid{grid-template-columns:1fr 1fr}.filter-row{grid-template-columns:1fr}.result-main{grid-template-columns:1fr}.media-col{min-height:180px}.head-row{grid-template-columns:1fr}.price-box{text-align:left}.spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.search-options-grid,.filter-row,.spec-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.content-col{padding:14px}.vehicle-title{font-size:28px}.total-row.grand .v{font-size:30px}.cta{height:54px;font-size:17px}}
 
 
 @media (max-width:760px){.page{width:min(var(--container), calc(100vw - 8px))}.footer-grid{grid-template-columns:1fr}.footer-bottom{padding:0 16px 18px}}
@@ -805,6 +815,26 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
             <select id="dropoffTime" class="time-select" required></select>
           </div>
         </div>
+        <div class="search-options-grid">
+          <div class="field">
+            <label>Κατηγορίες οχημάτων</label>
+            <select id="category">
+              <option value="all">Όλες οι κατηγορίες</option>
+              <option value="A">Κατηγορία A</option>
+              <option value="B">Κατηγορία B</option>
+              <option value="LX">Κατηγορία LX</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ηλικία οδηγού</label>
+            <select id="ageGroup">
+              <option value="23-69">23-69</option>
+              <option value="19-22">19-22</option>
+              <option value="70+">70+</option>
+            </select>
+          </div>
+        </div>
+        <div class="helper-note" id="categoryHint">Επιλεγμένη κατηγορία: Όλες</div>
         <div class="panel-footer">
           <div id="dateRangeError" class="date-range-error" role="alert"></div>
           <div class="search-note">Η λίστα και το σύνολο ενημερώνονται άμεσα μόλις αλλάζει ημερομηνία, ώρα, ηλικιακή ομάδα ή φίλτρο κατηγορίας.</div>
@@ -814,27 +844,10 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div><!-- end search-form-panel -->
   </section>
 
-  <section class="filter-combined">
+  <section class="filter-combined" aria-label="Ταξινόμηση αποτελεσμάτων">
     <div class="filter-row">
       <div class="filter-slot">
-        <p class="filter-title">Κατηγορίες οχημάτων</p>
-        <select id="category">
-          <option value="all">Όλες οι κατηγορίες</option>
-          <option value="A">Κατηγορία A</option>
-          <option value="B">Κατηγορία B</option>
-          <option value="LX">Κατηγορία LX</option>
-        </select>
-      </div>
-      <div class="filter-slot">
-        <p class="filter-title">Ηλικία οδηγού</p>
-        <select id="ageGroup">
-          <option value="23-69">23-69</option>
-          <option value="19-22">19-22</option>
-          <option value="70+">70+</option>
-        </select>
-      </div>
-      <div class="filter-slot">
-        <p class="filter-title">Ταξινόμηση</p>
+        <p class="filter-title">Ταξινόμηση αποτελεσμάτων</p>
         <select id="sortSelect">
           <option value="priceAsc">Τιμή: Χαμηλότερη → Υψηλό</option>
           <option value="priceDesc">Τιμή: Υψηλότερη → Χαμηλό</option>
@@ -842,7 +855,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         </select>
       </div>
     </div>
-    <div class="helper-note" id="categoryHint">Επιλεγμένη κατηγορία: Όλες</div>
   </section>
 
   <section class="list" id="list">
@@ -1729,12 +1741,16 @@ function updateSearchSummaryBar(){
     var pt = document.getElementById('pickupTime');
     var dd = document.getElementById('dropoffDate');
     var dt = document.getElementById('dropoffTime');
+    var categoryEl = document.getElementById('category');
+    var ageEl = document.getElementById('ageGroup');
     var days = typeof currentDays === 'function' ? currentDays() : '?';
     var from = (pl && pl.value) ? pl.value : 'Παραλαβή';
     var to = (dl && dl.value) ? dl.value : 'Επιστροφή';
     var pickupWhen = ((pd && pd.value) ? pd.value : 'ημ/νία') + ((pt && pt.value) ? ' ' + pt.value : '');
     var dropoffWhen = ((dd && dd.value) ? dd.value : 'ημ/νία') + ((dt && dt.value) ? ' ' + dt.value : '');
-    summaryText.textContent = from + ' · ' + pickupWhen + ' → ' + to + ' · ' + dropoffWhen + ' · ' + days + ' ημέρες';
+    var categoryText = categoryEl ? categoryEl.options[categoryEl.selectedIndex]?.text || categoryEl.value : 'Όλες οι κατηγορίες';
+    var ageText = ageEl && ageEl.value ? ageEl.value : '23-69';
+    summaryText.textContent = from + ' · ' + pickupWhen + ' → ' + to + ' · ' + dropoffWhen + ' · ' + categoryText + ' · Ηλικία ' + ageText + ' · ' + days + ' ημέρες';
   }catch(_){}
 }
 (function(){
