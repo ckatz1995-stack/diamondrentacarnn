@@ -362,8 +362,28 @@
     .fieldGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fieldBox{padding:10px 11px;border-radius:16px;border:1px solid var(--border);background:var(--surface2)}
     .fieldBox.full{grid-column:1 / -1}.fk{font:900 10px/1 system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--gold)}.fv{margin-top:5px;font:900 12px/1.4 system-ui,-apple-system,sans-serif;color:var(--text);white-space:pre-wrap}
     .inspectorActions{display:flex;gap:8px;flex-wrap:wrap}.inspectorBtn{appearance:none;border:1px solid var(--border2);background:var(--surface2);border-radius:13px;padding:9px 10px;font:900 11.5px/1 system-ui,-apple-system,sans-serif;cursor:pointer;color:var(--sub)}.inspectorBtn.primary{background:linear-gradient(135deg,var(--gold),#c8a048);color:#1a1208;border-color:transparent}
-    .modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:center;padding:18px 12px;z-index:999999}
-    .modal{width:min(780px,calc(100vw - 24px));max-height:calc(100vh - 36px);overflow:auto;background:var(--surface);border-radius:20px;border:1px solid var(--border2);box-shadow:var(--shadow-lg)}
+    /* Slide-in side panel */
+    .modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:stretch;justify-content:flex-end;z-index:999999}
+    .modal{width:min(480px,100vw);height:100%;overflow:auto;background:var(--surface);border-radius:0;border-left:1px solid var(--border2);box-shadow:-8px 0 40px rgba(0,0,0,.5);display:flex;flex-direction:column}
+    @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+    .modalOverlay[style*="flex"] .modal{animation:slideIn .22s ease}
+    .modalHead{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex:0 0 auto}
+    .modalTitle{font:900 15px/1.15 system-ui,-apple-system,sans-serif;color:var(--text)}
+    .modalSub{margin-top:4px;font:700 11px/1.45 system-ui,-apple-system,sans-serif;color:var(--sub)}
+    .closeBtn{appearance:none;border:1px solid var(--border2);background:rgba(255,255,255,.05);border-radius:var(--r-pill);width:28px;height:28px;font:900 12px/1 system-ui;cursor:pointer;display:grid;place-items:center;color:var(--sub);flex-shrink:0}
+    .closeBtn:hover{background:rgba(255,255,255,.09)}
+    .modalBody{padding:14px;display:grid;gap:10px;flex:1 1 auto;overflow:auto}
+    .modalActions{padding:12px 14px 16px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border);flex:0 0 auto;background:var(--surface2)}
+    .inspectorBtn{appearance:none;border:1px solid var(--border2);background:rgba(255,255,255,.05);border-radius:10px;padding:8px 12px;font:900 11px/1 system-ui;cursor:pointer;color:var(--sub);transition:all .14s}
+    .inspectorBtn:hover{background:rgba(255,255,255,.08);color:var(--text)}
+    .inspectorBtn.primary{background:linear-gradient(135deg,var(--gold),#c8a048);color:#1a1208;border-color:transparent}
+    .inspectorBtn.danger{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#f87171}
+    .fieldBox{padding:10px 11px;border-radius:12px;border:1px solid var(--border);background:var(--surface2)}
+    .fieldBox.full{grid-column:1 / -1}
+    .fk{font:900 10px/1 system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-bottom:6px}
+    .fv{font:900 12px/1.4 system-ui;color:var(--text);white-space:pre-wrap}
+    .input{appearance:none;border:1px solid var(--border2);background:var(--surface2);border-radius:10px;padding:7px 9px;font:800 11px/1.2 system-ui;color:var(--text);outline:none;width:100%}
+    .input:focus{border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(231,191,105,.12)}
     .modalHead{padding:12px 14px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.modalTitle{font:900 16px/1.15 system-ui,-apple-system,sans-serif;color:var(--text)}.modalSub{margin-top:4px;font:800 11px/1.45 system-ui,-apple-system,sans-serif;color:var(--sub)}.closeBtn{appearance:none;border:1px solid var(--border2);background:rgba(255,255,255,.05);border-radius:12px;padding:8px 10px;font:900 11px/1 system-ui,-apple-system,sans-serif;cursor:pointer;color:var(--sub)}
     .modalBody{padding:14px;display:grid;gap:12px}.modalActions{padding:0 14px 14px;display:flex;gap:8px;flex-wrap:wrap}
 
@@ -437,41 +457,35 @@
 
   <section class="summaryGrid" id="summaryGrid"></section>
 
-  <section class="surface controls">
-    <div class="controlsRow">
-      <div class="controlGroup">
-        <span class="controlLabel">Date</span>
-        <button class="btn" id="btnPrev" type="button">←</button>
-        <input class="input" id="datePick" type="date" />
-        <button class="btn" id="btnNext" type="button">→</button>
-        <button class="btn" id="btnToday" type="button">Σήμερα</button>
-        <button class="btn btnPrimary" id="btnRefresh" type="button">Ανανέωση</button>
+  <section class="surface controls" style="padding:8px 10px">
+    <div class="controlsRow" style="flex-wrap:wrap;gap:6px;align-items:center">
+      <div class="controlGroup" style="flex:0 0 auto">
+        <button class="btn" id="btnPrev" type="button">&#8592;</button>
+        <input class="input" id="datePick" type="date" style="width:136px" />
+        <button class="btn" id="btnNext" type="button">&#8594;</button>
+        <button class="btn" id="btnToday" type="button">&#931;&#942;&#956;&#949;&#961;&#945;</button>
+        <button class="btn btnPrimary" id="btnRefresh" type="button">&#8635;</button>
       </div>
-      <div class="controlGroup" style="flex:1 1 280px;min-width:0;">
-        <span class="controlLabel">Search</span>
-        <input class="input search" id="globalSearch" placeholder="RES, πελάτης, όχημα, σημείο, flight…" />
+      <div class="controlGroup" style="flex:1 1 200px;min-width:0">
+        <input class="input search" id="globalSearch" placeholder="RES, &#960;&#949;&#955;&#940;&#964;&#951;&#962;, &#972;&#967;&#951;&#956;&#945;, flight&#8230;" style="width:100%" />
       </div>
-      <div class="controlGroup">
-        <span class="controlLabel">Station</span>
-        <select class="select" id="stationFilter"><option value="all">Όλες</option></select>
+      <div class="controlGroup" style="flex:0 0 auto">
+        <select class="select" id="stationFilter"><option value="all">&#8704;&#955;&#949;&#962;</option></select>
       </div>
-    </div>
-    <div class="controlsRow">
-      <div class="controlGroup">
-        <span class="controlLabel">View</span>
+      <div class="controlGroup" style="flex:0 0 auto">
         <button class="modeBtn active" data-view-mode="desk" type="button">Desk</button>
         <button class="modeBtn" data-view-mode="full" type="button">Full</button>
       </div>
-      <div class="controlGroup slim" id="fullOnlyTabsWrap">
-        <span class="controlLabel">Tabs</span>
+      <div class="controlGroup slim" id="fullOnlyTabsWrap" style="flex:0 1 auto;min-width:0">
         <div class="tabBar" id="tabBar"></div>
       </div>
-      
-      <label class="togglePill"><input id="autoRefresh" type="checkbox" /> Auto refresh</label>
-      <button class="btn" id="exportBtn" type="button">Export CSV</button>
-      <button class="btn" id="printBtn" type="button">Print</button>
-      <div class="statusLine" id="status">BOOT…</div>
+      <div class="controlGroup" style="flex:0 0 auto;margin-left:auto">
+        <label class="togglePill" style="padding:5px 9px;font-size:11px"><input id="autoRefresh" type="checkbox" /> Auto</label>
+        <button class="btn" id="exportBtn" type="button" title="Export CSV">CSV</button>
+        <button class="btn" id="printBtn" type="button" title="Print">Print</button>
+      </div>
     </div>
+    <div class="statusLine" id="status" style="margin-top:6px;font-size:10px;padding:5px 10px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">BOOT&#8230;</div>
   </section>
 
   <div class="tl-wrap" id="timelineStrip" style="display:none"></div>

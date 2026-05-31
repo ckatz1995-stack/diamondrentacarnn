@@ -270,31 +270,32 @@
     .inlineBtn:hover,.pill:hover,.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
     .row:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
 
-    /* ── Bookings controls block ── */
-    .bookingsControls{display:grid;gap:8px;padding:10px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);box-shadow:var(--shadow)}
-    .controlsRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .bookingsTopRow{justify-content:space-between}
-    .controlsLeft{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1 1 720px;min-width:0}
-    .controlsRight{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex:0 0 auto;min-width:0}
-    .bookingsControls .search{min-width:280px;flex:1 1 320px;border-radius:16px;padding:8px 11px}
-    .bookingsControls .rangeBar{padding:8px 10px;border-radius:16px}
-    .bookingsControls .rangeInput{min-width:118px;padding:8px 10px}
-    .bookingsControls .btn{border-radius:14px;padding:8px 11px}
-    .bookingsControls .statusLine{padding:8px 10px;font-size:10px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .filterBox{display:grid;gap:7px;padding:9px 10px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,.02)}
-    .filtersRow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    .filterGroup{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
-    .controlLabel{display:inline-flex;align-items:center;padding:0 2px;font:900 10px/1 system-ui,-apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
-    .pills,.bookingsModeTabs,.focusPills,.queueStrip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
-    .pill,.bookingsModeBtn,.focusPill,.queueKpi{appearance:none;border:1px solid var(--border2);background:rgba(255,255,255,.05);color:var(--sub);border-radius:var(--r-pill);padding:7px 10px;font:900 10.5px/1 system-ui,-apple-system,sans-serif;cursor:pointer}
-    .pill.active,.bookingsModeBtn.active,.focusPill.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
+    /* ── Bookings flat toolbar ── */
+    .bkCtrl{display:grid;gap:8px}
+    .bkCtrlMain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-radius:var(--r-lg);border:1px solid var(--border2);background:var(--surface2)}
+    .bkSearch{flex:1 1 240px;min-width:0;border-radius:14px;padding:7px 11px}
+    .bkDateGroup{display:flex;align-items:center;gap:6px;flex:0 1 auto;flex-wrap:wrap}
+    .ctrlLbl{font:900 9.5px/1 system-ui;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    .bkCtrlRight{display:flex;align-items:center;gap:6px;margin-left:auto;flex:0 0 auto}
+    .bkCtrlFilters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 12px;border-radius:var(--r);border:1px solid var(--border);background:rgba(255,255,255,.02)}
+    .bkSep{width:1px;height:18px;background:var(--border2);flex:0 0 auto}
+    .bkCtrlTail{display:flex;align-items:center;gap:8px;margin-left:auto;flex:0 0 auto}
+    .bkCtrlTail .statusLine{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px}
+    .bookingsModeTabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .bookingsModeBtn{appearance:none;border:1px solid var(--border2);background:rgba(255,255,255,.05);color:var(--sub);border-radius:var(--r-pill);padding:7px 10px;font:900 10.5px/1 system-ui;cursor:pointer}
+    .bookingsModeBtn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
+    .pills,.focusPills,.queueStrip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+    .pill,.focusPill,.queueKpi{appearance:none;border:1px solid var(--border2);background:rgba(255,255,255,.05);color:var(--sub);border-radius:var(--r-pill);padding:7px 10px;font:900 10.5px/1 system-ui;cursor:pointer}
+    .pill.active,.focusPill.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
     .focusPill .count,.pill .count,.bookingsModeBtn .count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:var(--r-pill);background:rgba(255,255,255,.08);color:inherit;font-size:10px;font-weight:900}
     .focusPill.active .count,.bookingsModeBtn.active .count,.pill.active .count{background:rgba(231,191,105,.2);color:var(--gold)}
     .queueKpi{gap:6px;padding:6px 9px;cursor:default;background:rgba(255,255,255,.03)}
     .queueKpiLabel{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
     .queueKpiValue{font-size:10px;font-weight:900;color:var(--text)}
-    .toolbar,.routeShell,.pageHero{display:none!important}
-    .legacyActionDock{display:none!important}
+    .focusInfo{display:flex;align-items:center;font:800 11px/1 system-ui;color:var(--sub)}
+    .toolbar,.routeShell,.pageHero,.legacyActionDock{display:none!important}
+    .rangeInput{appearance:none;border:1px solid var(--border2);background:var(--surface2);border-radius:10px;padding:6px 9px;font:800 11px/1 system-ui;color:var(--text);min-width:118px}
+    .rangeInput:focus{outline:none;border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(231,191,105,.12)}
 
     /* ── Table panel head ── */
     .tablePanel .card.tableCard{min-height:calc(100vh - 334px);border-radius:20px;border:1px solid var(--border2);box-shadow:var(--shadow);overflow:hidden}
@@ -433,59 +434,45 @@
     <div class="summaryCard"><div class="summaryLabel">Χωρίς όχημα</div><div class="summaryValue" id="sumUnassigned">0</div><div class="summaryMeta">Κρατήσεις χωρίς assigned vehicle label, plate ή model.</div></div>
   </section>
 
-  <section class="bookingsControls">
-    <div class="controlsRow bookingsTopRow">
-      <div class="controlsLeft">
-        <div class="search"><input id="q" placeholder="Αναζήτηση: booking, πελάτης, τηλέφωνο, email, όχημα, τοποθεσία…"/></div>
-        <div class="rangeBar">
-          <span class="rangeLbl">Από</span>
-          <input class="rangeInput" id="startDate" type="date"/>
-          <span class="rangeLbl">Έως</span>
-          <input class="rangeInput" id="endDate" type="date"/>
-          <button class="btn rangeQuick" id="todayRange" type="button">Σήμερα</button>
-          <button class="btn rangeQuick" id="last7" type="button">7 ημέρες</button>
-          <button class="btn rangeQuick" id="last30" type="button">30 ημέρες</button>
-          <button class="btn btnPrimary" id="applyDates" type="button">Εφαρμογή</button>
-        </div>
+  <section class="bkCtrl">
+    <div class="bkCtrlMain">
+      <div class="search bkSearch"><input id="q" placeholder="Αναζήτηση: booking, πελάτης, τηλέφωνο, email, οχήμα, τοποθεσία…"/></div>
+      <div class="bkDateGroup">
+        <span class="ctrlLbl">Από</span>
+        <input class="rangeInput" id="startDate" type="date"/>
+        <span class="ctrlLbl">Έως</span>
+        <input class="rangeInput" id="endDate" type="date"/>
+        <button class="btn rangeQuick" id="todayRange" type="button">Σήμερα</button>
+        <button class="btn rangeQuick" id="last7" type="button">7d</button>
+        <button class="btn rangeQuick" id="last30" type="button">30d</button>
+        <button class="btn btnPrimary" id="applyDates" type="button">Εφαρμογή</button>
       </div>
-      <div class="controlsRight">
+      <div class="bkCtrlRight">
         <button class="btn btnPrimary" id="newBookingBtn" type="button">+ Νέα Κράτηση</button>
         <button class="btn" id="clear" type="button">Καθαρισμός</button>
-        <div class="statusLine" id="status">BOOT…</div>
-      </div>
-      <div class="legacyActionDock" hidden>
-        <button class="btn" id="exportBoardCsv" type="button">Export CSV</button>
-        <button class="btn" id="jumpPickupDaily" type="button">Pickup Daily</button>
-        <button class="btn" id="jumpFleetRange" type="button">Open Fleet</button>
-        <button class="btn" id="refresh" type="button">Ανανέωση</button>
       </div>
     </div>
-
-    <div class="filterBox">
-      <div class="filtersRow filtersRowMain">
-        <div class="filterGroup filterCluster statusCluster">
-          <span class="controlLabel">Κατάσταση</span>
-          <div class="pills" id="pillbar"></div>
-        </div>
-        <div class="filterGroup filterCluster workspaceCluster">
-          <span class="controlLabel">Workspace</span>
-          <div class="bookingsModeTabs" id="boardModeTabs">
-            <button class="bookingsModeBtn active" data-mode="all" type="button">Όλο το dataset</button>
-            <button class="bookingsModeBtn" data-mode="followup" type="button">Follow-up desk</button>
-            <button class="bookingsModeBtn" data-mode="pickups72" type="button">Pre-checkins 72h</button>
-          </div>
-        </div>
+    <div class="bkCtrlFilters">
+      <div class="bookingsModeTabs" id="boardModeTabs">
+        <button class="bookingsModeBtn active" data-mode="all" type="button">Όλα</button>
+        <button class="bookingsModeBtn" data-mode="followup" type="button">Follow-up</button>
+        <button class="bookingsModeBtn" data-mode="pickups72" type="button">Pre-check 72h</button>
       </div>
-      <div class="filtersRow filtersRowFocus">
-        <div class="filterGroup filterCluster focusCluster" style="flex:1 1 620px;">
-          <span class="controlLabel">Focus</span>
-          <div class="focusPills" id="focusPills"></div>
-        </div>
-        <div class="filterGroup filterCluster queueCluster" style="justify-content:flex-end;flex:0 1 auto;">
-          <div class="focusInfo" id="focusInfo">—</div>
-          <div class="queueStrip" id="queueStrip"></div>
-        </div>
+      <div class="bkSep"></div>
+      <div class="pills" id="pillbar"></div>
+      <div class="bkSep"></div>
+      <div class="focusPills" id="focusPills"></div>
+      <div class="bkCtrlTail">
+        <div class="focusInfo" id="focusInfo"></div>
+        <div class="queueStrip" id="queueStrip"></div>
+        <div class="statusLine" id="status">BOOT…</div>
       </div>
+    </div>
+    <div hidden>
+      <button id="exportBoardCsv" type="button">Export CSV</button>
+      <button id="jumpPickupDaily" type="button">Pickup Daily</button>
+      <button id="jumpFleetRange" type="button">Open Fleet</button>
+      <button id="refresh" type="button">Ανανέωση</button>
     </div>
   </section>
 

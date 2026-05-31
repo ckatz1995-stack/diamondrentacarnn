@@ -161,6 +161,49 @@ html{scrollbar-color:rgba(231,191,105,.28) rgba(255,255,255,.03)}
   .leftLine{min-width:580px}
 }
 
+
+/* ── Briefing card ── */
+.briefCard{padding:18px 20px;background:linear-gradient(135deg,rgba(231,191,105,.06),rgba(63,116,138,.04));border:1px solid var(--gold-border);border-radius:var(--r-lg);border-top:2px solid var(--gold);display:grid;gap:14px}
+.briefRow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.briefUser{display:flex;align-items:center;gap:12px}
+.briefBadge{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--gold-bg);border:1px solid var(--gold-border);font:900 20px/1 system-ui;color:var(--gold)}
+.briefInfo{display:flex;flex-direction:column;gap:4px}
+.briefName{font:900 16px/1 system-ui;color:var(--text)}
+.briefRole{font:700 12px/1 system-ui;color:var(--sub)}
+.briefStatus{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--r-pill);border:1px solid var(--border2);background:rgba(255,255,255,.04);font:700 13px/1.2 system-ui;color:var(--sub)}
+.briefStatus.ok{background:rgba(16,185,129,.08);color:#34d399;border-color:rgba(16,185,129,.22)}
+.briefStatus.warn{background:rgba(245,158,11,.08);color:#fbbf24;border-color:rgba(245,158,11,.22)}
+.briefStatus.error{background:rgba(239,68,68,.08);color:#f87171;border-color:rgba(239,68,68,.22)}
+
+/* ── Quick nav tiles ── */
+.quickNav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.navTile{appearance:none;border:1px solid var(--border2);background:var(--surface2);border-radius:var(--r);padding:14px 12px;cursor:pointer;text-align:center;transition:border-color .15s,transform .15s;display:flex;flex-direction:column;align-items:center;gap:6px}
+.navTile:hover{border-color:var(--gold-border);transform:translateY(-2px)}
+.navTile.locked{opacity:.36;filter:grayscale(.6);pointer-events:none}
+.navTile .navIcon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.06);font-size:18px}
+.navTile .navLabel{font:900 12px/1 system-ui;color:var(--text)}
+.navTile .navSub{font:700 10px/1.3 system-ui;color:var(--muted)}
+.navTile.primary .navIcon{background:var(--gold-bg);border:1px solid var(--gold-border)}
+
+/* ── Macro row ── */
+.macroRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;border-radius:var(--r);background:var(--surface2);border:1px solid var(--border2)}
+.macroLabel{font:900 10px/1 system-ui;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;flex:0 0 auto}
+.macroBtn{appearance:none;border:1px solid var(--border2);background:rgba(255,255,255,.05);color:var(--sub);border-radius:var(--r-pill);padding:8px 14px;font:800 12px/1 system-ui;cursor:pointer;transition:all .14s;flex:0 0 auto}
+.macroBtn:hover{background:rgba(255,255,255,.09);color:var(--text);border-color:rgba(255,255,255,.20)}
+.macroBtn.primary{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
+.macroBtn.locked{opacity:.35;filter:grayscale(.6);pointer-events:none}
+.macroDivider{width:1px;height:20px;background:var(--border);flex:0 0 auto}
+
+/* ── Resume banner ── */
+.resumeBanner{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--r);background:var(--gold-bg);border:1px solid var(--gold-border)}
+.resumeBanner.visible{display:flex}
+.resumeInfo{flex:1;min-width:0}
+.resumeTitle{font:900 13px/1.2 system-ui;color:var(--text)}
+.resumeMeta{font:700 11px/1.3 system-ui;color:var(--sub);margin-top:3px}
+
+@media(max-width:900px){.quickNav{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.quickNav{grid-template-columns:repeat(2,minmax(0,1fr))}.macroRow{flex-direction:column;align-items:flex-start}}
+
 /* ── KPI alert pulse ── */
 @keyframes kpiAlertPulse{0%,100%{box-shadow:0 0 0 0 rgba(231,191,105,.4)}60%{box-shadow:0 0 0 10px rgba(231,191,105,0)}}
 .patternCard.kpi-alert{border-color:var(--gold-border);animation:kpiAlertPulse 2.2s ease-in-out infinite}
@@ -194,154 +237,100 @@ html{scrollbar-color:rgba(231,191,105,.28) rgba(255,255,255,.03)}
 
     <div class="grid">
       <div class="panel" id="dashboardPanel">
-        <div class="hero">
-          <h1>Καλώς ήρθες στο backroom</h1>
-          <p>Το dashboard μένει ελαφρύ και σταθερό. Από εδώ περνάς σε Daily, Fleet, Bookings και Account Settings, με κοινό custom session σε όλο το ιδιωτικό περιβάλλον.</p>
-          <div class="note" id="authNotice" style="margin-top:12px">Το private session είναι ενεργό και ακολουθεί σε όλο το backroom.</div>
-          <div class="digest">
-            <div class="kpi"><div class="kpiLabel">Status</div><div class="kpiValue" id="statusValue">Not signed in</div></div>
-            <div class="kpi"><div class="kpiLabel">User</div><div class="kpiValue" id="digestUser">Guest</div></div>
-            <div class="kpi"><div class="kpiLabel">Role</div><div class="kpiValue" id="digestRole">—</div></div>
-            <div class="kpi"><div class="kpiLabel">Next target</div><div class="kpiValue" id="digestNext">Backroom</div></div>
+
+        <!-- Auth notice / status banner -->
+        <div class="note" id="authNotice" style="margin-bottom:14px">Το private session είναι ενεργό και ακολουθεί σε όλο το backroom.</div>
+
+        <!-- Shift briefing card -->
+        <div class="briefCard">
+          <div class="briefRow">
+            <div class="briefUser">
+              <div class="briefBadge" id="userBadge">G</div>
+              <div class="briefInfo">
+                <div class="briefName" id="digestUser">Guest</div>
+                <div class="briefRole" id="digestRole">Not signed in</div>
+              </div>
+            </div>
+            <div class="briefStatus" id="statusValue">Not signed in</div>
           </div>
-        </div>
-        <div class="patternStrip" id="liveKpiBar">
-          <div class="patternCard" id="kpiPendingCard">
-            <div class="patternKick">Εκκρεμείς κρατήσεις</div>
-            <div class="patternValue" id="kpiPending">—</div>
-            <div class="patternMeta">Pending confirmations</div>
-          </div>
-          <div class="patternCard">
-            <div class="patternKick">Παραλαβές σήμερα</div>
-            <div class="patternValue" id="kpiPickups">—</div>
-            <div class="patternMeta">Today's pickups</div>
-          </div>
-          <div class="patternCard">
-            <div class="patternKick">Επιστροφές σήμερα</div>
-            <div class="patternValue" id="kpiDropoffs">—</div>
-            <div class="patternMeta">Today's dropoffs</div>
-          </div>
-        </div>
-        <div class="entryRail">
-          <div class="entryCard">
-            <div class="entryKicker">Session layer</div>
-            <div class="entryTitle">One private entry for the whole backroom</div>
-            <div class="entryText">Το Myroom μένει η σταθερή αφετηρία: ίδιο custom session, ίδιο role context και ίδιο user dropdown πριν μπεις σε Daily, Fleet, Bookings ή Settings.</div>
-            <div class="entryMeta"><span class="entryPill primary">Private access</span><span class="entryPill">Single session</span></div>
-          </div>
-          <div class="entryCard">
-            <div class="entryKicker">Operator flow</div>
-            <div class="entryTitle">Move from sign-in to action with less friction</div>
-            <div class="entryText">Αφού γίνει το login, το dashboard λειτουργεί σαν command center με καθαρά jumps για operational pages και γρήγορη εικόνα του ρόλου που χειρίζεται το σύστημα.</div>
-            <div class="entryMeta"><span class="entryPill primary">Daily / Fleet / Bookings</span><span class="entryPill">Role-aware</span></div>
-          </div>
-          <div class="entryCard">
-            <div class="entryKicker">Admin readiness</div>
-            <div class="entryTitle">Setup, health και password tools stay visible</div>
-            <div class="entryText">Τα bootstrap και auth-health στοιχεία μένουν στο ίδιο panel ώστε ο διαχειριστής να βλέπει εύκολα αν το private login stack είναι έτοιμο πριν συνεχίσει σε ρυθμίσεις ή runtime pages.</div>
-            <div class="entryMeta"><span class="entryPill primary">Setup check</span><span class="entryPill">Recovery tools</span></div>
+
+          <!-- Live KPI strip -->
+          <div class="patternStrip" id="liveKpiBar" style="margin:0">
+            <div class="patternCard" id="kpiPendingCard">
+              <div class="patternKick">Εκκρεμείς κρατήσεις</div>
+              <div class="patternValue" id="kpiPending">—</div>
+              <div class="patternMeta">Pending confirmations</div>
+            </div>
+            <div class="patternCard">
+              <div class="patternKick">Παραλαβές σήμερα</div>
+              <div class="patternValue" id="kpiPickups">—</div>
+              <div class="patternMeta">Today's pickups</div>
+            </div>
+            <div class="patternCard">
+              <div class="patternKick">Επιστροφές σήμερα</div>
+              <div class="patternValue" id="kpiDropoffs">—</div>
+              <div class="patternMeta">Today's dropoffs</div>
+            </div>
           </div>
         </div>
 
-        <div class="commandDeck">
-          <div class="commandCard hidden" id="resumeWorkspaceCard" data-resume-workspace="1">
-            <div class="commandKick">Resume</div>
-            <div class="commandTitle" id="resumeWorkspaceTitle">Τελευταίο workspace</div>
-            <div class="commandText" id="resumeWorkspaceText">Συνέχισε από το πιο πρόσφατο operational context χωρίς να ψάχνεις ξανά page και φίλτρα.</div>
-            <div class="commandMeta"><span class="commandPill primary" id="resumeWorkspaceRoute">Backroom</span><span class="commandPill" id="resumeWorkspaceWhen">—</span></div>
-            <div class="commandActions"><button class="commandBtn primary" type="button" id="resumeWorkspaceBtn">Συνέχεια</button></div>
+        <!-- Resume workspace banner -->
+        <div class="resumeBanner hidden" id="resumeWorkspaceCard" data-resume-workspace="1" style="margin-top:12px">
+          <div class="resumeInfo">
+            <div class="resumeTitle" id="resumeWorkspaceTitle">Τελευταίο workspace</div>
+            <div class="resumeMeta"><span class="commandPill primary" id="resumeWorkspaceRoute">Backroom</span>&nbsp;<span id="resumeWorkspaceWhen">—</span> &mdash; <span id="resumeWorkspaceText">Συνέχισε από το πιο πρόσφατο operational context.</span></div>
           </div>
-          <div class="commandCard" data-route-card="daily">
-            <div class="commandKick">Quick launch</div>
-            <div class="commandTitle">Daily shift desk</div>
-            <div class="commandText">Άμεσο πέρασμα στο ημερήσιο operations board για check-outs, check-ins και contract follow-up χωρίς extra navigation.</div>
-            <div class="commandMeta"><span class="commandPill primary">Daily</span><span class="commandPill">Shift-first</span></div>
-            <div class="commandActions"><button class="commandBtn primary" type="button">Άνοιγμα Daily</button></div>
-          </div>
-          <div class="commandCard" data-route-card="fleet">
-            <div class="commandKick">Planner</div>
-            <div class="commandTitle">Fleet control room</div>
-            <div class="commandText">Γρήγορο άνοιγμα timeline, unassigned bookings και auto-assign controls σε πιο καθαρό control-room shell.</div>
-            <div class="commandMeta"><span class="commandPill primary">Fleet</span><span class="commandPill">Timeline</span></div>
-            <div class="commandActions"><button class="commandBtn primary" type="button">Άνοιγμα Fleet</button></div>
-          </div>
-          <div class="commandCard" data-route-card="bookings">
-            <div class="commandKick">Follow-up</div>
-            <div class="commandTitle">Bookings command board</div>
-            <div class="commandText">Search, range, status actions και quick contract από το ίδιο workspace για να καθαρίζεις γρήγορα το visible dataset.</div>
-            <div class="commandMeta"><span class="commandPill primary">Bookings</span><span class="commandPill">Status-safe</span></div>
-            <div class="commandActions"><button class="commandBtn primary" type="button">Άνοιγμα Bookings</button></div>
-          </div>
-          <div class="commandCard" data-route-card="settings">
-            <div class="commandKick">Admin tools</div>
-            <div class="commandTitle">Account settings & business control</div>
-            <div class="commandText">Πέρασμα σε business tabs, users, pricing και audit με ίδια premium γλώσσα με το υπόλοιπο backroom.</div>
-            <div class="commandMeta"><span class="commandPill primary">Settings</span><span class="commandPill">Admin</span></div>
-            <div class="commandActions"><button class="commandBtn primary" type="button">Άνοιγμα Account Settings</button></div>
-          </div>
+          <button class="commandBtn primary" type="button" id="resumeWorkspaceBtn">Συνέχεια →</button>
         </div>
 
-        <div class="commandDeck" id="workspaceToolsDeck">
-          <div class="commandCard" data-macro-card="today-daily">
-            <div class="commandKick">Operator macro</div>
-            <div class="commandTitle">Άνοιγμα Today Ops</div>
-            <div class="commandText">Άμεσο jump στο Daily για σήμερα, με καθαρό operator context και χωρίς να ψάχνεις ημερομηνίες.</div>
-            <div class="commandMeta"><span class="commandPill primary">Daily</span><span class="commandPill">Today</span></div>
-            <div class="commandActions"><button class="commandBtn primary" type="button" data-macro-action="today-daily">Today Ops</button></div>
-          </div>
-          <div class="commandCard" data-macro-card="fleet-14d">
-            <div class="commandKick">Planner macro</div>
-            <div class="commandTitle">Άνοιγμα Fleet 14d</div>
-            <div class="commandText">Στήνει αυτόματα 14ήμερο operational window για timeline scan και assignment work.</div>
-            <div class="commandMeta"><span class="commandPill primary">Fleet</span><span class="commandPill">14 days</span></div>
-            <div class="commandActions"><button class="commandBtn primary" type="button" data-macro-action="fleet-14d">Fleet 14d</button></div>
-          </div>
-          <div class="commandCard" data-macro-card="bookings-30d">
-            <div class="commandKick">Board macro</div>
-            <div class="commandTitle">Άνοιγμα Bookings 30d</div>
-            <div class="commandText">Γυρίζει το board στις τελευταίες 30 ημέρες για follow-up, status cleanup και export εργασίες.</div>
-            <div class="commandMeta"><span class="commandPill primary">Bookings</span><span class="commandPill">30 days</span></div>
-            <div class="commandActions"><button class="commandBtn primary" type="button" data-macro-action="bookings-30d">Bookings 30d</button></div>
-          </div>
-          <div class="commandCard" data-macro-card="copy-handoff-queue">
-            <div class="commandKick">Shift macro</div>
-            <div class="commandTitle">Copy handoff queue</div>
-            <div class="commandText">Μαζεύει τα queued follow-ups από Bookings, Daily, Fleet, Contract και Settings για γρήγορο handoff note.</div>
-            <div class="commandMeta"><span class="commandPill primary">Queue</span><span class="commandPill">Local only</span></div>
-            <div class="commandActions"><button class="commandBtn primary" type="button" data-macro-action="copy-handoff-queue">Copy queue</button></div>
-          </div>
-          <div class="commandCard" data-macro-card="clear-handoff-queue">
-            <div class="commandKick">Shift macro</div>
-            <div class="commandTitle">Clear handoff queue</div>
-            <div class="commandText">Αδειάζει το local handoff queue αυτού του browser χωρίς να πειράζει δεδομένα του συστήματος.</div>
-            <div class="commandMeta"><span class="commandPill primary">Queue</span><span class="commandPill">Safe clear</span></div>
-            <div class="commandActions"><button class="commandBtn" type="button" data-macro-action="clear-handoff-queue">Clear queue</button></div>
-          </div>
-          <div class="commandCard" data-macro-card="reset-workspace">
-            <div class="commandKick">Reset macro</div>
-            <div class="commandTitle">Καθαρισμός saved workspace state</div>
-            <div class="commandText">Καθαρίζει local resume, recent history, pins και saved page filters από αυτόν τον browser χωρίς να πειράζει δεδομένα του συστήματος.</div>
-            <div class="commandMeta"><span class="commandPill primary">Local only</span><span class="commandPill">Safe reset</span></div>
-            <div class="commandActions"><button class="commandBtn" type="button" data-macro-action="reset-workspace">Καθαρισμός</button></div>
-          </div>
+        <!-- Quick navigation tiles -->
+        <div class="quickNav" style="margin-top:14px">
+          <button class="navTile primary" data-route-card="daily" type="button">
+            <div class="navIcon">📋</div>
+            <div class="navLabel">Daily</div>
+            <div class="navSub">Shift desk</div>
+          </button>
+          <button class="navTile" data-route-card="fleet" type="button">
+            <div class="navIcon">🚗</div>
+            <div class="navLabel">Fleet</div>
+            <div class="navSub">Vehicles</div>
+          </button>
+          <button class="navTile" data-route-card="bookings" type="button">
+            <div class="navIcon">📂</div>
+            <div class="navLabel">Bookings</div>
+            <div class="navSub">All reservations</div>
+          </button>
+          <button class="navTile" data-route-card="customers" type="button">
+            <div class="navIcon">👤</div>
+            <div class="navLabel">Customers</div>
+            <div class="navSub">Profiles</div>
+          </button>
+          <button class="navTile" data-route-card="settings" type="button">
+            <div class="navIcon">⚙️</div>
+            <div class="navLabel">Settings</div>
+            <div class="navSub">Admin tools</div>
+          </button>
         </div>
 
-        <div class="commandDeck hidden" id="workspaceHistoryDeck"></div>
-        <div class="commandDeck hidden" id="handoffQueueDeck"></div>
-
-        <div class="patternStrip">
-          <div class="patternCard"><div class="patternKick">Shared system</div><div class="patternValue">One design language</div><div class="patternMeta">Myroom, Settings, Daily, Fleet, Bookings και Contract αρχίζουν πλέον με την ίδια admin ιεραρχία.</div></div>
-          <div class="patternCard"><div class="patternKick">Access model</div><div class="patternValue">Single private entry</div><div class="patternMeta">Το login panel μένει η μοναδική πύλη και ο ίδιος role context ακολουθεί σε κάθε page shell.</div></div>
-          <div class="patternCard"><div class="patternKick">Upgrade path</div><div class="patternValue">Command to workspace</div><div class="patternMeta">Από τα quick launches περνάς σε operator pages χωρίς να αλλάζει η γλώσσα πλοήγησης ή το session layer.</div></div>
-          <div class="patternCard"><div class="patternKick">Next layer</div><div class="patternValue">Ready for real upgrades</div><div class="patternMeta">Το hub είναι πλέον αρκετά σταθερό ώστε οι επόμενες αναβαθμίσεις να πατήσουν σε κοινό admin σύστημα και όχι σε σκόρπια shells.</div></div>
+        <!-- Macro actions row -->
+        <div class="macroRow" id="workspaceToolsDeck" style="margin-top:12px">
+          <span class="macroLabel">Quick actions</span>
+          <button class="macroBtn primary" data-macro-card="today-daily" data-macro-action="today-daily" type="button">Today Ops</button>
+          <button class="macroBtn" data-macro-card="fleet-14d" data-macro-action="fleet-14d" type="button">Fleet 14d</button>
+          <button class="macroBtn" data-macro-card="bookings-30d" data-macro-action="bookings-30d" type="button">Bookings 30d</button>
+          <div class="macroDivider"></div>
+          <button class="macroBtn" data-macro-card="copy-handoff-queue" data-macro-action="copy-handoff-queue" type="button">Copy queue</button>
+          <button class="macroBtn" data-macro-card="clear-handoff-queue" data-macro-action="clear-handoff-queue" type="button">Clear queue</button>
+          <button class="macroBtn" data-macro-card="reset-workspace" data-macro-action="reset-workspace" type="button">Reset state</button>
         </div>
-        <div class="dash" style="margin-top:14px">
-          <div class="section" data-route-card="daily"><div class="sectionTitle">Daily View</div><div class="sectionText">Check-outs, check-ins και γρήγορο άνοιγμα συμβολαίων.</div></div>
-          <div class="section" data-route-card="fleet"><div class="sectionTitle">Fleet Chart</div><div class="sectionText">Αναθέσεις οχημάτων, auto-assign και καθαρό οπτικό calendar.</div></div>
-          <div class="section" data-route-card="bookings"><div class="sectionTitle">Bookings Board</div><div class="sectionText">Status, rental state και κεντρικός έλεγχος κρατήσεων.</div></div>
-          <div class="section" data-route-card="customers"><div class="sectionTitle">Customers</div><div class="sectionText">Customer cards, 16-field profiles, support tickets και member notifications.</div></div>
-        <div class="section" data-route-card="settings"><div class="sectionTitle">Settings</div><div class="sectionText">Pricing catalog, users, roles, sessions και audit σε ένα private console.</div></div></div>
-        <div class="footerNote" style="margin-top:12px">Στο πρώτο admin bootstrap login χρησιμοποίησε το προσωρινό password του setup και μετά όρισε μόνιμα credentials για τους χρήστες.</div>
+
+        <!-- Dynamic decks (rendered by JS) -->
+        <div class="commandDeck hidden" id="workspaceHistoryDeck" style="margin-top:12px"></div>
+        <div class="commandDeck hidden" id="handoffQueueDeck" style="margin-top:12px"></div>
+
+        <!-- Hidden digest elements for JS compatibility -->
+        <span id="digestNext" style="display:none"></span>
+
       </div>
     </div>
   </div>
