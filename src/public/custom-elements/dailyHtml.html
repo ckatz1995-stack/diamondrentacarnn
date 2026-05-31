@@ -129,14 +129,22 @@
     .controlGroup.slim{padding:0;border:none;background:transparent}
 
     /* ── KPI summary ── */
-    .summaryGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
-    .summaryCard{padding:7px 8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);display:grid;gap:2px;align-content:start;text-align:left}
-    .summaryCard.clickable{cursor:pointer;transition:transform .14s,box-shadow .14s,border-color .14s}
-    .summaryCard.clickable:hover{transform:translateY(-1px);box-shadow:var(--shadow);border-color:var(--gold-border)}
+    .summaryGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:10px}
+    .summaryCard{padding:14px 16px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden;align-items:flex-start;text-align:left}
+    .summaryCard::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--border2);border-radius:0 3px 3px 0;transition:background .16s}
+    .summaryCard.clickable{cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}
+    .summaryCard.clickable:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--gold-border)}
+    .summaryCard.clickable:hover::before,.summaryCard.isActive::before{background:linear-gradient(180deg,var(--gold),var(--gold2))}
     .summaryCard.isActive{background:var(--gold-bg);border-color:var(--gold-border)}
-    .summaryCard .k{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
-    .summaryCard .v{margin-top:2px;font-size:16px;font-weight:900;color:var(--text);line-height:1}
-    .summaryCard .m{margin-top:4px;font-size:10px;line-height:1.4;font-weight:800;color:var(--sub)}
+    .summaryCard .k,.summaryCard .summaryLabel{font:900 9.5px/1 system-ui;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .summaryCard .v,.summaryCard .summaryValue{font:900 26px/1 system-ui;color:var(--text);letter-spacing:-.02em;margin-top:3px}
+    .summaryCard.isActive .v,.summaryCard.isActive .summaryValue{color:var(--gold)}
+    .summaryCard .m,.summaryCard .summaryMeta{font:700 10px/1.4 system-ui;color:var(--muted);display:block;margin-top:2px}
+    /* accent bar per tab type */
+    .summaryCard[data-summary-tab="checkin"]::before{background:linear-gradient(180deg,var(--teal),#1E4D5C)}
+    .summaryCard[data-summary-tab="checkin"].clickable:hover::before,.summaryCard[data-summary-tab="checkin"].isActive::before{background:linear-gradient(180deg,var(--teal),#1E4D5C)}
+    .summaryCard[data-summary-tab="overdue"]::before{background:linear-gradient(180deg,var(--danger),#7F1D1D)}
+    .summaryCard[data-summary-tab="overdue"].clickable:hover::before,.summaryCard[data-summary-tab="overdue"].isActive::before{background:linear-gradient(180deg,var(--danger),#7F1D1D)}
 
     /* ── Tool table system ── */
     .toolTableShell{position:relative;display:grid;grid-template-rows:auto auto minmax(280px,1fr);gap:0;border:1px solid var(--border2);border-radius:14px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow);min-height:0;height:100%}
