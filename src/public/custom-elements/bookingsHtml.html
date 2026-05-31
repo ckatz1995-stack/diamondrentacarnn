@@ -100,13 +100,19 @@
     .summaryCard{padding:14px 16px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden;align-items:flex-start}
     .summaryCard::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--border2);border-radius:0 3px 3px 0}
     .summaryLabel{font:900 9.5px/1 system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
-    .summaryValue{font:900 26px/1 system-ui,-apple-system,sans-serif;color:var(--text);letter-spacing:-.02em;margin-top:3px}
+    .summaryValue{font:900 26px/1 system-ui,-apple-system,sans-serif;color:var(--text);letter-spacing:-.02em;margin-top:3px;transition:color .2s}
     .summaryMeta{font:700 10px/1.4 system-ui,-apple-system,sans-serif;color:var(--muted);display:block;margin-top:2px}
-    /* color-accent per card position */
-    .summaryCard:first-child::before{background:var(--border2)}
-    .summaryCard:nth-child(3)::before{background:linear-gradient(180deg,var(--ok),#14532D)}
-    .summaryCard:nth-child(4)::before{background:linear-gradient(180deg,var(--gold),var(--gold2))}
-    .summaryCard:nth-child(5)::before{background:linear-gradient(180deg,var(--danger),#7F1D1D)}
+    /* color-accent per semantic kpi type */
+    .summaryCard[data-kpi="confirmed"]::before{background:linear-gradient(180deg,#10B981,#14532D)}
+    .summaryCard[data-kpi="pending"]::before{background:linear-gradient(180deg,var(--gold),var(--gold2))}
+    .summaryCard[data-kpi="unassigned"]::before{background:linear-gradient(180deg,var(--danger),#7F1D1D)}
+    /* non-zero warning tints */
+    .summaryCard[data-kpi="pending"][data-nonzero]{background:rgba(154,110,30,.05);border-color:var(--gold-border)}
+    .summaryCard[data-kpi="pending"][data-nonzero] .summaryValue{color:var(--gold)}
+    .summaryCard[data-kpi="unassigned"][data-nonzero]{background:rgba(239,68,68,.04);border-color:rgba(239,68,68,.2)}
+    .summaryCard[data-kpi="unassigned"][data-nonzero] .summaryValue{color:var(--danger)}
+    @keyframes kpiFlash{0%{opacity:.5;transform:scale(.97)}100%{opacity:1;transform:scale(1)}}
+    .summaryValue.kpi-flash{animation:kpiFlash .25s ease-out}
 
     /* ── Upgrade / ops / dock cards ── */
     .upgradeRail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -453,11 +459,11 @@
   </div>
 
   <section class="summaryGrid">
-    <div class="summaryCard"><div class="summaryLabel">Σύνολο</div><div class="summaryValue" id="sumTotal">0</div><div class="summaryMeta">Όλες οι κρατήσεις που φορτώθηκαν για το επιλεγμένο διάστημα.</div></div>
-    <div class="summaryCard"><div class="summaryLabel">Ορατές</div><div class="summaryValue" id="sumVisible">0</div><div class="summaryMeta">Μετά από search, status και mode filters.</div></div>
-    <div class="summaryCard"><div class="summaryLabel">Confirmed</div><div class="summaryValue" id="sumConfirmed">0</div><div class="summaryMeta">Confirmed / live rows που είναι έτοιμες για χειρισμό.</div></div>
-    <div class="summaryCard"><div class="summaryLabel">Pending</div><div class="summaryValue" id="sumPending">0</div><div class="summaryMeta">Rows που θέλουν follow-up, status action ή συμπλήρωση.</div></div>
-    <div class="summaryCard"><div class="summaryLabel">Χωρίς όχημα</div><div class="summaryValue" id="sumUnassigned">0</div><div class="summaryMeta">Κρατήσεις χωρίς assigned vehicle label, plate ή model.</div></div>
+    <div class="summaryCard" data-kpi="total"><div class="summaryLabel">Σύνολο</div><div class="summaryValue" id="sumTotal">0</div><div class="summaryMeta">Όλες οι κρατήσεις που φορτώθηκαν για το επιλεγμένο διάστημα.</div></div>
+    <div class="summaryCard" data-kpi="visible"><div class="summaryLabel">Ορατές</div><div class="summaryValue" id="sumVisible">0</div><div class="summaryMeta">Μετά από search, status και mode filters.</div></div>
+    <div class="summaryCard" data-kpi="confirmed"><div class="summaryLabel">Confirmed</div><div class="summaryValue" id="sumConfirmed">0</div><div class="summaryMeta">Confirmed / live rows που είναι έτοιμες για χειρισμό.</div></div>
+    <div class="summaryCard" data-kpi="pending"><div class="summaryLabel">Pending</div><div class="summaryValue" id="sumPending">0</div><div class="summaryMeta">Rows που θέλουν follow-up, status action ή συμπλήρωση.</div></div>
+    <div class="summaryCard" data-kpi="unassigned"><div class="summaryLabel">Χωρίς όχημα</div><div class="summaryValue" id="sumUnassigned">0</div><div class="summaryMeta">Κρατήσεις χωρίς assigned vehicle label, plate ή model.</div></div>
   </section>
 
   <section class="bkCtrl">
@@ -1115,11 +1121,12 @@
     const confirmed = allList.filter((it)=> normalizeStatusValue(it.status) === 'Confirmed').length;
     const pending = allList.filter((it)=> normalizeStatusValue(it.status) === 'Pending').length;
     const unassigned = allList.filter((it)=> !hasAssignedVehicle(it)).length;
-    if (sumTotalEl) sumTotalEl.textContent = String(allList.length);
-    if (sumVisibleEl) sumVisibleEl.textContent = String(visibleList.length); const _bkb=document.getElementById('bkBoardBadge');if(_bkb)_bkb.textContent=`${visibleList.length} visible`;
-    if (sumConfirmedEl) sumConfirmedEl.textContent = String(confirmed);
-    if (sumPendingEl) sumPendingEl.textContent = String(pending);
-    if (sumUnassignedEl) sumUnassignedEl.textContent = String(unassigned);
+    function setKpi(el, val){ if(!el)return; el.textContent=String(val); el.classList.remove('kpi-flash'); requestAnimationFrame(()=>el.classList.add('kpi-flash')); el.closest('.summaryCard')?.toggleAttribute('data-nonzero', val>0); }
+    setKpi(sumTotalEl, allList.length);
+    setKpi(sumVisibleEl, visibleList.length); const _bkb=document.getElementById('bkBoardBadge');if(_bkb)_bkb.textContent=`${visibleList.length} visible`;
+    setKpi(sumConfirmedEl, confirmed);
+    setKpi(sumPendingEl, pending);
+    setKpi(sumUnassignedEl, unassigned);
   }
 
   function renderRow(it){
