@@ -79,10 +79,6 @@ body{overflow:hidden}
 .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow)}
 
-/* ── Hero ── */
-.hero{padding:22px;background:linear-gradient(135deg,rgba(154,110,30,.07),rgba(63,116,138,.05));border:1px solid var(--gold-border);border-radius:var(--r);border-top:2px solid var(--gold)}
-.hero h1{margin:0 0 8px;font-size:26px;line-height:1.1;letter-spacing:-.02em;color:var(--text)}
-.hero p{margin:0;color:var(--sub);font-size:15px;font-weight:700;line-height:1.6}
 
 /* ── Notice ── */
 .note{padding:11px 14px;border-radius:12px;background:rgba(0,0,0,.03);border:1px solid var(--border2);font:700 13px/1.45 system-ui;color:var(--sub)}
@@ -92,30 +88,14 @@ body{overflow:hidden}
 .helperList{margin:0;padding-left:18px;color:var(--sub);font:700 13px/1.5 system-ui}
 .helperList li{margin:4px 0}
 
-/* ── KPI digest ── */
-.digest{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
-.kpi{padding:14px;border-radius:14px;background:rgba(0,0,0,.03);border:1px solid var(--border2)}
-.kpiLabel{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.kpiValue{font-size:17px;font-weight:900;margin-top:6px;color:var(--text)}
 
 /* ── Live KPI bar ── */
-.patternStrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 2px}
 .patternCard{padding:14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);display:grid;gap:4px;transition:border-color .15s}
 .patternCard:hover{border-color:var(--gold-border)}
 .patternKick{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .patternValue{font-size:22px;font-weight:900;letter-spacing:-.02em;color:var(--gold)}
 .patternMeta{font-size:11px;font-weight:700;color:var(--sub)}
 
-/* ── Entry rail ── */
-.entryRail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
-.entryCard{padding:16px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);display:grid;gap:8px;transition:border-color .15s,transform .15s}
-.entryCard:hover{border-color:var(--gold-border);transform:translateY(-1px)}
-.entryKicker{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
-.entryTitle{font-size:16px;font-weight:900;letter-spacing:-.01em;color:var(--text)}
-.entryText{font-size:13px;line-height:1.55;font-weight:700;color:var(--sub)}
-.entryMeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.entryPill{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--r-pill);border:1px solid var(--border2);background:rgba(0,0,0,.03);font:800 11px/1.1 system-ui;color:var(--sub)}
-.entryPill.primary{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
 
 /* ── Command deck ── */
 .commandDeck{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
@@ -134,14 +114,6 @@ body{overflow:hidden}
 .commandBtn.primary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent;box-shadow:0 4px 12px rgba(154,110,30,.20)}
 .commandBtn.primary:hover{box-shadow:0 6px 18px rgba(154,110,30,.32)}
 
-/* ── Dash sections ── */
-.dash{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.section{padding:16px;border-radius:var(--r);background:var(--surface2);border:1px solid var(--border2);cursor:pointer;transition:border-color .15s,transform .15s;display:grid;align-content:start;gap:6px;min-height:96px}
-.section:hover{border-color:var(--gold-border);transform:translateY(-1px)}
-.section.locked{opacity:.42;filter:grayscale(.5);pointer-events:none}
-.section.locked .sectionTitle::after{content:" • locked";color:#B45309;font-size:11px;font-weight:900}
-.sectionTitle{font-size:14px;font-weight:900;color:var(--text)}
-.sectionText{font-size:13px;color:var(--sub);line-height:1.55;font-weight:700;max-width:36ch}
 
 /* ── Auth card (login form) ── */
 .authCard{display:flex;flex-direction:column;gap:14px}
@@ -172,15 +144,11 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
 
 /* ── Responsive ── */
 @media(max-width:980px){
-  .grid,.dash{grid-template-columns:1fr}
-  .digest,.patternStrip,.entryRail,.commandDeck{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .hero h1{font-size:22px}
-  .leftLine{min-width:720px}
+  .grid{grid-template-columns:1fr}
+  .commandDeck{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media(max-width:780px){html{overflow-x:hidden}.leftLine{min-width:640px}}
 @media(max-width:640px){
-  .digest,.patternStrip,.entryRail,.commandDeck{grid-template-columns:1fr}
-  .leftLine{min-width:500px}
+  .commandDeck{grid-template-columns:1fr}
 }
 
 
