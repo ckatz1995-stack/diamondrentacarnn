@@ -94,9 +94,18 @@
     .rb-auto-label input{accent-color:var(--gold)}
     .rb-auto-label.is-on{border-color:var(--gold-border);color:var(--gold);background:var(--gold-bg)}
 
-    /* countdown chip */
+    /* countdown */
     .rb-countdown{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border2);border-radius:var(--r-pill);background:rgba(0,0,0,.03);font:900 10px/1 system-ui;color:var(--sub);white-space:nowrap;flex-shrink:0;transition:all .3s}
     .rb-countdown.urgent{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
+
+    /* view toggle */
+    .rb-view-toggle{appearance:none;display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border:1px solid var(--border2);border-radius:10px;background:rgba(0,0,0,.03);font:900 10.5px/1 system-ui;color:var(--sub);cursor:pointer;transition:all .14s;white-space:nowrap}
+    .rb-view-toggle:hover{background:rgba(0,0,0,.06)}
+    .rb-view-toggle.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
+
+    /* help button */
+    .rb-help-btn{appearance:none;border:1px solid var(--border2);background:rgba(0,0,0,.03);border-radius:var(--r-pill);width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font:900 13px/1 system-ui;color:var(--muted);cursor:pointer;transition:all .14s;flex-shrink:0}
+    .rb-help-btn:hover{background:rgba(0,0,0,.07);color:var(--sub)}
 
     /* ── Quick filters ── */
     .rb-filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -119,13 +128,15 @@
     .tl-leg.checkin::before{background:#10B981}
     .tl-axis{position:relative;height:64px;margin:0 8px;user-select:none}
     .tl-line{position:absolute;left:0;right:0;top:50%;height:2px;background:var(--border2);border-radius:2px;transform:translateY(-50%)}
+    .tl-past{position:absolute;left:0;top:50%;height:2px;background:var(--gold);opacity:.35;border-radius:2px;transform:translateY(-50%);pointer-events:none}
     .tl-tick{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none}
     .tl-tick::before{content:"";width:1px;height:7px;background:var(--border2)}
     .tl-tick span{font:700 8px/1 system-ui;color:var(--muted);white-space:nowrap}
     .tl-dot{position:absolute;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);cursor:pointer;transition:transform .14s,box-shadow .14s;z-index:2}
-    .tl-dot:hover{transform:translateX(-50%) scale(2);z-index:10}
+    .tl-dot:hover{transform:translateX(-50%) scale(2.2);z-index:10}
     .tl-dot.co{top:calc(50% - 18px);background:var(--gold);box-shadow:0 0 0 2px rgba(168,132,74,.25)}
     .tl-dot.ci{top:calc(50% + 8px);background:#10B981;box-shadow:0 0 0 2px rgba(16,185,129,.22)}
+    .tl-dot.past{opacity:.38}
     .tl-dot.crit{background:#EF4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.3)!important}
     .tl-now{position:absolute;top:-8px;bottom:-8px;width:2px;background:var(--gold);transform:translateX(-50%);border-radius:2px;z-index:5;pointer-events:none}
     .tl-now::after{content:"NOW";position:absolute;top:-14px;left:50%;transform:translateX(-50%);font:900 7.5px/1 system-ui;color:var(--gold);letter-spacing:.04em}
@@ -169,6 +180,7 @@
 
     /* ── Board ── */
     .rb-board{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start;margin-bottom:20px}
+    .rb-board.compact-mode{display:none}
     .rb-col{background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
     .rb-colhead{padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;gap:6px;position:sticky;top:0;z-index:2}
     .rb-colhead-left{display:flex;align-items:center;gap:6px;min-width:0}
@@ -194,7 +206,15 @@
     .rb-card:last-child{border-bottom:none}
     .rb-card:hover{background:rgba(0,0,0,.018)}
 
-    /* card header row — click to expand */
+    /* coming-up-soon pulse */
+    @keyframes upcoming-pulse{0%,100%{box-shadow:0 2px 12px rgba(15,23,42,.06)}55%{box-shadow:0 0 0 5px rgba(245,158,11,.22),0 2px 12px rgba(15,23,42,.06)}}
+    .rb-card.card-upcoming{animation:upcoming-pulse 2.5s ease-in-out infinite}
+
+    /* timeline-click highlight */
+    @keyframes card-flash{0%,100%{background:transparent}20%,80%{background:rgba(168,132,74,.14)}}
+    .rb-card.highlight{animation:card-flash 2s ease!important}
+
+    /* card header */
     .rb-card-header{display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer;margin-bottom:7px}
     .rb-card-header-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
     .rb-card-time{display:inline-flex;align-items:center;padding:4px 9px;border-radius:9px;background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold);font:900 12px/1 system-ui}
@@ -213,8 +233,12 @@
     .rb-tag.info{background:rgba(59,130,246,.10);border-color:rgba(59,130,246,.22);color:#1D4ED8}
     .rb-tag.ok{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22);color:#065F46}
     .rb-tag.crit{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
+    .rb-tag.dur{background:rgba(168,132,74,.08);border-color:var(--gold-border);color:var(--gold2)}
 
-    /* notes preview (always visible if notes exist) */
+    /* search highlight */
+    mark.rb-hl{background:rgba(168,132,74,.28);color:inherit;border-radius:3px;padding:0 1px;font-style:normal}
+
+    /* notes preview */
     .rb-notes-preview{margin-top:6px;padding:5px 8px;background:rgba(168,132,74,.06);border-left:2px solid var(--gold-border);border-radius:0 6px 6px 0;font:800 10px/1.45 system-ui;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
     /* expandable details */
@@ -236,6 +260,58 @@
     .rb-btn.primary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent;box-shadow:0 2px 6px rgba(154,110,30,.22)}
     .rb-btn.primary:hover{box-shadow:0 4px 12px rgba(154,110,30,.34)}
     .rb-empty{padding:32px 16px;text-align:center;font:800 11.5px/1.6 system-ui;color:var(--muted)}
+
+    /* ── Health dot ── */
+    .health-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:var(--border2);transition:background .4s,box-shadow .4s;margin-left:2px}
+    .health-dot.hd-ok{background:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,.18)}
+    .health-dot.hd-warn{background:#F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,.20)}
+    .health-dot.hd-crit{background:#EF4444;box-shadow:0 0 0 3px rgba(239,68,68,.20);animation:pulse-dot 1.4s infinite}
+
+    /* ── Refresh spinner ── */
+    @keyframes spin{to{transform:rotate(360deg)}}
+    #btnRefresh.spinning{animation:spin .8s linear infinite;pointer-events:none;opacity:.6}
+
+    /* ── Compact table ── */
+    .rb-compact-wrap{display:none;margin-bottom:20px}
+    .rb-compact-wrap.show{display:block}
+    .rb-ctable{width:100%;border-collapse:collapse;background:var(--surface);border-radius:14px;overflow:hidden;border:1px solid var(--border2);box-shadow:var(--shadow)}
+    .rb-ctable th{background:var(--surface2);padding:8px 10px;text-align:left;font:900 9px/1 system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+    .rb-ctable td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;font:800 11px/1.3 system-ui}
+    .rb-ctable tbody tr:last-child td{border-bottom:none}
+    .rb-ctable tbody tr:hover td{background:rgba(0,0,0,.02)}
+    .ct-time{font:900 12px/1 system-ui;white-space:nowrap}
+    .ct-time.co{color:var(--gold)}
+    .ct-time.ci{color:#10B981}
+    .ct-badge{display:inline-flex;padding:2px 6px;border-radius:var(--r-pill);font:900 8.5px/1 system-ui;white-space:nowrap}
+    .ct-badge.co{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold2)}
+    .ct-badge.ci{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.22);color:#065F46}
+    .ct-name{font:900 12px/1.2 system-ui;color:var(--text)}
+    .ct-booking{font:700 9.5px/1 system-ui;color:var(--muted);margin-top:1px}
+    .ct-vehicle{font:800 10.5px/1 system-ui;color:var(--sub)}
+    .ct-vehicle.missing{color:#B91C1C;font-weight:900}
+    .ct-route{font:700 9.5px/1.4 system-ui;color:var(--muted);max-width:130px}
+    .ct-dur{display:inline-flex;align-items:center;padding:1px 5px;background:rgba(168,132,74,.08);border:1px solid var(--gold-border);border-radius:4px;font:900 8.5px/1 system-ui;color:var(--gold2);margin-left:4px}
+    .ct-acts{display:flex;gap:4px;white-space:nowrap}
+    .ct-acts .rb-btn{padding:4px 7px;font-size:8.5px}
+    .ct-row-crit td:first-child{border-left:3px solid #EF4444}
+    .ct-row-warn td:first-child{border-left:3px solid #F59E0B}
+    @keyframes ct-flash{0%,100%{background:transparent}25%,75%{background:rgba(168,132,74,.12)}}
+    .ct-row-flash td{animation:ct-flash 2s ease}
+
+    /* ── Shortcut panel ── */
+    .sc-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:9998;display:none;backdrop-filter:blur(3px)}
+    .sc-backdrop.show{display:block}
+    .sc-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--surface);border:1px solid var(--border2);border-radius:20px;box-shadow:var(--shadow-lg);z-index:9999;display:none;width:360px;max-width:calc(100vw - 32px);overflow:hidden}
+    .sc-panel.show{display:block}
+    .sc-panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;border-bottom:1px solid var(--border);background:var(--surface2)}
+    .sc-panel-title{font:900 13px/1 system-ui;color:var(--text)}
+    .sc-close-btn{appearance:none;border:none;background:transparent;color:var(--muted);font:700 18px/1 system-ui;cursor:pointer;padding:1px 6px;border-radius:6px}
+    .sc-close-btn:hover{background:rgba(0,0,0,.08)}
+    .sc-grid{display:grid;grid-template-columns:auto 1fr;padding:6px 0 10px}
+    .sc-section{grid-column:1/-1;padding:8px 16px 3px;font:900 9px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .sc-key{padding:5px 10px 5px 16px;display:flex;justify-content:flex-end;align-items:center}
+    .sc-desc{padding:5px 16px 5px 8px;font:800 11px/1.3 system-ui;color:var(--sub);display:flex;align-items:center}
+    kbd{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:3px 6px;background:var(--surface2);border:1px solid var(--border2);border-bottom-width:2px;border-radius:6px;font:900 10px/1 system-ui;color:var(--text)}
 
     @media(max-width:980px){.rb-board{grid-template-columns:1fr 1fr}}
     @media(max-width:640px){.rb-board{grid-template-columns:1fr}.rb-row{gap:6px}.tl-axis{height:50px}}
@@ -270,7 +346,11 @@
   <div class="shell-main">
     <div class="shell-top">
       <div class="shell-page-info">
-        <div class="shell-page-name"><span class="shell-page-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Daily Ops</div>
+        <div class="shell-page-name">
+          <span class="shell-page-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+          Daily Ops
+          <span id="healthDot" class="health-dot" title="Day health"></span>
+        </div>
         <div class="shell-page-sub">Daily operations &middot; confirmed &amp; live workspace</div>
       </div>
       <div class="shell-top-right">
@@ -298,13 +378,15 @@
           <button class="btn" id="btnPrev" type="button" title="Previous day (&#8592;)">&#8592;</button>
           <input class="input" id="datePick" type="date" style="width:136px" />
           <button class="btn" id="btnNext" type="button" title="Next day (&#8594;)">&#8594;</button>
-          <button class="btn" id="btnToday" type="button">&#931;&#942;&#956;&#949;&#961;&#945;</button>
-          <button class="btn btnPrimary" id="btnRefresh" type="button" title="Reload">&#8635;</button>
+          <button class="btn" id="btnToday" type="button" title="Today (T)">&#931;&#942;&#956;&#949;&#961;&#945;</button>
+          <button class="btn btnPrimary" id="btnRefresh" type="button" title="Reload (R)">&#8635;</button>
           <input class="input" id="globalSearch" placeholder="RES, &#960;&#949;&#955;&#940;&#964;&#951;&#962;, &#972;&#967;&#951;&#956;&#945;, flight&#8230;" style="flex:1 1 160px;min-width:100px" />
           <select class="select" id="stationFilter"><option value="all">&#8704;&#955;&#949;&#962;</option></select>
           <label class="rb-auto-label" id="autoLabel" title="Auto-refresh every 5 minutes">
             <input type="checkbox" id="autoRefresh" /> Auto 5'
           </label>
+          <button class="rb-view-toggle" id="btnCompact" type="button" title="Toggle compact view (V)">&#8803; Cards</button>
+          <button class="rb-help-btn" id="btnHelp" type="button" title="Keyboard shortcuts (?)">?</button>
           <span class="rb-countdown" id="countdown"></span>
           <span class="rb-status" id="status">Loading&#8230;</span>
           <span class="rb-refresh-time" id="refreshTime"></span>
@@ -331,7 +413,7 @@
       <!-- Timeline strip -->
       <div class="rb-timeline">
         <div class="tl-header">
-          <span class="tl-title">Day Timeline</span>
+          <span class="tl-title">Day Timeline — click a dot to jump to its card</span>
           <div class="tl-legend">
             <span class="tl-leg checkout">Check-outs</span>
             <span class="tl-leg checkin">Check-ins</span>
@@ -346,13 +428,16 @@
       <!-- Stats bar -->
       <div class="rb-stats-bar" id="statsBar"></div>
 
+      <!-- Compact table (shown in compact mode) -->
+      <div class="rb-compact-wrap" id="compactWrap"></div>
+
       <!-- 3-column board -->
-      <div class="rb-board">
+      <div class="rb-board" id="mainBoard">
         <div class="rb-col" id="colOut">
           <div class="rb-colhead">
             <div class="rb-colhead-left"><strong>Check-outs</strong><span class="rb-badge" id="cntOut">0</span></div>
             <div class="rb-colhead-sort">
-              <button class="rb-sort-btn active" data-col="out" data-sort="time" type="button">&#9201; Time</button>
+              <button class="rb-sort-btn active" data-col="out" data-sort="time" type="button">&#9201; Time &#8593;</button>
               <button class="rb-sort-btn" data-col="out" data-sort="name" type="button">A&#8211;Z</button>
               <button class="rb-sort-btn" data-col="out" data-sort="status" type="button">&#9888; Status</button>
             </div>
@@ -363,7 +448,7 @@
           <div class="rb-colhead">
             <div class="rb-colhead-left"><strong>Check-ins</strong><span class="rb-badge" id="cntIn">0</span></div>
             <div class="rb-colhead-sort">
-              <button class="rb-sort-btn active" data-col="in" data-sort="time" type="button">&#9201; Time</button>
+              <button class="rb-sort-btn active" data-col="in" data-sort="time" type="button">&#9201; Time &#8593;</button>
               <button class="rb-sort-btn" data-col="in" data-sort="name" type="button">A&#8211;Z</button>
               <button class="rb-sort-btn" data-col="in" data-sort="status" type="button">&#9888; Status</button>
             </div>
@@ -374,7 +459,7 @@
           <div class="rb-colhead">
             <div class="rb-colhead-left"><strong id="bookingsColLabel">Bookings</strong><span class="rb-badge" id="cntBookings">0</span></div>
             <div class="rb-colhead-sort">
-              <button class="rb-sort-btn active" data-col="bookings" data-sort="time" type="button">&#9201; Time</button>
+              <button class="rb-sort-btn active" data-col="bookings" data-sort="time" type="button">&#9201; Time &#8593;</button>
               <button class="rb-sort-btn" data-col="bookings" data-sort="name" type="button">A&#8211;Z</button>
               <button class="rb-sort-btn" data-col="bookings" data-sort="status" type="button">&#9888; Status</button>
             </div>
@@ -384,6 +469,28 @@
       </div>
 
     </main>
+  </div>
+</div>
+
+<!-- Shortcut panel -->
+<div class="sc-backdrop" id="scBackdrop"></div>
+<div class="sc-panel" id="scPanel">
+  <div class="sc-panel-head">
+    <span class="sc-panel-title">&#9000; Keyboard Shortcuts</span>
+    <button class="sc-close-btn" id="scClose" type="button">&#215;</button>
+  </div>
+  <div class="sc-grid">
+    <div class="sc-section">Navigation</div>
+    <div class="sc-key"><kbd>&#8592;</kbd></div><div class="sc-desc">Previous day</div>
+    <div class="sc-key"><kbd>&#8594;</kbd></div><div class="sc-desc">Next day</div>
+    <div class="sc-key"><kbd>T</kbd></div><div class="sc-desc">Jump to today</div>
+    <div class="sc-section">Actions</div>
+    <div class="sc-key"><kbd>R</kbd></div><div class="sc-desc">Refresh data</div>
+    <div class="sc-key"><kbd>/</kbd></div><div class="sc-desc">Focus search bar</div>
+    <div class="sc-key"><kbd>V</kbd></div><div class="sc-desc">Toggle compact / card view</div>
+    <div class="sc-section">General</div>
+    <div class="sc-key"><kbd>?</kbd></div><div class="sc-desc">Show / hide this panel</div>
+    <div class="sc-key"><kbd>Esc</kbd></div><div class="sc-desc">Close panel &middot; clear search</div>
   </div>
 </div>
 
@@ -413,7 +520,10 @@
     countdown:     $('countdown'),
     overdueBanner: $('overdueBanner'),
     overdueText:   $('overdueText'),
-    tlAxis:        $('tlAxis')
+    tlAxis:        $('tlAxis'),
+    mainBoard:     $('mainBoard'),
+    compactWrap:   $('compactWrap'),
+    healthDot:     $('healthDot')
   };
 
   const state = {
@@ -422,6 +532,7 @@
     station:     'all',
     quickFilter: 'all',
     sort:        { out:{key:'time',dir:'asc'}, in:{key:'time',dir:'asc'}, bookings:{key:'time',dir:'asc'} },
+    compact:     false,
     autoTimer:   null,
     cdTimer:     null,
     user:        { name:'Operator', role:'Backroom' }
@@ -438,9 +549,25 @@
   function setStatus(t){ if(els.status) els.status.textContent=s(t); }
   function stampRefresh(){ if(els.refreshTime){ const n=new Date(); els.refreshTime.textContent=`Updated ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; } }
 
+  function dateLabel(dateStr){
+    try{ return asDate(dateStr||ymd(new Date())).toLocaleDateString('el-GR',{weekday:'short',day:'2-digit',month:'short'}); }
+    catch(_){ return dateStr||''; }
+  }
+
+  /* ── Search highlight ── */
+  function highlight(text, q){
+    const safe = esc(text);
+    if(!q) return safe;
+    try{
+      const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+      return safe.replace(re,'<mark class="rb-hl">$1</mark>');
+    }catch(_){ return safe; }
+  }
+
   /* ── Data request ── */
   function reloadData(){
     const d = els.datePick.value || ymd(new Date());
+    const btn=$('btnRefresh'); if(btn) btn.classList.add('spinning');
     postToWix({ type:'requestDailyData', date:d, startISO:new Date(d+'T00:00:00').toISOString(), endISO:new Date(d+'T23:59:59').toISOString() });
     setStatus('Loading…');
   }
@@ -455,13 +582,44 @@
   function hasVehicle(item){ return !!s(item.assignedVehicleLabel||item.assignedVehiclePlate||item.vehicleLabel||''); }
   function hasFlight(item){ return !!s(item.flightNumber||item.flight||''); }
   function isPending(item){ return ['pending','request','requested','new','quote','unconfirmed','hold','waiting'].includes(norm(item.status||'')); }
-  function isOverdue(item){ const st=norm(item.status||''); return st.includes('overdue')||st.includes('late'); }
+
+  function isOverdue(item){
+    const st=norm(item.status||'');
+    if(st.includes('overdue')||st.includes('late')) return true;
+    /* time-based: pickup/dropoff passed today and not in a terminal state */
+    const done=['completed','done','returned','closed','cancelled','canceled','active','out','checked out','checked in'];
+    if(done.some(c=>st===c||st.includes(c))) return false;
+    const today=ymd(new Date()); const now=Date.now(); const GRACE=20*60*1000;
+    const pickup=asDate(item.pickupDateTime||item.start);
+    if(pickup && ymd(pickup)===today && now-pickup.getTime()>GRACE) return true;
+    const dropoff=asDate(item.dropoffDateTime||item.end);
+    if(dropoff && ymd(dropoff)===today && now-dropoff.getTime()>GRACE) return true;
+    return false;
+  }
+
+  function isComingUp(item, type){
+    const t=type==='checkin'?asDate(item.dropoffDateTime||item.end):asDate(item.pickupDateTime||item.start);
+    if(!t) return false;
+    const diff=(t.getTime()-Date.now())/60000;
+    return diff>0&&diff<=30;
+  }
+
   function hasNotes(item){ return !!s(item.notes||item.note||item.remarks||item.memo||''); }
   function getPhone(item){ return s(item.phone||item.mobile||item.customerPhone||item.tel||''); }
   function getEmail(item){ return s(item.email||item.customerEmail||''); }
   function getAgent(item){ return s(item.agent||item.agentName||item.assignedAgent||''); }
   function getNotes(item){ return s(item.notes||item.note||item.remarks||item.memo||''); }
   function getVehicleDetail(item){ return [s(item.assignedVehicleModel||item.vehicleModel||''),s(item.assignedVehiclePlate||item.vehiclePlate||'')].filter(Boolean).join(' · '); }
+
+  function getDuration(item){
+    const s1=asDate(item.pickupDateTime||item.start);
+    const e1=asDate(item.dropoffDateTime||item.end);
+    if(!s1||!e1||e1<=s1) return '';
+    const mins=Math.round((e1-s1)/60000);
+    if(mins<60) return `${mins}m`;
+    if(mins<24*60) return `${Math.round(mins/60)}h`;
+    return `${Math.ceil(mins/(24*60))}d`;
+  }
 
   function blob(item){
     return [item.bookingNumber,item.customerName,item.name,item.phone,item.mobile,item.email,
@@ -517,6 +675,18 @@
     });
   }
 
+  /* ── Sort UI ── */
+  const SORT_LABELS={time:'&#9201; Time',name:'A&#8211;Z',status:'&#9888; Status'};
+  function refreshSortUI(col){
+    const {key,dir}=state.sort[col]||{key:'time',dir:'asc'};
+    document.querySelectorAll(`.rb-sort-btn[data-col="${col}"]`).forEach(b=>{
+      const bk=b.getAttribute('data-sort');
+      const active=bk===key;
+      b.classList.toggle('active',active);
+      b.innerHTML=SORT_LABELS[bk]+(active?(dir==='asc'?' &#8593;':' &#8595;'):'');
+    });
+  }
+
   /* ── Card urgency class ── */
   function cardClass(item){
     if(isOverdue(item)) return 'card-crit';
@@ -528,36 +698,44 @@
 
   /* ── Render card ── */
   function renderCard(item, type){
-    const time    = type==='checkin'?hhmm(item.dropoffDateTime||item.end):hhmm(item.pickupDateTime||item.start);
-    const name    = esc(item.customerName||item.name||'—');
-    const booking = esc(item.bookingNumber||'');
-    const vehicle = s(item.assignedVehicleLabel||item.assignedVehiclePlate||item.vehicleLabel||'');
-    const pickup  = esc(item.pickuppoint||item.station||'');
-    const dropoff = esc(item.dropoffpoint||'');
-    const flight  = s(item.flightNumber||item.flight||'');
-    const airport = isAirport(item);
-    const overdue = isOverdue(item);
-    const pending = isPending(item);
-    const notes   = getNotes(item);
-    const phone   = getPhone(item);
-    const email   = getEmail(item);
-    const agent   = getAgent(item);
-    const vDetail = getVehicleDetail(item);
-    const id      = s(item._id||item.id||'');
-    const eid     = esc(id);
-    const cls     = cardClass(item);
+    const timeVal = type==='checkin'?hhmm(item.dropoffDateTime||item.end):hhmm(item.pickupDateTime||item.start);
+    const nameRaw  = s(item.customerName||item.name||'—');
+    const bookRaw  = s(item.bookingNumber||'');
+    const q        = norm(state.search);
+    const nameHtml = highlight(nameRaw, q);
+    const bookHtml = highlight(bookRaw, q);
+    const vehicle  = s(item.assignedVehicleLabel||item.assignedVehiclePlate||item.vehicleLabel||'');
+    const pickup   = esc(item.pickuppoint||item.station||'');
+    const dropoff  = esc(item.dropoffpoint||'');
+    const flight   = s(item.flightNumber||item.flight||'');
+    const dur      = getDuration(item);
+    const airport  = isAirport(item);
+    const overdue  = isOverdue(item);
+    const pending  = isPending(item);
+    const comingUp = isComingUp(item, type);
+    const notes    = getNotes(item);
+    const phone    = getPhone(item);
+    const email    = getEmail(item);
+    const agent    = getAgent(item);
+    const vDetail  = getVehicleDetail(item);
+    const id       = s(item._id||item.id||'');
+    const eid      = esc(id);
+    const cls      = cardClass(item);
+    const extraCls = comingUp&&!overdue?' card-upcoming':'';
 
     /* header chips */
     const chips=[];
-    if(time) chips.push(`<span class="rb-card-time${overdue?' urgent':''}">${esc(time)}</span>`);
+    if(timeVal) chips.push(`<span class="rb-card-time${overdue?' urgent':''}">${esc(timeVal)}</span>`);
     if(airport) chips.push(`<span class="rb-badge-ap">&#9992; Airport</span>`);
     if(overdue) chips.push(`<span class="rb-badge-ov">&#9210; Overdue</span>`);
+    else if(comingUp) chips.push(`<span class="rb-badge-pd">&#9650; Soon</span>`);
     else if(pending) chips.push(`<span class="rb-badge-pd">&#9679; Pending</span>`);
 
     /* tags */
     const tags=[];
     if(vehicle)             tags.push(`<span class="rb-tag ok">&#128663; ${esc(vehicle)}</span>`);
     else                    tags.push(`<span class="rb-tag crit">&#9888; No vehicle</span>`);
+    if(dur)                 tags.push(`<span class="rb-tag dur">&#9201; ${esc(dur)}</span>`);
     if(airport&&flight)     tags.push(`<span class="rb-tag info">&#9992; ${esc(flight)}</span>`);
     if(airport&&!flight)    tags.push(`<span class="rb-tag warn">No flight #</span>`);
     if(pickup)              tags.push(`<span class="rb-tag">${pickup}${dropoff?' &#8594; '+dropoff:''}</span>`);
@@ -579,13 +757,13 @@
     const hasDetails = detailParts.length > 0;
     const notesPreview = notes ? `<div class="rb-notes-preview">&#128203; ${esc(notes.length>100?notes.slice(0,100)+'…':notes)}</div>` : '';
 
-    return `<div class="rb-card ${cls}" id="rbc-${eid}">
+    return `<div class="rb-card ${cls}${extraCls}" id="rbc-${eid}">
       <div class="rb-card-header" onclick="window._rbToggle('${eid}',event)">
         <div class="rb-card-header-chips">${chips.join('')}</div>
         ${hasDetails?`<button class="rb-expand-btn" type="button">&#9660;</button>`:''}
       </div>
-      <div class="rb-card-name">${name}</div>
-      ${booking?`<div class="rb-card-booking">${booking}</div>`:''}
+      <div class="rb-card-name">${nameHtml}</div>
+      ${bookRaw?`<div class="rb-card-booking">${bookHtml}</div>`:''}
       <div class="rb-card-tags">${tags.join('')}</div>
       ${notesPreview}
       ${hasDetails?`<div class="rb-card-details"><div class="rb-detail-section">${detailParts.join('')}</div></div>`:''}
@@ -598,8 +776,8 @@
   }
 
   /* ── Global actions ── */
-  window._rbAct = function(action,id){
-    if(action==='contract')  postToWix({type:'openContract',bookingId:id});
+  window._rbAct = function(action, id){
+    if(action==='contract')      postToWix({type:'openContract',bookingId:id});
     else if(action==='bookings') postToWix({type:'openOnBookings',bookingId:id});
     else if(action==='fleet')    postToWix({type:'openOnFleet',bookingId:id});
   };
@@ -619,6 +797,27 @@
       btn.classList.toggle('active', btn.getAttribute('data-filter')===f)
     );
     render();
+  };
+
+  /* scroll to card from timeline click */
+  window._rbScrollToCard = function(id){
+    /* try card view first */
+    const card=document.getElementById('rbc-'+id);
+    if(card){
+      card.scrollIntoView({behavior:'smooth',block:'center'});
+      card.classList.remove('highlight');
+      void card.offsetWidth; /* reflow to re-trigger animation */
+      card.classList.add('highlight');
+      setTimeout(()=>card.classList.remove('highlight'),2100);
+      return;
+    }
+    /* compact table row */
+    const row=document.getElementById('ctr-'+id);
+    if(row){
+      row.scrollIntoView({behavior:'smooth',block:'center'});
+      row.classList.add('ct-row-flash');
+      setTimeout(()=>row.classList.remove('ct-row-flash'),2100);
+    }
   };
 
   /* ── KPI card variant ── */
@@ -669,32 +868,68 @@
     els.statsBar.innerHTML=chips.join('');
   }
 
+  /* ── Health dot ── */
+  function updateHealthDot(){
+    const dot=els.healthDot; if(!dot) return;
+    const all=[...getTab('checkout'),...getTab('checkin')];
+    dot.className='health-dot';
+    if(!all.length) return;
+    const hasOverdue=all.some(isOverdue);
+    const hasNoVehicleAirport=all.some(i=>isAirport(i)&&!hasVehicle(i));
+    const hasNoVehicle=all.some(i=>!hasVehicle(i));
+    if(hasOverdue||hasNoVehicleAirport) dot.classList.add('hd-crit');
+    else if(hasNoVehicle) dot.classList.add('hd-warn');
+    else dot.classList.add('hd-ok');
+    dot.title=hasOverdue?'🔴 Overdue ops need attention':hasNoVehicleAirport?'🔴 Airport op missing vehicle':hasNoVehicle?'🟡 Some ops missing vehicle':'🟢 All ops look good';
+  }
+
   /* ── Timeline ── */
   function renderTimeline(){
     if(!els.tlAxis) return;
     const START=6*60, END=23*60, RANGE=END-START;
     function pct(v){ return Math.max(0,Math.min(100,((v.getHours()*60+v.getMinutes())-START)/RANGE*100)).toFixed(1); }
 
+    const now=new Date(), nowMin=now.getHours()*60+now.getMinutes();
+    const nowPct=((nowMin-START)/RANGE*100).toFixed(1);
+
     let html='<div class="tl-line"></div>';
+
+    /* past shading */
+    if(nowMin>=START&&nowMin<=END){
+      html+=`<div class="tl-past" style="width:${nowPct}%"></div>`;
+    }
+
+    /* hour ticks */
     for(let h=6;h<=22;h+=2){
       const p=((h*60-START)/RANGE*100).toFixed(1);
-      html+=`<div class="tl-tick" style="left:${p}%"><span>${h}:00</span></div>`;
+      html+=`<div class="tl-tick" style="left:${p}%"><span>${h}</span></div>`;
     }
-    const now=new Date(), nowMin=now.getHours()*60+now.getMinutes();
-    if(nowMin>=START&&nowMin<=END) html+=`<div class="tl-now" style="left:${((nowMin-START)/RANGE*100).toFixed(1)}%"></div>`;
 
+    /* NOW line */
+    if(nowMin>=START&&nowMin<=END) html+=`<div class="tl-now" style="left:${nowPct}%"></div>`;
+
+    /* checkout dots */
     getTab('checkout').forEach(item=>{
       const d=asDate(item.pickupDateTime||item.start); if(!d) return;
-      const p=pct(d), title=`${esc(item.customerName||item.name||'—')} · ${hhmm(d)}`;
+      const p=pct(d);
+      const id=esc(s(item._id||item.id||''));
+      const title=`${esc(s(item.customerName||item.name||'—'))} · ${hhmm(d)}`;
       const crit=!hasVehicle(item)?'crit':'';
-      html+=`<div class="tl-dot co ${crit}" style="left:${p}%" title="${title}"></div>`;
+      const past=d<now?' past':'';
+      html+=`<div class="tl-dot co ${crit}${past}" style="left:${p}%" title="${title}" onclick="window._rbScrollToCard('${id}')"></div>`;
     });
+
+    /* checkin dots */
     getTab('checkin').forEach(item=>{
       const d=asDate(item.dropoffDateTime||item.end); if(!d) return;
-      const p=pct(d), title=`${esc(item.customerName||item.name||'—')} · ${hhmm(d)}`;
+      const p=pct(d);
+      const id=esc(s(item._id||item.id||''));
+      const title=`${esc(s(item.customerName||item.name||'—'))} · ${hhmm(d)}`;
       const crit=isOverdue(item)?'crit':'';
-      html+=`<div class="tl-dot ci ${crit}" style="left:${p}%" title="${title}"></div>`;
+      const past=d<now?' past':'';
+      html+=`<div class="tl-dot ci ${crit}${past}" style="left:${p}%" title="${title}" onclick="window._rbScrollToCard('${id}')"></div>`;
     });
+
     els.tlAxis.innerHTML=html;
   }
 
@@ -722,11 +957,86 @@
     if(els.overdueText&&n>0) els.overdueText.textContent=`${n} overdue vehicle${n===1?'':'s'} — immediate attention needed`;
   }
 
+  /* ── Compact table ── */
+  function renderCompact(){
+    const wrap=els.compactWrap; if(!wrap) return;
+    if(!state.compact){wrap.innerHTML='';wrap.classList.remove('show');return;}
+
+    const outs=applyFilters(getTab('checkout')).map(i=>({...i,_ct:'checkout'}));
+    const ins =applyFilters(getTab('checkin')).map(i=>({...i,_ct:'checkin'}));
+    const all=[...outs,...ins].sort((a,b)=>{
+      const ta=asDate(a._ct==='checkin'?(a.dropoffDateTime||a.end):(a.pickupDateTime||a.start))||new Date(0);
+      const tb=asDate(b._ct==='checkin'?(b.dropoffDateTime||b.end):(b.pickupDateTime||b.start))||new Date(0);
+      return ta-tb;
+    });
+
+    if(!all.length){
+      wrap.innerHTML=`<div class="rb-empty">No ops for ${dateLabel(els.datePick.value)}</div>`;
+      wrap.classList.add('show');
+      return;
+    }
+
+    const q=norm(state.search);
+    const rows=all.map(item=>{
+      const type=item._ct;
+      const t=type==='checkin'?asDate(item.dropoffDateTime||item.end):asDate(item.pickupDateTime||item.start);
+      const time=hhmm(t)||'—';
+      const nameRaw=s(item.customerName||item.name||'—');
+      const bookRaw=s(item.bookingNumber||'');
+      const vehicle=s(item.assignedVehicleLabel||item.assignedVehiclePlate||item.vehicleLabel||'');
+      const pickup=s(item.pickuppoint||item.station||'');
+      const dropoff=s(item.dropoffpoint||'');
+      const flight=s(item.flightNumber||item.flight||'');
+      const dur=getDuration(item);
+      const id=s(item._id||item.id||'');
+      const eid=esc(id);
+      const ovd=isOverdue(item);
+      const rowCls=ovd?'ct-row-crit':(!hasVehicle(item)?'ct-row-warn':'');
+      return `<tr id="ctr-${eid}" class="${rowCls}">
+        <td><span class="ct-time ${type==='checkin'?'ci':'co'}">${esc(time)}</span></td>
+        <td><span class="ct-badge ${type==='checkin'?'ci':'co'}">${type==='checkin'?'&#8595; In':'&#8593; Out'}</span></td>
+        <td><div class="ct-name">${highlight(nameRaw,q)}</div>${bookRaw?`<div class="ct-booking">${highlight(bookRaw,q)}</div>`:''}</td>
+        <td class="ct-vehicle${!vehicle?' missing':''}">${vehicle?esc(vehicle):'&#9888; No vehicle'}${dur?`<span class="ct-dur">${esc(dur)}</span>`:''}</td>
+        <td class="ct-route">${pickup?esc(pickup)+(dropoff?' &#8594; '+esc(dropoff):''):'—'}${flight?`<br><small>&#9992; ${esc(flight)}</small>`:''}</td>
+        <td><div class="ct-acts">
+          <button class="rb-btn primary" onclick="window._rbAct('contract','${eid}')">Contract</button>
+          <button class="rb-btn" onclick="window._rbAct('bookings','${eid}')">Bookings</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+
+    wrap.innerHTML=`<table class="rb-ctable">
+      <thead><tr>
+        <th>Time</th><th>Type</th><th>Customer</th><th>Vehicle &middot; Duration</th><th>Route &middot; Flight</th><th>Actions</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+    wrap.classList.add('show');
+  }
+
+  /* ── Compact toggle ── */
+  function toggleCompact(){
+    state.compact=!state.compact;
+    const btn=$('btnCompact');
+    if(btn){ btn.classList.toggle('active',state.compact); btn.innerHTML=state.compact?'&#8803; Table':'&#8803; Cards'; }
+    if(els.mainBoard) els.mainBoard.classList.toggle('compact-mode',state.compact);
+    renderCompact();
+  }
+
+  /* ── Shortcut panel ── */
+  function openShortcutPanel(){ $('scPanel').classList.add('show'); $('scBackdrop').classList.add('show'); }
+  function closeShortcutPanel(){ $('scPanel').classList.remove('show'); $('scBackdrop').classList.remove('show'); }
+  function toggleShortcutPanel(){ $('scPanel').classList.contains('show')?closeShortcutPanel():openShortcutPanel(); }
+
   /* ── Render column ── */
-  function renderCol(bodyEl,cntEl,items,type){
+  function renderCol(bodyEl, cntEl, items, type){
     if(!bodyEl) return;
     if(cntEl) cntEl.textContent=String(items.length);
-    if(!items.length){bodyEl.innerHTML='<div class="rb-empty">&#916;εν υπάρχουν δεδομένα.</div>';return;}
+    if(!items.length){
+      const noun=type==='checkout'?'Check-outs':type==='checkin'?'Check-ins':'Bookings';
+      bodyEl.innerHTML=`<div class="rb-empty">${noun}<br><small style="font-weight:700;font-size:10px">${dateLabel(els.datePick.value)}</small><br><small style="font-size:10px;opacity:.7">No ops found</small></div>`;
+      return;
+    }
     bodyEl.innerHTML=items.map(item=>renderCard(item,type)).join('');
   }
 
@@ -747,14 +1057,22 @@
     const bookings=sortItems(applyFilters(bookSrc),'bookings');
 
     if(els.bookingsLabel) els.bookingsLabel.textContent=hasDedicated?'Bookings':"All Today's Ops";
+
     renderCol(els.listOut,      els.cntOut,      out,      'checkout');
     renderCol(els.listIn,       els.cntIn,       inn,      'checkin');
     renderCol(els.listBookings, els.cntBookings, bookings, hasDedicated?'bookings':'all');
+
     renderSummary(state.data.summary);
     renderOverdueBanner(state.data.summary);
     renderTimeline();
     renderStatsBar();
     updateCountdown();
+    updateHealthDot();
+
+    ['out','in','bookings'].forEach(refreshSortUI);
+
+    if(state.compact) renderCompact();
+
     try{ postToWix({type:'resizeShell',height:Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)}); }catch(_){}
   }
 
@@ -771,6 +1089,10 @@
   $('globalSearch').addEventListener('input',()=>{ state.search=els.search.value; render(); });
   $('stationFilter').addEventListener('change',()=>{ state.station=els.station.value; render(); });
   els.autoCheck.addEventListener('change',()=>{ if(els.autoCheck.checked){startAuto();els.autoLabel.classList.add('is-on');}else{stopAuto();els.autoLabel.classList.remove('is-on');} });
+  $('btnCompact').addEventListener('click',toggleCompact);
+  $('btnHelp').addEventListener('click',toggleShortcutPanel);
+  $('scClose').addEventListener('click',closeShortcutPanel);
+  $('scBackdrop').addEventListener('click',closeShortcutPanel);
 
   /* Quick filters */
   document.querySelectorAll('.rb-fchip').forEach(btn=>
@@ -785,21 +1107,31 @@
       if(state.sort[col].key===key){
         state.sort[col].dir=state.sort[col].dir==='asc'?'desc':'asc';
       } else {
-        state.sort[col]={key, dir:'asc'};
+        state.sort[col]={key,dir:'asc'};
       }
-      /* update active state in this column's sort group */
-      btn.closest('.rb-colhead-sort').querySelectorAll('.rb-sort-btn').forEach(b=>
-        b.classList.toggle('active', b===btn)
-      );
+      refreshSortUI(col);
       render();
     });
   });
 
-  /* Keyboard: ← → date navigation */
+  /* Keyboard shortcuts */
   document.addEventListener('keydown',e=>{
-    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
+    const inInput=e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT';
+
+    if(e.key==='Escape'){
+      closeShortcutPanel();
+      if(els.search&&els.search.value){ els.search.value=''; state.search=''; render(); }
+      return;
+    }
+    if(e.key==='/'&&!inInput){ e.preventDefault(); els.search&&els.search.focus(); return; }
+    if(e.key==='?'&&!inInput){ e.preventDefault(); toggleShortcutPanel(); return; }
+    if(inInput) return;
+
     if(e.key==='ArrowLeft'){  els.datePick.value=addDays(els.datePick.value||ymd(new Date()),-1); reloadData(); }
     else if(e.key==='ArrowRight'){ els.datePick.value=addDays(els.datePick.value||ymd(new Date()), 1); reloadData(); }
+    else if(e.key==='t'||e.key==='T'){ els.datePick.value=ymd(new Date()); reloadData(); }
+    else if(e.key==='r'||e.key==='R'){ reloadData(); }
+    else if(e.key==='v'||e.key==='V'){ toggleCompact(); }
   });
 
   /* Countdown tick every 30s */
@@ -845,6 +1177,8 @@
     }
 
     if(d.type==='loadDailyOps'){
+      const btn=$('btnRefresh'); if(btn) btn.classList.remove('spinning');
+
       const tabs=d.tabs||{};
       if(!Array.isArray(tabs.checkout)||!tabs.checkout.length){ const a=d.checkOut||d.checkout||d.CheckOut; if(Array.isArray(a)&&a.length) tabs.checkout=a; }
       if(!Array.isArray(tabs.checkin)||!tabs.checkin.length){  const a=d.checkIn||d.checkin||d.CheckIn;   if(Array.isArray(a)&&a.length) tabs.checkin=a;  }
