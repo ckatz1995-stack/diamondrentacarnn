@@ -1555,8 +1555,8 @@
   }
   function renderStations(){ const current = state.station || 'all'; els.station.innerHTML = `<option value="all">Όλες</option>` + (state.data.stations || []).map((s)=> `<option value="${esc(s)}" ${s===current?'selected':''}>${esc(s)}</option>`).join(''); }
   function renderTabBar(){ const fullTabs = ['checkout','checkin','requests','bookings','overdue','available','grounded']; if (!fullTabs.includes(state.activeTab)) state.activeTab = 'checkout'; els.tabBar.innerHTML = fullTabs.map((key)=>`<button class="tabBtn ${state.activeTab===key?'active':''}" data-tab-key="${key}" type="button">${esc(TAB_CONFIG[key].label)} <span class="countPill">${esc((state.data.summary[key] || 0))}</span></button>`).join(''); }
-  function deskBookingItems(){ const raw = Array.isArray(state.data.tabs.bookings) ? state.data.tabs.bookings : []; return raw.filter((item)=>{ const st = state.station; if (st && st !== 'all'){ const is = stationOf(item); if (!is || is !== st) return false; } const q = norm(state.search); if (q && !searchBlob(item).includes(q)) return false; return true; }); }
-  function renderDeskBookings(){ const rows = deskBookingItems(); if (els.deskBookingsCount) els.deskBookingsCount.textContent = String(rows.length); if (!els.deskBookings) return; if (!rows.length){ els.deskBookings.innerHTML = `<div class="deskBookingsEmpty">Δεν υπάρχουν bookings για την επιλεγμένη ημέρα.</div>`; return; } els.deskBookings.innerHTML = rows.map((item)=> renderDeskRow(item,'bookings')).join(''); }
+  function deskBookingItems(){ const raw = Array.isArray(state.data.tabs.bookings) && state.data.tabs.bookings.length ? state.data.tabs.bookings : [...(Array.isArray(state.data.tabs.checkout)?state.data.tabs.checkout:[]), ...(Array.isArray(state.data.tabs.checkin)?state.data.tabs.checkin:[])]; return raw.filter((item)=>{ const st = state.station; if (st && st !== 'all'){ const is = stationOf(item); if (!is || is !== st) return false; } const q = norm(state.search); if (q && !searchBlob(item).includes(q)) return false; return true; }); }
+  function renderDeskBookings(){ const hasDedicated = Array.isArray(state.data.tabs.bookings) && state.data.tabs.bookings.length > 0; const rows = deskBookingItems(); if (els.deskBookingsCount) els.deskBookingsCount.textContent = String(rows.length); const head = document.querySelector('.deskBookingsCol .deskHead strong'); if (head) head.textContent = hasDedicated ? 'Bookings' : 'All Today\'s Ops'; if (!els.deskBookings) return; if (!rows.length){ els.deskBookings.innerHTML = `<div class="deskBookingsEmpty">Δεν υπάρχουν δεδομένα για την επιλεγμένη ημέρα.</div>`; return; } els.deskBookings.innerHTML = rows.map((item)=> renderDeskRow(item, hasDedicated ? 'bookings' : (item.pickupDateTime ? 'checkout' : 'checkin'))).join(''); }
   function renderDesk(){ const out = deskItems('out'); const inn = deskItems('in'); if (els.deskOutCount) els.deskOutCount.textContent = String(out.length); if (els.deskInCount) els.deskInCount.textContent = String(inn.length); if (els.deskOut) els.deskOut.innerHTML = renderOpsTable(out,'checkout','desk','deskout'); if (els.deskIn) els.deskIn.innerHTML = renderOpsTable(inn,'checkin','desk','deskin'); renderDeskBookings(); const total = out.length + inn.length + deskBookingItems().length; if (els.visiblePill) els.visiblePill.textContent = `${total} visible`; const _bb=document.getElementById('boardCountBadge');if(_bb)_bb.textContent=`${total} visible`; }
   function renderFull(){ const tab = ['checkout','checkin','requests','bookings','overdue','available','grounded'].includes(state.activeTab) ? state.activeTab : 'checkout'; if (tab !== state.activeTab) state.activeTab = tab; const rows = currentTabItems(state.activeTab); if (els.fullRows) els.fullRows.innerHTML = state.activeTab === 'bookings' ? renderBookingsTable(rows, 'bookings') : renderOpsTable(rows, state.activeTab); if (els.visiblePill) els.visiblePill.textContent = `${rows.length} visible`; const _bb2=document.getElementById('boardCountBadge');if(_bb2)_bb2.textContent=`${rows.length} visible`; }
   function field(k,v,full){ return `<div class="fieldBox ${full?'full':''}"><div class="fk">${esc(k)}</div><div class="fv">${esc(v || '—')}</div></div>`; }
@@ -1798,7 +1798,7 @@
     if (event.origin && !isTrustedParentOrigin(event.origin)) return;
     const d = event.data || {};
     if (!d || !d.type) return;
-    if (d.type === 'resume') { els.datePick.value = ymd(new Date()); reloadData(); return; }
+    if (d.type === 'resume') { const today = ymd(new Date()); if (els.datePick.value !== today) { els.datePick.value = today; reloadData(); } return; }
     if (d.type === 'loadDailyOps') {
       state.data = { tabs: d.tabs || {}, summary: d.summary || {}, stations: Array.isArray(d.stations) ? d.stations : [], debug: d.debug || {} };
       if (!Array.isArray(state.data.tabs.checkout) || (!state.data.tabs.checkout.length && Array.isArray(d.checkOut) && d.checkOut.length)) state.data.tabs.checkout = Array.isArray(d.checkOut) ? d.checkOut : [];
@@ -1849,6 +1849,9 @@
   });
 
   postToWix({ type:'requestUserContext' });
+  els.datePick.value = ymd(new Date());
+  setStatus('Loading…');
+  reloadData();
 })();
 </script>
 </body>
