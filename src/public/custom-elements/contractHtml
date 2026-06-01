@@ -7,26 +7,38 @@
   <title>Contract Pro Editor</title>
   <style>
     :root{
-      --bg:#f4f6fa;
+      --bg:#F0F4FA;
       --surface:#ffffff;
       --surface-2:#f8fafc;
+      --surface2:#E8EEF7;
       --line:#d7dde7;
       --line-strong:#bcc7d8;
+      --border:rgba(15,23,42,0.10);
+      --border2:rgba(15,23,42,0.14);
       --text:#132238;
       --muted:#5f6f86;
+      --sub:#475569;
       --accent:#1f4b8f;
       --accent-soft:#eaf1fb;
       --ok:#0a7a42;
       --warn:#a46400;
       --danger:#b3261e;
       --shadow:0 12px 32px rgba(17,24,39,.08);
+      --shadow-lg:0 12px 32px rgba(15,23,42,0.12);
       --radius:16px;
       --radius-sm:10px;
+      --gold:#A8844A;
+      --gold2:#6C522E;
+      --gold-bg:rgba(168,132,74,0.08);
+      --gold-border:rgba(168,132,74,0.30);
+      --r:14px;
+      --r-lg:18px;
+      --r-pill:999px;
+      --sb-w:220px;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;overflow:hidden}
     button,input,select,textarea{font:inherit}
-    .app{max-width:1680px;margin:0 auto;padding:18px}
     .topbar{
       background:linear-gradient(180deg,#fff,#f8fbff);
       border:1px solid var(--line);
@@ -293,46 +305,51 @@
     .products-strip{display:grid;gap:8px}
     .products-placeholder{border:1px dashed var(--line-strong);border-radius:14px;background:#fff;padding:12px;color:var(--muted);font-size:13px}
 
-    /* settings-like central header */
-    .app{max-width:none;width:100%;margin:0;padding:0 20px 20px}
-    .backroom-header{display:grid;grid-template-columns:minmax(300px,340px) minmax(420px,1fr) auto;gap:0;align-items:stretch;width:100%;background:linear-gradient(135deg,#4b3923 0%,#6c522e 55%,#8e6d3d 100%);border:1px solid rgba(255,255,255,.05);border-radius:0 0 24px 24px;box-shadow:0 22px 48px rgba(15,23,42,.16);padding:0;margin:0 0 16px;overflow:visible;position:relative}
-    .backroom-header::after{content:"";position:absolute;left:24px;right:24px;bottom:-10px;height:22px;background:radial-gradient(ellipse at center, rgba(15,23,42,.14), rgba(15,23,42,0) 72%);pointer-events:none;filter:blur(10px)}
-    .backroom-brand{display:flex;flex-direction:column;justify-content:center;gap:4px;min-height:82px;padding:14px 18px 14px 78px;position:relative;background:linear-gradient(135deg,#8e6d3d 0%,#a8844a 62%,#6c522e 100%);color:#fff}
-    .backroom-brand::before{content:"D";position:absolute;left:20px;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:20px;font-weight:900;letter-spacing:-.03em;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 18px rgba(0,0,0,.12)}
-    .backroom-brand::after{content:"";position:absolute;right:-28px;top:-24px;bottom:-24px;width:74px;background:linear-gradient(120deg,rgba(255,255,255,.18),rgba(255,255,255,0));transform:skewX(-18deg)}
-    .backroom-brand b{display:block;font-size:20px;letter-spacing:-.02em;color:#fff}
-    .backroom-brand span{display:block;color:rgba(255,255,255,.82);font-size:12px;margin-top:2px}
-    .backroom-nav{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:4px;padding:0 18px;background:linear-gradient(180deg,rgba(255,255,255,.03) 0%,rgba(255,255,255,0) 100%);min-width:0;overflow:auto;scrollbar-width:none}
-    .backroom-nav::-webkit-scrollbar{display:none}
-    .nav-btn{appearance:none;border:0;background:transparent;color:rgba(255,255,255,.82);padding:0 14px;height:82px;font-weight:800;font-size:14px;cursor:pointer;position:relative;transition:background .18s ease,color .18s ease,transform .18s ease;border-radius:16px;flex:0 0 auto;white-space:nowrap}
-    .nav-btn::after{content:"";position:absolute;left:16px;right:16px;bottom:10px;height:3px;border-radius:999px;background:transparent;transition:background .18s ease}
-    .nav-btn:hover{background:rgba(255,255,255,.06);color:#fff;transform:translateY(-1px)}
-    .nav-btn.active{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,.03) 100%);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
-    .nav-btn.active::after{background:#d7b27a}
-    .backroom-user{display:flex;justify-content:flex-end;gap:10px;align-items:center;flex-wrap:nowrap;padding:12px 16px;background:linear-gradient(180deg,rgba(79,58,34,.92) 0%,rgba(58,42,24,.98) 100%);border-left:1px solid rgba(255,255,255,.06);position:relative;min-width:430px;overflow:visible}
-    .backroom-user::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:1px;background:rgba(255,255,255,.08)}
-    .backroom-search{display:flex;align-items:center;min-width:200px;max-width:280px;flex:0 1 260px;height:44px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 18px rgba(0,0,0,.08)}
-    .backroom-search input{flex:1;min-width:0;height:100%;border:0;background:transparent;color:#fff;padding:0 14px;font:700 13px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .backroom-search input::placeholder{color:rgba(255,255,255,.58)}
-    .backroom-search input:focus{outline:none}
-    .backroom-search button{appearance:none;border:0;border-left:1px solid rgba(255,255,255,.1);background:transparent;color:#fff;height:100%;padding:0 14px;font-weight:800;cursor:pointer}
-    .backroom-search button:hover{background:rgba(255,255,255,.08)}
-    .top-chip{padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.72);flex:0 0 auto;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .top-chip strong{color:#fff}
+    /* Shell */
+    .shell{display:flex;height:100vh;overflow:hidden}
+    .sb{width:var(--sb-w);min-width:var(--sb-w);background:linear-gradient(180deg,#2a1f0e 0%,#1c150a 100%);display:flex;flex-direction:column;gap:2px;padding:10px 8px 16px;overflow-y:auto;overflow-x:hidden;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06)}
+    .sb-brand{display:flex;align-items:center;gap:10px;padding:10px 8px 14px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:4px}
+    .sb-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:grid;place-items:center;color:#fff;font-weight:1100;font-size:15px;flex-shrink:0}
+    .sb-brand-text{display:flex;flex-direction:column;gap:2px}
+    .sb-brand-title{font:1000 13px/1 system-ui;color:#fff;letter-spacing:-.01em}
+    .sb-brand-sub{font:800 10px/1 system-ui;color:rgba(255,255,255,.45)}
+    .sb-section{font:900 9px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:12px 12px 4px;margin-top:2px;pointer-events:none}
+    .sb-item{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:rgba(255,255,255,.62);border-radius:10px;padding:9px 10px;font:800 12px/1.2 system-ui;cursor:pointer;text-align:left;transition:background .12s,color .12s;box-shadow:none!important}
+    .sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+    .sb-item.active{background:linear-gradient(135deg,rgba(168,132,74,.28),rgba(108,82,46,.18));color:#e8c97a;border:1px solid rgba(168,132,74,.22)}
+    .sb-icon{width:18px;text-align:center;flex-shrink:0;font-size:14px}
+    .sb-item-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .shell-main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+    .shell-top{height:62px;min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px 0 20px;background:var(--surface);border-bottom:1px solid var(--line);flex-shrink:0}
+    .shell-content{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+    .top-page-info{display:flex;flex-direction:column;gap:2px}
+    .top-page-title{font:1000 15px/1 system-ui;color:var(--text);letter-spacing:-.01em}
+    .top-page-sub{font:800 11px/1 system-ui;color:var(--muted)}
+    .top-tools{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
     .quick-apps{position:relative}
-    .quick-apps-btn,.top-icon-btn,.header-action-btn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
-    .quick-apps-btn:hover,.top-icon-btn:hover,.header-action-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22);transform:translateY(-1px)}
-    .quick-apps-btn::before{content:"☰";font-size:13px;line-height:1}
-    .quick-apps-panel{position:absolute;top:calc(100% + 12px);right:0;left:auto;min-width:420px;display:none;padding:14px;background:#3f2e1e;border:1px solid rgba(255,255,255,.08);border-radius:20px;box-shadow:0 22px 44px rgba(15,23,42,.28);z-index:40}
+    .quick-apps-btn{appearance:none;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--text);border-radius:10px;padding:7px 10px;font:800 11px/1 system-ui;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+    .quick-apps-btn:hover{border-color:#8da1c1;background:#eef2f7}
+    .quick-apps-btn::before{content:"⊞";font-size:13px;line-height:1}
+    .quick-apps-panel{position:absolute;top:calc(100% + 10px);right:0;left:auto;min-width:380px;display:none;padding:12px;background:#3f2e1e;border:1px solid rgba(255,255,255,.08);border-radius:18px;box-shadow:0 22px 44px rgba(15,23,42,.28);z-index:9000}
     .quick-apps.open .quick-apps-panel{display:block}
-    .quick-apps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-    .quick-app-card{appearance:none;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#5b4328 0%,#46311d 100%);color:#fff;border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer;min-height:104px;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+    .quick-apps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .quick-app-card{appearance:none;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#5b4328 0%,#46311d 100%);color:#fff;border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;cursor:pointer;min-height:92px;transition:transform .18s,border-color .18s,background .18s}
     .quick-app-card:hover{transform:translateY(-2px);border-color:rgba(180,138,79,.48);background:linear-gradient(180deg,#71522f 0%,#4c3720 100%)}
-    .quick-app-card b{font-size:14px}
-    .quick-app-card span{font-size:12px;line-height:1.4;color:rgba(255,255,255,.7);text-align:left}
-    .quick-app-icon{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:15px}
-    .top-icon-group{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-    .top-icon-btn .dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18)}
+    .quick-app-card b{font-size:13px}
+    .quick-app-card span{font-size:11px;line-height:1.4;color:rgba(255,255,255,.7);text-align:left}
+    .quick-app-icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:14px}
+    .top-search-wrap{display:flex;align-items:center;height:34px;border-radius:var(--r-pill);border:1px solid var(--line-strong);background:var(--surface-2);overflow:hidden;min-width:180px;flex:0 1 220px}
+    .top-search-wrap input{flex:1;min-width:0;height:100%;border:0;background:transparent;color:var(--text);padding:0 10px;font:700 12px/1.2 system-ui;outline:none}
+    .top-search-wrap input::placeholder{color:var(--muted)}
+    .top-search-wrap button{appearance:none;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);height:100%;padding:0 10px;font-weight:800;cursor:pointer}
+    .top-search-wrap button:hover{background:var(--surface-2);color:var(--text)}
+    .top-icon-btn{appearance:none;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--text);border-radius:8px;width:32px;height:32px;font:800 12px/1 system-ui;cursor:pointer;display:grid;place-items:center}
+    .top-icon-btn:hover{border-color:#8da1c1;background:#eef2f7}
+    .top-icon-btn .dot{width:7px;height:7px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+    .top-user-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--r-pill);border:1px solid var(--line-strong);background:var(--surface-2);font:800 11px/1 system-ui;color:var(--text);white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+    .top-logout-btn{appearance:none;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--text);border-radius:8px;padding:6px 10px;font:800 11px/1 system-ui;cursor:pointer}
+    .top-logout-btn:hover{border-color:#8da1c1;background:#fff1f0;color:#a12f28}
+    @media(max-width:900px){.sb-brand-text,.sb-item-label,.sb-brand-sub,.sb-section{display:none}.sb{width:54px;min-width:54px;padding:10px 6px 16px}.sb-item{padding:9px;justify-content:center}.sb-logo{width:30px;height:30px}}
     .contract-toolbar{display:grid;gap:8px;background:transparent;border:0;border-radius:0;box-shadow:none;margin:0 0 14px;overflow:visible;padding:0}
     .contract-toolbar-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:0}
     .contract-toolbar-row.top{background:transparent;border-bottom:0}
@@ -621,16 +638,11 @@
     .station-operation-sub{font-size:11px}
     .station-label{font-size:11px}
 
-    @media (max-width: 1380px){
-      .backroom-header{grid-template-columns:1fr;overflow:hidden}
-      .backroom-nav{justify-content:flex-start;padding:0 12px 12px}
-      .backroom-user{min-width:0;border-left:0;border-top:1px solid rgba(255,255,255,.06);justify-content:flex-start;flex-wrap:wrap}
-    }
     @media (max-width: 1220px){
       .workspace-shell{padding:14px;border-radius:18px}
       .layout{grid-template-columns:1fr}
       .rail{position:static}
-      .quick-apps-panel{min-width:min(92vw,420px)}
+      .quick-apps-panel{min-width:min(92vw,380px)}
     }
     @media (max-width: 900px){
       .grid.cols-4,.grid.cols-3,.grid.cols-2,.summary-row{grid-template-columns:1fr}
@@ -638,15 +650,13 @@
       .customer-lookup{grid-template-columns:1fr}
       .driver-card .row{grid-template-columns:1fr}
       .quick-actions{grid-template-columns:1fr}
-      .app{padding:0 12px 20px}
-      .backroom-brand{padding:14px 16px 14px 72px}
       .quick-apps-grid{grid-template-columns:1fr 1fr}
       .contract-toolbar{overflow:hidden}
       .contract-toolbar-row{align-items:flex-start}
     }
     @media (max-width: 640px){
       .quick-apps-grid{grid-template-columns:1fr}
-      .backroom-search{max-width:none;flex:1 1 100%}
+      .top-search-wrap{display:none}
     }
   
     /* Movement planning */
@@ -787,66 +797,59 @@
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <header class="backroom-header">
-    <div class="backroom-brand">
-      <b>DIAMOND Backroom</b>
-      <span>Contract workspace · pickup, checkout &amp; signatures</span>
+<div class="shell">
+<nav class="sb">
+  <div class="sb-brand">
+    <div class="sb-logo">D</div>
+    <div class="sb-brand-text">
+      <div class="sb-brand-title">DIAMOND</div>
+      <div class="sb-brand-sub">Backroom</div>
     </div>
-
-    <nav class="backroom-nav" id="backroomNav">
-      <button class="nav-btn" type="button" data-nav-route="home">Myroom</button>
-      <button class="nav-btn" type="button" data-nav-route="daily">Daily</button>
-      <button class="nav-btn" type="button" data-nav-route="fleet">Fleet</button>
-      <button class="nav-btn" type="button" data-nav-route="bookings">Bookings</button>
-      <button class="nav-btn active" type="button" data-nav-route="contract">Contract</button>
-      <button class="nav-btn" type="button" data-nav-route="settings">Settings</button>
-    </nav>
-
-    <div class="backroom-user">
-      <div class="backroom-search">
-        <input id="topSearchInput" type="search" placeholder="Search section, action ή workspace…" />
-        <button id="topSearchBtn" type="button">Go</button>
-      </div>
-
-      <div class="quick-apps" id="quickApps">
-        <button class="quick-apps-btn" id="quickAppsTrigger" type="button">Quick apps</button>
-        <div class="quick-apps-panel">
-          <div class="quick-apps-grid">
-            <button class="quick-app-card" type="button" data-quick-modal="billingModal">
-              <div class="quick-app-icon">€</div><b>Payments</b><span>Άνοιγμα commercial, payment method, status και desk finance.</span>
-            </button>
-            <button class="quick-app-card" type="button" data-quick-modal="customerModal">
-              <div class="quick-app-icon">👤</div><b>Customer</b><span>Renter, driver, εταιρικά στοιχεία και extra drivers.</span>
-            </button>
-            <button class="quick-app-card" type="button" data-quick-modal="vehicleModal">
-              <div class="quick-app-icon">🚘</div><b>Vehicle</b><span>Category, assigned vehicle και purchased products.</span>
-            </button>
-            <button class="quick-app-card" type="button" data-quick-modal="rentalModal">
-              <div class="quick-app-icon">🛫</div><b>Rental</b><span>Pickup / return, km, fuel και operational notes.</span>
-            </button>
-            <button class="quick-app-card" type="button" data-quick-modal="notesModal">
-              <div class="quick-app-icon">📝</div><b>Notes</b><span>Damage, internal memo και contract notes.</span>
-            </button>
-            <button class="quick-app-card" type="button" data-quick-route="settings">
-              <div class="quick-app-icon">⚙</div><b>Settings</b><span>Άμεση μετάβαση στο κεντρικό settings workspace.</span>
-            </button>
-          </div>
+  </div>
+  <div class="sb-section">Ops</div>
+  <button class="sb-item" data-route="home" type="button"><span class="sb-icon">⌂</span><span class="sb-item-label">Myroom</span></button>
+  <button class="sb-item" data-route="daily" type="button"><span class="sb-icon">◈</span><span class="sb-item-label">Daily</span></button>
+  <div class="sb-section">Fleet</div>
+  <button class="sb-item" data-route="fleet" type="button"><span class="sb-icon">◫</span><span class="sb-item-label">Fleet</span></button>
+  <button class="sb-item" data-route="fleetCal" type="button"><span class="sb-icon">◱</span><span class="sb-item-label">Fleet Cal</span></button>
+  <div class="sb-section">Manage</div>
+  <button class="sb-item" data-route="customers" type="button"><span class="sb-icon">◎</span><span class="sb-item-label">Customers</span></button>
+  <button class="sb-item" data-route="bookings" type="button"><span class="sb-icon">◧</span><span class="sb-item-label">Bookings</span></button>
+  <button class="sb-item active" data-route="contract" type="button"><span class="sb-icon">📄</span><span class="sb-item-label">Contract</span></button>
+  <div class="sb-section">System</div>
+  <button class="sb-item" data-route="settings" type="button"><span class="sb-icon">⚙</span><span class="sb-item-label">Settings</span></button>
+</nav>
+<div class="shell-main">
+<div class="shell-top">
+  <div class="top-page-info">
+    <div class="top-page-title">Contract</div>
+    <div class="top-page-sub" id="chipBookingNo">—</div>
+  </div>
+  <div class="top-tools">
+    <div class="quick-apps" id="quickApps">
+      <button class="quick-apps-btn" id="quickAppsTrigger" type="button">Quick apps</button>
+      <div class="quick-apps-panel">
+        <div class="quick-apps-grid">
+          <button class="quick-app-card" type="button" data-quick-modal="billingModal"><div class="quick-app-icon">€</div><b>Payments</b><span>Commercial, payment method, desk finance.</span></button>
+          <button class="quick-app-card" type="button" data-quick-modal="customerModal"><div class="quick-app-icon">👤</div><b>Customer</b><span>Renter, driver, εταιρικά στοιχεία.</span></button>
+          <button class="quick-app-card" type="button" data-quick-modal="vehicleModal"><div class="quick-app-icon">🚘</div><b>Vehicle</b><span>Category, assigned vehicle &amp; products.</span></button>
+          <button class="quick-app-card" type="button" data-quick-modal="rentalModal"><div class="quick-app-icon">🛫</div><b>Rental</b><span>Pickup / return, km, fuel, notes.</span></button>
+          <button class="quick-app-card" type="button" data-quick-modal="notesModal"><div class="quick-app-icon">📝</div><b>Notes</b><span>Damage, internal memo &amp; contract notes.</span></button>
+          <button class="quick-app-card" type="button" data-quick-route="settings"><div class="quick-app-icon">⚙</div><b>Settings</b><span>Άμεση μετάβαση στο settings.</span></button>
         </div>
       </div>
-
-      <div class="top-chip">Booking <strong id="chipBookingNo">—</strong></div>
-      <div class="top-chip">Status <strong id="chipStatus">—</strong></div>
-      <div class="top-chip">User <strong id="chipUser">—</strong></div>
-
-      <div class="top-icon-group">
-        <button class="top-icon-btn" id="topStatusBtn" type="button" title="System status"><span class="dot"></span></button>
-        <button class="top-icon-btn" id="topHelpBtn" type="button" title="Quick help">?</button>
-        <button class="header-action-btn" id="topLogoutBtn" type="button">Logout</button>
-      </div>
     </div>
-  </header>
-
+    <div class="top-search-wrap">
+      <input id="topSearchInput" type="search" placeholder="Search…" />
+      <button id="topSearchBtn" type="button">↵</button>
+    </div>
+    <button class="top-icon-btn" id="topStatusBtn" type="button" title="System status"><span class="dot"></span></button>
+    <button class="top-icon-btn" id="topHelpBtn" type="button" title="Quick help">?</button>
+    <span class="top-user-chip" id="chipUser">—</span>
+    <button class="top-logout-btn" id="topLogoutBtn" type="button">Logout</button>
+  </div>
+</div>
+<div class="shell-content">
   <section class="workspace-shell">
   <section class="contract-toolbar">
     <div class="contract-toolbar-row top">
@@ -1307,6 +1310,8 @@
     </aside>
   </div>
   </section>
+</div>
+</div>
 </div>
 
 <!-- Customer modal -->
@@ -4399,8 +4404,8 @@ function renderLookups(){
     byId('btnOpenFleet')?.addEventListener('click', () => post({ type:'openOnFleet', bookingId: state.booking?._id }));
     byId('btnOpenBookings')?.addEventListener('click', () => post({ type:'openOnBookings', bookingId: state.booking?._id }));
 
-    qa('[data-nav-route]').forEach((btn) => btn.addEventListener('click', () => {
-      const route = btn.getAttribute('data-nav-route');
+    qa('.sb-item[data-route]').forEach((btn) => btn.addEventListener('click', () => {
+      const route = btn.getAttribute('data-route');
       if (!route || route === 'contract') return;
       post({ type:'navigate', route });
     }));

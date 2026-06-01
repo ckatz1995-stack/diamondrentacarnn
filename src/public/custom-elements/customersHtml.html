@@ -4,305 +4,382 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <style>
-    :root{--bg:#f6f7fb;--card:#fff;--text:#0f172a;--sub:#475569;--border:rgba(0,0,0,.10);--shadow:0 12px 30px rgba(0,0,0,.06);--pri1:#a8844a;--pri2:#8e6d3d;--danger:#b91c1c;--ok:#166534;--shellDark1:#4f3a22;--shellDark2:#7a5b33;--shellDark3:#9f7845}
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{min-height:100%;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);font-size:14px}
-    .hidden{display:none!important}
+/* ── DIAMOND BACKROOM: Customers ── */
+:root{
+  --bg:#F0F4FA;--surface:#FFFFFF;--surface2:#E8EEF7;
+  --border:rgba(15,23,42,.08);--border2:rgba(15,23,42,.15);
+  --text:#0F172A;--sub:#475569;--muted:#94A3B8;
+  --gold:#A8844A;--gold2:#6C522E;
+  --gold-bg:rgba(180,138,79,.10);--gold-border:rgba(168,132,74,.22);
+  --teal:#2A6B82;--danger:#991B1B;--ok:#166534;
+  --shadow:0 2px 12px rgba(15,23,42,.06);--shadow-lg:0 8px 28px rgba(15,23,42,.14);
+  --r:14px;--r-lg:18px;--r-pill:999px;--sb-w:220px;
+}
+/* ── Base ── */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased}
+body{overflow:hidden}
+.hidden{display:none!important}
+/* ── Shell & Sidebar layout ── */
+.shell{display:flex;height:100vh;overflow:hidden}
+.shell-main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.shell-content{flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg);padding:14px 18px}
+.shell-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex:0 0 auto;min-height:62px;position:relative;z-index:20}
+.shell-page-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.shell-page-name{display:flex;align-items:center;gap:9px;font:900 15px/1.2 system-ui,-apple-system,sans-serif;color:var(--text);letter-spacing:-.01em}
+.shell-page-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--gold-bg);border:1px solid var(--gold-border);flex:0 0 28px;color:var(--gold)}
+.shell-page-icon svg{width:14px;height:14px}
+.shell-page-sub{font:700 11px/1 system-ui;color:var(--muted);padding-left:37px}
+.shell-top-right{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.sb{width:var(--sb-w);flex:0 0 var(--sb-w);display:flex;flex-direction:column;height:100vh;overflow:hidden;background:linear-gradient(175deg,#3D2A14 0%,#5A3F1E 50%,#7A5830 100%);position:relative}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;flex:0 0 auto;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#C8952E,#A8844A);color:#1A0E00;font:900 17px/1 system-ui;box-shadow:0 4px 14px rgba(200,149,46,.35);flex:0 0 36px}
+.sb-brand-text{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.sb-brand-name{font:900 13px/1.2 system-ui;color:#FEFCF7;letter-spacing:-.01em}
+.sb-brand-sub{font:700 10px/1 system-ui;color:rgba(255,255,255,.45);margin-top:2px}
+.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 8px;display:flex;flex-direction:column;gap:2px;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{display:none}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:rgba(255,255,255,.62);cursor:pointer;transition:all .16s;text-align:left;width:100%;font:700 13px/1.2 system-ui,-apple-system,sans-serif;appearance:none}
+.sb-item:hover{background:rgba(255,255,255,.08);color:#FEFCF7;border-color:rgba(255,255,255,.1)}
+.sb-item.active{background:rgba(200,149,46,.18);color:#F5CC72;border-color:rgba(200,149,46,.28);font-weight:900}
+.sb-item svg{flex:0 0 18px;width:18px;height:18px;opacity:.75}
+.sb-item.active svg{opacity:1}
+.sb-item-label{flex:1;min-width:0;font-size:13px}
+.sb-section{font:900 9px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:12px 12px 4px;margin-top:2px;pointer-events:none}
+.sb-footer{flex:0 0 auto;padding:12px 8px;border-top:1px solid rgba(255,255,255,.08)}
+.shell-content::-webkit-scrollbar{width:5px}
+.shell-content::-webkit-scrollbar-track{background:transparent}
+.shell-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+.userWrap{position:relative;display:inline-flex;align-items:center;flex:0 0 auto;overflow:visible;z-index:6}
+.userBtn{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border:1px solid var(--border2);background:rgba(15,23,42,.04);border-radius:var(--r-pill);cursor:pointer;font:900 12px/1.1 system-ui;color:var(--text);transition:all .15s}
+.userBtn:hover{background:rgba(15,23,42,.08)}
+.userBadge{width:28px;height:28px;border-radius:var(--r-pill);display:grid;place-items:center;background:var(--gold-bg);color:var(--gold);font:900 13px/1 system-ui;border:1px solid var(--gold-border)}
+.userText{display:flex;flex-direction:column;align-items:flex-start}
+.userName{font-weight:900;font-size:13px;color:var(--text)}
+.userRole{font-size:11px;color:var(--muted);font-weight:700}
+.caret{font-size:10px;color:var(--muted)}
+.menu{position:absolute;right:0;top:calc(100% + 8px);min-width:200px;background:var(--surface);border:1px solid var(--border2);border-radius:14px;box-shadow:var(--shadow-lg);display:none;z-index:999999;overflow:hidden}
+.menu.open{display:block}
+.menuHead{padding:12px 14px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border)}
+.menuItem{padding:11px 14px;font:800 13px/1.2 system-ui;color:var(--text);background:transparent;border:0;border-bottom:1px solid var(--border);text-align:left;cursor:pointer;width:100%;transition:background .12s}
+.menuItem:last-child{border-bottom:none}
+.menuItem:hover{background:rgba(15,23,42,.05)}
+.menuItem.danger{color:#B91C1C}
+.menuItem.danger:hover{background:rgba(239,68,68,.08)}
+@media(max-width:900px){
+  .sb{width:60px;flex:0 0 60px}
+  .sb-brand-text,.sb-item-label,.sb-brand-sub,.sb-section{display:none}
+  .sb-brand{justify-content:center;padding:14px 0}
+  .sb-item{justify-content:center;padding:10px}
+  .sb-item svg{flex:0 0 22px;width:22px;height:22px}
+  .shell-content{padding:10px 12px}
+}
 
-    /* Top bar */
-    .topbar{border-radius:24px;background:linear-gradient(135deg,var(--shellDark1) 0%,var(--shellDark2) 42%,var(--shellDark3) 100%);border:1px solid rgba(0,0,0,.06);box-shadow:0 18px 40px rgba(15,23,42,.14);margin:12px}
-    .toprow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;overflow:visible}
-    .leftScroll{overflow-x:auto}.leftLine{min-width:860px;display:flex;align-items:center;gap:14px;padding:14px 16px}
-    .brand{display:inline-flex;align-items:center;gap:10px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#8e6d3d,#b48a4f,#6c522e);border:1px solid rgba(255,255,255,.08);color:#fff;font-weight:950;flex:0 0 auto}
-    .logo{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.16);color:#fff;font-weight:1100}
-    .brandText{display:flex;flex-direction:column;line-height:1.08}.brandTitle{font-weight:1100;color:#fff;font-size:16px;letter-spacing:-.02em}.brandSub{font-size:11px;color:rgba(255,255,255,.82);font-weight:900}
-    .tabs{display:inline-flex;align-items:center;gap:10px;flex:0 0 auto}
-    .tab{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;border-radius:999px;padding:10px 15px;font:800 14px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;cursor:pointer}
-    .tab.active{background:linear-gradient(135deg,#b48a4f,#8e6d3d);border-color:transparent;box-shadow:0 10px 20px rgba(91,68,35,.18)}
-    .tab[disabled]{opacity:.38;cursor:not-allowed}
-    .meta{padding:14px 16px;display:inline-flex;align-items:center;gap:12px;overflow:visible;position:relative;z-index:3}
-    .userWrap{position:relative;display:inline-flex;align-items:center;overflow:visible;z-index:6}
-    .userBtn{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);border-radius:999px;cursor:pointer;font:900 13px/1.1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#fff}
-    .userBadge{width:30px;height:30px;border-radius:999px;display:grid;place-items:center;background:rgba(255,255,255,.16);color:#fff;font-weight:1100;border:1px solid rgba(255,255,255,.18)}
-    .userText{display:flex;flex-direction:column}.userName{font-weight:1000}.userRole{font-size:11px;color:rgba(255,255,255,.72);font-weight:900}.caret{font-size:10px;color:rgba(255,255,255,.72)}
-    .menu{position:absolute;right:0;top:calc(100% + 8px);min-width:180px;background:#fff;border:1px solid rgba(0,0,0,.10);border-radius:16px;box-shadow:0 18px 45px rgba(0,0,0,.16);display:none;z-index:999999;overflow:hidden}.menu.open{display:block}
-    .menuItem{padding:12px 14px;font:900 13px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#0f172a;background:#fff;border:0;border-bottom:1px solid rgba(0,0,0,.06);text-align:left;cursor:pointer;width:100%}.menuItem:last-child{border-bottom:none}.menuItem:hover{background:rgba(180,138,79,.08)}.menuItem.danger{color:var(--danger)}
+/* ── Customer layout ── */
+.cust-grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;align-items:start}
+@media(max-width:880px){.cust-grid{grid-template-columns:1fr}}
 
-    /* Layout */
-    .page{padding:12px;display:flex;flex-direction:column;gap:12px}
-    .mainGrid{display:grid;grid-template-columns:310px minmax(0,1fr);gap:12px;align-items:start}
+/* ── Customer list panel ── */
+.cust-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;min-height:560px}
+.side-head{padding:16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+.side-title{font:900 14px/1.2 system-ui;color:var(--text);letter-spacing:-.01em}
+.search-wrap{position:relative;display:flex;align-items:center}
+.search-input{width:100%;padding:9px 36px 9px 11px;border-radius:var(--r-pill);border:1px solid var(--border2);font:800 12.5px/1 system-ui;background:var(--surface2);color:var(--text);transition:all .14s}
+.search-input:focus{outline:none;border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(168,132,74,.10);background:var(--surface)}
+.search-btn{position:absolute;right:9px;background:none;border:0;cursor:pointer;color:var(--muted);font-size:15px;padding:4px;transition:color .14s}
+.search-btn:hover{color:var(--gold)}
+.cust-list{flex:1;overflow-y:auto;padding:6px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.cust-item{padding:9px 11px;border-radius:var(--r);cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s;display:flex;align-items:center;gap:10px;margin-bottom:2px;position:relative}
+.cust-item:hover{background:var(--gold-bg);border-color:var(--gold-border)}
+.cust-item.selected{background:var(--gold-bg);border-color:var(--gold-border)}
+.cust-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);border-radius:var(--r) 0 0 var(--r);opacity:0;transition:opacity .14s}
+.cust-item.selected::before{opacity:1}
+.cust-avatar{width:34px;height:34px;border-radius:var(--r-pill);background:var(--gold-bg);border:1px solid var(--gold-border);display:grid;place-items:center;font:900 13px/1 system-ui;color:var(--gold2);flex:0 0 auto}
+.cust-info{min-width:0;flex:1}
+.cust-name{font:800 12.5px/1.2 system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.cust-email{font:700 11px/1.3 system-ui;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.no-results{padding:24px 16px;text-align:center;color:var(--sub);font:800 12.5px/1.5 system-ui}
 
-    /* Sidebar */
-    .sidebar{background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;min-height:600px}
-    .sideHead{padding:16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
-    .sideTitle{font-size:15px;font-weight:1000}
-    .searchWrap{position:relative;display:flex;align-items:center}
-    .searchInput{width:100%;padding:10px 38px 10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12);font:800 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8fafc;color:var(--text)}
-    .searchInput:focus{outline:none;border-color:#a8844a;box-shadow:0 0 0 3px rgba(180,138,79,.12);background:#fff}
-    .searchBtn{position:absolute;right:8px;background:none;border:0;cursor:pointer;color:#64748b;font-size:15px;padding:4px}
-    .customerList{flex:1;overflow-y:auto;padding:6px}
-    .customerItem{padding:10px 12px;border-radius:14px;cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s;display:flex;align-items:center;gap:10px;margin-bottom:2px}
-    .customerItem:hover{background:rgba(180,138,79,.06);border-color:rgba(180,138,79,.18)}
-    .customerItem.selected{background:rgba(180,138,79,.10);border-color:rgba(180,138,79,.30)}
-    .custAvatar{width:36px;height:36px;border-radius:999px;background:linear-gradient(135deg,rgba(180,138,79,.18),rgba(108,82,46,.12));display:grid;place-items:center;font:900 14px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#6c522e;flex:0 0 auto}
-    .custInfo{min-width:0;flex:1}.custName{font:800 13px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.custEmail{font:700 11px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .noResults{padding:24px 16px;text-align:center;color:var(--sub);font:800 13px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+/* ── Detail panel ── */
+.cust-detail{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;min-height:560px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px;color:var(--sub);text-align:center;gap:12px}
+.empty-icon{font-size:40px;opacity:.3}
+.empty-text{font:800 13.5px/1.6 system-ui;color:var(--sub)}
 
-    /* Detail panel */
-    .detail{background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;min-height:600px}
-    .emptyState{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px;color:var(--sub);text-align:center;gap:12px}
-    .emptyIcon{font-size:44px;opacity:.35}
-    .emptyText{font:800 14px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+/* ── Customer header ── */
+.cust-header{padding:18px 20px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);position:relative}
+.cust-header::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);border-radius:var(--r-lg) 0 0 0}
+.cust-header-avatar{width:48px;height:48px;border-radius:var(--r-pill);background:var(--gold-bg);border:1px solid var(--gold-border);display:grid;place-items:center;font:900 18px/1 system-ui;color:var(--gold2);flex:0 0 auto}
+.cust-header-info{flex:1;min-width:0}
+.cust-header-name{font:900 18px/1.2 system-ui;letter-spacing:-.02em;color:var(--text)}
+.cust-header-meta{font:700 12px/1.4 system-ui;color:var(--sub);margin-top:3px}
 
-    /* Customer header */
-    .custHeader{padding:20px 22px 16px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border)}
-    .custHeaderAvatar{width:52px;height:52px;border-radius:999px;background:linear-gradient(135deg,rgba(180,138,79,.22),rgba(108,82,46,.16));display:grid;place-items:center;font:900 20px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#6c522e;flex:0 0 auto}
-    .custHeaderInfo{flex:1;min-width:0}
-    .custHeaderName{font:900 20px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;letter-spacing:-.02em}
-    .custHeaderMeta{font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--sub);margin-top:4px}
+/* ── Detail tabs ── */
+.detail-tabs{display:flex;gap:2px;padding:8px 16px;border-bottom:1px solid var(--border);overflow-x:auto}
+.dtab{appearance:none;border:0;background:none;padding:7px 13px;border-radius:var(--r-pill);font:800 12.5px/1 system-ui;cursor:pointer;color:var(--sub);white-space:nowrap;transition:all .14s}
+.dtab.active{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border);font-weight:900}
+.dtab:hover:not(.active){background:rgba(0,0,0,.04);color:var(--text)}
 
-    /* Detail tabs */
-    .detailTabs{display:flex;gap:2px;padding:10px 22px;border-bottom:1px solid var(--border);overflow-x:auto}
-    .dtab{appearance:none;border:0;background:none;padding:8px 14px;border-radius:10px;font:800 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;cursor:pointer;color:var(--sub);white-space:nowrap}
-    .dtab.active{background:rgba(180,138,79,.12);color:#6c522e}
-    .dtab:hover:not(.active){background:rgba(0,0,0,.04)}
+.detail-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
 
-    .detailBody{padding:20px 22px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+/* ── Profile sections ── */
+.profile-section{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:relative}
+.profile-section::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);opacity:.4}
+.profile-section-head{padding:10px 14px 10px 18px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border);font:900 10px/1 system-ui;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);display:flex;align-items:center;justify-content:space-between}
+.profile-rows{display:grid;grid-template-columns:repeat(2,1fr)}
+@media(max-width:880px){.profile-rows{grid-template-columns:1fr}}
+.profile-row{padding:9px 14px;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid var(--border)}
+.profile-row:nth-last-child(-n+2){border-bottom:none}
+.profile-label{font:900 10px/1 system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.profile-value{font:800 12.5px/1.4 system-ui;color:var(--text)}
+.profile-value.empty{color:var(--muted);font-style:italic}
 
-    /* Profile sections */
-    .profileSection{border:1px solid var(--border);border-radius:16px;overflow:hidden}
-    .profileSectionHead{padding:11px 16px;background:rgba(180,138,79,.07);border-bottom:1px solid var(--border);font:900 11px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#6c522e;display:flex;align-items:center;justify-content:space-between}
-    .profileRows{display:grid;grid-template-columns:repeat(2,1fr)}
-    .profileRow{padding:10px 16px;display:flex;flex-direction:column;gap:3px;border-bottom:1px solid rgba(0,0,0,.05)}
-    .profileRow:nth-last-child(-n+2){border-bottom:none}
-    .profileLabel{font:900 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8}
-    .profileValue{font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .profileValue.empty{color:#94a3b8;font-style:italic}
+/* ── Edit form ── */
+.edit-form{display:flex;flex-direction:column;gap:14px}
+.form-section{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:relative}
+.form-section::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);opacity:.4}
+.form-section-head{padding:10px 14px 10px 18px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border);font:900 10px/1 system-ui;text-transform:uppercase;letter-spacing:.08em;color:var(--gold)}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px 16px}
+@media(max-width:880px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font:900 10px/1 system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--sub)}
+.field input,.field select{width:100%;padding:9px 11px;border-radius:var(--r);border:1px solid var(--border2);font:800 13px/1 system-ui;background:var(--surface2);color:var(--text);transition:all .14s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(168,132,74,.10);background:var(--surface)}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;padding:4px 0 0}
 
-    /* Edit form */
-    .editForm{display:flex;flex-direction:column;gap:14px}
-    .formSection{border:1px solid var(--border);border-radius:16px;overflow:hidden}
-    .formSectionHead{padding:11px 16px;background:rgba(180,138,79,.07);border-bottom:1px solid var(--border);font:900 11px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#6c522e}
-    .formGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px 16px}
-    .field{display:flex;flex-direction:column;gap:5px}
-    .field label{font:900 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#64748b}
-    .field input,.field select{width:100%;padding:9px 11px;border-radius:10px;border:1px solid rgba(0,0,0,.12);font:800 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff;color:var(--text)}
-    .field input:focus,.field select:focus{outline:none;border-color:#a8844a;box-shadow:0 0 0 3px rgba(180,138,79,.10)}
-    .formActions{display:flex;gap:10px;justify-content:flex-end;padding:4px 0 0}
+/* ── Buttons ── */
+.btn{appearance:none;border:0;border-radius:var(--r);padding:9px 15px;font:900 12.5px/1 system-ui;cursor:pointer;transition:transform .14s,box-shadow .14s,background .14s}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn.primary{color:#fff;background:linear-gradient(135deg,var(--gold),var(--gold2))}
+.btn.ghost{background:var(--gold-bg);color:var(--gold2);border:1px solid var(--gold-border)}
+.btn.danger{background:#fef2f2;color:#B91C1C;border:1px solid rgba(185,28,28,.18)}
+.btn.ok{background:#f0fdf4;color:var(--ok);border:1px solid rgba(22,101,52,.18)}
+.btn.sm{padding:6px 12px;font-size:11.5px}
 
-    /* Buttons */
-    .btn{appearance:none;border:0;border-radius:12px;padding:10px 16px;font:900 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;cursor:pointer}
-    .btn.primary{color:#fff;background:linear-gradient(135deg,var(--pri1),var(--pri2))}
-    .btn.ghost{background:#f7f0e5;color:#6c522e;border:1px solid rgba(180,138,79,.22)}
-    .btn.danger{background:#fef2f2;color:var(--danger);border:1px solid rgba(185,28,28,.18)}
-    .btn.ok{background:#f0fdf4;color:var(--ok);border:1px solid rgba(22,101,52,.18)}
-    .btn.sm{padding:7px 12px;font-size:12px}
+/* ── Booking items ── */
+.booking-item{padding:11px 14px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;gap:12px;margin-bottom:8px;transition:border-color .14s}
+.booking-item:hover{border-color:var(--border2)}
+.bk-status{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-pill);font:900 10.5px/1 system-ui;white-space:nowrap;border:1px solid transparent}
+.bk-status.confirmed,.bk-status.active{background:#f0fdf4;color:#166534;border-color:rgba(22,101,52,.18)}
+.bk-status.pending{background:#fff7ed;color:#9a3412;border-color:rgba(154,52,18,.18)}
+.bk-status.cancelled,.bk-status.canceled{background:#fef2f2;color:#B91C1C;border-color:rgba(185,28,28,.18)}
+.bk-status.completed{background:#f0f9ff;color:#075985;border-color:rgba(7,89,133,.18)}
+.bk-info{flex:1;min-width:0}
+.bk-title{font:800 13px/1.3 system-ui}
+.bk-meta{font:700 11px/1.3 system-ui;color:var(--sub);margin-top:2px}
 
-    /* Bookings */
-    .bookingItem{padding:12px 16px;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
-    .bkStatus{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;font:900 11px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;white-space:nowrap}
-    .bkStatus.confirmed,.bkStatus.active{background:#f0fdf4;color:#166534}
-    .bkStatus.pending{background:#fff7ed;color:#9a3412}
-    .bkStatus.cancelled,.bkStatus.canceled{background:#fef2f2;color:#b91c1c}
-    .bkStatus.completed{background:#f0f9ff;color:#075985}
-    .bkInfo{flex:1;min-width:0}
-    .bkTitle{font:800 13px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .bkMeta{font:700 11px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--sub);margin-top:2px}
+/* ── Ticket items ── */
+.ticket-item{padding:11px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;margin-bottom:8px;transition:all .14s;position:relative}
+.ticket-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);border-radius:var(--r) 0 0 var(--r);opacity:0;transition:opacity .14s}
+.ticket-item:hover{background:var(--surface2);border-color:var(--border2)}
+.ticket-item.selected{border-color:var(--gold-border);background:var(--gold-bg)}
+.ticket-item.selected::before{opacity:1}
+.ticket-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.ticket-subject{font:800 13px/1.3 system-ui;flex:1;color:var(--text)}
+.t-status{display:inline-flex;align-items:center;padding:3px 7px;border-radius:var(--r-pill);font:900 10px/1 system-ui;white-space:nowrap;border:1px solid transparent}
+.t-status.open{background:#fff7ed;color:#9a3412;border-color:rgba(154,52,18,.18)}
+.t-status.in_progress{background:#eff6ff;color:#1e40af;border-color:rgba(30,64,175,.18)}
+.t-status.resolved{background:#f0fdf4;color:#166534;border-color:rgba(22,101,52,.18)}
+.t-status.closed{background:var(--surface2);color:var(--sub);border-color:var(--border2)}
+.ticket-meta{font:700 11px/1.3 system-ui;color:var(--sub)}
 
-    /* Support Tickets */
-    .ticketItem{padding:12px 16px;border:1px solid var(--border);border-radius:14px;cursor:pointer;margin-bottom:8px}
-    .ticketItem:hover{background:rgba(180,138,79,.04)}
-    .ticketItem.selected{border-color:rgba(180,138,79,.40);background:rgba(180,138,79,.05)}
-    .ticketHead{display:flex;align-items:center;gap:10px;margin-bottom:5px}
-    .ticketSubject{font:800 13px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;flex:1}
-    .tStatus{display:inline-flex;align-items:center;padding:3px 7px;border-radius:6px;font:900 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;white-space:nowrap}
-    .tStatus.open{background:#fff7ed;color:#9a3412}
-    .tStatus.in_progress{background:#eff6ff;color:#1e40af}
-    .tStatus.resolved{background:#f0fdf4;color:#166534}
-    .tStatus.closed{background:#f1f5f9;color:#64748b}
-    .ticketMeta{font:700 11px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--sub)}
+/* ── Ticket detail ── */
+.ticket-detail{border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-top:4px}
+.ticket-detail-head{padding:12px 16px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.ticket-detail-head-info{flex:1;min-width:0}
+.ticket-detail-title{font:800 14px/1.3 system-ui;color:var(--text)}
+.ticket-detail-sub{font:700 11px/1.3 system-ui;color:var(--sub);margin-top:3px}
+.ticket-detail-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+.status-sel{padding:6px 10px;border-radius:var(--r);border:1px solid var(--border2);font:800 12px/1 system-ui;background:var(--surface);color:var(--text)}
+.ticket-messages{display:flex;flex-direction:column;gap:10px;padding:14px 16px;max-height:260px;overflow-y:auto}
+.msg-bubble{padding:10px 14px;border-radius:var(--r);max-width:84%;font:800 13px/1.5 system-ui}
+.msg-bubble.member{background:var(--surface2);align-self:flex-start;border-bottom-left-radius:4px}
+.msg-bubble.staff{background:var(--gold-bg);align-self:flex-end;border-bottom-right-radius:4px;border:1px solid var(--gold-border)}
+.msg-sender{font:900 10px/1 system-ui;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;color:var(--sub)}
+.msg-time{font:700 10px/1 system-ui;color:var(--muted);margin-top:5px}
+.reply-area{padding:12px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.reply-textarea{width:100%;padding:10px 12px;border-radius:var(--r);border:1px solid var(--border2);font:800 13px/1.4 system-ui;resize:vertical;min-height:68px;background:var(--surface2);transition:all .14s}
+.reply-textarea:focus{outline:none;border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(168,132,74,.10);background:var(--surface)}
+.reply-actions{display:flex;gap:8px;justify-content:space-between;align-items:center}
 
-    /* Ticket detail */
-    .ticketDetail{border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:4px}
-    .ticketDetailHead{padding:12px 16px;background:rgba(180,138,79,.07);border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .ticketDetailHeadInfo{flex:1;min-width:0}
-    .ticketDetailTitle{font:800 14px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .ticketDetailSub{font:700 11px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#64748b;margin-top:3px}
-    .ticketDetailActions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
-    .statusSel{padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,.12);font:800 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff}
-    .ticketMessages{display:flex;flex-direction:column;gap:10px;padding:14px 16px;max-height:280px;overflow-y:auto}
-    .msgBubble{padding:10px 14px;border-radius:14px;max-width:84%;font:800 13px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .msgBubble.member{background:#f1f5f9;align-self:flex-start;border-bottom-left-radius:4px}
-    .msgBubble.staff{background:rgba(180,138,79,.13);align-self:flex-end;border-bottom-right-radius:4px}
-    .msgSender{font:900 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;color:#64748b}
-    .msgTime{font:700 10px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#94a3b8;margin-top:5px}
-    .replyArea{padding:12px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
-    .replyTextarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12);font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;resize:vertical;min-height:68px;background:#f8fafc}
-    .replyTextarea:focus{outline:none;border-color:#a8844a;box-shadow:0 0 0 3px rgba(180,138,79,.10);background:#fff}
-    .replyActions{display:flex;gap:8px;justify-content:space-between;align-items:center}
+/* ── Notify card ── */
+.notify-card{border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;position:relative}
+.notify-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);opacity:.5}
+.notify-head{padding:11px 14px 11px 18px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border);font:900 10px/1 system-ui;text-transform:uppercase;letter-spacing:.08em;color:var(--gold)}
+.notify-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.notify-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.notify-textarea{width:100%;padding:10px 12px;border-radius:var(--r);border:1px solid var(--border2);font:800 13px/1.4 system-ui;resize:vertical;min-height:80px;background:var(--surface2);transition:all .14s}
+.notify-textarea:focus{outline:none;border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(168,132,74,.10);background:var(--surface)}
+.no-member-note{padding:10px 14px;border-radius:var(--r);background:#fff7ed;border:1px solid rgba(154,52,18,.18);color:#9a3412;font:800 12.5px/1.4 system-ui}
 
-    /* Notifications */
-    .notifyCard{border:1px solid var(--border);border-radius:16px;overflow:hidden}
-    .notifyHead{padding:12px 16px;background:rgba(180,138,79,.07);border-bottom:1px solid var(--border);font:900 11px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#6c522e}
-    .notifyBody{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
-    .notifyRow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .notifyTextarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12);font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;resize:vertical;min-height:80px;background:#f8fafc}
-    .notifyTextarea:focus{outline:none;border-color:#a8844a;box-shadow:0 0 0 3px rgba(180,138,79,.10);background:#fff}
+/* ── Toast ── */
+.toast{position:fixed;bottom:20px;right:20px;padding:12px 18px;border-radius:var(--r);background:#1e293b;color:#fff;font:800 13px/1.3 system-ui;box-shadow:var(--shadow-lg);z-index:9999;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;max-width:300px}
+.toast.ok{background:#166534}.toast.error{background:#B91C1C}.toast.show{opacity:1;transform:translateY(0)}
 
-    /* Toast */
-    .toast{position:fixed;bottom:20px;right:20px;padding:12px 18px;border-radius:14px;background:#1e293b;color:#fff;font:800 13px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:9999;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;max-width:300px}
-    .toast.ok{background:#166534}.toast.error{background:var(--danger)}.toast.show{opacity:1;transform:translateY(0)}
-
-    /* Loading */
-    .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(168,132,74,.2);border-top-color:var(--pri1);border-radius:50%;animation:spin .7s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .loadingRow{display:flex;align-items:center;justify-content:center;gap:10px;padding:24px;color:var(--sub);font:800 13px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-
-    @media(max-width:880px){.mainGrid{grid-template-columns:1fr}.profileRows,.formGrid{grid-template-columns:1fr}}
+/* ── Spinner ── */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row{display:flex;align-items:center;justify-content:center;gap:10px;padding:24px;color:var(--sub);font:800 12.5px/1 system-ui}
   </style>
 </head>
 <body>
-<div class="page">
+<div class="shell">
 
-  <!-- Top nav bar -->
-  <div class="topbar">
-    <div class="toprow">
-      <div class="leftScroll">
-        <div class="leftLine">
-          <div class="brand">
-            <div class="logo">D</div>
-            <div class="brandText">
-              <div class="brandTitle">Diamond</div>
-              <div class="brandSub">Backroom</div>
-            </div>
-          </div>
-          <div class="tabs">
-            <button class="tab" data-route="home" type="button">Myroom</button>
-            <button class="tab" data-route="bookings" type="button">Bookings</button>
-            <button class="tab" data-route="daily" type="button">Daily</button>
-            <button class="tab" data-route="fleet" type="button">Fleet</button>
-            <button class="tab active" data-route="customers" type="button">Customers</button>
-            <button class="tab" data-route="settings" type="button">Settings</button>
-          </div>
-        </div>
+<nav class="sb">
+  <div class="sb-brand">
+    <div class="sb-logo">D</div>
+    <div class="sb-brand-text">
+      <span class="sb-brand-name">DIAMOND</span>
+      <span class="sb-brand-sub">Backroom</span>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <button class="sb-item" data-route="home" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="sb-item-label">Myroom</span></button>
+    <div class="sb-section">Ops</div>
+    <button class="sb-item" data-route="daily" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span class="sb-item-label">Daily</span></button>
+    <button class="sb-item" data-route="bookings" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span class="sb-item-label">Bookings</span></button>
+    <div class="sb-section">Fleet</div>
+    <button class="sb-item" data-route="fleet" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2"/><circle cx="7" cy="20" r="1"/><circle cx="15" cy="20" r="1"/></svg><span class="sb-item-label">Fleet</span></button>
+    <button class="sb-item" data-route="fleetCal" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg><span class="sb-item-label">Fleet Cal</span></button>
+    <div class="sb-section">Manage</div>
+    <button class="sb-item active" data-route="customers" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="sb-item-label">Customers</span></button>
+    <button class="sb-item" data-route="pricing" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="sb-item-label">Pricing</span></button>
+    <div class="sb-section">System</div>
+    <button class="sb-item" data-route="settings" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="sb-item-label">Settings</span></button>
+  </div>
+  <div class="sb-footer"></div>
+</nav>
+
+<div class="shell-main">
+  <div class="shell-top">
+    <div class="shell-page-info">
+      <div class="shell-page-name">
+        <span class="shell-page-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        Customers
       </div>
-      <div class="meta">
-        <div class="userWrap">
-          <button class="userBtn" id="userMenuBtn" type="button">
-            <div class="userBadge" id="userBadge">?</div>
-            <div class="userText">
-              <div class="userName" id="userName">Staff</div>
-              <div class="userRole" id="userRole">Backroom</div>
-            </div>
-            <span class="caret">▾</span>
-          </button>
-          <div class="menu" id="userMenu">
-            <button class="menuItem danger" type="button" data-menu-action="logout">Sign out</button>
-          </div>
+      <div class="shell-page-sub">Search, view &amp; manage customer cards</div>
+    </div>
+    <div class="shell-top-right">
+      <div class="userWrap">
+        <button class="userBtn" id="userMenuBtn" type="button">
+          <span class="userBadge" id="userBadge">?</span>
+          <span class="userText">
+            <span class="userName" id="userName">Staff</span>
+            <span class="userRole" id="userRole">Backroom</span>
+          </span>
+          <span class="caret">▾</span>
+        </button>
+        <div class="menu" id="userMenu">
+          <div class="menuHead"><div class="userName" id="menuUserName">Staff</div><div class="userRole" id="menuUserRole">Backroom</div></div>
+          <button class="menuItem danger" type="button" data-menu-action="logout">Sign out</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Main content -->
-  <div class="mainGrid">
+  <div class="shell-content">
+    <div class="cust-grid">
 
-    <!-- Sidebar: search + customer list -->
-    <div class="sidebar">
-      <div class="sideHead">
-        <div class="sideTitle">Customers</div>
-        <div class="searchWrap">
-          <input class="searchInput" id="searchInput" type="text" placeholder="Search name, email, phone…" autocomplete="off"/>
-          <button class="searchBtn" id="searchBtn" type="button">⌕</button>
-        </div>
-      </div>
-      <div class="customerList" id="customerList">
-        <div class="loadingRow"><span class="spinner"></span>Loading…</div>
-      </div>
-    </div>
-
-    <!-- Detail panel -->
-    <div class="detail">
-      <div class="emptyState" id="emptyState">
-        <div class="emptyIcon">👤</div>
-        <div class="emptyText">Select a customer from the list<br/>to view and edit their card.</div>
-      </div>
-
-      <div class="hidden" id="customerDetail">
-        <!-- Customer header -->
-        <div class="custHeader">
-          <div class="custHeaderAvatar" id="detailAvatar">?</div>
-          <div class="custHeaderInfo">
-            <div class="custHeaderName" id="detailName">Customer</div>
-            <div class="custHeaderMeta" id="detailMeta"></div>
-          </div>
-          <button class="btn ghost sm" id="editProfileBtn" type="button">Edit Profile</button>
-        </div>
-
-        <!-- Tab bar -->
-        <div class="detailTabs">
-          <button class="dtab active" data-dtab="profile" type="button">Profile</button>
-          <button class="dtab" data-dtab="bookings" type="button">Bookings</button>
-          <button class="dtab" data-dtab="tickets" type="button">Support Tickets</button>
-          <button class="dtab" data-dtab="notify" type="button">Send Notification</button>
-        </div>
-
-        <!-- Profile tab -->
-        <div class="detailBody" id="tabProfile">
-          <div id="profileView"></div>
-          <div class="hidden" id="profileEditWrap">
-            <div class="editForm" id="profileEditForm"></div>
+      <!-- Customer list panel -->
+      <div class="cust-panel">
+        <div class="side-head">
+          <div class="side-title">Customers</div>
+          <div class="search-wrap">
+            <input class="search-input" id="searchInput" type="text" placeholder="Search name, email, phone…" autocomplete="off"/>
+            <button class="search-btn" id="searchBtn" type="button">⌕</button>
           </div>
         </div>
+        <div class="cust-list" id="customerList">
+          <div class="loading-row"><span class="spinner"></span>Loading…</div>
+        </div>
+      </div>
 
-        <!-- Bookings tab -->
-        <div class="detailBody hidden" id="tabBookings">
-          <div id="bookingsList"><div class="loadingRow"><span class="spinner"></span>Loading…</div></div>
+      <!-- Detail panel -->
+      <div class="cust-detail">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">👤</div>
+          <div class="empty-text">Select a customer from the list<br/>to view and edit their card.</div>
         </div>
 
-        <!-- Tickets tab -->
-        <div class="detailBody hidden" id="tabTickets">
-          <div id="ticketsList"></div>
-          <div class="hidden" id="ticketDetailWrap"></div>
-        </div>
+        <div class="hidden" id="customerDetail">
+          <!-- Customer header -->
+          <div class="cust-header">
+            <div class="cust-header-avatar" id="detailAvatar">?</div>
+            <div class="cust-header-info">
+              <div class="cust-header-name" id="detailName">Customer</div>
+              <div class="cust-header-meta" id="detailMeta"></div>
+            </div>
+            <button class="btn ghost sm" id="editProfileBtn" type="button">Edit Profile</button>
+          </div>
 
-        <!-- Notification tab -->
-        <div class="detailBody hidden" id="tabNotify">
-          <div class="notifyCard">
-            <div class="notifyHead">Send Notification to Member</div>
-            <div class="notifyBody">
-              <div class="notifyRow">
-                <div class="field">
-                  <label>Type</label>
-                  <select id="notifyType">
-                    <option value="info">Info</option>
-                    <option value="booking">Booking Update</option>
-                    <option value="payment">Payment</option>
-                    <option value="alert">Alert</option>
-                  </select>
+          <!-- Tab bar -->
+          <div class="detail-tabs">
+            <button class="dtab active" data-dtab="profile" type="button">Profile</button>
+            <button class="dtab" data-dtab="bookings" type="button">Bookings</button>
+            <button class="dtab" data-dtab="tickets" type="button">Support Tickets</button>
+            <button class="dtab" data-dtab="notify" type="button">Send Notification</button>
+          </div>
+
+          <!-- Profile tab -->
+          <div class="detail-body" id="tabProfile">
+            <div id="profileView"></div>
+            <div class="hidden" id="profileEditWrap">
+              <div class="edit-form" id="profileEditForm"></div>
+            </div>
+          </div>
+
+          <!-- Bookings tab -->
+          <div class="detail-body hidden" id="tabBookings">
+            <div id="bookingsList"><div class="loading-row"><span class="spinner"></span>Loading…</div></div>
+          </div>
+
+          <!-- Tickets tab -->
+          <div class="detail-body hidden" id="tabTickets">
+            <div id="ticketsList"></div>
+            <div class="hidden" id="ticketDetailWrap"></div>
+          </div>
+
+          <!-- Notification tab -->
+          <div class="detail-body hidden" id="tabNotify">
+            <div class="notify-card">
+              <div class="notify-head">Send Notification to Member</div>
+              <div class="notify-body">
+                <div class="notify-row">
+                  <div class="field">
+                    <label>Type</label>
+                    <select id="notifyType">
+                      <option value="info">Info</option>
+                      <option value="booking">Booking Update</option>
+                      <option value="payment">Payment</option>
+                      <option value="alert">Alert</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <div class="field">
-                <label>Title</label>
-                <input type="text" id="notifyTitle" placeholder="Notification title" maxlength="200"/>
-              </div>
-              <div class="field">
-                <label>Message</label>
-                <textarea class="notifyTextarea" id="notifyBody" placeholder="Write the notification body…" rows="4" maxlength="1000"></textarea>
-              </div>
-              <div style="display:flex;gap:10px;justify-content:flex-end">
-                <button class="btn primary" id="sendNotifyBtn" type="button">Send Notification</button>
-              </div>
-              <div class="hidden" id="noMemberId" style="padding:10px 14px;border-radius:12px;background:#fff7ed;color:#9a3412;font:800 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif">
-                This customer does not have a linked member account. Notifications can only be sent to Wix Members.
+                <div class="field">
+                  <label>Title</label>
+                  <input type="text" id="notifyTitle" placeholder="Notification title" maxlength="200"/>
+                </div>
+                <div class="field">
+                  <label>Message</label>
+                  <textarea class="notify-textarea" id="notifyBody" placeholder="Write the notification body…" rows="4" maxlength="1000"></textarea>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end">
+                  <button class="btn primary" id="sendNotifyBtn" type="button">Send Notification</button>
+                </div>
+                <div class="hidden no-member-note" id="noMemberId">
+                  This customer does not have a linked member account. Notifications can only be sent to Wix Members.
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
+
+</div><!-- /.shell -->
 
 <div class="toast" id="toast"></div>
 
@@ -340,7 +417,7 @@ function dispatch(msg) {
       if (msg.role) state.role = msg.role;
       if (msg.permissions) state.permissions = msg.permissions;
       updateTopbar();
-      setTabsEnabled();
+      setNavEnabled();
       if (!state.initialLoadDone) {
         state.initialLoadDone = true;
         postToWix({ type: 'searchCustomers', q: '', limit: 40, skip: 0 });
@@ -362,7 +439,6 @@ function dispatch(msg) {
       if (msg.ok) {
         if (msg.customer) {
           state.selectedCustomer = msg.customer;
-          // If a new CMS record was created for a member-only entry, adopt the real _id
           if (msg.customer._id && msg.customer._id !== state.selectedCustomerId) {
             state.selectedCustomerId = msg.customer._id;
           }
@@ -419,13 +495,17 @@ function updateTopbar() {
   const badge = document.getElementById('userBadge');
   const nameEl = document.getElementById('userName');
   const roleEl = document.getElementById('userRole');
+  const menuName = document.getElementById('menuUserName');
+  const menuRole = document.getElementById('menuUserRole');
   if (badge && state.user) badge.textContent = (state.user[0] || '?').toUpperCase();
   if (nameEl && state.user) nameEl.textContent = state.user;
   if (roleEl && state.role) roleEl.textContent = state.role;
+  if (menuName && state.user) menuName.textContent = state.user;
+  if (menuRole && state.role) menuRole.textContent = state.role;
 }
 
 function permKey(route) {
-  const map = { daily: 'rentalsView', fleet: 'fleetView', bookings: 'bookingsView', customers: 'customersView', settings: 'pricingView', pricing: 'pricingView' };
+  const map = { daily: 'rentalsView', fleet: 'fleetView', bookings: 'bookingsView', customers: 'customersView', settings: 'pricingView', pricing: 'pricingView', fleetCal: 'fleetView' };
   return map[route] || '';
 }
 
@@ -436,11 +516,11 @@ function canAccess(route) {
   return !key || !!(state.permissions[key]);
 }
 
-function setTabsEnabled() {
-  document.querySelectorAll('.tab[data-route]').forEach(btn => {
+function setNavEnabled() {
+  document.querySelectorAll('.sb-item[data-route]').forEach(btn => {
     const route = btn.getAttribute('data-route');
-    if (canAccess(route)) btn.removeAttribute('disabled');
-    else btn.setAttribute('disabled', 'disabled');
+    if (canAccess(route)) btn.style.opacity = '';
+    else btn.style.opacity = '.35';
   });
 }
 
@@ -450,7 +530,7 @@ function renderCustomerList(items) {
   const el = document.getElementById('customerList');
   if (!el) return;
   if (!items.length) {
-    el.innerHTML = '<div class="noResults">No customers found.</div>';
+    el.innerHTML = '<div class="no-results">No customers found.</div>';
     reportHeight();
     return;
   }
@@ -459,15 +539,15 @@ function renderCustomerList(items) {
     const email = c.email || c.customerEmail || '';
     const initials = name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
     const sel = c._id === state.selectedCustomerId ? ' selected' : '';
-    return `<div class="customerItem${sel}" data-id="${esc(c._id)}">
-      <div class="custAvatar">${esc(initials || '?')}</div>
-      <div class="custInfo">
-        <div class="custName">${esc(name)}</div>
-        <div class="custEmail">${esc(email)}</div>
+    return `<div class="cust-item${sel}" data-id="${esc(c._id)}">
+      <div class="cust-avatar">${esc(initials || '?')}</div>
+      <div class="cust-info">
+        <div class="cust-name">${esc(name)}</div>
+        <div class="cust-email">${esc(email)}</div>
       </div>
     </div>`;
   }).join('');
-  el.querySelectorAll('.customerItem').forEach(item => {
+  el.querySelectorAll('.cust-item').forEach(item => {
     item.addEventListener('click', () => selectCustomer(item.getAttribute('data-id')));
   });
   reportHeight();
@@ -477,7 +557,7 @@ function selectCustomer(id) {
   state.selectedCustomerId = id;
   state.activeTab = 'profile';
   state.editingProfile = false;
-  document.querySelectorAll('.customerItem').forEach(el =>
+  document.querySelectorAll('.cust-item').forEach(el =>
     el.classList.toggle('selected', el.getAttribute('data-id') === id));
   document.getElementById('emptyState').classList.add('hidden');
   document.getElementById('customerDetail').classList.remove('hidden');
@@ -496,7 +576,6 @@ function renderCustomerDetail() {
   document.getElementById('detailName').textContent = name;
   document.getElementById('detailMeta').textContent = [c.email || c.customerEmail, c.phone || c.customerPhone].filter(Boolean).join(' · ');
 
-  // Show/hide notify note based on memberId
   const noMemberId = document.getElementById('noMemberId');
   const sendBtn = document.getElementById('sendNotifyBtn');
   if (noMemberId && sendBtn) {
@@ -534,7 +613,7 @@ function fmtDate(v) {
 
 function row(label, value) {
   const empty = !value;
-  return `<div class="profileRow"><div class="profileLabel">${esc(label)}</div><div class="profileValue${empty ? ' empty' : ''}">${esc(value) || '–'}</div></div>`;
+  return `<div class="profile-row"><div class="profile-label">${esc(label)}</div><div class="profile-value${empty ? ' empty' : ''}">${esc(value) || '–'}</div></div>`;
 }
 
 function renderProfileView() {
@@ -553,32 +632,32 @@ function renderProfileView() {
     editWrap.classList.add('hidden');
     if (editBtn) editBtn.textContent = 'Edit Profile';
     view.innerHTML = `
-      <div class="profileSection">
-        <div class="profileSectionHead">Personal Info</div>
-        <div class="profileRows">
+      <div class="profile-section">
+        <div class="profile-section-head">Personal Info</div>
+        <div class="profile-rows">
           ${row('First Name', c.firstName)}${row('Last Name', c.lastName)}
           ${row('Email', c.email || c.customerEmail)}${row('Phone', c.phone || c.customerPhone)}
           ${row('Date of Birth', fmtDate(c.dateOfBirth))}${row('Nationality', c.nationality)}
           ${row('Tax Number', c.taxNumber)}${row('Age Band', c.driverAge)}
         </div>
       </div>
-      <div class="profileSection">
-        <div class="profileSectionHead">ID / Passport</div>
-        <div class="profileRows">
+      <div class="profile-section">
+        <div class="profile-section-head">ID / Passport</div>
+        <div class="profile-rows">
           ${row('ID Number', c.idNumber)}${row('Issue Country', c.idIssueCountry)}
           ${row('Issue Date', fmtDate(c.idIssueDate))}${row('Expiry', fmtDate(c.idExpiry))}
         </div>
       </div>
-      <div class="profileSection">
-        <div class="profileSectionHead">Driver's Licence</div>
-        <div class="profileRows">
+      <div class="profile-section">
+        <div class="profile-section-head">Driver's Licence</div>
+        <div class="profile-rows">
           ${row('Licence Number', c.licenseNumber)}${row('Country', c.licenseCountry)}
           ${row('Issue Date', fmtDate(c.licenseIssueDate))}${row('Expiry', fmtDate(c.licenseExpiry))}
         </div>
       </div>
-      <div class="profileSection">
-        <div class="profileSectionHead">Address</div>
-        <div class="profileRows">
+      <div class="profile-section">
+        <div class="profile-section-head">Address</div>
+        <div class="profile-rows">
           ${row('Address', c.address)}${row('City', c.city)}
           ${row('Postal Code', c.zipCode)}${row('Country', c.country)}
         </div>
@@ -608,9 +687,9 @@ function renderEditForm() {
   const wrap = document.getElementById('profileEditForm');
   if (!wrap) return;
   wrap.innerHTML = `
-    <div class="formSection">
-      <div class="formSectionHead">Personal Info</div>
-      <div class="formGrid">
+    <div class="form-section">
+      <div class="form-section-head">Personal Info</div>
+      <div class="form-grid">
         ${inp('firstName', 'First Name', 'text', c.firstName)}
         ${inp('lastName', 'Last Name', 'text', c.lastName)}
         ${inp('email', 'Email', 'email', c.email || c.customerEmail)}
@@ -620,34 +699,34 @@ function renderEditForm() {
         ${inp('taxNumber', 'Tax Number', 'text', c.taxNumber)}
       </div>
     </div>
-    <div class="formSection">
-      <div class="formSectionHead">ID / Passport</div>
-      <div class="formGrid">
+    <div class="form-section">
+      <div class="form-section-head">ID / Passport</div>
+      <div class="form-grid">
         ${inp('idNumber', 'ID Number', 'text', c.idNumber)}
         ${inp('idIssueCountry', 'Issue Country', 'text', c.idIssueCountry)}
         ${inp('idIssueDate', 'Issue Date', 'date', toInputDate(c.idIssueDate))}
         ${inp('idExpiry', 'Expiry Date', 'date', toInputDate(c.idExpiry))}
       </div>
     </div>
-    <div class="formSection">
-      <div class="formSectionHead">Driver's Licence</div>
-      <div class="formGrid">
+    <div class="form-section">
+      <div class="form-section-head">Driver's Licence</div>
+      <div class="form-grid">
         ${inp('licenseNumber', 'Licence Number', 'text', c.licenseNumber)}
         ${inp('licenseCountry', 'Country', 'text', c.licenseCountry)}
         ${inp('licenseIssueDate', 'Issue Date', 'date', toInputDate(c.licenseIssueDate))}
         ${inp('licenseExpiry', 'Expiry Date', 'date', toInputDate(c.licenseExpiry))}
       </div>
     </div>
-    <div class="formSection">
-      <div class="formSectionHead">Address</div>
-      <div class="formGrid">
+    <div class="form-section">
+      <div class="form-section-head">Address</div>
+      <div class="form-grid">
         ${inp('address', 'Address', 'text', c.address)}
         ${inp('city', 'City', 'text', c.city)}
         ${inp('zipCode', 'Postal Code', 'text', c.zipCode)}
         ${inp('country', 'Country', 'text', c.country)}
       </div>
     </div>
-    <div class="formActions">
+    <div class="form-actions">
       <button class="btn ghost" id="cancelEditBtn" type="button">Cancel</button>
       <button class="btn primary" id="saveProfileBtn" type="button">Save Changes</button>
     </div>`;
@@ -688,23 +767,23 @@ function saveProfile() {
 function loadBookings() {
   const c = state.selectedCustomer;
   if (!c) return;
-  document.getElementById('bookingsList').innerHTML = '<div class="loadingRow"><span class="spinner"></span>Loading…</div>';
+  document.getElementById('bookingsList').innerHTML = '<div class="loading-row"><span class="spinner"></span>Loading…</div>';
   postToWix({ type: 'getCustomerBookings', customerId: state.selectedCustomerId, email: c.email || c.customerEmail || '' });
 }
 
 function renderBookingsTab() {
   const el = document.getElementById('bookingsList');
   if (!el) return;
-  if (!state.bookings.length) { el.innerHTML = '<div class="noResults">No bookings found for this customer.</div>'; reportHeight(); return; }
+  if (!state.bookings.length) { el.innerHTML = '<div class="no-results">No bookings found for this customer.</div>'; reportHeight(); return; }
   el.innerHTML = state.bookings.map(b => {
     const status = (b.status || 'unknown').toLowerCase().replace(/\s+/g, '_');
     const vehicle = b.vehicleName || b.categoryName || b.categoryCode || '';
     const dates = [b.pickupDate || b.startDate, b.dropoffDate || b.endDate].filter(Boolean).map(fmtDate).join(' → ');
-    return `<div class="bookingItem">
-      <div class="bkStatus ${esc(status)}">${esc(b.status || 'Unknown')}</div>
-      <div class="bkInfo">
-        <div class="bkTitle">${esc(b.bookingNumber || ('#' + (b._id || '').slice(-6)))}</div>
-        <div class="bkMeta">${[vehicle, dates].filter(Boolean).map(esc).join(' · ')}</div>
+    return `<div class="booking-item">
+      <div class="bk-status ${esc(status)}">${esc(b.status || 'Unknown')}</div>
+      <div class="bk-info">
+        <div class="bk-title">${esc(b.bookingNumber || ('#' + (b._id || '').slice(-6)))}</div>
+        <div class="bk-meta">${[vehicle, dates].filter(Boolean).map(esc).join(' · ')}</div>
       </div>
     </div>`;
   }).join('');
@@ -715,7 +794,7 @@ function renderBookingsTab() {
 function loadTickets() {
   const c = state.selectedCustomer;
   if (!c) return;
-  document.getElementById('ticketsList').innerHTML = '<div class="loadingRow"><span class="spinner"></span>Loading…</div>';
+  document.getElementById('ticketsList').innerHTML = '<div class="loading-row"><span class="spinner"></span>Loading…</div>';
   document.getElementById('ticketDetailWrap').classList.add('hidden');
   postToWix({
     type: 'getStaffTickets',
@@ -729,7 +808,7 @@ function renderTicketsTab() {
   const listEl = document.getElementById('ticketsList');
   if (!listEl) return;
   if (!state.tickets.length) {
-    listEl.innerHTML = '<div class="noResults">No support tickets for this customer.</div>';
+    listEl.innerHTML = '<div class="no-results">No support tickets for this customer.</div>';
     reportHeight();
     return;
   }
@@ -737,15 +816,15 @@ function renderTicketsTab() {
     const msgs = parseMsgs(t.messages);
     const selCls = t._id === state.selectedTicketId ? ' selected' : '';
     const status = t.status || 'open';
-    return `<div class="ticketItem${selCls}" data-tid="${esc(t._id)}">
-      <div class="ticketHead">
-        <div class="ticketSubject">${esc(t.subject || 'No subject')}</div>
-        <div class="tStatus ${esc(status)}">${esc(status.replace(/_/g, ' '))}</div>
+    return `<div class="ticket-item${selCls}" data-tid="${esc(t._id)}">
+      <div class="ticket-head">
+        <div class="ticket-subject">${esc(t.subject || 'No subject')}</div>
+        <div class="t-status ${esc(status)}">${esc(status.replace(/_/g, ' '))}</div>
       </div>
-      <div class="ticketMeta">${[t.category, msgs.length + ' message' + (msgs.length !== 1 ? 's' : '')].filter(Boolean).join(' · ')}</div>
+      <div class="ticket-meta">${[t.category, msgs.length + ' message' + (msgs.length !== 1 ? 's' : '')].filter(Boolean).join(' · ')}</div>
     </div>`;
   }).join('');
-  listEl.querySelectorAll('.ticketItem').forEach(el => {
+  listEl.querySelectorAll('.ticket-item').forEach(el => {
     el.addEventListener('click', () => openTicket(el.getAttribute('data-tid')));
   });
   reportHeight();
@@ -760,14 +839,14 @@ function openTicket(ticketId) {
   wrap.classList.remove('hidden');
   const msgs = parseMsgs(ticket.messages);
   const status = ticket.status || 'open';
-  wrap.innerHTML = `<div class="ticketDetail">
-    <div class="ticketDetailHead">
-      <div class="ticketDetailHeadInfo">
-        <div class="ticketDetailTitle">${esc(ticket.subject || 'Support Ticket')}</div>
-        <div class="ticketDetailSub">${esc(ticket.category || '')} · #${esc((ticket._id || '').slice(-8))}</div>
+  wrap.innerHTML = `<div class="ticket-detail">
+    <div class="ticket-detail-head">
+      <div class="ticket-detail-head-info">
+        <div class="ticket-detail-title">${esc(ticket.subject || 'Support Ticket')}</div>
+        <div class="ticket-detail-sub">${esc(ticket.category || '')} · #${esc((ticket._id || '').slice(-8))}</div>
       </div>
-      <div class="ticketDetailActions">
-        <select class="statusSel" id="tStatusSel">
+      <div class="ticket-detail-actions">
+        <select class="status-sel" id="tStatusSel">
           <option value="open"${status === 'open' ? ' selected' : ''}>Open</option>
           <option value="in_progress"${status === 'in_progress' ? ' selected' : ''}>In Progress</option>
           <option value="resolved"${status === 'resolved' ? ' selected' : ''}>Resolved</option>
@@ -777,17 +856,17 @@ function openTicket(ticketId) {
         <button class="btn ghost sm" id="tCloseBtn" type="button">✕</button>
       </div>
     </div>
-    <div class="ticketMessages" id="tMsgs">
-      ${msgs.map(m => `<div class="msgBubble ${esc(m.sender || 'member')}">
-        <div class="msgSender">${m.sender === 'staff' ? esc(m.staffName || 'Staff') : 'Member'}</div>
+    <div class="ticket-messages" id="tMsgs">
+      ${msgs.map(m => `<div class="msg-bubble ${esc(m.sender || 'member')}">
+        <div class="msg-sender">${m.sender === 'staff' ? esc(m.staffName || 'Staff') : 'Member'}</div>
         ${esc(m.text || '')}
-        <div class="msgTime">${fmtDate(m.createdAt)}</div>
+        <div class="msg-time">${fmtDate(m.createdAt)}</div>
       </div>`).join('')}
     </div>
-    <div class="replyArea">
-      <textarea class="replyTextarea" id="tReplyText" placeholder="Write your reply to the member…" rows="3"></textarea>
-      <div class="replyActions">
-        <span style="font:700 11px/1 system-ui;color:#94a3b8">Reply will be visible to the member in their portal.</span>
+    <div class="reply-area">
+      <textarea class="reply-textarea" id="tReplyText" placeholder="Write your reply to the member…" rows="3"></textarea>
+      <div class="reply-actions">
+        <span style="font:700 11px/1 system-ui;color:var(--muted)">Reply will be visible to the member in their portal.</span>
         <button class="btn primary sm" id="tSendBtn" type="button">Send Reply</button>
       </div>
     </div>
@@ -857,10 +936,11 @@ function reportHeight() {
 
 // ── Wire ────────────────────────────────────────────────────────────────────────
 function wire() {
-  // Top nav tabs
-  document.querySelectorAll('.tab[data-route]').forEach(btn => {
+  // Sidebar navigation
+  document.querySelectorAll('.sb-item[data-route]').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (!btn.hasAttribute('disabled')) postToWix({ type: 'navigate', route: btn.getAttribute('data-route') });
+      const route = btn.getAttribute('data-route');
+      if (btn.style.opacity !== '.35') postToWix({ type: 'navigate', route });
     });
   });
 
@@ -883,7 +963,9 @@ function wire() {
     searchTimer = setTimeout(() => postToWix({ type: 'searchCustomers', q: searchInput.value || '', limit: 40, skip: 0 }), 350);
   }
   searchInput.addEventListener('input', doSearch);
-  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(searchTimer); postToWix({ type: 'searchCustomers', q: searchInput.value || '', limit: 40, skip: 0 }); } });
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { clearTimeout(searchTimer); postToWix({ type: 'searchCustomers', q: searchInput.value || '', limit: 40, skip: 0 }); }
+  });
   document.getElementById('searchBtn').addEventListener('click', () => {
     clearTimeout(searchTimer);
     postToWix({ type: 'searchCustomers', q: searchInput.value || '', limit: 40, skip: 0 });
@@ -901,7 +983,6 @@ function wire() {
     el.addEventListener('click', () => { postToWix({ type: 'menuAction', action: el.getAttribute('data-menu-action') }); menu.classList.remove('open'); });
   });
 
-  // Height observer
   try {
     const ro = new ResizeObserver(() => reportHeight());
     ro.observe(document.body);
