@@ -12,7 +12,7 @@
       --gold-bg:rgba(180,138,79,.10);--gold-border:rgba(168,132,74,.22);
       --ok:#166534;--warn:#92400E;--danger:#991B1B;--info:#1E3A8A;
       --shadow:0 2px 12px rgba(15,23,42,.06);--shadow-lg:0 8px 28px rgba(15,23,42,.14);
-      --r:14px;--r-lg:18px;--r-pill:999px;--sb-w:220px;
+      --r:14px;--r-pill:999px;--sb-w:220px;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;height:100%;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
@@ -31,7 +31,7 @@
     .shell-page-icon svg{width:14px;height:14px}
     .shell-page-sub{font:700 11px/1 system-ui;color:var(--muted);padding-left:37px}
     .shell-top-right{display:flex;align-items:center;gap:12px;flex:0 0 auto}
-    .sb{width:var(--sb-w);flex:0 0 var(--sb-w);display:flex;flex-direction:column;height:100vh;overflow:hidden;background:linear-gradient(180deg,#2a1f0e 0%,#3d2b12 55%,#4f3a22 100%);position:relative}
+    .sb{width:var(--sb-w);flex:0 0 var(--sb-w);display:flex;flex-direction:column;height:100vh;overflow:hidden;background:linear-gradient(180deg,#2a1f0e 0%,#3d2b12 55%,#4f3a22 100%)}
     .sb-brand{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;flex:0 0 auto;border-bottom:1px solid rgba(255,255,255,.08)}
     .sb-logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;font:900 17px/1 system-ui;flex:0 0 36px}
     .sb-brand-text{display:flex;flex-direction:column;line-height:1.1;min-width:0}
@@ -90,23 +90,48 @@
     .rb-row+.rb-row{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
     .rb-status{padding:5px 10px;border:1px solid var(--border2);border-radius:10px;background:rgba(0,0,0,.03);font:800 10px/1.35 system-ui;color:var(--sub);flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .rb-refresh-time{font:700 10px/1 system-ui;color:var(--muted);white-space:nowrap;flex-shrink:0}
-    .rb-auto-label{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border2);border-radius:10px;background:rgba(0,0,0,.03);font:800 10.5px/1 system-ui;color:var(--sub);cursor:pointer;user-select:none}
+    .rb-auto-label{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border2);border-radius:10px;background:rgba(0,0,0,.03);font:800 10.5px/1 system-ui;color:var(--sub);cursor:pointer;user-select:none;white-space:nowrap}
     .rb-auto-label input{accent-color:var(--gold)}
     .rb-auto-label.is-on{border-color:var(--gold-border);color:var(--gold);background:var(--gold-bg)}
+
+    /* countdown chip */
+    .rb-countdown{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border2);border-radius:var(--r-pill);background:rgba(0,0,0,.03);font:900 10px/1 system-ui;color:var(--sub);white-space:nowrap;flex-shrink:0;transition:all .3s}
+    .rb-countdown.urgent{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
 
     /* ── Quick filters ── */
     .rb-filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
     .rb-filter-label{font:900 9px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
     .rb-fchip{appearance:none;display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border2);border-radius:var(--r-pill);background:rgba(0,0,0,.03);font:900 10px/1 system-ui;color:var(--sub);cursor:pointer;transition:all .14s;white-space:nowrap}
-    .rb-fchip:hover{background:rgba(0,0,0,.06);border-color:var(--border2)}
+    .rb-fchip:hover{background:rgba(0,0,0,.06)}
     .rb-fchip.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
     .rb-fchip.fc-airport.active{background:rgba(59,130,246,.10);border-color:rgba(59,130,246,.22);color:#1D4ED8}
-    .rb-fchip.fc-novehicle.active{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.22);color:#B45309}
-    .rb-fchip.fc-noflight.active{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.22);color:#B45309}
+    .rb-fchip.fc-novehicle.active,.rb-fchip.fc-noflight.active{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.22);color:#B45309}
     .rb-fchip.fc-overdue.active{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
 
+    /* ── Timeline ── */
+    .rb-timeline{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:10px 16px 12px;margin-bottom:12px;box-shadow:var(--shadow)}
+    .tl-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+    .tl-title{font:900 9.5px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .tl-legend{display:flex;gap:12px;align-items:center}
+    .tl-leg{display:inline-flex;align-items:center;gap:5px;font:800 10px/1 system-ui;color:var(--sub)}
+    .tl-leg::before{content:"";width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .tl-leg.checkout::before{background:var(--gold)}
+    .tl-leg.checkin::before{background:#10B981}
+    .tl-axis{position:relative;height:64px;margin:0 8px;user-select:none}
+    .tl-line{position:absolute;left:0;right:0;top:50%;height:2px;background:var(--border2);border-radius:2px;transform:translateY(-50%)}
+    .tl-tick{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none}
+    .tl-tick::before{content:"";width:1px;height:7px;background:var(--border2)}
+    .tl-tick span{font:700 8px/1 system-ui;color:var(--muted);white-space:nowrap}
+    .tl-dot{position:absolute;width:10px;height:10px;border-radius:50%;transform:translateX(-50%);cursor:pointer;transition:transform .14s,box-shadow .14s;z-index:2}
+    .tl-dot:hover{transform:translateX(-50%) scale(2);z-index:10}
+    .tl-dot.co{top:calc(50% - 18px);background:var(--gold);box-shadow:0 0 0 2px rgba(168,132,74,.25)}
+    .tl-dot.ci{top:calc(50% + 8px);background:#10B981;box-shadow:0 0 0 2px rgba(16,185,129,.22)}
+    .tl-dot.crit{background:#EF4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.3)!important}
+    .tl-now{position:absolute;top:-8px;bottom:-8px;width:2px;background:var(--gold);transform:translateX(-50%);border-radius:2px;z-index:5;pointer-events:none}
+    .tl-now::after{content:"NOW";position:absolute;top:-14px;left:50%;transform:translateX(-50%);font:900 7.5px/1 system-ui;color:var(--gold);letter-spacing:.04em}
+
     /* ── KPI summary ── */
-    .rb-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:14px}
+    .rb-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:10px}
     .rb-scard{padding:14px 16px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);position:relative;overflow:hidden}
     .rb-scard::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--border2);border-radius:0 3px 3px 0}
     .rb-scard.sc-danger{border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.04)}
@@ -120,50 +145,19 @@
     .rb-scard.sc-danger .rb-sv{color:#B91C1C}
     .rb-scard.sc-warn .rb-sv{color:#B45309}
 
-    /* ── Board ── */
-    .rb-board{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start;margin-bottom:20px}
-    .rb-col{background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
-    .rb-colhead{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:2}
-    .rb-colhead strong{font:900 11px/1 system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--text)}
-    .rb-badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,.04);border:1px solid var(--border);font:900 10px/1 system-ui;color:var(--sub)}
-    .rb-colbody{display:flex;flex-direction:column;gap:0;max-height:70vh;overflow-y:auto}
-    .rb-colbody::-webkit-scrollbar{width:4px}
-    .rb-colbody::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
-
-    /* ── Cards ── */
-    .rb-card{padding:12px 14px 12px 18px;border-bottom:1px solid var(--border);transition:background .12s;position:relative}
-    .rb-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--card-accent,var(--border2));border-radius:0;transition:background .14s}
-    .rb-card.card-ok::before{background:#10B981}
-    .rb-card.card-warn::before{background:#F59E0B}
-    .rb-card.card-crit::before{background:#EF4444}
-    .rb-card.card-gold::before{background:var(--gold)}
-    .rb-card:last-child{border-bottom:none}
-    .rb-card:hover{background:rgba(0,0,0,.018)}
-    .rb-card-header{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:8px}
-    .rb-card-time{display:inline-flex;align-items:center;padding:5px 10px;border-radius:10px;background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold);font:900 12px/1 system-ui}
-    .rb-card-time.time-soon{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
-    .rb-badge-airport{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:var(--r-pill);background:rgba(59,130,246,.10);border:1px solid rgba(59,130,246,.22);color:#1D4ED8;font:900 9.5px/1 system-ui}
-    .rb-badge-pending{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:var(--r-pill);background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.22);color:#B45309;font:900 9.5px/1 system-ui}
-    .rb-badge-overdue{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:var(--r-pill);background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.22);color:#B91C1C;font:900 9.5px/1 system-ui}
-    .rb-card-name{font:900 13px/1.3 system-ui;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .rb-card-booking{font:800 10px/1.2 system-ui;color:var(--muted);margin-top:1px;letter-spacing:.02em}
-    .rb-card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
-    .rb-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:var(--r-pill);font:900 9px/1 system-ui;border:1px solid var(--border);background:rgba(0,0,0,.03);color:var(--sub)}
-    .rb-tag.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.22);color:#B45309}
-    .rb-tag.info{background:rgba(59,130,246,.10);border-color:rgba(59,130,246,.22);color:#1D4ED8}
-    .rb-tag.ok{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22);color:#065F46}
-    .rb-tag.crit{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
-    .rb-card-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
-    .rb-btn{appearance:none;border:1px solid var(--border);background:rgba(0,0,0,.03);border-radius:8px;padding:5px 10px;font:900 9.5px/1 system-ui;color:var(--sub);cursor:pointer;transition:all .14s}
-    .rb-btn:hover{background:rgba(0,0,0,.07);transform:translateY(-1px);box-shadow:var(--shadow)}
-    .rb-btn.primary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent;box-shadow:0 2px 6px rgba(154,110,30,.22)}
-    .rb-btn.primary:hover{box-shadow:0 4px 12px rgba(154,110,30,.34)}
-    .rb-empty{padding:32px 16px;text-align:center;font:800 11.5px/1.6 system-ui;color:var(--muted)}
-
-    /* ── Column accent borders ── */
-    #colOut{border-top:3px solid var(--gold)}
-    #colIn{border-top:3px solid #10B981}
-    #colBookings{border-top:3px solid var(--gold2)}
+    /* ── Stats bar ── */
+    .rb-stats-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:var(--shadow)}
+    .rb-stat-label{font:900 9px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .rb-stat-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:var(--r-pill);border:1px solid var(--border);background:rgba(0,0,0,.03);font:800 10px/1 system-ui;color:var(--sub)}
+    .rb-stat-chip strong{font-weight:900;color:var(--text)}
+    .rb-stat-chip.info{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.20);color:#1D4ED8}
+    .rb-stat-chip.info strong{color:#1D4ED8}
+    .rb-stat-chip.warn{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.20);color:#B45309}
+    .rb-stat-chip.warn strong{color:#B45309}
+    .rb-stat-chip.ok{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.20);color:#065F46}
+    .rb-stat-chip.ok strong{color:#065F46}
+    .rb-stat-chip.note{background:rgba(168,132,74,.08);border-color:var(--gold-border);color:var(--gold2)}
+    .rb-stat-chip.note strong{color:var(--gold2)}
 
     /* ── Overdue alert banner ── */
     .rb-overdue-banner{display:none;align-items:center;gap:10px;padding:9px 14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);border-radius:12px;margin-bottom:12px}
@@ -173,8 +167,78 @@
     .rb-overdue-text{font:900 11px/1.35 system-ui;color:#B91C1C;flex:1}
     .rb-overdue-btn{appearance:none;border:1px solid rgba(239,68,68,.30);background:rgba(239,68,68,.10);border-radius:8px;padding:5px 10px;font:900 10px/1 system-ui;color:#B91C1C;cursor:pointer}
 
+    /* ── Board ── */
+    .rb-board{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start;margin-bottom:20px}
+    .rb-col{background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+    .rb-colhead{padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;gap:6px;position:sticky;top:0;z-index:2}
+    .rb-colhead-left{display:flex;align-items:center;gap:6px;min-width:0}
+    .rb-colhead-left strong{font:900 11px/1 system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--text)}
+    .rb-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;background:rgba(0,0,0,.04);border:1px solid var(--border);font:900 10px/1 system-ui;color:var(--sub)}
+    .rb-colhead-sort{display:flex;gap:3px;align-items:center;flex-shrink:0}
+    .rb-sort-btn{appearance:none;border:1px solid var(--border);background:transparent;border-radius:6px;padding:3px 6px;font:900 9px/1 system-ui;color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap}
+    .rb-sort-btn:hover{background:rgba(0,0,0,.05);color:var(--sub)}
+    .rb-sort-btn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold)}
+    .rb-colbody{display:flex;flex-direction:column;gap:0;max-height:70vh;overflow-y:auto}
+    .rb-colbody::-webkit-scrollbar{width:4px}
+    .rb-colbody::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+    #colOut{border-top:3px solid var(--gold)}
+    #colIn{border-top:3px solid #10B981}
+    #colBookings{border-top:3px solid var(--gold2)}
+
+    /* ── Cards ── */
+    .rb-card{padding:12px 12px 12px 17px;border-bottom:1px solid var(--border);position:relative;transition:background .12s}
+    .rb-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--border2);border-radius:0}
+    .rb-card.card-ok::before{background:#10B981}
+    .rb-card.card-warn::before{background:#F59E0B}
+    .rb-card.card-crit::before{background:#EF4444}
+    .rb-card:last-child{border-bottom:none}
+    .rb-card:hover{background:rgba(0,0,0,.018)}
+
+    /* card header row — click to expand */
+    .rb-card-header{display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer;margin-bottom:7px}
+    .rb-card-header-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+    .rb-card-time{display:inline-flex;align-items:center;padding:4px 9px;border-radius:9px;background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold);font:900 12px/1 system-ui}
+    .rb-card-time.urgent{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
+    .rb-badge-ap{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:var(--r-pill);background:rgba(59,130,246,.10);border:1px solid rgba(59,130,246,.22);color:#1D4ED8;font:900 9px/1 system-ui}
+    .rb-badge-pd{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:var(--r-pill);background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.22);color:#B45309;font:900 9px/1 system-ui}
+    .rb-badge-ov{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:var(--r-pill);background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.22);color:#B91C1C;font:900 9px/1 system-ui}
+    .rb-expand-btn{appearance:none;border:none;background:transparent;color:var(--muted);font:900 10px/1 system-ui;cursor:pointer;padding:4px 5px;border-radius:6px;flex-shrink:0;transition:all .12s}
+    .rb-expand-btn:hover{background:rgba(0,0,0,.06);color:var(--sub)}
+
+    .rb-card-name{font:900 13px/1.3 system-ui;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .rb-card-booking{font:800 10px/1.2 system-ui;color:var(--muted);margin-top:1px;letter-spacing:.02em}
+    .rb-card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+    .rb-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:var(--r-pill);font:900 9px/1 system-ui;border:1px solid var(--border);background:rgba(0,0,0,.03);color:var(--sub)}
+    .rb-tag.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.22);color:#B45309}
+    .rb-tag.info{background:rgba(59,130,246,.10);border-color:rgba(59,130,246,.22);color:#1D4ED8}
+    .rb-tag.ok{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22);color:#065F46}
+    .rb-tag.crit{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
+
+    /* notes preview (always visible if notes exist) */
+    .rb-notes-preview{margin-top:6px;padding:5px 8px;background:rgba(168,132,74,.06);border-left:2px solid var(--gold-border);border-radius:0 6px 6px 0;font:800 10px/1.45 system-ui;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* expandable details */
+    .rb-card-details{max-height:0;overflow:hidden;transition:max-height .25s ease}
+    .rb-card.expanded .rb-card-details{max-height:400px}
+    .rb-detail-section{padding:10px 0 4px;border-top:1px solid var(--border);margin-top:9px;display:flex;flex-direction:column;gap:7px}
+    .rb-contact-row{display:flex;gap:6px;flex-wrap:wrap}
+    .rb-contact-link{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,.02);font:800 10.5px/1 system-ui;color:var(--sub);text-decoration:none;transition:all .12s}
+    .rb-contact-link:hover{background:rgba(0,0,0,.06);color:var(--text)}
+    .rb-notes-full{font:800 10.5px/1.5 system-ui;color:var(--sub);padding:8px 10px;background:rgba(0,0,0,.025);border-radius:8px;border-left:2px solid var(--gold-border);white-space:pre-wrap;word-break:break-word}
+    .rb-detail-extra{display:flex;gap:10px;flex-wrap:wrap}
+    .rb-detail-field{display:flex;flex-direction:column;gap:2px}
+    .rb-detail-key{font:900 8.5px/1 system-ui;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .rb-detail-val{font:800 11px/1.3 system-ui;color:var(--sub)}
+
+    .rb-card-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+    .rb-btn{appearance:none;border:1px solid var(--border);background:rgba(0,0,0,.03);border-radius:8px;padding:5px 10px;font:900 9.5px/1 system-ui;color:var(--sub);cursor:pointer;transition:all .14s}
+    .rb-btn:hover{background:rgba(0,0,0,.07);transform:translateY(-1px);box-shadow:var(--shadow)}
+    .rb-btn.primary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent;box-shadow:0 2px 6px rgba(154,110,30,.22)}
+    .rb-btn.primary:hover{box-shadow:0 4px 12px rgba(154,110,30,.34)}
+    .rb-empty{padding:32px 16px;text-align:center;font:800 11.5px/1.6 system-ui;color:var(--muted)}
+
     @media(max-width:980px){.rb-board{grid-template-columns:1fr 1fr}}
-    @media(max-width:640px){.rb-board{grid-template-columns:1fr}.rb-row{gap:6px}}
+    @media(max-width:640px){.rb-board{grid-template-columns:1fr}.rb-row{gap:6px}.tl-axis{height:50px}}
   </style>
 </head>
 <body>
@@ -235,12 +299,13 @@
           <input class="input" id="datePick" type="date" style="width:136px" />
           <button class="btn" id="btnNext" type="button" title="Next day (&#8594;)">&#8594;</button>
           <button class="btn" id="btnToday" type="button">&#931;&#942;&#956;&#949;&#961;&#945;</button>
-          <button class="btn btnPrimary" id="btnRefresh" type="button" title="Reload data">&#8635;</button>
-          <input class="input" id="globalSearch" placeholder="RES, &#960;&#949;&#955;&#940;&#964;&#951;&#962;, &#972;&#967;&#951;&#956;&#945;, flight&#8230;" style="flex:1 1 180px;min-width:100px" />
+          <button class="btn btnPrimary" id="btnRefresh" type="button" title="Reload">&#8635;</button>
+          <input class="input" id="globalSearch" placeholder="RES, &#960;&#949;&#955;&#940;&#964;&#951;&#962;, &#972;&#967;&#951;&#956;&#945;, flight&#8230;" style="flex:1 1 160px;min-width:100px" />
           <select class="select" id="stationFilter"><option value="all">&#8704;&#955;&#949;&#962;</option></select>
           <label class="rb-auto-label" id="autoLabel" title="Auto-refresh every 5 minutes">
             <input type="checkbox" id="autoRefresh" /> Auto 5'
           </label>
+          <span class="rb-countdown" id="countdown"></span>
           <span class="rb-status" id="status">Loading&#8230;</span>
           <span class="rb-refresh-time" id="refreshTime"></span>
         </div>
@@ -263,21 +328,57 @@
         <button class="rb-overdue-btn" onclick="window._rbSetFilter('overdue')">View all</button>
       </div>
 
+      <!-- Timeline strip -->
+      <div class="rb-timeline">
+        <div class="tl-header">
+          <span class="tl-title">Day Timeline</span>
+          <div class="tl-legend">
+            <span class="tl-leg checkout">Check-outs</span>
+            <span class="tl-leg checkin">Check-ins</span>
+          </div>
+        </div>
+        <div class="tl-axis" id="tlAxis"><div class="tl-line"></div></div>
+      </div>
+
       <!-- KPI summary -->
       <div id="summaryGrid" class="rb-summary"></div>
+
+      <!-- Stats bar -->
+      <div class="rb-stats-bar" id="statsBar"></div>
 
       <!-- 3-column board -->
       <div class="rb-board">
         <div class="rb-col" id="colOut">
-          <div class="rb-colhead"><strong>Check-outs</strong><span class="rb-badge" id="cntOut">0</span></div>
+          <div class="rb-colhead">
+            <div class="rb-colhead-left"><strong>Check-outs</strong><span class="rb-badge" id="cntOut">0</span></div>
+            <div class="rb-colhead-sort">
+              <button class="rb-sort-btn active" data-col="out" data-sort="time" type="button">&#9201; Time</button>
+              <button class="rb-sort-btn" data-col="out" data-sort="name" type="button">A&#8211;Z</button>
+              <button class="rb-sort-btn" data-col="out" data-sort="status" type="button">&#9888; Status</button>
+            </div>
+          </div>
           <div class="rb-colbody" id="listOut"><div class="rb-empty">Loading&#8230;</div></div>
         </div>
         <div class="rb-col" id="colIn">
-          <div class="rb-colhead"><strong>Check-ins</strong><span class="rb-badge" id="cntIn">0</span></div>
+          <div class="rb-colhead">
+            <div class="rb-colhead-left"><strong>Check-ins</strong><span class="rb-badge" id="cntIn">0</span></div>
+            <div class="rb-colhead-sort">
+              <button class="rb-sort-btn active" data-col="in" data-sort="time" type="button">&#9201; Time</button>
+              <button class="rb-sort-btn" data-col="in" data-sort="name" type="button">A&#8211;Z</button>
+              <button class="rb-sort-btn" data-col="in" data-sort="status" type="button">&#9888; Status</button>
+            </div>
+          </div>
           <div class="rb-colbody" id="listIn"><div class="rb-empty">Loading&#8230;</div></div>
         </div>
         <div class="rb-col" id="colBookings">
-          <div class="rb-colhead"><strong id="bookingsColLabel">Bookings</strong><span class="rb-badge" id="cntBookings">0</span></div>
+          <div class="rb-colhead">
+            <div class="rb-colhead-left"><strong id="bookingsColLabel">Bookings</strong><span class="rb-badge" id="cntBookings">0</span></div>
+            <div class="rb-colhead-sort">
+              <button class="rb-sort-btn active" data-col="bookings" data-sort="time" type="button">&#9201; Time</button>
+              <button class="rb-sort-btn" data-col="bookings" data-sort="name" type="button">A&#8211;Z</button>
+              <button class="rb-sort-btn" data-col="bookings" data-sort="status" type="button">&#9888; Status</button>
+            </div>
+          </div>
           <div class="rb-colbody" id="listBookings"><div class="rb-empty">Loading&#8230;</div></div>
         </div>
       </div>
@@ -298,6 +399,7 @@
     station:       $('stationFilter'),
     search:        $('globalSearch'),
     summaryGrid:   $('summaryGrid'),
+    statsBar:      $('statsBar'),
     listOut:       $('listOut'),
     listIn:        $('listIn'),
     listBookings:  $('listBookings'),
@@ -308,111 +410,125 @@
     refreshTime:   $('refreshTime'),
     autoLabel:     $('autoLabel'),
     autoCheck:     $('autoRefresh'),
+    countdown:     $('countdown'),
     overdueBanner: $('overdueBanner'),
-    overdueText:   $('overdueText')
+    overdueText:   $('overdueText'),
+    tlAxis:        $('tlAxis')
   };
 
   const state = {
-    data:         { tabs:{}, summary:{}, stations:[] },
-    search:       '',
-    station:      'all',
-    quickFilter:  'all',
-    autoTimer:    null,
-    user:         { name:'Operator', role:'Backroom' }
+    data:        { tabs:{}, summary:{}, stations:[] },
+    search:      '',
+    station:     'all',
+    quickFilter: 'all',
+    sort:        { out:{key:'time',dir:'asc'}, in:{key:'time',dir:'asc'}, bookings:{key:'time',dir:'asc'} },
+    autoTimer:   null,
+    cdTimer:     null,
+    user:        { name:'Operator', role:'Backroom' }
   };
 
   /* ── Utilities ── */
   function s(v){ return String(v ?? '').trim(); }
-  function esc(v){ return s(v).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-  function asDate(v){ const d = new Date(v); return isNaN(d.getTime()) ? null : d; }
-  function ymd(v){ const d = asDate(v) || new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-  function hhmm(v){ const d = asDate(v); if(!d) return ''; return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
-  function addDays(str, n){ const d = asDate(str) || new Date(); d.setDate(d.getDate()+n); return ymd(d); }
-  function postToWix(payload){ try{ window.parent.postMessage(payload,'*'); }catch(_){} }
-  function setStatus(t){ if(els.status) els.status.textContent = s(t); }
-
-  function stampRefreshTime(){
-    if(!els.refreshTime) return;
-    const now = new Date();
-    els.refreshTime.textContent = `Updated ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  }
+  function esc(v){ return s(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function asDate(v){ const d=new Date(v); return isNaN(d.getTime())?null:d; }
+  function ymd(v){ const d=asDate(v)||new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+  function hhmm(v){ const d=asDate(v); if(!d) return ''; return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+  function addDays(str,n){ const d=asDate(str)||new Date(); d.setDate(d.getDate()+n); return ymd(d); }
+  function postToWix(p){ try{ window.parent.postMessage(p,'*'); }catch(_){} }
+  function setStatus(t){ if(els.status) els.status.textContent=s(t); }
+  function stampRefresh(){ if(els.refreshTime){ const n=new Date(); els.refreshTime.textContent=`Updated ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; } }
 
   /* ── Data request ── */
   function reloadData(){
     const d = els.datePick.value || ymd(new Date());
-    const start = new Date(d + 'T00:00:00');
-    const end   = new Date(d + 'T23:59:59');
+    postToWix({ type:'requestDailyData', date:d, startISO:new Date(d+'T00:00:00').toISOString(), endISO:new Date(d+'T23:59:59').toISOString() });
     setStatus('Loading…');
-    postToWix({ type:'requestDailyData', date:d, startISO:start.toISOString(), endISO:end.toISOString() });
   }
 
-  /* ── Item helpers ── */
+  /* ── Item predicates ── */
   function norm(v){ return s(v).toLowerCase(); }
   function stationOf(item){ return s(item.station||item.pickupStation||item.dropoffStation||item.pickuppoint||item.dropoffpoint||''); }
   function isAirport(item){
-    const route = (s(item.pickuppoint)+' '+s(item.dropoffpoint)+' '+s(item.station)).toLowerCase();
-    return route.includes('airport') || route.includes('&#945;&#949;&#961;&#959;&#948;') || !!s(item.flightNumber||item.flight||'');
+    const r=(s(item.pickuppoint)+' '+s(item.dropoffpoint)+' '+s(item.station)).toLowerCase();
+    return r.includes('airport')||r.includes('αεροδ')||!!s(item.flightNumber||item.flight||'');
   }
   function hasVehicle(item){ return !!s(item.assignedVehicleLabel||item.assignedVehiclePlate||item.vehicleLabel||''); }
   function hasFlight(item){ return !!s(item.flightNumber||item.flight||''); }
   function isPending(item){ return ['pending','request','requested','new','quote','unconfirmed','hold','waiting'].includes(norm(item.status||'')); }
-  function isOverdue(item){
-    const st = norm(item.status||'');
-    return st.includes('overdue') || st.includes('late');
-  }
+  function isOverdue(item){ const st=norm(item.status||''); return st.includes('overdue')||st.includes('late'); }
+  function hasNotes(item){ return !!s(item.notes||item.note||item.remarks||item.memo||''); }
+  function getPhone(item){ return s(item.phone||item.mobile||item.customerPhone||item.tel||''); }
+  function getEmail(item){ return s(item.email||item.customerEmail||''); }
+  function getAgent(item){ return s(item.agent||item.agentName||item.assignedAgent||''); }
+  function getNotes(item){ return s(item.notes||item.note||item.remarks||item.memo||''); }
+  function getVehicleDetail(item){ return [s(item.assignedVehicleModel||item.vehicleModel||''),s(item.assignedVehiclePlate||item.vehiclePlate||'')].filter(Boolean).join(' · '); }
+
   function blob(item){
-    return [item.bookingNumber,item.customerName,item.name,item.phone,item.email,
-            item.pickuppoint,item.dropoffpoint,item.assignedVehicleLabel,
-            item.assignedVehiclePlate,item.assignedVehicleModel,item.flightNumber,
-            item.station,item.group,item.notes].map(s).join(' ').toLowerCase();
+    return [item.bookingNumber,item.customerName,item.name,item.phone,item.mobile,item.email,
+            item.pickuppoint,item.dropoffpoint,item.assignedVehicleLabel,item.assignedVehiclePlate,
+            item.assignedVehicleModel,item.flightNumber,item.station,item.group,item.notes,item.agent]
+      .map(s).join(' ').toLowerCase();
   }
 
-  /* ── Quick filter match ── */
+  /* ── Quick filter ── */
   function matchesQuickFilter(item){
     switch(state.quickFilter){
       case 'airport':   return isAirport(item);
       case 'novehicle': return !hasVehicle(item);
-      case 'noflight':  return isAirport(item) && !hasFlight(item);
+      case 'noflight':  return isAirport(item)&&!hasFlight(item);
       case 'overdue':   return isOverdue(item);
       default:          return true;
     }
   }
 
-  /* ── Combined filter ── */
+  /* ── Filters ── */
   function applyFilters(list){
-    const st = state.station;
-    const q  = norm(state.search);
-    return (Array.isArray(list) ? list : []).filter(item => {
-      if(st && st !== 'all'){
-        const is = stationOf(item);
-        if(is && is !== st) return false;
-      }
-      if(q && !blob(item).includes(q)) return false;
+    const st=state.station; const q=norm(state.search);
+    return (Array.isArray(list)?list:[]).filter(item=>{
+      if(st&&st!=='all'){ const is=stationOf(item); if(is&&is!==st) return false; }
+      if(q&&!blob(item).includes(q)) return false;
       if(!matchesQuickFilter(item)) return false;
       return true;
     });
   }
 
-  function getTab(key){ return Array.isArray(state.data.tabs[key]) ? state.data.tabs[key] : []; }
+  function getTab(key){ return Array.isArray(state.data.tabs[key])?state.data.tabs[key]:[]; }
+
+  /* ── Sorting ── */
+  function itemTime(item, colId){
+    if(colId==='in') return asDate(item.dropoffDateTime||item.end)||new Date(0);
+    return asDate(item.pickupDateTime||item.start||item.dropoffDateTime||item.end)||new Date(0);
+  }
+  function urgencyScore(item){
+    if(isOverdue(item)) return 0;
+    if(!hasVehicle(item)&&isAirport(item)) return 1;
+    if(!hasVehicle(item)) return 2;
+    if(isAirport(item)&&!hasFlight(item)) return 3;
+    return 4;
+  }
+  function sortItems(items, colId){
+    const {key,dir}=state.sort[colId]||{key:'time',dir:'asc'};
+    const m=dir==='asc'?1:-1;
+    return [...items].sort((a,b)=>{
+      if(key==='time') return (itemTime(a,colId)-itemTime(b,colId))*m;
+      if(key==='name') return s(a.customerName||a.name||'').localeCompare(s(b.customerName||b.name||''))*m;
+      if(key==='status') return (urgencyScore(a)-urgencyScore(b))*m;
+      return 0;
+    });
+  }
 
   /* ── Card urgency class ── */
   function cardClass(item){
-    const airport  = isAirport(item);
-    const vehicle  = hasVehicle(item);
-    const flight   = hasFlight(item);
-    const overdue  = isOverdue(item);
-    if(overdue) return 'card-crit';
-    if(!vehicle && airport) return 'card-crit';
-    if(!vehicle)            return 'card-warn';
-    if(airport && !flight)  return 'card-warn';
+    if(isOverdue(item)) return 'card-crit';
+    if(!hasVehicle(item)&&isAirport(item)) return 'card-crit';
+    if(!hasVehicle(item)) return 'card-warn';
+    if(isAirport(item)&&!hasFlight(item)) return 'card-warn';
     return 'card-ok';
   }
 
-  /* ── Render a single card ── */
+  /* ── Render card ── */
   function renderCard(item, type){
-    const time    = type === 'checkin'
-      ? hhmm(item.dropoffDateTime||item.end)
-      : hhmm(item.pickupDateTime||item.start);
+    const time    = type==='checkin'?hhmm(item.dropoffDateTime||item.end):hhmm(item.pickupDateTime||item.start);
     const name    = esc(item.customerName||item.name||'—');
     const booking = esc(item.bookingNumber||'');
     const vehicle = s(item.assignedVehicleLabel||item.assignedVehiclePlate||item.vehicleLabel||'');
@@ -420,292 +536,352 @@
     const dropoff = esc(item.dropoffpoint||'');
     const flight  = s(item.flightNumber||item.flight||'');
     const airport = isAirport(item);
-    const pending = isPending(item);
     const overdue = isOverdue(item);
-    const id      = esc(s(item._id||item.id||''));
+    const pending = isPending(item);
+    const notes   = getNotes(item);
+    const phone   = getPhone(item);
+    const email   = getEmail(item);
+    const agent   = getAgent(item);
+    const vDetail = getVehicleDetail(item);
+    const id      = s(item._id||item.id||'');
+    const eid     = esc(id);
     const cls     = cardClass(item);
 
-    /* header badges */
-    const headerParts = [];
-    if(time) headerParts.push(`<span class="rb-card-time${overdue?' time-soon':''}">${esc(time)}</span>`);
-    if(airport) headerParts.push(`<span class="rb-badge-airport">&#9992; Airport</span>`);
-    if(overdue) headerParts.push(`<span class="rb-badge-overdue">&#9210; Overdue</span>`);
-    else if(pending) headerParts.push(`<span class="rb-badge-pending">&#9679; Pending</span>`);
+    /* header chips */
+    const chips=[];
+    if(time) chips.push(`<span class="rb-card-time${overdue?' urgent':''}">${esc(time)}</span>`);
+    if(airport) chips.push(`<span class="rb-badge-ap">&#9992; Airport</span>`);
+    if(overdue) chips.push(`<span class="rb-badge-ov">&#9210; Overdue</span>`);
+    else if(pending) chips.push(`<span class="rb-badge-pd">&#9679; Pending</span>`);
 
-    /* detail tags */
-    const tags = [];
+    /* tags */
+    const tags=[];
     if(vehicle)             tags.push(`<span class="rb-tag ok">&#128663; ${esc(vehicle)}</span>`);
     else                    tags.push(`<span class="rb-tag crit">&#9888; No vehicle</span>`);
-    if(airport && flight)   tags.push(`<span class="rb-tag info">&#9992; ${esc(flight)}</span>`);
-    if(airport && !flight)  tags.push(`<span class="rb-tag warn">No flight #</span>`);
+    if(airport&&flight)     tags.push(`<span class="rb-tag info">&#9992; ${esc(flight)}</span>`);
+    if(airport&&!flight)    tags.push(`<span class="rb-tag warn">No flight #</span>`);
     if(pickup)              tags.push(`<span class="rb-tag">${pickup}${dropoff?' &#8594; '+dropoff:''}</span>`);
 
-    return `<div class="rb-card ${cls}">
-      <div class="rb-card-header">${headerParts.join('')}</div>
+    /* expandable details */
+    const detailParts=[];
+    if(phone||email){
+      const links=[];
+      if(phone) links.push(`<a class="rb-contact-link" href="tel:${esc(phone)}">&#128222; ${esc(phone)}</a>`);
+      if(email) links.push(`<a class="rb-contact-link" href="mailto:${esc(email)}">&#9993; ${esc(email)}</a>`);
+      detailParts.push(`<div class="rb-contact-row">${links.join('')}</div>`);
+    }
+    if(notes) detailParts.push(`<div class="rb-notes-full">&#128203; ${esc(notes)}</div>`);
+    const extras=[];
+    if(vDetail) extras.push(`<div class="rb-detail-field"><div class="rb-detail-key">Vehicle</div><div class="rb-detail-val">${esc(vDetail)}</div></div>`);
+    if(agent)   extras.push(`<div class="rb-detail-field"><div class="rb-detail-key">Agent</div><div class="rb-detail-val">${esc(agent)}</div></div>`);
+    if(extras.length) detailParts.push(`<div class="rb-detail-extra">${extras.join('')}</div>`);
+
+    const hasDetails = detailParts.length > 0;
+    const notesPreview = notes ? `<div class="rb-notes-preview">&#128203; ${esc(notes.length>100?notes.slice(0,100)+'…':notes)}</div>` : '';
+
+    return `<div class="rb-card ${cls}" id="rbc-${eid}">
+      <div class="rb-card-header" onclick="window._rbToggle('${eid}',event)">
+        <div class="rb-card-header-chips">${chips.join('')}</div>
+        ${hasDetails?`<button class="rb-expand-btn" type="button">&#9660;</button>`:''}
+      </div>
       <div class="rb-card-name">${name}</div>
-      ${booking ? `<div class="rb-card-booking">${booking}</div>` : ''}
+      ${booking?`<div class="rb-card-booking">${booking}</div>`:''}
       <div class="rb-card-tags">${tags.join('')}</div>
+      ${notesPreview}
+      ${hasDetails?`<div class="rb-card-details"><div class="rb-detail-section">${detailParts.join('')}</div></div>`:''}
       <div class="rb-card-actions">
-        <button class="rb-btn primary" onclick="window._rbAct('contract','${id}')">Contract</button>
-        <button class="rb-btn" onclick="window._rbAct('bookings','${id}')">Bookings</button>
-        <button class="rb-btn" onclick="window._rbAct('fleet','${id}')">Fleet</button>
+        <button class="rb-btn primary" onclick="window._rbAct('contract','${eid}')">Contract</button>
+        <button class="rb-btn" onclick="window._rbAct('bookings','${eid}')">Bookings</button>
+        <button class="rb-btn" onclick="window._rbAct('fleet','${eid}')">Fleet</button>
       </div>
     </div>`;
   }
 
-  window._rbAct = function(action, id){
-    if(action === 'contract') postToWix({ type:'openContract',   bookingId:id });
-    else if(action === 'bookings') postToWix({ type:'openOnBookings', bookingId:id });
-    else if(action === 'fleet')    postToWix({ type:'openOnFleet',    bookingId:id });
+  /* ── Global actions ── */
+  window._rbAct = function(action,id){
+    if(action==='contract')  postToWix({type:'openContract',bookingId:id});
+    else if(action==='bookings') postToWix({type:'openOnBookings',bookingId:id});
+    else if(action==='fleet')    postToWix({type:'openOnFleet',bookingId:id});
+  };
+
+  window._rbToggle = function(id, event){
+    if(event&&event.target.closest('.rb-card-actions,.rb-btn')) return;
+    const card = document.getElementById('rbc-'+id);
+    if(!card) return;
+    const expanded = card.classList.toggle('expanded');
+    const btn = card.querySelector('.rb-expand-btn');
+    if(btn) btn.innerHTML = expanded?'&#9650;':'&#9660;';
   };
 
   window._rbSetFilter = function(f){
-    state.quickFilter = f;
-    document.querySelectorAll('.rb-fchip').forEach(btn =>
-      btn.classList.toggle('active', btn.getAttribute('data-filter') === f)
+    state.quickFilter=f;
+    document.querySelectorAll('.rb-fchip').forEach(btn=>
+      btn.classList.toggle('active', btn.getAttribute('data-filter')===f)
     );
     render();
   };
 
   /* ── KPI card variant ── */
-  function scardClass(key, val){
-    if(key === 'overdue' && Number(val) > 0) return 'sc-danger';
-    if(key === 'requests' && Number(val) > 0) return 'sc-warn';
-    if(key === 'checkout' || key === 'checkin') return 'sc-ok';
-    if(key === 'available') return 'sc-info';
+  function scardClass(k,val){
+    if(k==='overdue'&&Number(val)>0) return 'sc-danger';
+    if(k==='requests'&&Number(val)>0) return 'sc-warn';
+    if(k==='checkout'||k==='checkin') return 'sc-ok';
+    if(k==='available') return 'sc-info';
     return '';
   }
 
   function renderSummary(summary){
-    if(!summary || !Object.keys(summary).length){ els.summaryGrid.innerHTML=''; return; }
-    const defs = [
-      {k:'checkout', label:'Check-outs'},
-      {k:'checkin',  label:'Check-ins'},
-      {k:'bookings', label:'Bookings'},
-      {k:'overdue',  label:'Overdue'},
-      {k:'requests', label:'Requests'},
-      {k:'available',label:'Available'}
+    if(!summary||!Object.keys(summary).length){els.summaryGrid.innerHTML='';return;}
+    const defs=[
+      {k:'checkout',label:'Check-outs'},{k:'checkin',label:'Check-ins'},
+      {k:'bookings',label:'Bookings'},{k:'overdue',label:'Overdue'},
+      {k:'requests',label:'Requests'},{k:'available',label:'Available'}
     ];
-    els.summaryGrid.innerHTML = defs
-      .filter(({k}) => summary[k] !== undefined && summary[k] !== null)
-      .map(({k,label}) => {
-        const val = summary[k]||0;
-        const sc = scardClass(k, val);
-        return `<div class="rb-scard ${sc}"><div class="rb-sk">${esc(label)}</div><div class="rb-sv">${esc(String(val))}</div></div>`;
+    els.summaryGrid.innerHTML=defs
+      .filter(({k})=>summary[k]!==undefined&&summary[k]!==null)
+      .map(({k,label})=>{
+        const val=summary[k]||0;
+        return `<div class="rb-scard ${scardClass(k,val)}"><div class="rb-sk">${esc(label)}</div><div class="rb-sv">${esc(String(val))}</div></div>`;
       }).join('');
+  }
+
+  /* ── Stats bar ── */
+  function renderStatsBar(){
+    if(!els.statsBar) return;
+    const all=[...getTab('checkout'),...getTab('checkin')];
+    if(!all.length){els.statsBar.style.display='none';return;}
+    els.statsBar.style.display='';
+    const airportN  = all.filter(isAirport).length;
+    const noVehicleN= all.filter(i=>!hasVehicle(i)).length;
+    const notesN    = all.filter(hasNotes).length;
+    const now = Date.now();
+    const nextEv = all
+      .map(i=>({t:asDate(i.pickupDateTime||i.dropoffDateTime||i.start||i.end),type:i.pickupDateTime?'checkout':'checkin'}))
+      .filter(e=>e.t&&e.t.getTime()>now)
+      .sort((a,b)=>a.t-b.t)[0]||null;
+    const chips=[];
+    chips.push(`<span class="rb-stat-label">Today:</span>`);
+    chips.push(`<span class="rb-stat-chip ok">&#128197; Total ops: <strong>${all.length}</strong></span>`);
+    if(airportN)   chips.push(`<span class="rb-stat-chip info">&#9992; Airport: <strong>${airportN}</strong></span>`);
+    if(noVehicleN) chips.push(`<span class="rb-stat-chip warn">&#9888; No vehicle: <strong>${noVehicleN}</strong></span>`);
+    if(notesN)     chips.push(`<span class="rb-stat-chip note">&#128203; With notes: <strong>${notesN}</strong></span>`);
+    if(nextEv)     chips.push(`<span class="rb-stat-chip ok">&#9654; Next ${nextEv.type==='checkout'?'out':'in'}: <strong>${hhmm(nextEv.t)}</strong></span>`);
+    els.statsBar.innerHTML=chips.join('');
+  }
+
+  /* ── Timeline ── */
+  function renderTimeline(){
+    if(!els.tlAxis) return;
+    const START=6*60, END=23*60, RANGE=END-START;
+    function pct(v){ return Math.max(0,Math.min(100,((v.getHours()*60+v.getMinutes())-START)/RANGE*100)).toFixed(1); }
+
+    let html='<div class="tl-line"></div>';
+    for(let h=6;h<=22;h+=2){
+      const p=((h*60-START)/RANGE*100).toFixed(1);
+      html+=`<div class="tl-tick" style="left:${p}%"><span>${h}:00</span></div>`;
+    }
+    const now=new Date(), nowMin=now.getHours()*60+now.getMinutes();
+    if(nowMin>=START&&nowMin<=END) html+=`<div class="tl-now" style="left:${((nowMin-START)/RANGE*100).toFixed(1)}%"></div>`;
+
+    getTab('checkout').forEach(item=>{
+      const d=asDate(item.pickupDateTime||item.start); if(!d) return;
+      const p=pct(d), title=`${esc(item.customerName||item.name||'—')} · ${hhmm(d)}`;
+      const crit=!hasVehicle(item)?'crit':'';
+      html+=`<div class="tl-dot co ${crit}" style="left:${p}%" title="${title}"></div>`;
+    });
+    getTab('checkin').forEach(item=>{
+      const d=asDate(item.dropoffDateTime||item.end); if(!d) return;
+      const p=pct(d), title=`${esc(item.customerName||item.name||'—')} · ${hhmm(d)}`;
+      const crit=isOverdue(item)?'crit':'';
+      html+=`<div class="tl-dot ci ${crit}" style="left:${p}%" title="${title}"></div>`;
+    });
+    els.tlAxis.innerHTML=html;
+  }
+
+  /* ── Live countdown ── */
+  function updateCountdown(){
+    if(!els.countdown) return;
+    const all=[
+      ...getTab('checkout').map(i=>({t:asDate(i.pickupDateTime||i.start),type:'checkout'})),
+      ...getTab('checkin').map(i=>({t:asDate(i.dropoffDateTime||i.end),type:'check-in'}))
+    ];
+    const now=Date.now();
+    const next=all.filter(e=>e.t&&e.t.getTime()>now).sort((a,b)=>a.t-b.t)[0]||null;
+    if(!next){els.countdown.textContent='';els.countdown.className='rb-countdown';return;}
+    const diff=Math.round((next.t.getTime()-now)/60000);
+    const label=diff<1?'Now!':(diff<60?`${diff}m`:`${Math.floor(diff/60)}h ${diff%60}m`);
+    els.countdown.textContent=`⏱ Next ${next.type} in ${label}`;
+    els.countdown.className='rb-countdown'+(diff<30?' urgent':'');
   }
 
   /* ── Overdue banner ── */
   function renderOverdueBanner(summary){
-    const n = Number(summary && summary.overdue || 0);
+    const n=Number(summary&&summary.overdue||0);
     if(!els.overdueBanner) return;
-    if(n > 0){
-      els.overdueBanner.classList.add('show');
-      if(els.overdueText) els.overdueText.textContent = `${n} overdue vehicle${n===1?'':'s'} — immediate attention needed`;
-    } else {
-      els.overdueBanner.classList.remove('show');
-    }
+    els.overdueBanner.classList.toggle('show',n>0);
+    if(els.overdueText&&n>0) els.overdueText.textContent=`${n} overdue vehicle${n===1?'':'s'} — immediate attention needed`;
   }
 
-  /* ── Render a column ── */
-  function renderCol(bodyEl, cntEl, items, type){
+  /* ── Render column ── */
+  function renderCol(bodyEl,cntEl,items,type){
     if(!bodyEl) return;
-    if(cntEl) cntEl.textContent = String(items.length);
-    if(!items.length){
-      bodyEl.innerHTML = '<div class="rb-empty">&#916;&#949;&#957; &#965;&#960;&#940;&#961;&#967;&#959;&#965;&#957; &#948;&#949;&#948;&#959;&#956;&#941;&#957;&#945;.</div>';
-      return;
-    }
-    bodyEl.innerHTML = items.map(item => renderCard(item, type)).join('');
+    if(cntEl) cntEl.textContent=String(items.length);
+    if(!items.length){bodyEl.innerHTML='<div class="rb-empty">&#916;εν υπάρχουν δεδομένα.</div>';return;}
+    bodyEl.innerHTML=items.map(item=>renderCard(item,type)).join('');
   }
 
   function renderStations(stations){
-    if(!Array.isArray(stations) || !stations.length) return;
-    const cur = els.station.value;
-    while(els.station.options.length > 1) els.station.remove(1);
-    stations.forEach(st => {
-      const opt = document.createElement('option');
-      opt.value = opt.textContent = st;
-      els.station.appendChild(opt);
-    });
-    if(cur && cur !== 'all') els.station.value = cur;
+    if(!Array.isArray(stations)||!stations.length) return;
+    const cur=els.station.value;
+    while(els.station.options.length>1) els.station.remove(1);
+    stations.forEach(st=>{ const o=document.createElement('option'); o.value=o.textContent=st; els.station.appendChild(o); });
+    if(cur&&cur!=='all') els.station.value=cur;
   }
 
   function render(){
-    const out     = applyFilters(getTab('checkout'));
-    const inn     = applyFilters(getTab('checkin'));
-    const rawBook = getTab('bookings');
-    const hasDedicated = rawBook.length > 0;
-    const bookSrc = hasDedicated ? rawBook : [...getTab('checkout'), ...getTab('checkin')];
-    const bookings = applyFilters(bookSrc);
+    const out  = sortItems(applyFilters(getTab('checkout')),'out');
+    const inn  = sortItems(applyFilters(getTab('checkin')),'in');
+    const rawB = getTab('bookings');
+    const hasDedicated=rawB.length>0;
+    const bookSrc=hasDedicated?rawB:[...getTab('checkout'),...getTab('checkin')];
+    const bookings=sortItems(applyFilters(bookSrc),'bookings');
 
-    if(els.bookingsLabel)
-      els.bookingsLabel.textContent = hasDedicated ? 'Bookings' : "All Today's Ops";
-
+    if(els.bookingsLabel) els.bookingsLabel.textContent=hasDedicated?'Bookings':"All Today's Ops";
     renderCol(els.listOut,      els.cntOut,      out,      'checkout');
     renderCol(els.listIn,       els.cntIn,       inn,      'checkin');
-    renderCol(els.listBookings, els.cntBookings, bookings, hasDedicated ? 'bookings' : 'all');
+    renderCol(els.listBookings, els.cntBookings, bookings, hasDedicated?'bookings':'all');
     renderSummary(state.data.summary);
     renderOverdueBanner(state.data.summary);
-
-    try{
-      const h = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-      postToWix({ type:'resizeShell', height:h });
-    }catch(_){}
+    renderTimeline();
+    renderStatsBar();
+    updateCountdown();
+    try{ postToWix({type:'resizeShell',height:Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)}); }catch(_){}
   }
 
   /* ── Auto-refresh ── */
-  function startAutoRefresh(){
-    stopAutoRefresh();
-    state.autoTimer = setInterval(reloadData, 5 * 60 * 1000);
-  }
-  function stopAutoRefresh(){
-    if(state.autoTimer){ clearInterval(state.autoTimer); state.autoTimer = null; }
-  }
+  function startAuto(){ stopAuto(); state.autoTimer=setInterval(reloadData,5*60*1000); }
+  function stopAuto(){ if(state.autoTimer){clearInterval(state.autoTimer);state.autoTimer=null;} }
 
-  /* ── Controls wiring ── */
-  $('btnPrev').addEventListener('click', () => { els.datePick.value = addDays(els.datePick.value||ymd(new Date()), -1); reloadData(); });
-  $('btnNext').addEventListener('click', () => { els.datePick.value = addDays(els.datePick.value||ymd(new Date()),  1); reloadData(); });
-  $('btnToday').addEventListener('click', () => { els.datePick.value = ymd(new Date()); reloadData(); });
-  $('btnRefresh').addEventListener('click', () => reloadData());
-  $('datePick').addEventListener('change', () => reloadData());
+  /* ── Controls ── */
+  $('btnPrev').addEventListener('click',()=>{ els.datePick.value=addDays(els.datePick.value||ymd(new Date()),-1); reloadData(); });
+  $('btnNext').addEventListener('click',()=>{ els.datePick.value=addDays(els.datePick.value||ymd(new Date()), 1); reloadData(); });
+  $('btnToday').addEventListener('click',()=>{ els.datePick.value=ymd(new Date()); reloadData(); });
+  $('btnRefresh').addEventListener('click',()=>reloadData());
+  $('datePick').addEventListener('change',()=>reloadData());
+  $('globalSearch').addEventListener('input',()=>{ state.search=els.search.value; render(); });
+  $('stationFilter').addEventListener('change',()=>{ state.station=els.station.value; render(); });
+  els.autoCheck.addEventListener('change',()=>{ if(els.autoCheck.checked){startAuto();els.autoLabel.classList.add('is-on');}else{stopAuto();els.autoLabel.classList.remove('is-on');} });
 
-  $('globalSearch').addEventListener('input', () => { state.search = els.search.value; render(); });
-  $('stationFilter').addEventListener('change', () => { state.station = els.station.value; render(); });
-
-  els.autoCheck.addEventListener('change', () => {
-    if(els.autoCheck.checked){ startAutoRefresh(); els.autoLabel.classList.add('is-on'); }
-    else{ stopAutoRefresh(); els.autoLabel.classList.remove('is-on'); }
-  });
-
-  /* Quick filter chips */
-  document.querySelectorAll('.rb-fchip').forEach(btn =>
-    btn.addEventListener('click', () => window._rbSetFilter(btn.getAttribute('data-filter')))
+  /* Quick filters */
+  document.querySelectorAll('.rb-fchip').forEach(btn=>
+    btn.addEventListener('click',()=>window._rbSetFilter(btn.getAttribute('data-filter')))
   );
 
-  /* Keyboard: ← → for date nav, only when not in an input */
-  document.addEventListener('keydown', e => {
-    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-    if(e.key === 'ArrowLeft'){
-      els.datePick.value = addDays(els.datePick.value||ymd(new Date()), -1);
-      reloadData();
-    } else if(e.key === 'ArrowRight'){
-      els.datePick.value = addDays(els.datePick.value||ymd(new Date()),  1);
-      reloadData();
-    }
+  /* Sort buttons */
+  document.querySelectorAll('.rb-sort-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const col=btn.getAttribute('data-col');
+      const key=btn.getAttribute('data-sort');
+      if(state.sort[col].key===key){
+        state.sort[col].dir=state.sort[col].dir==='asc'?'desc':'asc';
+      } else {
+        state.sort[col]={key, dir:'asc'};
+      }
+      /* update active state in this column's sort group */
+      btn.closest('.rb-colhead-sort').querySelectorAll('.rb-sort-btn').forEach(b=>
+        b.classList.toggle('active', b===btn)
+      );
+      render();
+    });
   });
 
+  /* Keyboard: ← → date navigation */
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
+    if(e.key==='ArrowLeft'){  els.datePick.value=addDays(els.datePick.value||ymd(new Date()),-1); reloadData(); }
+    else if(e.key==='ArrowRight'){ els.datePick.value=addDays(els.datePick.value||ymd(new Date()), 1); reloadData(); }
+  });
+
+  /* Countdown tick every 30s */
+  state.cdTimer=setInterval(updateCountdown,30000);
+
   /* ── Sidebar nav ── */
-  document.querySelectorAll('[data-route]').forEach(btn =>
-    btn.addEventListener('click', () => postToWix({ type:'navigate', route:btn.getAttribute('data-route') }))
+  document.querySelectorAll('[data-route]').forEach(btn=>
+    btn.addEventListener('click',()=>postToWix({type:'navigate',route:btn.getAttribute('data-route')}))
   );
 
   /* ── User menu ── */
-  const menuBtn = $('userMenuBtn');
-  const menu    = $('userMenu');
-  if(menuBtn && menu){
-    menuBtn.parentElement.style.display = '';
-    menuBtn.addEventListener('click', e => { e.stopPropagation(); menu.classList.toggle('open'); });
-    document.addEventListener('click', e => {
-      if(!menu.contains(e.target) && !menuBtn.contains(e.target)) menu.classList.remove('open');
-    });
-    menu.querySelectorAll('[data-menu-action]').forEach(node =>
-      node.addEventListener('click', () => {
-        postToWix({ type:'menuAction', action:node.getAttribute('data-menu-action') });
-        menu.classList.remove('open');
-      })
+  const menuBtn=$('userMenuBtn'), menu=$('userMenu');
+  if(menuBtn&&menu){
+    menuBtn.parentElement.style.display='';
+    menuBtn.addEventListener('click',e=>{ e.stopPropagation(); menu.classList.toggle('open'); });
+    document.addEventListener('click',e=>{ if(!menu.contains(e.target)&&!menuBtn.contains(e.target)) menu.classList.remove('open'); });
+    menu.querySelectorAll('[data-menu-action]').forEach(n=>
+      n.addEventListener('click',()=>{ postToWix({type:'menuAction',action:n.getAttribute('data-menu-action')}); menu.classList.remove('open'); })
     );
   }
 
   /* ── Trusted-origin check ── */
-  const TRUSTED = ['wix.com','wixsite.com','parastorage.com','wixstatic.com'];
+  const TRUSTED=['wix.com','wixsite.com','parastorage.com','wixstatic.com'];
   function isTrusted(origin){
-    const raw = s(origin).toLowerCase();
-    if(!raw) return true;
+    const raw=s(origin).toLowerCase(); if(!raw) return true;
     try{
-      const host = new URL(raw).hostname.toLowerCase();
-      if(!host) return false;
-      if(TRUSTED.some(t => host === t || host.endsWith('.'+t))) return true;
-      try{ const rh = new URL(document.referrer).hostname.toLowerCase(); if(rh && rh === host) return true; }catch(_){}
+      const host=new URL(raw).hostname.toLowerCase(); if(!host) return false;
+      if(TRUSTED.some(t=>host===t||host.endsWith('.'+t))) return true;
+      try{ const rh=new URL(document.referrer).hostname.toLowerCase(); if(rh&&rh===host) return true; }catch(_){}
       return false;
     }catch(_){ return false; }
   }
 
   /* ── postMessage handler ── */
-  window.addEventListener('message', event => {
-    if(event.origin && !isTrusted(event.origin)) return;
-    const d = event.data || {};
-    if(!d || !d.type) return;
+  window.addEventListener('message',event=>{
+    if(event.origin&&!isTrusted(event.origin)) return;
+    const d=event.data||{}; if(!d||!d.type) return;
 
-    if(d.type === 'resume'){
-      const today = ymd(new Date());
-      if(!els.datePick.value || els.datePick.value !== today){
-        els.datePick.value = today;
-        reloadData();
-      }
+    if(d.type==='resume'){
+      const today=ymd(new Date());
+      if(!els.datePick.value||els.datePick.value!==today){ els.datePick.value=today; reloadData(); }
       return;
     }
 
-    if(d.type === 'loadDailyOps'){
-      const tabs = d.tabs || {};
-      /* normalise all known backend key variants */
-      if(!Array.isArray(tabs.checkout)||!tabs.checkout.length){
-        const alt = d.checkOut||d.checkout||d.CheckOut;
-        if(Array.isArray(alt)&&alt.length) tabs.checkout = alt;
-      }
-      if(!Array.isArray(tabs.checkin)||!tabs.checkin.length){
-        const alt = d.checkIn||d.checkin||d.CheckIn;
-        if(Array.isArray(alt)&&alt.length) tabs.checkin = alt;
-      }
-      if(!Array.isArray(tabs.bookings)||!tabs.bookings.length){
-        const alt = d.bookings||d.Bookings;
-        if(Array.isArray(alt)&&alt.length) tabs.bookings = alt;
-      }
+    if(d.type==='loadDailyOps'){
+      const tabs=d.tabs||{};
+      if(!Array.isArray(tabs.checkout)||!tabs.checkout.length){ const a=d.checkOut||d.checkout||d.CheckOut; if(Array.isArray(a)&&a.length) tabs.checkout=a; }
+      if(!Array.isArray(tabs.checkin)||!tabs.checkin.length){  const a=d.checkIn||d.checkin||d.CheckIn;   if(Array.isArray(a)&&a.length) tabs.checkin=a;  }
+      if(!Array.isArray(tabs.bookings)||!tabs.bookings.length){ const a=d.bookings||d.Bookings;            if(Array.isArray(a)&&a.length) tabs.bookings=a; }
 
-      state.data = {
-        tabs,
-        summary:  d.summary  || {},
-        stations: Array.isArray(d.stations) ? d.stations : []
-      };
-
+      state.data={ tabs, summary:d.summary||{}, stations:Array.isArray(d.stations)?d.stations:[] };
       renderStations(state.data.stations);
-      stampRefreshTime();
+      stampRefresh();
 
-      const nOut  = (tabs.checkout||[]).length;
-      const nIn   = (tabs.checkin||[]).length;
-      const nBook = (tabs.bookings||[]).length;
-      const nOver = state.data.summary.overdue || 0;
-      setStatus(`OK • out=${nOut} in=${nIn} bookings=${nBook} overdue=${nOver}`);
-
+      const nO=(tabs.checkout||[]).length, nI=(tabs.checkin||[]).length, nB=(tabs.bookings||[]).length;
+      setStatus(`OK • out=${nO} in=${nI} bookings=${nB} overdue=${state.data.summary.overdue||0}`);
       render();
       return;
     }
 
-    if(d.type === 'userContext' || d.type === 'backroomUserContext'){
-      const u    = d.user || d.identity || d || {};
-      const role = d.role || d.currentRole || d || {};
-      state.user.name = s(u.displayName||u.fullName||u.name||u.email||d.fullName||d.name||d.email||'Operator');
-      state.user.role = s(role.label||role.roleLabel||role.name||d.roleLabel||d.role||'Backroom');
-
-      document.querySelectorAll('#menuUserName,#menuUserName2').forEach(el => el.textContent = state.user.name);
-      document.querySelectorAll('#menuUserRole,#menuUserRole2').forEach(el => el.textContent = state.user.role);
-      const badge = $('userBadge');
-      if(badge) badge.textContent = state.user.name.slice(0,2).toUpperCase();
-      const today = $('todayMeta');
-      if(today){ try{ today.textContent = new Date().toLocaleDateString('el-GR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'}); }catch(_){} }
-      if(menuBtn) menuBtn.parentElement.style.display = '';
-
-      const can = d.canNavigate || {};
-      document.querySelectorAll('[data-route]').forEach(btn => {
-        const r = btn.getAttribute('data-route');
-        if(Object.prototype.hasOwnProperty.call(can, r) && !can[r]) btn.style.display='none';
+    if(d.type==='userContext'||d.type==='backroomUserContext'){
+      const u=d.user||d.identity||d||{}, role=d.role||d.currentRole||d||{};
+      state.user.name=s(u.displayName||u.fullName||u.name||u.email||d.fullName||d.name||d.email||'Operator');
+      state.user.role=s(role.label||role.roleLabel||role.name||d.roleLabel||d.role||'Backroom');
+      document.querySelectorAll('#menuUserName,#menuUserName2').forEach(el=>el.textContent=state.user.name);
+      document.querySelectorAll('#menuUserRole,#menuUserRole2').forEach(el=>el.textContent=state.user.role);
+      const badge=$('userBadge'); if(badge) badge.textContent=state.user.name.slice(0,2).toUpperCase();
+      const today=$('todayMeta');
+      if(today){try{today.textContent=new Date().toLocaleDateString('el-GR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}catch(_){}}
+      if(menuBtn) menuBtn.parentElement.style.display='';
+      const can=d.canNavigate||{};
+      document.querySelectorAll('[data-route]').forEach(btn=>{
+        const r=btn.getAttribute('data-route');
+        if(Object.prototype.hasOwnProperty.call(can,r)&&!can[r]) btn.style.display='none';
       });
       return;
     }
   });
 
   /* ── Auto-init ── */
-  postToWix({ type:'requestUserContext' });
-  els.datePick.value = ymd(new Date());
+  postToWix({type:'requestUserContext'});
+  els.datePick.value=ymd(new Date());
   reloadData();
 
 })();
