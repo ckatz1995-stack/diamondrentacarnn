@@ -18,53 +18,62 @@
       --warn:#a16207;
       --shadow:0 12px 24px rgba(15,23,42,.06);
       --radius:18px;
+      --gold:#A8844A;--gold2:#6C522E;--gold-bg:rgba(168,132,74,0.08);--gold-border:rgba(168,132,74,0.30);
+      --r:14px;--r-lg:18px;--r-pill:999px;--sb-w:220px;
+      --surface:#FFFFFF;--surface2:#E8EEF7;--border:rgba(15,23,42,0.10);--border2:rgba(15,23,42,0.14);
+      --shadow-lg:0 12px 32px rgba(15,23,42,0.12);--sub:#475569;--ok:#16A34A;--teal:#0D9488;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);font:14px/1.4 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text)}
     button,input,select,textarea{font:inherit}
-    .wrap{max-width:none;width:100%;margin:0;padding:0 20px 20px}
-    .backroom-header{display:grid;grid-template-columns:minmax(300px,340px) minmax(420px,1fr) auto;gap:0;align-items:stretch;width:100%;background:linear-gradient(135deg,#4b3923 0%,#6c522e 55%,#8e6d3d 100%);border:1px solid rgba(255,255,255,.05);border-radius:0 0 24px 24px;box-shadow:0 22px 48px rgba(15,23,42,.16);padding:0;margin:0 0 16px;overflow:visible;position:relative}
-    .backroom-header::after{content:"";position:absolute;left:24px;right:24px;bottom:-10px;height:22px;background:radial-gradient(ellipse at center, rgba(15,23,42,.14), rgba(15,23,42,0) 72%);pointer-events:none;filter:blur(10px)}
-    .backroom-brand{display:flex;flex-direction:column;justify-content:center;gap:4px;min-height:82px;padding:14px 18px 14px 78px;position:relative;background:linear-gradient(135deg,#8e6d3d 0%,#a8844a 62%,#6c522e 100%);color:#fff}
-    .backroom-brand::before{content:"D";position:absolute;left:20px;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:20px;font-weight:900;letter-spacing:-.03em;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 18px rgba(0,0,0,.12)}
-    .backroom-brand::after{content:"";position:absolute;right:-28px;top:-24px;bottom:-24px;width:74px;background:linear-gradient(120deg,rgba(255,255,255,.18),rgba(255,255,255,0));transform:skewX(-18deg)}
-    .backroom-brand b{display:block;font-size:20px;letter-spacing:-.02em;color:#fff}
-    .backroom-brand span{display:block;color:rgba(255,255,255,.82);font-size:12px;margin-top:2px}
-    .backroom-nav{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:4px;padding:0 18px;background:linear-gradient(180deg,rgba(255,255,255,.03) 0%,rgba(255,255,255,0) 100%);min-width:0;overflow:auto;scrollbar-width:none}.backroom-nav::-webkit-scrollbar{display:none}
-    .nav-btn{appearance:none;border:0;background:transparent;color:rgba(255,255,255,.82);padding:0 14px;height:82px;font-weight:800;font-size:14px;cursor:pointer;position:relative;transition:background .18s ease,color .18s ease,transform .18s ease;border-radius:16px;flex:0 0 auto;white-space:nowrap}
-    .nav-btn::after{content:"";position:absolute;left:16px;right:16px;bottom:10px;height:3px;border-radius:999px;background:transparent;transition:background .18s ease,transform .18s ease}
-    .nav-btn:hover{background:rgba(255,255,255,.06);color:#fff;transform:translateY(-1px)}
-    .nav-btn.active{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,.03) 100%);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
-    .nav-btn.active::after{background:#d7b27a}
-    .nav-btn.locked{opacity:.48}
-    .backroom-user{display:flex;justify-content:flex-end;gap:10px;align-items:center;flex-wrap:nowrap;padding:12px 16px;background:linear-gradient(180deg,rgba(79,58,34,.92) 0%,rgba(58,42,24,.98) 100%);border-left:1px solid rgba(255,255,255,.06);position:relative;min-width:430px;overflow:visible}
-    .backroom-user::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:1px;background:rgba(255,255,255,.08)}
-    .backroom-search{display:flex;align-items:center;min-width:200px;max-width:280px;flex:0 1 260px;height:44px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 18px rgba(0,0,0,.08)}
-    .backroom-search input{flex:1;min-width:0;height:100%;border:0;background:transparent;color:#fff;padding:0 14px;font:700 13px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    .backroom-search input::placeholder{color:rgba(255,255,255,.58)}
-    .backroom-search input:focus{outline:none}
-    .backroom-search button{appearance:none;border:0;border-left:1px solid rgba(255,255,255,.1);background:transparent;color:#fff;height:100%;padding:0 14px;font-weight:800;cursor:pointer}
-    .backroom-search button:hover{background:rgba(255,255,255,.08)}
-    .top-chip{padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.72);flex:0 0 auto;max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .top-chip strong{color:#fff}
-    .header-action-btn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease;flex:0 0 auto;white-space:nowrap}
-    .header-action-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22);transform:translateY(-1px)}
+    /* ── shell layout ─────────────────────────────── */
+    html,body{height:100%;overflow:hidden}
+    .shell{display:flex;height:100vh;overflow:hidden}
+    .sb{width:var(--sb-w);flex:0 0 var(--sb-w);background:linear-gradient(180deg,#2a1f0e 0%,#3d2b12 55%,#4f3a22 100%);display:flex;flex-direction:column;gap:2px;padding:12px 8px;overflow-y:auto;overflow-x:hidden;border-right:1px solid rgba(255,255,255,.06)}
+    .sb-brand{display:flex;align-items:center;gap:10px;padding:10px 10px 16px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:6px;flex:0 0 auto}
+    .sb-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold));display:grid;place-items:center;color:#fff;font-weight:900;font-size:15px;flex:0 0 auto}
+    .sb-brand-text{min-width:0}
+    .sb-brand-name{font-size:13px;font-weight:900;color:#fff;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sb-brand-sub{font-size:10px;color:rgba(255,255,255,.55);font-weight:700;white-space:nowrap}
+    .sb-section{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.38);padding:10px 10px 4px;flex:0 0 auto}
+    .sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;border:0;background:transparent;color:rgba(255,255,255,.72);font-size:13px;font-weight:800;cursor:pointer;width:100%;text-align:left;transition:background .14s,color .14s;flex:0 0 auto;box-shadow:none!important}
+    .sb-item:hover{background:rgba(255,255,255,.08);color:#fff}
+    .sb-item.active{background:linear-gradient(135deg,rgba(168,132,74,.22),rgba(168,132,74,.10));color:var(--gold);border:1px solid rgba(168,132,74,.20)}
+    .sb-icon{width:20px;text-align:center;flex:0 0 auto;font-size:14px}
+    .sb-item-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .shell-main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+    .shell-top{height:62px;flex:0 0 62px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px}
+    .shell-page-title{font-size:17px;font-weight:950;letter-spacing:-.02em;color:var(--text,#0f172a);white-space:nowrap}
+    .shell-top-left{display:flex;align-items:center;gap:12px;min-width:0}
+    .shell-top-right{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+    .shell-content{flex:1;overflow:auto;background:var(--bg)}
+    .wrap{padding:0 20px 20px}
+    .top-search-wrap{display:flex;align-items:center;height:38px;border-radius:999px;border:1px solid var(--border2);background:#fff;overflow:hidden;min-width:160px;max-width:240px}
+    .top-search-wrap input{flex:1;min-width:0;height:100%;border:0;background:transparent;color:var(--text);padding:0 12px;font:700 13px/1.2 system-ui,-apple-system,sans-serif}
+    .top-search-wrap input::placeholder{color:var(--sub)}
+    .top-search-wrap input:focus{outline:none}
+    .top-search-wrap button{appearance:none;border:0;border-left:1px solid var(--border2);background:transparent;color:var(--gold2);height:100%;padding:0 12px;font:900 12px system-ui,-apple-system,sans-serif;cursor:pointer}
+    .top-search-wrap button:hover{background:var(--gold-bg)}
     .quick-apps{position:relative}
-    .quick-apps-btn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#fff;border-radius:14px;padding:10px 12px;font-weight:800;cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
-    .quick-apps-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22);transform:translateY(-1px)}
-    .quick-apps-btn::before{content:"☰";font-size:13px;line-height:1}
-    .quick-apps-panel{position:absolute;top:calc(100% + 12px);right:0;left:auto;min-width:420px;display:none;padding:14px;background:#3f2e1e;border:1px solid rgba(255,255,255,.08);border-radius:20px;box-shadow:0 22px 44px rgba(15,23,42,.28);z-index:40}
+    .quick-apps-btn{appearance:none;border:1px solid var(--border2);background:#fff;color:var(--gold2);border-radius:10px;padding:8px 12px;font:900 12px system-ui,-apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+    .quick-apps-btn:hover{background:var(--gold-bg);border-color:var(--gold-border)}
+    .quick-apps-panel{position:absolute;top:calc(100% + 10px);right:0;min-width:360px;display:none;padding:12px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-lg);z-index:40}
     .quick-apps.open .quick-apps-panel{display:block}
-    .quick-apps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-    .quick-app-card{appearance:none;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#5b4328 0%,#46311d 100%);color:#fff;border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer;min-height:104px;transition:transform .18s ease,border-color .18s ease,background .18s ease}
-    .quick-app-card:hover{transform:translateY(-2px);border-color:rgba(180,138,79,.48);background:linear-gradient(180deg,#71522f 0%,#4c3720 100%)}
-    .quick-app-card b{font-size:14px}
-    .quick-app-card span{font-size:12px;line-height:1.4;color:rgba(255,255,255,.7);text-align:left}
-    .quick-app-icon{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:15px}
-    .top-icon-group{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-    .top-icon-btn{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#fff;border-radius:12px;padding:10px 11px;display:grid;place-items:center;cursor:pointer;transition:background .18s ease,border-color .18s ease,transform .18s ease}
-    .top-icon-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22);transform:translateY(-1px)}
-    .top-icon-btn .dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18)}
+    .quick-apps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .quick-app-card{appearance:none;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;cursor:pointer;min-height:88px;transition:transform .14s,border-color .14s,background .14s;text-align:left}
+    .quick-app-card:hover{transform:translateY(-2px);border-color:var(--gold-border);background:var(--gold-bg)}
+    .quick-app-card b{font-size:13px;color:var(--text)}
+    .quick-app-card span{font-size:11px;line-height:1.35;color:var(--sub)}
+    .quick-app-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:rgba(168,132,74,.12);font-size:13px}
+    .top-icon-group{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+    .top-icon-btn{appearance:none;border:1px solid var(--border2);background:#fff;color:var(--sub);border-radius:10px;padding:9px 10px;display:grid;place-items:center;cursor:pointer}
+    .top-icon-btn:hover{background:var(--gold-bg);border-color:var(--gold-border)}
+    .top-icon-btn .dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+    .top-user-chip{appearance:none;border:1px solid var(--border2);background:#fff;color:var(--text);border-radius:999px;padding:7px 12px;font:900 12px system-ui,-apple-system,sans-serif;cursor:pointer;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+    .top-user-chip:hover{background:var(--gold-bg);border-color:var(--gold-border)}
+    .top-logout-btn{appearance:none;border:1px solid var(--border2);background:#fff;color:var(--danger,#B91C1C);border-radius:10px;padding:8px 12px;font:900 12px system-ui,-apple-system,sans-serif;cursor:pointer;white-space:nowrap}
+    .top-logout-btn:hover{background:#fef2f2;border-color:rgba(185,28,28,.20)}
+    @media(max-width:900px){.sb-brand-text,.sb-item-label,.sb-brand-sub,.sb-section{display:none}.sb{width:54px;flex:0 0 54px}.sb-item{justify-content:center;padding:10px}}
     .hero{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px}
     .panel{background:linear-gradient(180deg,#fdfaf4 0%,#f7f1e6 100%);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
     .hero-main{padding:18px 20px}
@@ -372,8 +381,7 @@
       h1{font-size:24px}
     }
 
-    @media (max-width:1280px){.wrap{padding:0 14px 18px}.backroom-header{grid-template-columns:1fr;overflow:visible;border-radius:0 0 22px 22px}.backroom-brand,.backroom-nav,.backroom-user{min-height:auto}.backroom-nav{padding:4px 12px 10px;justify-content:flex-start}.nav-btn{height:58px}.backroom-user{justify-content:flex-start;flex-wrap:wrap;overflow:visible;min-width:0}.backroom-search{min-width:260px;max-width:none;flex:1 1 320px}.quick-apps-panel{left:0;right:auto;min-width:min(92vw,420px)}}
-    @media (max-width:760px){.quick-apps-panel{min-width:min(94vw,360px)}.quick-apps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top-icon-group{display:none}}
+    @media (max-width:760px){.quick-apps-panel{min-width:min(94vw,320px)}.quick-apps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top-icon-group{display:none}}
   
 
     /* phase 16: settings system upgrade */
@@ -384,25 +392,71 @@
     .overview-card,.section-card,.quick-app-card,.business-pane,.panel,.viewer-card,.info-card,.overview-primary,.status-panel,.settings-command-card,.table-wrap,.embedded-manager,.access-summary-shell{transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease}
     .overview-card:hover,.section-card:hover,.quick-app-card:hover,.business-pane:hover,.viewer-card:hover,.info-card:hover,.status-panel:hover,.settings-command-card:hover{transform:translateY(-2px);box-shadow:0 18px 38px rgba(15,23,42,.10);border-color:rgba(180,138,79,.18)}
     .business-pane-shell,.table-wrap,.access-summary-shell,.embedded-manager{box-shadow:0 16px 34px rgba(15,23,42,.06)}
-    .btn,.nav-btn,.mini-btn,.header-action-btn,.jump-btn,.business-subtab,.tab,.top-icon-btn,.quick-apps-btn,.table-col-btn{transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease}
-    .btn:hover,.nav-btn:hover,.mini-btn:hover,.header-action-btn:hover,.jump-btn:hover,.business-subtab:hover,.tab:hover,.top-icon-btn:hover,.quick-apps-btn:hover,.table-col-btn:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(15,23,42,.08)}
-    .btn.primary,.quick-apps-btn.primary,.header-action-btn.primary{box-shadow:0 14px 28px rgba(108,82,46,.18)}
-    .field input:focus,.field textarea:focus,.field select:focus,.backroom-search input:focus,.table-col-search input:focus,.text-editor-textarea:focus{outline:none;border-color:rgba(180,138,79,.34);box-shadow:0 0 0 4px rgba(180,138,79,.12),0 12px 28px rgba(108,82,46,.08)}
+    .btn,.mini-btn,.jump-btn,.business-subtab,.tab,.top-icon-btn,.quick-apps-btn,.table-col-btn{transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease}
+    .btn:hover,.mini-btn:hover,.jump-btn:hover,.business-subtab:hover,.tab:hover,.top-icon-btn:hover,.quick-apps-btn:hover,.table-col-btn:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(15,23,42,.08)}
+    .btn.primary,.quick-apps-btn.primary{box-shadow:0 14px 28px rgba(108,82,46,.18)}
+    .field input:focus,.field textarea:focus,.field select:focus,.table-col-search input:focus,.text-editor-textarea:focus{outline:none;border-color:rgba(180,138,79,.34);box-shadow:0 0 0 4px rgba(180,138,79,.12),0 12px 28px rgba(108,82,46,.08)}
     .empty{padding:18px 16px;border:1px dashed rgba(180,138,79,.22);border-radius:16px;background:linear-gradient(180deg,#fffdfa 0%,#f7f1e6 100%);font-weight:800;color:#6c522e}
     .modal,.overlay{backdrop-filter:blur(4px)}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="backroom-header">
-      <div class="backroom-brand">
-        <b>DIAMOND Backroom</b>
-        <span>Settings workspace · front, company & communications</span>
+  <div class="shell">
+    <nav class="sb">
+      <div class="sb-brand">
+        <div class="sb-logo">D</div>
+        <div class="sb-brand-text">
+          <div class="sb-brand-name">DIAMOND</div>
+          <div class="sb-brand-sub">Backroom</div>
+        </div>
       </div>
-      <div class="backroom-nav" id="backroomNav"></div>
-      <div class="backroom-user" id="backroomUser"></div>
-    </div>
-    <div class="panel" id="accessGate" style="display:none;margin-bottom:16px;padding:18px 20px"></div>
+      <div class="sb-section">Ops</div>
+      <button class="sb-item" data-route="home" type="button"><span class="sb-icon">⌂</span><span class="sb-item-label">Myroom</span></button>
+      <button class="sb-item" data-route="daily" type="button"><span class="sb-icon">☼</span><span class="sb-item-label">Daily</span></button>
+      <div class="sb-section">Fleet</div>
+      <button class="sb-item" data-route="fleet" type="button"><span class="sb-icon">▣</span><span class="sb-item-label">Fleet</span></button>
+      <button class="sb-item" data-route="fleetCalendar" type="button"><span class="sb-icon">📅</span><span class="sb-item-label">Fleet Cal</span></button>
+      <div class="sb-section">Manage</div>
+      <button class="sb-item" data-route="customers" type="button"><span class="sb-icon">👥</span><span class="sb-item-label">Customers</span></button>
+      <button class="sb-item" data-route="bookings" type="button"><span class="sb-icon">✓</span><span class="sb-item-label">Bookings</span></button>
+      <button class="sb-item" data-route="contract" type="button"><span class="sb-icon">📄</span><span class="sb-item-label">Contract</span></button>
+      <div class="sb-section">System</div>
+      <button class="sb-item active" data-route="settings" type="button"><span class="sb-icon">⚙</span><span class="sb-item-label">Settings</span></button>
+    </nav>
+    <div class="shell-main">
+      <div class="shell-top">
+        <div class="shell-top-left">
+          <span class="shell-page-title">Settings</span>
+        </div>
+        <div class="shell-top-right">
+          <div class="top-search-wrap">
+            <input id="topSearchInput" type="search" placeholder="Search settings…" aria-label="Search settings" />
+            <button id="topSearchBtn" type="button" data-allow-busy="1">Go</button>
+          </div>
+          <div class="quick-apps" id="quickAppsWrap">
+            <button class="quick-apps-btn" id="quickAppsBtn" type="button">Apps</button>
+            <div class="quick-apps-panel" id="quickAppsPanel">
+              <div class="quick-apps-grid">
+                <button class="quick-app-card" type="button" data-route="home"><span class="quick-app-icon">⌂</span><b>Myroom</b><span>Κεντρική επιχειρησιακή εικόνα.</span></button>
+                <button class="quick-app-card" type="button" data-route="daily"><span class="quick-app-icon">☼</span><b>Daily</b><span>Ημερήσια λειτουργία.</span></button>
+                <button class="quick-app-card" type="button" data-route="fleet"><span class="quick-app-icon">▣</span><b>Fleet</b><span>Διαθεσιμότητα και στόλος.</span></button>
+                <button class="quick-app-card" type="button" data-route="bookings"><span class="quick-app-icon">✓</span><b>Bookings</b><span>Κρατήσεις και follow-up.</span></button>
+                <button class="quick-app-card" type="button" data-route="settings"><span class="quick-app-icon">⚙</span><b>Settings</b><span>Pricing, fleet, access.</span></button>
+                <button class="quick-app-card" type="button" data-jump-settings="business"><span class="quick-app-icon">↗</span><b>Jump to business</b><span>Άμεση μετάβαση στο business control.</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="top-icon-group">
+            <button class="top-icon-btn" id="topStatusBtn" type="button" title="System status"><span class="dot"></span></button>
+            <button class="top-icon-btn" id="topHelpBtn" type="button" title="Quick help">?</button>
+          </div>
+          <button class="top-user-chip" id="chipUser" type="button">Staff</button>
+          <button class="top-logout-btn" id="topLogoutBtn" data-allow-busy="1" type="button">Logout</button>
+        </div>
+      </div>
+      <div class="shell-content">
+        <div class="wrap">
+          <div class="panel" id="accessGate" style="display:none;margin-bottom:16px;padding:18px 20px"></div>
 
     <div class="workspace-board">
       <div class="tabs" id="tabs"></div>
@@ -1016,6 +1070,9 @@
 
     </div>
     <div class="statusbar"><div class="toast" id="toast"></div></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="overlay" id="editorOverlay">
@@ -1887,6 +1944,8 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
     }
 
     function renderBackroomHeader(){
+      const chipUser = document.getElementById('chipUser');
+      if(chipUser){ const current = currentStaff(); chipUser.textContent = current.name || current.email || 'Staff'; }
       const current = currentStaff();
       const nav = [
         { key:'home', label:'Myroom' },
@@ -3788,6 +3847,43 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       if (els.filterAuditType) els.filterAuditType.addEventListener('change', (e) => { state.filters.auditType = e.target.value; renderAuditTable(); requestResize(); });
       els.filterRuleType.addEventListener('change', (e) => { state.filters.ruleType = e.target.value; renderFeesTable(); requestResize(); });
       els.refreshAuditBtn.addEventListener('click', () => { setBusy(true); post('refreshStaffAccess', {}); });
+      // shell sidebar navigation
+      document.querySelectorAll('.sb-item[data-route]').forEach(btn => btn.addEventListener('click', () => {
+        const route = btn.getAttribute('data-route');
+        if(!navAllowed(route)){ showToast('Ο ρόλος σου δεν έχει πρόσβαση σε αυτή την ενότητα.', 'error'); return; }
+        post('navigate', { route });
+      }));
+      // shell-top static bindings
+      document.getElementById('topLogoutBtn')?.addEventListener('click', () => post('menuAction', { action:'logout' }));
+      document.getElementById('topHelpBtn')?.addEventListener('click', () => showToast('Χρησιμοποίησε το search ή το quick apps panel για άμεση μετάβαση στις βασικές ενότητες.', 'info'));
+      document.getElementById('topStatusBtn')?.addEventListener('click', () => openSectionByKey('settingsHome'));
+      const shellSearchInput = document.getElementById('topSearchInput');
+      const shellSearchBtn = document.getElementById('topSearchBtn');
+      shellSearchBtn?.addEventListener('click', () => runToolbarSearch(shellSearchInput?.value || ''));
+      shellSearchInput?.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); runToolbarSearch(shellSearchInput.value || ''); } });
+      const shellQuickWrap = document.getElementById('quickAppsWrap');
+      const shellQuickBtn = document.getElementById('quickAppsBtn');
+      const shellCloseQuick = (evt) => { if(!shellQuickWrap?.contains(evt.target)) shellQuickWrap?.classList.remove('open'); };
+      shellQuickBtn?.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const open = !shellQuickWrap.classList.contains('open');
+        shellQuickWrap.classList.toggle('open', open);
+        if(open){ setTimeout(() => document.addEventListener('click', shellCloseQuick, true), 0); }
+        else { document.removeEventListener('click', shellCloseQuick, true); }
+      });
+      document.getElementById('quickAppsPanel')?.querySelectorAll('[data-route]').forEach(btn => btn.addEventListener('click', () => {
+        const route = btn.getAttribute('data-route');
+        shellQuickWrap?.classList.remove('open');
+        document.removeEventListener('click', shellCloseQuick, true);
+        if(!navAllowed(route)){ showToast('Ο ρόλος σου δεν έχει πρόσβαση σε αυτή την ενότητα.', 'error'); return; }
+        post('navigate', { route });
+      }));
+      document.getElementById('quickAppsPanel')?.querySelector('[data-jump-settings="business"]')?.addEventListener('click', () => {
+        shellQuickWrap?.classList.remove('open');
+        document.removeEventListener('click', shellCloseQuick, true);
+        openSectionByKey('business', { businessPane: state.activeBusinessPane || 'frontCompany' });
+        showToast('Άνοιξε το business control center.', 'success');
+      });
       els.closeEditorBtn.addEventListener('click', closeEditor);
       els.cancelEditorBtn.addEventListener('click', closeEditor);
       els.editorOverlay.addEventListener('click', (e) => { if(e.target === els.editorOverlay) closeEditor(); });
