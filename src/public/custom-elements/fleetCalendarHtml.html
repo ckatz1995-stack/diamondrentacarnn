@@ -570,7 +570,7 @@ button:active{transform:scale(.985)}
   function fmtDateTime(d){ const dt=new Date(d); if(isNaN(dt.getTime())) return '-'; return `${pad2(dt.getDate())}/${pad2(dt.getMonth()+1)}/${dt.getFullYear()} ${hhmm(dt)}`; }
   function norm(s){ return (s??'').toString().toLowerCase().trim(); }
 
-  // ── Group content HTML builders (CSS classes only — fixGroupStyles() applies display via JS) ──
+  // ── Group content builders — all inline styles, bypasses vis-timeline XSS tag stripping ──
   const _grpHtmlCache = new Map();
 
   function _buildGroupContent(g, rowNo){
@@ -578,68 +578,25 @@ button:active{transform:scale(.985)}
     if(isCat){
       const catCode=escHtml(String(g.id||'').replace(/^cat_/,''));
       const count=Array.isArray(g.nestedGroups)?g.nestedGroups.length:0;
-      return `<div class="fleetCatCell"><span class="fleetCatCode">${catCode}</span><span class="fleetCatMeta">${count}&thinsp;veh</span></div>`;
+      return '<div style="display:flex;align-items:center;width:100%;height:100%;padding:0 8px 0 10px;background:#E8EEF7;border-left:3px solid #A8844A;border-top:1px solid rgba(15,23,42,.14);gap:6px;box-sizing:border-box;overflow:hidden;">'
+        +'<span style="font:900 10.5px/1 system-ui,sans-serif;color:#0f172a;flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;">'
+        +'<span style="color:#A8844A;font-size:9px;flex-shrink:0;">&#9658;</span>'+catCode+'</span>'
+        +'<span style="font:700 9px/1 system-ui,sans-serif;color:#475569;padding:1px 5px;background:rgba(0,0,0,.06);border-radius:3px;border:1px solid rgba(15,23,42,.10);white-space:nowrap;flex-shrink:0;">'+count+' veh</span>'
+        +'</div>';
     }
     const cat  =escHtml(safe(g.categoryCode||'—'));
     const no   =escHtml(String(rowNo||'—'));
     const plate=escHtml(safe(g.plate||'—'));
     const model=escHtml(safe(g.model||'—'));
     const stn  =escHtml(safe(g.station||'—'));
-    return `<div class="fleetGroupCell"><span class="fleetCol fleetCategory">${cat}</span><span class="fleetCol fleetNo">${no}</span><span class="fleetCol fleetPlate">${plate}</span><span class="fleetCol fleetModel">${model}</span><span class="fleetCol fleetStation">${stn}</span></div>`;
-  }
-
-  // ── Post-render style enforcer — setProperty('important') overrides EVERYTHING ──
-  function _sp(el,k,v){el.style.setProperty(k,v,'important');}
-
-  function fixGroupStyles(){
-    const tl=document.getElementById('timeline');
-    if(!tl) return;
-    // Vehicle rows
-    tl.querySelectorAll('.vis-label .vis-inner .fleetGroupCell').forEach(gc=>{
-      _sp(gc,'display','flex');_sp(gc,'align-items','stretch');
-      _sp(gc,'width','100%');_sp(gc,'height','100%');_sp(gc,'overflow','hidden');
-      const spans=Array.from(gc.children);
-      const COLS=[
-        // category
-        {w:'80px',bg:'rgba(168,132,74,.18)',br:'2px solid rgba(168,132,74,.35)',c:'#6C522E',fw:'900',fs:'9.5px',tt:'uppercase',ls:'.04em',jc:'center',p:'0 3px'},
-        // #
-        {w:'32px',bg:'rgba(148,163,184,.14)',br:'1px solid rgba(15,23,42,.09)',c:'#94a3b8',fw:'900',fs:'10px',jc:'center',p:'0 2px'},
-        // plate
-        {w:'90px',bg:'rgba(168,132,74,.11)',br:'1px solid rgba(168,132,74,.22)',c:'#6C522E',fw:'900',fs:'10.5px',ff:'ui-monospace,monospace,system-ui',p:'0 4px'},
-        // model
-        {w:'90px',bg:'',br:'1px solid rgba(15,23,42,.08)',c:'#334155',fw:'700',fs:'10px',p:'0 4px'},
-        // station
-        {w:'',flex:'1',bg:'',br:'',c:'#64748b',fw:'700',fs:'10px',p:'0 4px'},
-      ];
-      spans.forEach((s,i)=>{
-        if(i>=COLS.length) return;
-        const c=COLS[i];
-        _sp(s,'display','flex');_sp(s,'align-items','center');
-        _sp(s,'overflow','hidden');_sp(s,'white-space','nowrap');_sp(s,'text-overflow','ellipsis');
-        _sp(s,'box-sizing','border-box');_sp(s,'padding',c.p);
-        if(c.w){_sp(s,'width',c.w);_sp(s,'min-width',c.w);_sp(s,'max-width',c.w);_sp(s,'flex-shrink','0');}
-        else if(c.flex){_sp(s,'flex',c.flex);}
-        if(c.bg) _sp(s,'background',c.bg);
-        if(c.br) _sp(s,'border-right',c.br);
-        _sp(s,'color',c.c);_sp(s,'font-weight',c.fw);_sp(s,'font-size',c.fs);
-        if(c.ff) _sp(s,'font-family',c.ff);
-        if(c.tt) _sp(s,'text-transform',c.tt);
-        if(c.ls) _sp(s,'letter-spacing',c.ls);
-        if(c.jc) _sp(s,'justify-content',c.jc);
-      });
-    });
-    // Category rows
-    tl.querySelectorAll('.vis-label .vis-inner .fleetCatCell').forEach(cc=>{
-      _sp(cc,'display','flex');_sp(cc,'align-items','center');
-      _sp(cc,'width','100%');_sp(cc,'height','100%');_sp(cc,'overflow','hidden');
-      _sp(cc,'padding','0 8px 0 10px');_sp(cc,'background','#E8EEF7');
-      _sp(cc,'border-left','3px solid #A8844A');_sp(cc,'border-top','1px solid rgba(15,23,42,.14)');
-      _sp(cc,'gap','6px');_sp(cc,'box-sizing','border-box');
-      const code=cc.querySelector('.fleetCatCode');
-      if(code){_sp(code,'font','900 10.5px/1 system-ui,sans-serif');_sp(code,'color','#0f172a');_sp(code,'flex','1');_sp(code,'min-width','0');_sp(code,'overflow','hidden');_sp(code,'white-space','nowrap');_sp(code,'text-overflow','ellipsis');}
-      const meta=cc.querySelector('.fleetCatMeta');
-      if(meta){_sp(meta,'font','700 9px/1 system-ui,sans-serif');_sp(meta,'color','#475569');_sp(meta,'padding','1px 5px');_sp(meta,'background','rgba(0,0,0,.06)');_sp(meta,'border-radius','3px');_sp(meta,'border','1px solid rgba(15,23,42,.10)');_sp(meta,'white-space','nowrap');_sp(meta,'flex-shrink','0');}
-    });
+    const S='display:flex;align-items:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-sizing:border-box;flex-shrink:0;';
+    return '<div style="display:flex;align-items:stretch;width:100%;height:100%;overflow:hidden;">'
+      +'<span style="'+S+'width:80px;min-width:80px;max-width:80px;justify-content:center;font:900 9.5px/1 system-ui,sans-serif;color:#6C522E;background:rgba(168,132,74,.18);border-right:2px solid rgba(168,132,74,.35);text-transform:uppercase;letter-spacing:.04em;padding:0 3px;">'+cat+'</span>'
+      +'<span style="'+S+'width:32px;min-width:32px;max-width:32px;justify-content:center;font:900 10px/1 system-ui,sans-serif;color:#94a3b8;background:rgba(148,163,184,.14);border-right:1px solid rgba(15,23,42,.09);padding:0 2px;">'+no+'</span>'
+      +'<span style="'+S+'width:90px;min-width:90px;max-width:90px;font:900 10.5px/1 ui-monospace,\'Cascadia Code\',monospace;color:#6C522E;background:rgba(168,132,74,.11);border-right:1px solid rgba(168,132,74,.22);padding:0 4px;">'+plate+'</span>'
+      +'<span style="'+S+'width:90px;min-width:90px;max-width:90px;font:700 10px/1.2 system-ui,sans-serif;color:#334155;border-right:1px solid rgba(15,23,42,.08);padding:0 4px;">'+model+'</span>'
+      +'<span style="display:flex;align-items:center;flex:1;min-width:75px;font:700 10px/1.1 system-ui,sans-serif;color:#64748b;padding:0 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+stn+'</span>'
+      +'</div>';
   }
 
   function assertVisReady(){
@@ -842,6 +799,7 @@ button:active{transform:scale(.985)}
       orientation:{axis:'top',item:'top'},
       margin:{item:1,axis:2},
       groupHeightMode:'fixed',
+      xss:{disabled:true},
       editable:{add:false,remove:false,updateTime:false,updateGroup:true},
       multiselect:false,
       zoomMin:1000*60*60*6,
@@ -880,7 +838,7 @@ button:active{transform:scale(.985)}
       if(suppressRangeEvents) return;
       try{ keepWindow=timeline.getWindow(); userWindowDirty=true; }catch(e){}
     });
-    timeline.on('changed',()=>requestAnimationFrame(()=>{syncCalHeader();fixGroupStyles();}));
+    timeline.on('changed',()=>requestAnimationFrame(syncCalHeader));
     timeline.on('select',(props)=>{ try{ const id=props?.items?.[0]; selectedFleetId=id?String(id):''; }catch(_){} });
     timeline.on('doubleClick',(props)=>{ try{ const id=props?.item; if(!id) return; const it=itemsDS.get(id); if(it) openBookingModal(it); }catch(_){} });
 
