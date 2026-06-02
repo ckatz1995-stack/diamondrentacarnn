@@ -48,14 +48,14 @@ $w.onReady(async function () {
 
     if (msg.type === 'navigate') {
       const route = String(msg.route || '');
-      if (route === 'home')      return wixLocation.to(ROUTES.home);
-      if (route === 'daily')     return wixLocation.to(ROUTES.daily);
-      if (route === 'fleet')     return wixLocation.to(ROUTES.fleet);
-      if (route === 'fleetCal')  return wixLocation.to(ROUTES.fleet);
-      if (route === 'bookings')  return wixLocation.to(ROUTES.bookings);
-      if (route === 'customers') return wixLocation.to(ROUTES.customers);
-      if (route === 'contract')  return wixLocation.to(ROUTES.contract);
-      if (route === 'settings')  return wixLocation.to(ROUTES.settings);
+      if (route === 'home')     return wixLocation.to(ROUTES.home);
+      if (route === 'daily')    return wixLocation.to(ROUTES.daily);
+      if (route === 'fleet')    return wixLocation.to(ROUTES.fleet);
+      if (route === 'fleetCal') return wixLocation.to(ROUTES.fleet);
+      if (route === 'bookings') return wixLocation.to(ROUTES.bookings);
+      if (route === 'customers')return wixLocation.to(ROUTES.customers);
+      if (route === 'contract') return wixLocation.to(ROUTES.contract);
+      if (route === 'settings') return wixLocation.to(ROUTES.settings);
     }
 
     if (msg.type === 'resizeShell') {
