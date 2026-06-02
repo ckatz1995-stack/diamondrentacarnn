@@ -691,21 +691,19 @@ button:active{transform:scale(.985)}
       zoomMin:1000*60*60*6,
       zoomMax:1000*60*60*24*90,
 
-      groupTemplate:function(group,element){
-        if(!group) return element;
+      groupTemplate:function(group){
+        if(!group) return '';
         const id=String(group.id||'');
-        if(id===HEAT_GROUP_ID){ element.innerHTML=''; return element; }
+        if(id===HEAT_GROUP_ID) return '';
         if(id.startsWith('cat_')){
           const label=escHtml(group.catLabel||group.content||id.replace('cat_','').toUpperCase());
-          element.innerHTML=`<div class="grp-cat"><span class="grp-cat-ico">▶</span>${label}</div>`;
-          return element;
+          return `<div class="grp-cat"><span class="grp-cat-ico">▶</span>${label}</div>`;
         }
         const num   =escHtml(String(group._rowNum||''));
         const plate =escHtml(String(group.plate||group.regNo||group.vehicleReg||group.content||''));
         const model =escHtml(String(group.model||group.vehicleModel||''));
         const info  =escHtml(String(group.station||group.stationCode||group.stationLabel||group.mileage||''));
-        element.innerHTML=`<div class="grp-row"><div class="grp-cell c-num">${num}</div><div class="grp-cell c-plate" title="${plate}">${plate}</div><div class="grp-cell c-model" title="${model}">${model}</div><div class="grp-cell c-info" title="${info}">${info}</div></div>`;
-        return element;
+        return `<div class="grp-row"><div class="grp-cell c-num">${num}</div><div class="grp-cell c-plate" title="${plate}">${plate}</div><div class="grp-cell c-model" title="${model}">${model}</div><div class="grp-cell c-info" title="${info}">${info}</div></div>`;
       },
 
       template:function(item){
