@@ -570,41 +570,76 @@ button:active{transform:scale(.985)}
   function fmtDateTime(d){ const dt=new Date(d); if(isNaN(dt.getTime())) return '-'; return `${pad2(dt.getDate())}/${pad2(dt.getMonth()+1)}/${dt.getFullYear()} ${hhmm(dt)}`; }
   function norm(s){ return (s??'').toString().toLowerCase().trim(); }
 
-  // ── Group DOM builder — uses DOM API (not innerHTML) to bypass vis-timeline sanitization ──
-  function _groupDomBuilder(group, element){
-    if(!group||!element) return;
-    element.innerHTML='';
-    const isCat=String(group.id||'').startsWith('cat_');
+  // ── Group content HTML builders (CSS classes only — fixGroupStyles() applies display via JS) ──
+  const _grpHtmlCache = new Map();
 
+  function _buildGroupContent(g, rowNo){
+    const isCat=String(g.id||'').startsWith('cat_');
     if(isCat){
-      const catCode=String(group.id||'').replace(/^cat_/,'');
-      const count=Array.isArray(group.nestedGroups)?group.nestedGroups.length:0;
-      const wrap=element.appendChild(document.createElement('div'));
-      wrap.style.cssText='display:flex;align-items:center;width:100%;height:100%;padding:0 8px 0 10px;background:#E8EEF7;border-left:3px solid #A8844A;border-top:1px solid rgba(15,23,42,.14);gap:6px;overflow:hidden;box-sizing:border-box';
-      const nameSpan=wrap.appendChild(document.createElement('span'));
-      nameSpan.textContent=catCode;
-      nameSpan.style.cssText='font:900 10.5px/1 system-ui,sans-serif;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0';
-      if(count){
-        const cs=wrap.appendChild(document.createElement('span'));
-        cs.textContent=count+' veh';
-        cs.style.cssText='font:700 9px/1 system-ui,sans-serif;color:#475569;padding:1px 5px;background:rgba(0,0,0,.05);border-radius:3px;border:1px solid rgba(15,23,42,.10);white-space:nowrap;flex-shrink:0';
-      }
-    } else {
-      const wrap=element.appendChild(document.createElement('div'));
-      wrap.style.cssText='display:flex;align-items:stretch;width:100%;height:100%;overflow:hidden';
-      const cols=[
-        [safe(group.categoryCode||'—'),'display:flex;align-items:center;justify-content:center;flex-shrink:0;width:80px;min-width:80px;max-width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 3px;font:900 9.5px/1 system-ui,sans-serif;color:#6C522E;background:rgba(168,132,74,.10);border-right:1px solid rgba(168,132,74,.20);text-transform:uppercase;letter-spacing:.04em'],
-        [String(group._rowNo||'—'),'display:flex;align-items:center;justify-content:center;flex-shrink:0;width:32px;min-width:32px;max-width:32px;overflow:hidden;white-space:nowrap;padding:0 2px;font:900 10px/1 system-ui,sans-serif;color:#94a3b8;background:rgba(148,163,184,.07);border-right:1px solid rgba(15,23,42,.08)'],
-        [safe(group.plate||'—'),'display:flex;align-items:center;flex-shrink:0;width:90px;min-width:90px;max-width:90px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px;font:900 10.5px/1 ui-monospace,monospace,system-ui;color:#6C522E;background:rgba(168,132,74,.07);border-right:1px solid rgba(168,132,74,.15)'],
-        [safe(group.model||'—'),'display:flex;align-items:center;flex-shrink:0;width:90px;min-width:90px;max-width:90px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px;font:700 10px/1.2 system-ui,sans-serif;color:#334155;border-right:1px solid rgba(15,23,42,.08)'],
-        [safe(group.station||'—'),'display:flex;align-items:center;flex:1;min-width:75px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px;font:700 10px/1.1 system-ui,sans-serif;color:#64748b'],
-      ];
-      for(const [text,css] of cols){
-        const s=wrap.appendChild(document.createElement('span'));
-        s.style.cssText=css;
-        s.textContent=text;
-      }
+      const catCode=escHtml(String(g.id||'').replace(/^cat_/,''));
+      const count=Array.isArray(g.nestedGroups)?g.nestedGroups.length:0;
+      return `<div class="fleetCatCell"><span class="fleetCatCode">${catCode}</span><span class="fleetCatMeta">${count}&thinsp;veh</span></div>`;
     }
+    const cat  =escHtml(safe(g.categoryCode||'—'));
+    const no   =escHtml(String(rowNo||'—'));
+    const plate=escHtml(safe(g.plate||'—'));
+    const model=escHtml(safe(g.model||'—'));
+    const stn  =escHtml(safe(g.station||'—'));
+    return `<div class="fleetGroupCell"><span class="fleetCol fleetCategory">${cat}</span><span class="fleetCol fleetNo">${no}</span><span class="fleetCol fleetPlate">${plate}</span><span class="fleetCol fleetModel">${model}</span><span class="fleetCol fleetStation">${stn}</span></div>`;
+  }
+
+  // ── Post-render style enforcer — setProperty('important') overrides EVERYTHING ──
+  function _sp(el,k,v){el.style.setProperty(k,v,'important');}
+
+  function fixGroupStyles(){
+    const tl=document.getElementById('timeline');
+    if(!tl) return;
+    // Vehicle rows
+    tl.querySelectorAll('.vis-label .vis-inner .fleetGroupCell').forEach(gc=>{
+      _sp(gc,'display','flex');_sp(gc,'align-items','stretch');
+      _sp(gc,'width','100%');_sp(gc,'height','100%');_sp(gc,'overflow','hidden');
+      const spans=Array.from(gc.children);
+      const COLS=[
+        // category
+        {w:'80px',bg:'rgba(168,132,74,.18)',br:'2px solid rgba(168,132,74,.35)',c:'#6C522E',fw:'900',fs:'9.5px',tt:'uppercase',ls:'.04em',jc:'center',p:'0 3px'},
+        // #
+        {w:'32px',bg:'rgba(148,163,184,.14)',br:'1px solid rgba(15,23,42,.09)',c:'#94a3b8',fw:'900',fs:'10px',jc:'center',p:'0 2px'},
+        // plate
+        {w:'90px',bg:'rgba(168,132,74,.11)',br:'1px solid rgba(168,132,74,.22)',c:'#6C522E',fw:'900',fs:'10.5px',ff:'ui-monospace,monospace,system-ui',p:'0 4px'},
+        // model
+        {w:'90px',bg:'',br:'1px solid rgba(15,23,42,.08)',c:'#334155',fw:'700',fs:'10px',p:'0 4px'},
+        // station
+        {w:'',flex:'1',bg:'',br:'',c:'#64748b',fw:'700',fs:'10px',p:'0 4px'},
+      ];
+      spans.forEach((s,i)=>{
+        if(i>=COLS.length) return;
+        const c=COLS[i];
+        _sp(s,'display','flex');_sp(s,'align-items','center');
+        _sp(s,'overflow','hidden');_sp(s,'white-space','nowrap');_sp(s,'text-overflow','ellipsis');
+        _sp(s,'box-sizing','border-box');_sp(s,'padding',c.p);
+        if(c.w){_sp(s,'width',c.w);_sp(s,'min-width',c.w);_sp(s,'max-width',c.w);_sp(s,'flex-shrink','0');}
+        else if(c.flex){_sp(s,'flex',c.flex);}
+        if(c.bg) _sp(s,'background',c.bg);
+        if(c.br) _sp(s,'border-right',c.br);
+        _sp(s,'color',c.c);_sp(s,'font-weight',c.fw);_sp(s,'font-size',c.fs);
+        if(c.ff) _sp(s,'font-family',c.ff);
+        if(c.tt) _sp(s,'text-transform',c.tt);
+        if(c.ls) _sp(s,'letter-spacing',c.ls);
+        if(c.jc) _sp(s,'justify-content',c.jc);
+      });
+    });
+    // Category rows
+    tl.querySelectorAll('.vis-label .vis-inner .fleetCatCell').forEach(cc=>{
+      _sp(cc,'display','flex');_sp(cc,'align-items','center');
+      _sp(cc,'width','100%');_sp(cc,'height','100%');_sp(cc,'overflow','hidden');
+      _sp(cc,'padding','0 8px 0 10px');_sp(cc,'background','#E8EEF7');
+      _sp(cc,'border-left','3px solid #A8844A');_sp(cc,'border-top','1px solid rgba(15,23,42,.14)');
+      _sp(cc,'gap','6px');_sp(cc,'box-sizing','border-box');
+      const code=cc.querySelector('.fleetCatCode');
+      if(code){_sp(code,'font','900 10.5px/1 system-ui,sans-serif');_sp(code,'color','#0f172a');_sp(code,'flex','1');_sp(code,'min-width','0');_sp(code,'overflow','hidden');_sp(code,'white-space','nowrap');_sp(code,'text-overflow','ellipsis');}
+      const meta=cc.querySelector('.fleetCatMeta');
+      if(meta){_sp(meta,'font','700 9px/1 system-ui,sans-serif');_sp(meta,'color','#475569');_sp(meta,'padding','1px 5px');_sp(meta,'background','rgba(0,0,0,.06)');_sp(meta,'border-radius','3px');_sp(meta,'border','1px solid rgba(15,23,42,.10)');_sp(meta,'white-space','nowrap');_sp(meta,'flex-shrink','0');}
+    });
   }
 
   function assertVisReady(){
@@ -812,8 +847,8 @@ button:active{transform:scale(.985)}
       zoomMin:1000*60*60*6,
       zoomMax:1000*60*60*24*90,
 
-      groupTemplate:function(group,element){
-        if(group&&element) _groupDomBuilder(group,element);
+      groupTemplate:function(group){
+        return _grpHtmlCache.get(String(group?.id||''))||String(group?.content||group?.id||'');
       },
 
       template:function(item){
@@ -845,7 +880,7 @@ button:active{transform:scale(.985)}
       if(suppressRangeEvents) return;
       try{ keepWindow=timeline.getWindow(); userWindowDirty=true; }catch(e){}
     });
-    timeline.on('changed',()=>requestAnimationFrame(syncCalHeader));
+    timeline.on('changed',()=>requestAnimationFrame(()=>{syncCalHeader();fixGroupStyles();}));
     timeline.on('select',(props)=>{ try{ const id=props?.items?.[0]; selectedFleetId=id?String(id):''; }catch(_){} });
     timeline.on('doubleClick',(props)=>{ try{ const id=props?.item; if(!id) return; const it=itemsDS.get(id); if(it) openBookingModal(it); }catch(_){} });
 
@@ -969,16 +1004,19 @@ button:active{transform:scale(.985)}
 
       groupsDS.clear();
       groupsDS.add([{id:HEAT_GROUP_ID,content:'',visible:false}]);
+      _grpHtmlCache.clear();
       const _catRowIdx={};
       groupsDS.add(groups.map(g=>{
         const isCat=String(g.id||'').startsWith('cat_');
-        if(isCat){
-          return{...g,content:' ',style:(g.style||'')+';height:24px'};
-        } else {
+        let rowNo;
+        if(!isCat){
           const cat=safe(g.categoryCode||'');
           _catRowIdx[cat]=(_catRowIdx[cat]||0)+1;
-          return{...g,content:' ',_rowNo:_catRowIdx[cat],style:(g.style||'')+';height:20px'};
+          rowNo=_catRowIdx[cat];
         }
+        const html=_buildGroupContent({...g,_rowNo:rowNo},rowNo);
+        _grpHtmlCache.set(String(g.id||''),html);
+        return{...g,content:html,_rowNo:rowNo,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
       }));
 
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,group:e.group,start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
