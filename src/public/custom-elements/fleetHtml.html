@@ -610,7 +610,6 @@
     { key:'status',   label:'Status',        sortable:true  },
     { key:'plate',    label:'Plate',         sortable:true  },
     { key:'model',    label:'Model',         sortable:true  },
-    { key:'category', label:'Category',      sortable:true  },
     { key:'station',  label:'Station',       sortable:true  },
     { key:'fuel',     label:'Fuel',          sortable:true  },
     { key:'mileage',  label:'Mileage',       sortable:true  },
@@ -641,8 +640,6 @@
     const statusCell   = `<td><span class="tbl-badge st-${esc(status)}">${STATUS_ICONS[status]||''} ${esc(STATUS_LABELS[status]||status)}</span></td>`;
     const plateCell    = `<td><span class="tbl-plate">${highlight(s(v.plate),q)}</span></td>`;
     const modelCell    = `<td><span class="tbl-model">${highlight(s(v.model||v.vehicleLabel||''),q)}</span></td>`;
-    const catTxt       = s(v.categoryLabel||v.categoryCode||'');
-    const categoryCell = `<td>${catTxt?`<span class="tbl-cat">${highlight(catTxt,q)}</span>`:'<span style="color:var(--muted)">&#8212;</span>'}</td>`;
     const stTxt        = s(v.currentStationLabel||v.currentStationCode||'');
     const stationCell  = `<td><span class="tbl-station">${stTxt?highlight(stTxt,q):'&#8212;'}</span></td>`;
     const fuel         = Number(v.fuelLevel)||0;
@@ -657,7 +654,7 @@
       const isDueToday= dropDate && ymd(dropDate)===today && !isOverdue;
       const dueBadge  = isOverdue ? `<span class="tbl-overdue">Overdue</span>` : isDueToday ? `<span class="tbl-duetoday">Due today</span>` : '';
       const nameHtml  = highlight(s(ar.customerName||''),q);
-      const bookHtml  = ar.bookingNumber||ar.bookingId ? `<span class="tbl-booking">${highlight(s(ar.bookingNumber||ar.bookingId||''),q)}</span>` : '';
+      const bookHtml  = ar.bookingNumber ? `<span class="tbl-booking">${highlight(s(ar.bookingNumber),q)}</span>` : '';
       const dropStr   = ar.dropoffDateTime ? hhmm(ar.dropoffDateTime) : '';
       rentalCell = `<td><span class="tbl-customer">${nameHtml}</span>${bookHtml}${dueBadge}${dropStr?`<span class="tbl-booking" style="margin-left:5px">&#8594;${dropStr}</span>`:''}</td>`;
     } else {
@@ -670,7 +667,7 @@
       ? `<button class="rb-btn" onclick="window._flAct('contract','${esc(s(ar.bookingId))}')">Contract</button>` : '';
     const actionsCell = `<td><div class="tbl-actions"><button class="rb-btn primary" onclick="window._flAct('card','${id}')">View</button>${contractBtn}</div></td>`;
 
-    return `<tr class="st-${esc(status)}" id="fvt-${id}">${statusCell}${plateCell}${modelCell}${categoryCell}${stationCell}${fuelCell}${mileageCell}${rentalCell}${actionsCell}</tr>`;
+    return `<tr class="st-${esc(status)}" id="fvt-${id}">${statusCell}${plateCell}${modelCell}${stationCell}${fuelCell}${mileageCell}${rentalCell}${actionsCell}</tr>`;
   }
 
   function renderTableBody(filtered){
