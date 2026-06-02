@@ -117,8 +117,7 @@
 
     /* ── KPI summary ── */
     .rb-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:10px}
-    .rb-scard{padding:14px 16px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .14s}
-    .rb-scard:hover{box-shadow:var(--shadow-lg)}
+    .rb-scard{padding:14px 16px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);position:relative;overflow:hidden}
     .rb-scard::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--border2);border-radius:0 3px 3px 0}
     .rb-scard.sc-ok::before{background:#10B981}
     .rb-scard.sc-out::before{background:var(--gold)}
@@ -373,23 +372,6 @@
 
   <main class="shell-content">
 
-    <!-- Filter row -->
-    <section class="surface rb-controls">
-      <div class="rb-row">
-        <div class="rb-filters">
-          <span class="rb-filter-label">Filter:</span>
-          <button class="rb-fchip active" data-filter="all" type="button">All</button>
-          <button class="rb-fchip fc-available" data-filter="available" type="button">&#10003; Available</button>
-          <button class="rb-fchip fc-out" data-filter="out" type="button">&#128663; Out</button>
-          <button class="rb-fchip fc-notready" data-filter="notready" type="button">&#9888; Not Ready</button>
-          <button class="rb-fchip fc-hold" data-filter="hold" type="button">&#128274; Hold</button>
-          <button class="rb-fchip fc-maintenance" data-filter="maintenance" type="button">&#128295; Maintenance</button>
-          <span style="flex:1"></span>
-          <button class="btn" id="btnNextProblem" type="button" title="Jump to next issue (N)">&#9889; Next issue</button>
-        </div>
-      </div>
-    </section>
-
     <!-- Stale data banner -->
     <div class="rb-stale-banner" id="staleBanner">
       <span>&#9201;</span>
@@ -432,7 +414,6 @@
     <div class="sc-section">Actions</div>
     <div class="sc-key"><kbd>R</kbd></div><div class="sc-desc">Refresh fleet data</div>
     <div class="sc-key"><kbd>/</kbd></div><div class="sc-desc">Focus search bar</div>
-    <div class="sc-key"><kbd>N</kbd></div><div class="sc-desc">Jump to next issue</div>
     <div class="sc-section">General</div>
     <div class="sc-key"><kbd>?</kbd></div><div class="sc-desc">Show / hide this panel</div>
     <div class="sc-key"><kbd>Esc</kbd></div><div class="sc-desc">Close panel &middot; clear search</div>
@@ -468,7 +449,6 @@
     summary:         {},
     search:          '',
     station:         'all',
-    quickFilter:     'all',
     viewMode:         'table', /* permanent */
     tableSort:        { key: 'status', dir: 'asc' },
     groupByCategory:  true,
@@ -476,7 +456,6 @@
     loading:          false,
     loadError:       false,
     lastRefreshTime: null,
-    problemIndex:    0,
     _savedStation:   null,
     autoTimer:       null,
     staleTimer:      null,
@@ -509,7 +488,6 @@
   /* ── Prefs persistence ── */
   function savePrefs(){
     try{ localStorage.setItem(LS_PREFS, JSON.stringify({
-      quickFilter:     state.quickFilter,
       station:         state.station,
       tableSort:       state.tableSort,
       groupByCategory: state.groupByCategory,
@@ -520,7 +498,6 @@
     try{
       const raw=localStorage.getItem(LS_PREFS); if(!raw) return;
       const p=JSON.parse(raw);
-      if(p.quickFilter)                              state.quickFilter=p.quickFilter;
       if(p.station)                                  state._savedStation=p.station;
       /* viewMode is always table — ignore saved value */
       if(p.tableSort&&p.tableSort.key)               state.tableSort=p.tableSort;
@@ -550,12 +527,10 @@
     hideStaleBanner();
     const btn=$('btnRefresh'); if(btn) btn.classList.add('spinning');
     postToWix({ type:'requestFleetBoard' });
-    setStatus('Loading…');
     _loadTimer = setTimeout(()=>{
       state.loading   = false;
       state.loadError = true;
       const b=$('btnRefresh'); if(b) b.classList.remove('spinning');
-      setStatus('⚠ No response — check connection');
       renderView();
     }, 8000);
   }
@@ -571,18 +546,6 @@
       .map(s).join(' ').toLowerCase();
   }
 
-  function matchesFilter(v){
-    const st = vehicleStatus(v);
-    switch(state.quickFilter){
-      case 'available':   return st==='available';
-      case 'out':         return st==='out';
-      case 'notready':    return st==='notready';
-      case 'hold':        return st==='hold';
-      case 'maintenance': return st==='maintenance';
-      default:            return true;
-    }
-  }
-
   function applyFilters(list){
     const stFilter = state.station;
     const q = norm(state.search);
@@ -592,7 +555,6 @@
         if(vs&&vs!==stFilter) return false;
       }
       if(q&&!vehicleBlob(v).includes(q)) return false;
-      if(!matchesFilter(v)) return false;
       return true;
     });
   }
@@ -870,7 +832,7 @@
       .map(({k,label,cls})=>{
         const val=sum[k]||0;
         const filter=k==='notReady'?'notready':(k==='total'?'all':k);
-        return `<div class="rb-scard ${cls}" onclick="window._flSetFilter('${esc(filter)}')" title="Filter by ${esc(label)}"><div class="rb-sk">${esc(label)}</div><div class="rb-sv">${esc(String(val))}</div></div>`;
+        return `<div class="rb-scard ${cls}"><div class="rb-sk">${esc(label)}</div><div class="rb-sv">${esc(String(val))}</div></div>`;
       }).join('');
   }
 
@@ -926,29 +888,6 @@
     try{ postToWix({type:'resizeShell',height:Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)}); }catch(_){}
   }
 
-  /* ── Jump to next problem ── */
-  function jumpToNextProblem(){
-    const problems=state.vehicles.filter(v=>{
-      const st=vehicleStatus(v);
-      if(st==='hold'||st==='notready') return true;
-      if(v.activeRental){ const d=asDate(v.activeRental.dropoffDateTime); if(d&&d<new Date()) return true; }
-      return false;
-    });
-    if(!problems.length){ setStatus('No issues found'); return; }
-    const v=problems[state.problemIndex%problems.length];
-    state.problemIndex++;
-    const id=s(v.fleetVehicleId||''); if(!id) return;
-
-    if(state.viewMode==='table'){
-      const row=document.getElementById('fvt-'+esc(id));
-      if(row){ row.scrollIntoView({behavior:'smooth',block:'center'}); row.classList.remove('highlight'); void row.offsetWidth; row.classList.add('highlight'); setTimeout(()=>row.classList.remove('highlight'),2100); }
-    } else {
-      const card=document.getElementById('fvc-'+esc(id));
-      if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.classList.remove('highlight'); void card.offsetWidth; card.classList.add('highlight'); setTimeout(()=>card.classList.remove('highlight'),2100); }
-    }
-    setStatus(`Issue ${(state.problemIndex-1)%problems.length+1}/${problems.length}: ${esc(s(v.plate||v.model||''))}`);
-  }
-
   /* ── Auto-refresh ── */
   function startAuto(){ stopAuto(); state.autoTimer=setInterval(reloadData,5*60*1000); }
   function stopAuto(){ if(state.autoTimer){clearInterval(state.autoTimer);state.autoTimer=null;} }
@@ -962,14 +901,6 @@
   window._flAct = function(action, id){
     if(action==='card')          postToWix({type:'openVehicleCard', fleetVehicleId:id});
     else if(action==='contract') postToWix({type:'openContract', bookingId:id});
-  };
-  window._flSetFilter = function(f){
-    state.quickFilter=f;
-    document.querySelectorAll('.rb-fchip').forEach(btn=>
-      btn.classList.toggle('active', btn.getAttribute('data-filter')===f)
-    );
-    renderView();
-    savePrefs();
   };
   window._flToggleCat = function(cat){
     if(state.collapsedCats.has(cat)) state.collapsedCats.delete(cat);
@@ -998,12 +929,6 @@
   $('btnHelp').addEventListener('click',toggleShortcutPanel);
   $('scClose').addEventListener('click',closeShortcutPanel);
   $('scBackdrop').addEventListener('click',closeShortcutPanel);
-  $('btnNextProblem').addEventListener('click',jumpToNextProblem);
-
-  /* Quick filter chips */
-  document.querySelectorAll('.rb-fchip').forEach(btn=>
-    btn.addEventListener('click',()=>window._flSetFilter(btn.getAttribute('data-filter')))
-  );
 
   /* Keyboard shortcuts */
   document.addEventListener('keydown',e=>{
@@ -1017,7 +942,6 @@
     if(e.key==='?'&&!inInput){ e.preventDefault(); toggleShortcutPanel(); return; }
     if(inInput) return;
     if(e.key==='r'||e.key==='R') reloadData();
-    else if(e.key==='n'||e.key==='N') jumpToNextProblem();
   });
 
   /* Sidebar nav */
@@ -1048,13 +972,6 @@
     }catch(_){ return false; }
   }
 
-  /* ── Restore UI from prefs ── */
-  function restoreUIFromState(){
-    document.querySelectorAll('.rb-fchip').forEach(b=>
-      b.classList.toggle('active', b.getAttribute('data-filter')===state.quickFilter)
-    );
-  }
-
   /* ── postMessage handler ── */
   window.addEventListener('message',event=>{
     if(event.origin&&!isTrusted(event.origin)) return;
@@ -1070,13 +987,10 @@
       state.loading         = false;
       state.loadError       = false;
       state.lastRefreshTime = Date.now();
-      state.problemIndex    = 0;
       const btn=$('btnRefresh'); if(btn) btn.classList.remove('spinning');
       state.vehicles = Array.isArray(d.vehicles) ? d.vehicles : [];
       state.summary  = d.summary || {};
       stampRefresh();
-      const sum=state.summary;
-      setStatus(`OK • total=${sum.total||0} available=${sum.available||0} out=${sum.out||0} hold=${sum.hold||0}`);
       render();
       return;
     }
@@ -1102,7 +1016,6 @@
 
   /* ── Auto-init ── */
   loadPrefs();
-  restoreUIFromState();
   state.staleTimer=setInterval(checkStaleness, 60000);
   postToWix({type:'requestUserContext'});
   reloadData();
