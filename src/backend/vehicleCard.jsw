@@ -280,3 +280,108 @@ export async function saveVehicleCardData({ sessionToken, fleetVehicleId, patch 
   const updated = await wixData.update(targetCollection, next, { suppressAuth: true });
   return { success: true, fleet: normalizeFleet(updated) };
 }
+
+export async function getFleetBoard({ sessionToken } = {}) {
+  await requireStaffAccess({ sessionToken, area: 'fleet', action: 'View' });
+
+  // 1. All active fleet vehicles
+  const fleetRes = await wixData.query('FleetNew')
+    .eq('active', true)
+    .limit(500)
+    .find({ suppressAuth: true });
+  const vehicles = fleetRes.items || [];
+
+  // 2. All non-closed rentals (to find currently active/out vehicles)
+  let rentals = [];
+  try {
+    const rRes = await wixData.query('RentalsNew')
+      .limit(500)
+      .find({ suppressAuth: true });
+    rentals = (rRes.items || []).filter(r => {
+      const st = txt(r.rentalState || '').toLowerCase();
+      return !['closed rental','cancelled','voided','completed'].some(c => st.includes(c));
+    });
+  } catch (_) {}
+
+  // 3. Booking details for active rentals
+  const bookingIds = [...new Set(rentals.map(r => txt(r.bookingId)).filter(Boolean))];
+  const bookingMap = new Map();
+  for (let i = 0; i < bookingIds.length; i += 50) {
+    const chunk = bookingIds.slice(i, i + 50);
+    try {
+      const bRes = await wixData.query('BookingsNew').hasSome('_id', chunk).limit(100).find({ suppressAuth: true });
+      (bRes.items || []).forEach(b => { bookingMap.set(txt(b._id), b); if (txt(b.bookingId)) bookingMap.set(txt(b.bookingId), b); });
+    } catch (_) {}
+  }
+
+  // 4. Map vehicle → active rental
+  const vehicleRentalMap = new Map();
+  for (const r of rentals) {
+    const vId  = txt(r.assignedVehicleId || '');
+    const vPlt = txt(r.assignedVehiclePlate || '').toLowerCase();
+    const b    = bookingMap.get(txt(r.bookingId)) || {};
+    const info = {
+      rentalId:        txt(r._id),
+      bookingId:       txt(r.bookingId || b._id || ''),
+      bookingNumber:   txt(b.bookingNumber || r.bookingNumber || ''),
+      customerName:    txt(b.customerName  || r.customerName  || ''),
+      pickupDateTime:  txt(b.pickupDateTime  || r.checkoutAt  || ''),
+      dropoffDateTime: txt(b.dropoffDateTime || r.checkinAt   || ''),
+      rentalState:     txt(r.rentalState || ''),
+      paymentStatus:   txt(r.paymentStatus || '')
+    };
+    if (vId)  vehicleRentalMap.set(vId, info);
+    if (vPlt) vehicleRentalMap.set(vPlt, info);
+  }
+
+  // 5. Normalize
+  const normalized = vehicles.map(v => {
+    const id  = txt(v._id);
+    const plt = txt(v.plate).toLowerCase();
+    const ar  = vehicleRentalMap.get(id) || vehicleRentalMap.get(plt) || null;
+    return {
+      fleetVehicleId:       txt(v.fleetVehicleId || id),
+      plate:                txt(v.plate),
+      model:                txt(v.model),
+      vehicleLabel:         txt(v.vehicleLabel || [txt(v.plate), txt(v.model)].filter(Boolean).join(' - ')),
+      categoryCode:         txt(v.categoryCode),
+      categoryLabel:        txt(v.categoryLabel),
+      status:               txt(v.status),
+      operationalStatus:    txt(v.operationalStatus),
+      currentStationCode:   txt(v.currentStationCode),
+      currentStationLabel:  txt(v.currentStationLabel),
+      fuelLevel:            num(v.fuelLevel) || 0,
+      fuelType:             txt(v.fuelType),
+      mileage:              num(v.mileage)   || 0,
+      readyToGo:            bool(v.readyToGo),
+      hardHold:             bool(v.hardHold),
+      notes:                txt(v.notes),
+      activeRental: ar
+    };
+  });
+
+  // Sort: available first, then out, notready, hold, maintenance
+  const priority = v => {
+    if (v.hardHold) return 4;
+    const st = (v.operationalStatus || v.status || '').toLowerCase();
+    if (['service','maintenance','blocked','repair'].some(s => st.includes(s))) return 5;
+    if (v.activeRental) return 1;
+    if (!v.readyToGo) return 2;
+    return 0;
+  };
+  normalized.sort((a, b) => priority(a) - priority(b));
+
+  const summary = {
+    total:       normalized.length,
+    available:   normalized.filter(v => !v.hardHold && !v.activeRental && v.readyToGo).length,
+    out:         normalized.filter(v => !!v.activeRental).length,
+    notReady:    normalized.filter(v => !v.readyToGo && !v.hardHold && !v.activeRental).length,
+    hold:        normalized.filter(v => v.hardHold).length,
+    maintenance: normalized.filter(v => {
+      const st = (v.operationalStatus || v.status || '').toLowerCase();
+      return ['service','maintenance','blocked','repair'].some(s => st.includes(s));
+    }).length
+  };
+
+  return { success: true, vehicles: normalized, summary };
+}
