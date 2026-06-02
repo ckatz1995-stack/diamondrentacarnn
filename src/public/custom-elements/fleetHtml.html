@@ -236,7 +236,22 @@
     .fleet-tbl tr.st-maintenance td:first-child{border-left:3px solid #94A3B8;padding-left:8px}
     .tbl-plate{font:900 11px/1 system-ui,monospace;color:var(--gold2);background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:5px;padding:2px 6px;display:inline-block}
     .tbl-model{font:800 11px/1.2 system-ui;color:var(--text)}
-    .tbl-cat{display:inline-block;font:900 8.5px/1 system-ui;color:var(--sub);background:rgba(0,0,0,.04);border:1px solid var(--border);border-radius:4px;padding:2px 5px;text-transform:uppercase;margin-left:5px;letter-spacing:.04em;vertical-align:middle}
+    .tbl-cat{display:inline-block;font:900 9px/1 system-ui;color:var(--sub);background:rgba(0,0,0,.04);border:1px solid var(--border);border-radius:4px;padding:2px 6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle}
+    /* ── Category group rows ── */
+    .tbl-group-hdr{background:var(--surface2)!important;cursor:pointer;user-select:none}
+    .tbl-group-hdr:hover td{background:rgba(0,0,0,.03)!important}
+    .tbl-group-hdr td{padding:6px 12px;border-top:2px solid var(--border2);border-bottom:1px solid var(--border2)}
+    .tbl-group-inner{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .tbl-group-caret{font-size:10px;color:var(--muted);transition:transform .15s;display:inline-block;width:12px}
+    .tbl-group-caret.collapsed{transform:rotate(-90deg)}
+    .tbl-group-name{font:900 11px/1 system-ui;color:var(--text);letter-spacing:.01em}
+    .tbl-group-count{font:700 10px/1 system-ui;color:var(--muted);padding:2px 6px;background:rgba(0,0,0,.05);border-radius:4px}
+    .tbl-group-stats{display:flex;gap:6px;flex-wrap:wrap;margin-left:4px}
+    .tbl-group-stat{font:700 9.5px/1 system-ui;padding:2px 6px;border-radius:var(--r-pill);border:1px solid transparent}
+    .tbl-group-stat.ok{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.18);color:#065F46}
+    .tbl-group-stat.out{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold2)}
+    .tbl-group-stat.warn{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.18);color:#B45309}
+    .tbl-group-stat.danger{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.18);color:#B91C1C}
     .tbl-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--r-pill);font:900 9.5px/1 system-ui;border:1px solid transparent;white-space:nowrap}
     .tbl-badge.st-available{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22);color:#065F46}
     .tbl-badge.st-out{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold2)}
@@ -465,9 +480,11 @@
     search:          '',
     station:         'all',
     quickFilter:     'all',
-    viewMode:        'table',
-    tableSort:       { key: 'status', dir: 'asc' },
-    loading:         false,
+    viewMode:         'table',
+    tableSort:        { key: 'status', dir: 'asc' },
+    groupByCategory:  true,
+    collapsedCats:    new Set(),
+    loading:          false,
     loadError:       false,
     lastRefreshTime: null,
     problemIndex:    0,
@@ -503,20 +520,24 @@
   /* ── Prefs persistence ── */
   function savePrefs(){
     try{ localStorage.setItem(LS_PREFS, JSON.stringify({
-      quickFilter: state.quickFilter,
-      station:     state.station,
-      viewMode:    state.viewMode,
-      tableSort:   state.tableSort
+      quickFilter:     state.quickFilter,
+      station:         state.station,
+      viewMode:        state.viewMode,
+      tableSort:       state.tableSort,
+      groupByCategory: state.groupByCategory,
+      collapsedCats:   [...state.collapsedCats]
     })); }catch(_){}
   }
   function loadPrefs(){
     try{
       const raw=localStorage.getItem(LS_PREFS); if(!raw) return;
       const p=JSON.parse(raw);
-      if(p.quickFilter)           state.quickFilter=p.quickFilter;
-      if(p.station)               state._savedStation=p.station;
+      if(p.quickFilter)                              state.quickFilter=p.quickFilter;
+      if(p.station)                                  state._savedStation=p.station;
       if(p.viewMode==='cards'||p.viewMode==='table') state.viewMode=p.viewMode;
-      if(p.tableSort&&p.tableSort.key) state.tableSort=p.tableSort;
+      if(p.tableSort&&p.tableSort.key)               state.tableSort=p.tableSort;
+      if(p.groupByCategory!=null)                    state.groupByCategory=!!p.groupByCategory;
+      if(Array.isArray(p.collapsedCats))             state.collapsedCats=new Set(p.collapsedCats);
     }catch(_){}
   }
 
@@ -601,6 +622,8 @@
         av = norm(a.plate); bv = norm(b.plate);
       } else if(key==='model'){
         av = norm(a.model||a.vehicleLabel||''); bv = norm(b.model||b.vehicleLabel||'');
+      } else if(key==='category'){
+        av = norm(a.categoryLabel||a.categoryCode||''); bv = norm(b.categoryLabel||b.categoryCode||'');
       } else if(key==='station'){
         av = norm(a.currentStationLabel||a.currentStationCode||'');
         bv = norm(b.currentStationLabel||b.currentStationCode||'');
@@ -647,15 +670,17 @@
 
   /* ── Render compact table ── */
   const TABLE_COLS = [
-    { key:'status',   label:'Status',   sortable:true  },
-    { key:'plate',    label:'Plate',    sortable:true  },
-    { key:'model',    label:'Model / Cat', sortable:true  },
-    { key:'station',  label:'Station',  sortable:true  },
-    { key:'fuel',     label:'Fuel',     sortable:true  },
-    { key:'mileage',  label:'Mileage',  sortable:true  },
-    { key:'customer', label:'Active Rental', sortable:true },
-    { key:'actions',  label:'',         sortable:false }
+    { key:'status',   label:'Status',        sortable:true  },
+    { key:'plate',    label:'Plate',         sortable:true  },
+    { key:'model',    label:'Model',         sortable:true  },
+    { key:'category', label:'Category',      sortable:true  },
+    { key:'station',  label:'Station',       sortable:true  },
+    { key:'fuel',     label:'Fuel',          sortable:true  },
+    { key:'mileage',  label:'Mileage',       sortable:true  },
+    { key:'customer', label:'Active Rental', sortable:true  },
+    { key:'actions',  label:'',              sortable:false }
   ];
+  const NUM_COLS = TABLE_COLS.length;
 
   function renderTableHeaders(){
     const { key, dir } = state.tableSort;
@@ -668,80 +693,104 @@
     }).join('') + '</tr>';
   }
 
-  function renderTableBody(filtered){
-    const q = norm(state.search);
+  function buildVehicleRow(v, q){
+    const status  = vehicleStatus(v);
+    const id      = esc(s(v.fleetVehicleId||v._id||''));
+    const today   = ymd(new Date());
+    const ar      = v.activeRental || null;
     const STATUS_LABELS = { available:'Available', out:'Out', notready:'Not Ready', hold:'Hold', maintenance:'Maintenance' };
     const STATUS_ICONS  = { available:'✓', out:'🚗', notready:'⚠', hold:'🔒', maintenance:'🔧' };
 
+    const statusCell   = `<td><span class="tbl-badge st-${esc(status)}">${STATUS_ICONS[status]||''} ${esc(STATUS_LABELS[status]||status)}</span></td>`;
+    const plateCell    = `<td><span class="tbl-plate">${highlight(s(v.plate),q)}</span></td>`;
+    const modelCell    = `<td><span class="tbl-model">${highlight(s(v.model||v.vehicleLabel||''),q)}</span></td>`;
+    const catTxt       = s(v.categoryLabel||v.categoryCode||'');
+    const categoryCell = `<td>${catTxt?`<span class="tbl-cat">${highlight(catTxt,q)}</span>`:'<span style="color:var(--muted)">&#8212;</span>'}</td>`;
+    const stTxt        = s(v.currentStationLabel||v.currentStationCode||'');
+    const stationCell  = `<td><span class="tbl-station">${stTxt?highlight(stTxt,q):'&#8212;'}</span></td>`;
+    const fuel         = Number(v.fuelLevel)||0;
+    const fuelCell     = `<td><span class="tbl-fuel">${fuelBarHtml(fuel,'tbl')}<span class="tbl-fuel-lbl">${fuel}/5</span></span></td>`;
+    const km           = Number(v.mileage)||0;
+    const mileageCell  = `<td><span class="tbl-mileage">${km?km.toLocaleString()+' km':'&#8212;'}</span></td>`;
+
+    let rentalCell;
+    if(ar){
+      const dropDate  = asDate(ar.dropoffDateTime);
+      const isOverdue = dropDate && dropDate < new Date();
+      const isDueToday= dropDate && ymd(dropDate)===today && !isOverdue;
+      const dueBadge  = isOverdue ? `<span class="tbl-overdue">Overdue</span>` : isDueToday ? `<span class="tbl-duetoday">Due today</span>` : '';
+      const nameHtml  = highlight(s(ar.customerName||''),q);
+      const bookHtml  = ar.bookingNumber||ar.bookingId ? `<span class="tbl-booking">${highlight(s(ar.bookingNumber||ar.bookingId||''),q)}</span>` : '';
+      const dropStr   = ar.dropoffDateTime ? hhmm(ar.dropoffDateTime) : '';
+      rentalCell = `<td><span class="tbl-customer">${nameHtml}</span>${bookHtml}${dueBadge}${dropStr?`<span class="tbl-booking" style="margin-left:5px">&#8594;${dropStr}</span>`:''}</td>`;
+    } else {
+      const flags=[];
+      if(v.hardHold)  flags.push(`<span class="tbl-hold-flag">&#128274; Hold</span>`);
+      else if(!v.readyToGo&&status!=='maintenance') flags.push(`<span class="tbl-notready-flag">&#9888; Not Ready</span>`);
+      rentalCell = `<td>${flags.join('')||'&#8212;'}</td>`;
+    }
+    const contractBtn = ar&&s(ar.bookingId)
+      ? `<button class="rb-btn" onclick="window._flAct('contract','${esc(s(ar.bookingId))}')">Contract</button>` : '';
+    const actionsCell = `<td><div class="tbl-actions"><button class="rb-btn primary" onclick="window._flAct('card','${id}')">View</button>${contractBtn}</div></td>`;
+
+    return `<tr class="st-${esc(status)}" id="fvt-${id}">${statusCell}${plateCell}${modelCell}${categoryCell}${stationCell}${fuelCell}${mileageCell}${rentalCell}${actionsCell}</tr>`;
+  }
+
+  function renderTableBody(filtered){
+    const q = norm(state.search);
+
     if(!filtered.length){
-      if(state.loading && !state.vehicles.length){
-        els.fleetTBody.innerHTML=`<tr><td colspan="${TABLE_COLS.length}" class="fleet-tbl-empty">Loading…</td></tr>`;
-      } else if(state.loadError && !state.vehicles.length){
-        els.fleetTBody.innerHTML=`<tr><td colspan="${TABLE_COLS.length}" class="fleet-tbl-empty">⚠ Could not load fleet data. <button class="rb-btn" onclick="reloadData()" style="margin-left:8px">Retry</button></td></tr>`;
-      } else {
-        els.fleetTBody.innerHTML=`<tr><td colspan="${TABLE_COLS.length}" class="fleet-tbl-empty">No vehicles match the current filter.</td></tr>`;
-      }
+      let msg;
+      if(state.loading&&!state.vehicles.length)      msg='Loading&#8230;';
+      else if(state.loadError&&!state.vehicles.length) msg=`&#9888; Could not load fleet data. <button class="rb-btn" onclick="reloadData()" style="margin-left:8px">Retry</button>`;
+      else                                             msg='No vehicles match the current filter.';
+      els.fleetTBody.innerHTML=`<tr><td colspan="${NUM_COLS}" class="fleet-tbl-empty">${msg}</td></tr>`;
       return;
     }
 
-    const rows = sortedVehicles(filtered).map(v=>{
-      const status  = vehicleStatus(v);
-      const id      = esc(s(v.fleetVehicleId||v._id||''));
-      const today   = ymd(new Date());
-      const ar      = v.activeRental || null;
+    if(!state.groupByCategory){
+      els.fleetTBody.innerHTML = sortedVehicles(filtered).map(v=>buildVehicleRow(v,q)).join('');
+      return;
+    }
 
-      /* status cell */
-      const statusCell = `<td><span class="tbl-badge st-${esc(status)}">${STATUS_ICONS[status]||''} ${esc(STATUS_LABELS[status]||status)}</span></td>`;
-
-      /* plate cell */
-      const plateCell = `<td><span class="tbl-plate">${highlight(s(v.plate),q)}</span></td>`;
-
-      /* model+cat cell */
-      const catTxt = s(v.categoryCode||v.categoryLabel||'');
-      const modelCell = `<td><span class="tbl-model">${highlight(s(v.model||v.vehicleLabel||''),q)}</span>${catTxt?`<span class="tbl-cat">${esc(catTxt)}</span>`:''}</td>`;
-
-      /* station */
-      const stTxt = s(v.currentStationLabel||v.currentStationCode||'');
-      const stationCell = `<td><span class="tbl-station">${stTxt?highlight(stTxt,q):'&#8212;'}</span></td>`;
-
-      /* fuel */
-      const fuel = Number(v.fuelLevel)||0;
-      const fuelCell = `<td><span class="tbl-fuel">${fuelBarHtml(fuel,'tbl')}<span class="tbl-fuel-lbl">${fuel}/5</span></span></td>`;
-
-      /* mileage */
-      const km = Number(v.mileage)||0;
-      const mileageCell = `<td><span class="tbl-mileage">${km?km.toLocaleString()+' km':'&#8212;'}</span></td>`;
-
-      /* rental */
-      let rentalCell;
-      if(ar){
-        const dropDate  = asDate(ar.dropoffDateTime);
-        const isOverdue = dropDate && dropDate < new Date();
-        const isDueToday= dropDate && ymd(dropDate)===today && !isOverdue;
-        const dueBadge  = isOverdue
-          ? `<span class="tbl-overdue">Overdue</span>`
-          : isDueToday ? `<span class="tbl-duetoday">Due today</span>` : '';
-        const nameHtml  = highlight(s(ar.customerName||''),q);
-        const bookHtml  = ar.bookingNumber||ar.bookingId ? `<span class="tbl-booking">${highlight(s(ar.bookingNumber||ar.bookingId||''),q)}</span>` : '';
-        const dropStr   = ar.dropoffDateTime ? hhmm(ar.dropoffDateTime) : '';
-        rentalCell = `<td><span class="tbl-customer">${nameHtml}</span>${bookHtml}${dueBadge}${dropStr?`<span class="tbl-booking" style="margin-left:5px">→${dropStr}</span>`:''}</td>`;
-      } else {
-        const flags=[];
-        if(v.hardHold)  flags.push(`<span class="tbl-hold-flag">🔒 Hold</span>`);
-        else if(!v.readyToGo&&status!=='maintenance') flags.push(`<span class="tbl-notready-flag">⚠ Not Ready</span>`);
-        rentalCell = `<td>${flags.join('')||'&#8212;'}</td>`;
+    /* ── Grouped by category ── */
+    const catKey = v => s(v.categoryLabel||v.categoryCode||'Uncategorized');
+    const groups = new Map();
+    for(const v of sortedVehicles(filtered)){
+      const k=catKey(v);
+      if(!groups.has(k)) groups.set(k,[]);
+      groups.get(k).push(v);
+    }
+    const html=[];
+    const sortedCats = [...groups.keys()].sort();
+    for(const cat of sortedCats){
+      const vehicles = groups.get(cat);
+      const collapsed = state.collapsedCats.has(cat);
+      const catEsc    = esc(cat);
+      const available = vehicles.filter(v=>vehicleStatus(v)==='available').length;
+      const out       = vehicles.filter(v=>vehicleStatus(v)==='out').length;
+      const notready  = vehicles.filter(v=>vehicleStatus(v)==='notready').length;
+      const hold      = vehicles.filter(v=>v.hardHold).length;
+      const stats=[];
+      if(available) stats.push(`<span class="tbl-group-stat ok">&#10003; ${available} avail</span>`);
+      if(out)       stats.push(`<span class="tbl-group-stat out">&#128663; ${out} out</span>`);
+      if(notready)  stats.push(`<span class="tbl-group-stat warn">&#9888; ${notready} not ready</span>`);
+      if(hold)      stats.push(`<span class="tbl-group-stat danger">&#128274; ${hold} hold</span>`);
+      html.push(`<tr class="tbl-group-hdr" onclick="window._flToggleCat('${catEsc}')">
+        <td colspan="${NUM_COLS}">
+          <div class="tbl-group-inner">
+            <span class="tbl-group-caret${collapsed?' collapsed':''}">&#9660;</span>
+            <span class="tbl-group-name">${catEsc}</span>
+            <span class="tbl-group-count">${vehicles.length} vehicle${vehicles.length!==1?'s':''}</span>
+            <span class="tbl-group-stats">${stats.join('')}</span>
+          </div>
+        </td>
+      </tr>`);
+      if(!collapsed){
+        html.push(...vehicles.map(v=>buildVehicleRow(v,q)));
       }
-
-      /* actions */
-      const contractBtn = ar&&s(ar.bookingId)
-        ? `<button class="rb-btn" onclick="window._flAct('contract','${esc(s(ar.bookingId))}')">Contract</button>`
-        : '';
-      const actionsCell = `<td><div class="tbl-actions"><button class="rb-btn primary" onclick="window._flAct('card','${id}')">View</button>${contractBtn}</div></td>`;
-
-      return `<tr class="st-${esc(status)}" id="fvt-${id}">${statusCell}${plateCell}${modelCell}${stationCell}${fuelCell}${mileageCell}${rentalCell}${actionsCell}</tr>`;
-    }).join('');
-
-    els.fleetTBody.innerHTML = rows;
+    }
+    els.fleetTBody.innerHTML = html.join('');
   }
 
   function renderTable(){
@@ -951,6 +1000,12 @@
       btn.classList.toggle('active', btn.getAttribute('data-filter')===f)
     );
     renderView();
+    savePrefs();
+  };
+  window._flToggleCat = function(cat){
+    if(state.collapsedCats.has(cat)) state.collapsedCats.delete(cat);
+    else state.collapsedCats.add(cat);
+    renderTable();
     savePrefs();
   };
   window._flSortBy = function(key){
