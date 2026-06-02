@@ -393,7 +393,6 @@
             <button class="vt-btn active" id="vtTable" type="button">&#9776; Table</button>
             <button class="vt-btn" id="vtCards" type="button">&#9783; Cards</button>
           </div>
-          <button class="btn" id="btnGroupCat" type="button" title="Group rows by category">&#128193; Group</button>
         </div>
       </div>
     </section>
@@ -483,7 +482,7 @@
     quickFilter:     'all',
     viewMode:         'table',
     tableSort:        { key: 'status', dir: 'asc' },
-    groupByCategory:  false,
+    groupByCategory:  true,
     collapsedCats:    new Set(),
     loading:          false,
     loadError:       false,
@@ -763,7 +762,9 @@
       groups.get(k).push(v);
     }
     const html=[];
-    for(const [cat, vehicles] of groups){
+    const sortedCats = [...groups.keys()].sort();
+    for(const cat of sortedCats){
+      const vehicles = groups.get(cat);
       const collapsed = state.collapsedCats.has(cat);
       const catEsc    = esc(cat);
       const available = vehicles.filter(v=>vehicleStatus(v)==='available').length;
@@ -1031,12 +1032,6 @@
   $('btnNextProblem').addEventListener('click',jumpToNextProblem);
   els.vtTable.addEventListener('click',()=>setViewMode('table'));
   els.vtCards.addEventListener('click',()=>setViewMode('cards'));
-  $('btnGroupCat').addEventListener('click',()=>{
-    state.groupByCategory = !state.groupByCategory;
-    $('btnGroupCat').classList.toggle('btnPrimary', state.groupByCategory);
-    renderTable();
-    savePrefs();
-  });
 
   /* Quick filter chips */
   document.querySelectorAll('.rb-fchip').forEach(btn=>
@@ -1093,8 +1088,6 @@
       b.classList.toggle('active', b.getAttribute('data-filter')===state.quickFilter)
     );
     setViewMode(state.viewMode);
-    const gb=$('btnGroupCat');
-    if(gb) gb.classList.toggle('btnPrimary', state.groupByCategory);
   }
 
   /* ── postMessage handler ── */
