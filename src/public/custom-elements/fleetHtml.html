@@ -117,7 +117,9 @@
 
     /* ── KPI summary ── */
     .rb-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:10px}
-    .rb-scard{padding:14px 16px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .rb-scard{padding:14px 16px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .14s,transform .12s}
+    .rb-scard:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+    .rb-scard.scard-active{box-shadow:0 0 0 2px var(--gold),var(--shadow-lg);transform:translateY(-1px)}
     .rb-scard::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--border2);border-radius:0 3px 3px 0}
     .rb-scard.sc-ok::before{background:#10B981}
     .rb-scard.sc-out::before{background:var(--gold)}
@@ -436,6 +438,7 @@
     summary:         {},
     search:          '',
     station:         'all',
+    quickFilter:     'all',
     viewMode:         'table', /* permanent */
     tableSort:        { key: 'status', dir: 'asc' },
     groupByCategory:  true,
@@ -475,6 +478,7 @@
   /* ── Prefs persistence ── */
   function savePrefs(){
     try{ localStorage.setItem(LS_PREFS, JSON.stringify({
+      quickFilter:     state.quickFilter,
       station:         state.station,
       tableSort:       state.tableSort,
       groupByCategory: state.groupByCategory,
@@ -485,6 +489,7 @@
     try{
       const raw=localStorage.getItem(LS_PREFS); if(!raw) return;
       const p=JSON.parse(raw);
+      if(p.quickFilter)                              state.quickFilter=p.quickFilter;
       if(p.station)                                  state._savedStation=p.station;
       /* viewMode is always table — ignore saved value */
       if(p.tableSort&&p.tableSort.key)               state.tableSort=p.tableSort;
@@ -533,6 +538,18 @@
       .map(s).join(' ').toLowerCase();
   }
 
+  function matchesQuickFilter(v){
+    const st = vehicleStatus(v);
+    switch(state.quickFilter){
+      case 'available':   return st==='available';
+      case 'out':         return st==='out';
+      case 'notready':    return st==='notready';
+      case 'hold':        return st==='hold';
+      case 'maintenance': return st==='maintenance';
+      default:            return true;
+    }
+  }
+
   function applyFilters(list){
     const stFilter = state.station;
     const q = norm(state.search);
@@ -542,6 +559,7 @@
         if(vs&&vs!==stFilter) return false;
       }
       if(q&&!vehicleBlob(v).includes(q)) return false;
+      if(!matchesQuickFilter(v)) return false;
       return true;
     });
   }
@@ -799,6 +817,14 @@
   /* ── Master render ── */
   function renderView(){ renderTable(); }
 
+  /* ── Set quick filter (from KPI card clicks) ── */
+  window._flSetFilter = function(f){
+    state.quickFilter = (state.quickFilter===f && f!=='all') ? 'all' : f;
+    renderSummary();
+    renderView();
+    savePrefs();
+  };
+
   /* ── Render KPI summary ── */
   function renderSummary(){
     const sum=state.summary;
@@ -816,7 +842,8 @@
       .map(({k,label,cls})=>{
         const val=sum[k]||0;
         const filter=k==='notReady'?'notready':(k==='total'?'all':k);
-        return `<div class="rb-scard ${cls}"><div class="rb-sk">${esc(label)}</div><div class="rb-sv">${esc(String(val))}</div></div>`;
+        const active = state.quickFilter===filter ? 'scard-active' : '';
+        return `<div class="rb-scard ${cls} ${active}" onclick="window._flSetFilter('${esc(filter)}')" title="Click to filter · click again to reset"><div class="rb-sk">${esc(label)}</div><div class="rb-sv">${esc(String(val))}</div></div>`;
       }).join('');
   }
 
