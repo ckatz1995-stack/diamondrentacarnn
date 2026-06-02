@@ -147,8 +147,9 @@ button:active{transform:scale(.985)}
 .vis-group.fleetRowEven{background:#f2f2f2}
 .vis-group.fleetCatGroup,
 .vis-labelset .vis-label.fleetCatGroup{
-  background:linear-gradient(180deg,#fdf8f0,#faf3e6)!important;
-  height:22px!important
+  background:var(--surface2)!important;
+  border-top:1px solid var(--border2)!important;
+  height:24px!important
 }
 
 /* ── booking bar items ───────────────────── */
@@ -190,9 +191,10 @@ button:active{transform:scale(.985)}
 .fleetCategory{
   order:-1!important;display:flex!important;width:80px!important;min-width:80px!important;max-width:80px!important;
   justify-content:center!important;align-items:center!important;
-  font:900 10px/1 system-ui!important;color:#fff!important;
-  background:#6b7280;border-right:1px solid rgba(15,23,42,.09)!important;
-  flex-shrink:0!important;padding:0 4px!important;letter-spacing:.04em
+  font:900 9.5px/1 system-ui!important;color:var(--gold2)!important;
+  background:rgba(168,132,74,.10)!important;border-right:1px solid rgba(168,132,74,.20)!important;
+  flex-shrink:0!important;padding:0 4px!important;letter-spacing:.04em;
+  text-transform:uppercase!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important
 }
 .fleetNo{
   order:0!important;
@@ -205,7 +207,9 @@ button:active{transform:scale(.985)}
   order:1!important;
   width:90px!important;min-width:90px!important;max-width:90px!important;
   font:900 10.5px/1 ui-monospace,'Cascadia Code','Fira Code',monospace!important;
-  color:#0f172a!important;letter-spacing:.03em
+  color:var(--gold2)!important;letter-spacing:.03em;
+  background:rgba(168,132,74,.07)!important;
+  border-right:1px solid rgba(168,132,74,.15)!important
 }
 .fleetModel{
   order:2!important;
@@ -220,13 +224,26 @@ button:active{transform:scale(.985)}
 
 /* ── left panel row content — category ──── */
 .fleetCatCell{
-  display:flex!important;align-items:center!important;gap:8px!important;
-  width:100%!important;height:100%!important;padding:0 10px!important;
-  background:linear-gradient(90deg,rgba(168,132,74,.14),rgba(168,132,74,.03))!important;
-  border-left:3px solid rgba(168,132,74,.5)!important
+  display:flex!important;align-items:center!important;gap:6px!important;
+  width:100%!important;height:100%!important;padding:0 8px 0 10px!important;
+  background:var(--surface2)!important;
+  border-left:3px solid var(--gold)!important;
+  border-top:1px solid var(--border2)!important
 }
-.fleetCatCode{font:1000 11px/1 system-ui;color:#3b2a10;letter-spacing:.01em}
-.fleetCatMeta{font:700 9px/1 system-ui;color:#8e6d3d;margin-left:auto;padding-right:4px}
+.fleetCatCode{
+  font:900 10.5px/1 system-ui;color:var(--text);letter-spacing:.02em;
+  display:flex;align-items:center;gap:4px
+}
+.fleetCatCode::before{content:"▸";font-size:9px;color:var(--gold);flex-shrink:0}
+.fleetCatMeta{
+  font:700 9px/1 system-ui;color:var(--sub);
+  margin-left:auto;
+  padding:1px 5px;
+  background:rgba(0,0,0,.05);
+  border-radius:3px;
+  border:1px solid var(--border);
+  white-space:nowrap
+}
 
 /* ── item card — compact single-line ────── */
 .card{display:flex;align-items:center;border-radius:2px;padding:0 4px;pointer-events:none;white-space:nowrap;height:100%;overflow:hidden}
@@ -307,7 +324,7 @@ button:active{transform:scale(.985)}
 <div class="shell">
 
 <!-- ── Sidebar ──────────────────────────────────────────── -->
-<nav class="sb sb-collapsed" id="sidebar">
+<nav class="sb" id="sidebar">
   <div class="sb-brand">
     <div class="sb-logo">D</div>
     <div class="sb-brand-text">
@@ -849,11 +866,36 @@ button:active{transform:scale(.985)}
   // ── Sidebar collapse/expand ──────────────────────────────
   const sidebar=document.getElementById('sidebar');
   const sbToggle=document.getElementById('sbToggle');
-  try{ if(localStorage.getItem('diamond.sb.collapsed')!=='0'){ sidebar.classList.add('sb-collapsed'); sbToggle.textContent='▶'; } else { sidebar.classList.remove('sb-collapsed'); sbToggle.textContent='◀'; } }catch(_){}
+  // Default = expanded; only collapse if user explicitly pinned it closed
+  try{
+    if(localStorage.getItem('diamond.sb.collapsed')==='1'){
+      sidebar.classList.add('sb-collapsed'); sbToggle.textContent='▶';
+    } else {
+      sidebar.classList.remove('sb-collapsed'); sbToggle.textContent='◀';
+    }
+  }catch(_){}
+
+  // Hover to expand when sidebar is collapsed
+  sidebar.addEventListener('mouseenter',()=>{
+    if(sidebar.classList.contains('sb-collapsed')){
+      sidebar._sbHover=true;
+      sidebar.classList.remove('sb-collapsed');
+    }
+  });
+  sidebar.addEventListener('mouseleave',()=>{
+    if(sidebar._sbHover){
+      sidebar._sbHover=false;
+      sidebar.classList.add('sb-collapsed');
+    }
+  });
+
+  // Click toggle = pin open / pin closed
   if(sbToggle) sbToggle.addEventListener('click',()=>{
-    const c=sidebar.classList.toggle('sb-collapsed');
-    sbToggle.textContent=c?'▶':'◀';
-    try{ localStorage.setItem('diamond.sb.collapsed',c?'1':'0'); }catch(_){}
+    sidebar._sbHover=false;
+    const willCollapse=!sidebar.classList.contains('sb-collapsed');
+    sidebar.classList.toggle('sb-collapsed',willCollapse);
+    sbToggle.textContent=willCollapse?'▶':'◀';
+    try{ localStorage.setItem('diamond.sb.collapsed',willCollapse?'1':'0'); }catch(_){}
     if(timeline) try{ timeline.redraw(); }catch(_){}
     setTimeout(syncCalHeader,220);
   });
@@ -888,7 +930,7 @@ button:active{transform:scale(.985)}
       groupsDS.add([{id:HEAT_GROUP_ID,content:'',visible:false}]);
       groupsDS.add(groups.map(g=>{
         const isCat=String(g.id||'').startsWith('cat_');
-        return{...g,style:(g.style||'')+(isCat?';height:22px':';height:20px')};
+        return{...g,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
       }));
 
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,group:e.group,start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
