@@ -386,10 +386,6 @@
           <button class="rb-fchip fc-maintenance" data-filter="maintenance" type="button">&#128295; Maintenance</button>
           <span style="flex:1"></span>
           <button class="btn" id="btnNextProblem" type="button" title="Jump to next issue (N)">&#9889; Next issue</button>
-          <div class="view-toggle" title="Toggle view (V)">
-            <button class="vt-btn active" id="vtTable" type="button">&#9776; Table</button>
-            <button class="vt-btn" id="vtCards" type="button">&#9783; Cards</button>
-          </div>
         </div>
       </div>
     </section>
@@ -435,7 +431,6 @@
   <div class="sc-grid">
     <div class="sc-section">Actions</div>
     <div class="sc-key"><kbd>R</kbd></div><div class="sc-desc">Refresh fleet data</div>
-    <div class="sc-key"><kbd>V</kbd></div><div class="sc-desc">Toggle table / card view</div>
     <div class="sc-key"><kbd>/</kbd></div><div class="sc-desc">Focus search bar</div>
     <div class="sc-key"><kbd>N</kbd></div><div class="sc-desc">Jump to next issue</div>
     <div class="sc-section">General</div>
@@ -462,9 +457,7 @@
     refreshTime:     $('refreshTime'),
     autoLabel:       $('autoLabel'),
     autoCheck:       $('autoRefresh'),
-    healthDot:       $('healthDot'),
-    vtTable:         $('vtTable'),
-    vtCards:         $('vtCards')
+    healthDot:       $('healthDot')
   };
 
   const LS_PREFS = 'diamond_rb_fleet_prefs';
@@ -476,7 +469,7 @@
     search:          '',
     station:         'all',
     quickFilter:     'all',
-    viewMode:         'table',
+    viewMode:         'table', /* permanent */
     tableSort:        { key: 'status', dir: 'asc' },
     groupByCategory:  true,
     collapsedCats:    new Set(),
@@ -518,7 +511,6 @@
     try{ localStorage.setItem(LS_PREFS, JSON.stringify({
       quickFilter:     state.quickFilter,
       station:         state.station,
-      viewMode:        state.viewMode,
       tableSort:       state.tableSort,
       groupByCategory: state.groupByCategory,
       collapsedCats:   [...state.collapsedCats]
@@ -530,7 +522,7 @@
       const p=JSON.parse(raw);
       if(p.quickFilter)                              state.quickFilter=p.quickFilter;
       if(p.station)                                  state._savedStation=p.station;
-      if(p.viewMode==='cards'||p.viewMode==='table') state.viewMode=p.viewMode;
+      /* viewMode is always table — ignore saved value */
       if(p.tableSort&&p.tableSort.key)               state.tableSort=p.tableSort;
       if(p.groupByCategory!=null)                    state.groupByCategory=!!p.groupByCategory;
       if(Array.isArray(p.collapsedCats))             state.collapsedCats=new Set(p.collapsedCats);
@@ -858,27 +850,8 @@
     els.fleetGrid.innerHTML = filtered.map(renderCard).join('');
   }
 
-  /* ── View switching ── */
-  function setViewMode(mode){
-    state.viewMode = mode;
-    if(mode==='table'){
-      els.fleetTableWrap.classList.remove('hidden');
-      els.fleetGrid.classList.add('hidden');
-      els.vtTable.classList.add('active');
-      els.vtCards.classList.remove('active');
-    } else {
-      els.fleetGrid.classList.remove('hidden');
-      els.fleetTableWrap.classList.add('hidden');
-      els.vtCards.classList.add('active');
-      els.vtTable.classList.remove('active');
-    }
-    savePrefs();
-  }
-
   /* ── Master render ── */
-  function renderView(){
-    if(state.viewMode==='table') renderTable(); else renderGrid();
-  }
+  function renderView(){ renderTable(); }
 
   /* ── Render KPI summary ── */
   function renderSummary(){
@@ -1026,8 +999,6 @@
   $('scClose').addEventListener('click',closeShortcutPanel);
   $('scBackdrop').addEventListener('click',closeShortcutPanel);
   $('btnNextProblem').addEventListener('click',jumpToNextProblem);
-  els.vtTable.addEventListener('click',()=>setViewMode('table'));
-  els.vtCards.addEventListener('click',()=>setViewMode('cards'));
 
   /* Quick filter chips */
   document.querySelectorAll('.rb-fchip').forEach(btn=>
@@ -1047,7 +1018,6 @@
     if(inInput) return;
     if(e.key==='r'||e.key==='R') reloadData();
     else if(e.key==='n'||e.key==='N') jumpToNextProblem();
-    else if(e.key==='v'||e.key==='V') setViewMode(state.viewMode==='table'?'cards':'table');
   });
 
   /* Sidebar nav */
@@ -1083,7 +1053,6 @@
     document.querySelectorAll('.rb-fchip').forEach(b=>
       b.classList.toggle('active', b.getAttribute('data-filter')===state.quickFilter)
     );
-    setViewMode(state.viewMode);
   }
 
   /* ── postMessage handler ── */
