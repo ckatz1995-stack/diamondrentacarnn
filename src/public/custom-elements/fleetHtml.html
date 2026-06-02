@@ -347,6 +347,8 @@
       <div class="shell-page-sub">Fleet status board &middot; all vehicles live</div>
     </div>
     <div class="shell-top-right">
+      <select class="select" id="stationFilter" style="padding:5px 8px;font-size:11px"><option value="all">All stations</option></select>
+      <span class="rb-refresh-time" id="refreshTime"></span>
       <span class="shell-topdate" id="todayMeta">&#8212;</span>
       <div class="userMenuWrap" style="display:none">
         <button class="userMenuBtn" id="userMenuBtn" type="button">
@@ -369,14 +371,11 @@
     <section class="surface rb-controls">
       <div class="rb-row">
         <input class="input" id="globalSearch" placeholder="Plate, model, category, customer&#8230;" style="flex:1 1 180px;min-width:100px" />
-        <select class="select" id="stationFilter"><option value="all">All stations</option></select>
         <label class="rb-auto-label" id="autoLabel" title="Auto-refresh every 5 minutes">
           <input type="checkbox" id="autoRefresh" /> Auto 5'
         </label>
         <button class="btn btnPrimary" id="btnRefresh" type="button" title="Refresh (R)">&#8635;</button>
         <button class="rb-help-btn" id="btnHelp" type="button" title="Keyboard shortcuts (?)">?</button>
-        <span class="rb-status" id="status">Loading&#8230;</span>
-        <span class="rb-refresh-time" id="refreshTime"></span>
       </div>
       <div class="rb-row">
         <div class="rb-filters">
@@ -454,7 +453,6 @@
   const $ = (id) => document.getElementById(id);
 
   const els = {
-    status:          $('status'),
     search:          $('globalSearch'),
     station:         $('stationFilter'),
     summaryGrid:     $('summaryGrid'),
