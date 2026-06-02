@@ -1,69 +1,79 @@
-
 import wixLocation from 'wix-location';
-import { requireBackroomAccess, logoutBackroom } from 'public/backroomAuth';
-import { getVehicleCardData, saveVehicleCardData } from 'backend/vehicleCard';
-import { APP_ROUTES as ROUTES } from 'public/appRoutes';
+import { getFleetBoard } from 'backend/vehicleCard.jsw';
+import { buildUserContext, logoutBackroom, requireBackroomAccess, getSessionToken } from 'public/backroomAuth';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
+import { APP_ROUTES as ROUTES } from 'public/appRoutes';
+import { collapseHtmlSiblings } from 'public/pageVisibility';
 
-const HTML_ID = '#vehicleCardHtml';
-
+const HTML_IDS = ['#fleetHtml'];
+const MIN_HEIGHT = 860;
+const MAX_HEIGHT = 5000;
 let authState = null;
-let fleetVehicleId = '';
-let returnTab = 'fleet';
 
 function logSuppressed(context, error) {
-  console.warn(`[Vehicle Card] ${context}`, error?.message || error || 'unknown error');
+  console.warn(`[Myroom Fleet] ${context}`, error?.message || error || 'unknown error');
 }
 
 $w.onReady(async function () {
   authState = await requireBackroomAccess({ area: 'fleet', action: 'View' });
   if (!authState?.ok) return;
 
-  const query = wixLocation.query || {};
-  fleetVehicleId = String(query.fleetVehicleId || query.id || '').trim();
-  returnTab = String(query.from || 'fleet').trim() || 'fleet';
+  hideOtherComponents(getHtmlIds());
 
   const html = getHtmlComponent();
-  if (!html) {
-    logSuppressed('HtmlComponent not found', new Error(`Missing ${HTML_ID}`));
-    return;
-  }
-  try { html.expand(); html.height = 1400; } catch (error) { logSuppressed('expand/initial height failed', error); }
+  if (!html) return;
+  try { html.expand(); html.show(); } catch (error) { logSuppressed('expand/show failed', error); }
+  try { html.height = MIN_HEIGHT; } catch (error) { logSuppressed('initial height set failed', error); }
 
   html.onMessage(async (event) => {
-    const origin = String(event?.origin || '').trim();
-    if (origin && !isTrustedBridgeOrigin(origin, wixLocation.url)) return;
+    if (!isTrustedBridgeOrigin(event?.origin, wixLocation.url)) return;
     const msg = normalizeBridgeMessage(event && event.data);
-    if (!msg || !msg.type) return;
+    if (!msg || typeof msg !== 'object' || !msg.type) return;
 
-    if (msg.type === 'vehicleCardReady') {
-      await loadVehicleCard();
+    if (msg.type === 'requestUserContext') {
+      post(buildUserContext(authState, { siteBase: deriveSiteBase() }));
       return;
     }
-    if (msg.type === 'saveVehicleCard') {
-      await saveVehicleCard(msg.patch || {});
+
+    if (msg.type === 'requestFleetBoard') {
+      await loadFleetBoard();
       return;
     }
-    if (msg.type === 'resize') {
-      const h = Math.min(Math.max(Number(msg.height || 0), 900), 5000);
-      if (h) { try { html.height = h; } catch (error) { logSuppressed('resize height set failed', error); } }
-      return;
+
+    if (msg.type === 'menuAction') {
+      const action = String(msg.action || '');
+      if (action === 'reload') { await loadFleetBoard(); return; }
+      if (action === 'logout') { await logoutBackroom(); wixLocation.to(ROUTES.home); return; }
     }
-    if (msg.type === 'back') {
-      wixLocation.to(returnTab === 'bookings' ? ROUTES.bookings : ROUTES.fleet);
-      return;
-    }
-    if (msg.type === 'logout') {
-      await logoutBackroom();
-      wixLocation.to(ROUTES.home);
-      return;
-    }
+
     if (msg.type === 'navigate') {
-      const route = String(msg.route || '').trim();
-      const target = ROUTES[route];
-      if (target) wixLocation.to(target);
+      const route = String(msg.route || '');
+      if (route === 'home')      return wixLocation.to(ROUTES.home);
+      if (route === 'daily')     return wixLocation.to(ROUTES.daily);
+      if (route === 'fleet')     return wixLocation.to(ROUTES.fleet);
+      if (route === 'fleetCal')  return wixLocation.to(ROUTES.fleet);
+      if (route === 'bookings')  return wixLocation.to(ROUTES.bookings);
+      if (route === 'customers') return wixLocation.to(ROUTES.customers);
+      if (route === 'contract')  return wixLocation.to(ROUTES.contract);
+      if (route === 'settings')  return wixLocation.to(ROUTES.settings);
+    }
+
+    if (msg.type === 'resizeShell') {
+      const h = clampHeight(Number(msg.height || 0));
+      if (h) { try { html.height = h; } catch (error) { logSuppressed('resizeShell height set failed', error); } }
       return;
     }
+
+    if (msg.type === 'openVehicleCard') {
+      const fleetVehicleId = String(msg.fleetVehicleId || msg.vehicleId || '').trim();
+      if (!fleetVehicleId) return;
+      const params = new URLSearchParams();
+      params.set('fleetVehicleId', fleetVehicleId);
+      params.set('from', 'fleet');
+      wixLocation.to(`${ROUTES.vehiclecard}?${params.toString()}`);
+      return;
+    }
+
     if (msg.type === 'openContract') {
       const bookingId = String(msg.bookingId || '').trim();
       if (!bookingId) return;
@@ -74,47 +84,68 @@ $w.onReady(async function () {
       return;
     }
   });
+
+  post({ type: 'resume' });
+  post(buildUserContext(authState, { siteBase: deriveSiteBase() }));
+  await loadFleetBoard();
 });
 
+function resolveAuthToken() {
+  return String((authState && authState.sessionToken) || getSessionToken() || '').trim();
+}
+
+function getHtmlIds() {
+  return HTML_IDS.filter((id) => {
+    try { return !!$w(id); } catch (error) { logSuppressed(`selector existence check failed for ${id}`, error); return false; }
+  });
+}
+
 function getHtmlComponent() {
-  try { return resolveHtmlComponent($w, [HTML_ID]); } catch (error) { logSuppressed('HtmlComponent lookup failed', error); }
+  try { return resolveHtmlComponent($w, getHtmlIds()); } catch (error) { logSuppressed('HtmlComponent lookup failed', error); }
   return null;
+}
+
+async function loadFleetBoard() {
+  try {
+    const res = await getFleetBoard({ sessionToken: resolveAuthToken() });
+    if (res?.success === false) {
+      post({ type: 'loadFleetBoard', vehicles: [], summary: {}, debug: { message: res.message || 'Fleet board load failed' } });
+      return;
+    }
+    post({
+      type: 'loadFleetBoard',
+      vehicles: Array.isArray(res?.vehicles) ? res.vehicles : [],
+      summary: res?.summary || {}
+    });
+  } catch (error) {
+    logSuppressed('loadFleetBoard failed', error);
+    post({ type: 'loadFleetBoard', vehicles: [], summary: {}, debug: { error: error?.message || String(error) } });
+  }
 }
 
 function post(payload) {
   const html = getHtmlComponent();
   if (!html) return;
-  if (!postMessageSafe(html, payload, 'vehicle-card')) logSuppressed('postMessage failed');
+  if (!postMessageSafe(html, payload, 'fleet')) logSuppressed('postMessage failed');
 }
 
-async function loadVehicleCard() {
-  if (!fleetVehicleId) {
-    post({ type: 'toast', message: 'Missing fleetVehicleId in URL.' });
-    return;
-  }
-  try {
-    const res = await getVehicleCardData({ sessionToken: authState.sessionToken, fleetVehicleId });
-    post({
-      type: 'loadVehicleCardData',
-      data: res,
-      context: {
-        user: authState.fullName || authState.email || 'Operator',
-        returnTab
-      }
-    });
-  } catch (err) {
-    post({ type: 'toast', message: err?.message || 'Failed to load vehicle card.' });
-    post({ type: 'loadVehicleCardData', data: { fleet:{}, category:{}, summary:{}, rentals:[] }, context: { user: authState.fullName || authState.email || 'Operator' } });
-  }
+function hideOtherComponents(keepIds) {
+  collapseHtmlSiblings($w, keepIds);
 }
 
-async function saveVehicleCard(patch) {
+function clampHeight(value) {
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, Math.round(value)));
+}
+
+function deriveSiteBase() {
   try {
-    const res = await saveVehicleCardData({ sessionToken: authState.sessionToken, fleetVehicleId, patch });
-    post({ type: 'toast', message: 'Vehicle saved.' });
-    post({ type: 'saveState', fleet: res.fleet || null });
-    await loadVehicleCard();
-  } catch (err) {
-    post({ type: 'toast', message: err?.message || 'Failed to save vehicle.' });
+    const u = new URL(wixLocation.url);
+    const parts = String(u.pathname || '').split('/').filter(Boolean);
+    if (parts.length <= 1) return u.origin;
+    return `${u.origin}/${parts.slice(0, -1).join('/')}`;
+  } catch (error) {
+    logSuppressed('deriveSiteBase failed', error);
+    return '';
   }
 }
