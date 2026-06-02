@@ -114,7 +114,7 @@ button:active{transform:scale(.985)}
 .plannerSchemaRight strong{padding:9px 12px;font:1000 10px/1 system-ui;text-transform:uppercase;letter-spacing:.07em;color:#8e6d3d}
 
 /* Timeline */
-#timeline{height:62vh;min-height:440px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+#timeline{height:clamp(380px,calc(100vh - 460px),900px);min-height:380px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
 .vis-panel.vis-left{border-right:1px solid rgba(0,0,0,.08);background:linear-gradient(180deg,#fbfdff 0%,#f7fafc 100%)}
 .vis-labelset .vis-label{border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer}
 .vis-label .vis-inner{padding:0!important;font-weight:650;color:#111827}
@@ -226,11 +226,39 @@ button:active{transform:scale(.985)}
 /* Fleet preview panel — kept hidden, referenced by JS */
 .fleetPreview{display:none!important}
 
-/* Hidden stats elements — kept in DOM for updateStats() */
-.statsHidden{display:none!important;position:absolute;pointer-events:none}
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.scard{padding:11px 14px;border-radius:var(--r-lg);border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:3px;transition:transform .14s,box-shadow .14s,border-color .14s}
+.scard:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(15,23,42,.10);border-color:rgba(168,132,74,.22)}
+.scard-lbl{font:900 10px/1 system-ui;text-transform:uppercase;letter-spacing:.07em;color:#8e6d3d}
+.scard-val{font:1000 22px/1.1 system-ui;color:var(--text);letter-spacing:-.03em}
+.scard-meta{font:800 10.5px/1 system-ui;color:var(--sub)}
+.scard.warn{border-color:rgba(180,83,9,.20);background:linear-gradient(180deg,#fffcf5 0%,#fff8e8 100%)}
+.scard.warn .scard-val{color:#b45309}
+.scard.alert{border-color:rgba(185,28,28,.18);background:linear-gradient(180deg,#fff7f7 0%,#fef2f2 100%)}
+.scard.alert .scard-val{color:#b91c1c}
+.scard-range-val{font-size:12px!important;letter-spacing:0!important;font-weight:950!important;line-height:1.3!important}
 
-@media(max-width:900px){.sb-brand-text,.sb-item-label,.sb-brand-sub,.sb-section{display:none}.sb{width:54px;min-width:54px;padding:10px 6px 16px}.sb-item{padding:9px;justify-content:center}.sb-logo{width:30px;height:30px}}
-@media(max-width:720px){.controls-band{gap:4px}#timeline{min-height:55vh}.bGrid{grid-template-columns:1fr}.plannerSchema{display:none}}
+/* Inline legend inside tl-controls */
+.tl-legend{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tl-leg-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:var(--r-pill);border:1px solid var(--border);background:#fff;font:900 10px/1 system-ui;color:#334155}
+
+/* Card booking number line */
+.card-bnum{font:900 9px/1 system-ui;opacity:.78;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+
+/* Drawer count badge */
+.drawerCount{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:rgba(168,132,74,.14);color:#8e6d3d;font:900 11px/1 system-ui;flex-shrink:0}
+.drawerCount.has-items{background:rgba(180,83,9,.16);color:#b45309}
+.drawerCount.many-items{background:rgba(185,28,28,.14);color:#b91c1c}
+
+/* vis-timeline left panel improvements */
+.vis-label .vis-inner{padding:4px 8px!important;font:800 11px/1.3 system-ui!important;color:#1e293b!important}
+.vis-label.vis-nested-group .vis-inner{padding:6px 8px!important;font:950 11px/1.2 system-ui!important;background:linear-gradient(90deg,rgba(168,132,74,.08),transparent)!important;color:#3b2a10!important}
+.vis-group{border-bottom:1px solid rgba(15,23,42,.04)!important}
+.vis-item.vis-range{min-height:36px}
+
+@media(max-width:900px){.sb-brand-text,.sb-item-label,.sb-brand-sub,.sb-section{display:none}.sb{width:54px;min-width:54px;padding:10px 6px 16px}.sb-item{padding:9px;justify-content:center}.sb-logo{width:30px;height:30px}.stats-row{grid-template-columns:repeat(3,1fr)}.tl-legend{display:none}}
+@media(max-width:720px){.controls-band{gap:4px}.bGrid{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -345,23 +373,49 @@ button:active{transform:scale(.985)}
   <!-- Content -->
   <div class="shell-content">
 
-    <!-- Legend -->
-    <div class="legendStrip">
-      <span class="legendLabel">Legend</span>
-      <span class="legendPill"><span class="legendDot bk"></span>Booking</span>
-      <span class="legendPill"><span class="legendDot pre"></span>Pre check-in</span>
-      <span class="legendPill"><span class="legendDot run"></span>Active rental</span>
-      <span class="legendPill"><span class="legendDot in"></span>Closed rental</span>
-      <span class="legendPill"><span class="legendDot cnc"></span>Cancelled</span>
-      <span class="legendPill"><span class="legendDot nr"></span>No-show</span>
+    <!-- KPI stats row -->
+    <div class="stats-row">
+      <div class="scard" id="scardVehicles">
+        <span class="scard-lbl">Vehicles</span>
+        <span class="scard-val" id="stVehicles">—</span>
+        <span class="scard-meta">In timeline</span>
+      </div>
+      <div class="scard" id="scardItems">
+        <span class="scard-lbl">Bookings</span>
+        <span class="scard-val" id="stItems">—</span>
+        <span class="scard-meta">Visible items</span>
+      </div>
+      <div class="scard" id="scardUnassigned">
+        <span class="scard-lbl">Unassigned</span>
+        <span class="scard-val" id="stUnassigned">—</span>
+        <span class="scard-meta">Need assignment</span>
+      </div>
+      <div class="scard" id="scardLocked">
+        <span class="scard-lbl">Active / Locked</span>
+        <span class="scard-val" id="stLocked">—</span>
+        <span class="scard-meta">Cannot be moved</span>
+      </div>
+      <div class="scard">
+        <span class="scard-lbl">Range</span>
+        <span class="scard-val scard-range-val" id="stRange">—</span>
+        <span class="scard-meta">Date window</span>
+      </div>
     </div>
 
-    <!-- Timeline controls -->
+    <!-- Timeline controls + inline legend -->
     <div class="tl-controls">
       <div id="fleetModeTabs" style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="fleetModeBtn active" data-mode="all" type="button">All items</button>
         <button class="fleetModeBtn" data-mode="attention" type="button">Attention</button>
         <button class="fleetModeBtn" data-mode="locked" type="button">Locked / Pre</button>
+      </div>
+      <div class="tl-legend">
+        <span class="tl-leg-pill"><span class="legendDot bk"></span>Booking</span>
+        <span class="tl-leg-pill"><span class="legendDot pre"></span>Pre check-in</span>
+        <span class="tl-leg-pill"><span class="legendDot run"></span>Active rental</span>
+        <span class="tl-leg-pill"><span class="legendDot in"></span>Closed</span>
+        <span class="tl-leg-pill"><span class="legendDot cnc"></span>Cancelled</span>
+        <span class="tl-leg-pill"><span class="legendDot nr"></span>No-show</span>
       </div>
       <div style="flex:1 1 0"></div>
       <button class="tlCtl" id="btnZoomOut" type="button">Zoom −</button>
@@ -370,36 +424,23 @@ button:active{transform:scale(.985)}
       <button class="tlCtl" id="btnNowFocus" type="button">Now</button>
     </div>
 
-    <!-- Planner schema header -->
-    <div class="plannerSchema">
-      <div class="plannerSchemaLeft">
-        <span>#</span><span>Plate</span><span>Model</span><span>Station</span><span>Group</span>
-      </div>
-      <div class="plannerSchemaRight">
-        <strong>Timeline</strong>
-      </div>
-    </div>
-
     <!-- Timeline -->
     <div id="timeline"></div>
 
-    <!-- Mini unassigned lane -->
-    <div class="miniLane" id="miniUnassignedLane"></div>
-
-    <!-- Unassigned drawer -->
+    <!-- Unassigned drawer (starts collapsed) -->
     <div class="drawer" id="unassignedDrawer">
       <div class="drawerHead">
-        <div>
+        <div style="display:flex;align-items:center;gap:10px">
           <div class="drawerTitle">Unassigned bookings</div>
-          <div class="drawerSub">Bookings in the current range with no vehicle assigned.</div>
+          <span class="drawerCount" id="drawerCount">0</span>
         </div>
         <div class="drawerTools">
-          <div class="drawerMeta" id="drawerMeta">Range: —</div>
-          <button class="tlCtl" id="btnToggleDrawer" type="button">Collapse</button>
+          <div class="drawerMeta" id="drawerMeta">—</div>
+          <button class="tlCtl" id="btnToggleDrawer" type="button">Expand</button>
           <button class="tlCtl" id="btnDrawerRefresh" type="button">Refresh</button>
         </div>
       </div>
-      <div class="drawerBody" id="drawerBody">
+      <div class="drawerBody" id="drawerBody" style="display:none">
         <table class="drawerTable">
           <thead><tr><th>Booking</th><th>Customer</th><th>Schedule</th><th>Category</th><th>Actions</th></tr></thead>
           <tbody id="drawerTbody"></tbody>
@@ -410,12 +451,6 @@ button:active{transform:scale(.985)}
   </div><!-- /shell-content -->
 </div><!-- /shell-main -->
 </div><!-- /shell -->
-
-<!-- Hidden stats elements (required by updateStats) -->
-<div class="statsHidden" aria-hidden="true">
-  <span id="stVehicles">0</span><span id="stItems">0</span>
-  <span id="stUnassigned">0</span><span id="stLocked">0</span><span id="stRange">—</span>
-</div>
 
 <!-- Fleet preview panel (hidden, referenced by JS) -->
 <aside class="fleetPreview disabled-preview" id="fleetPreviewPanel"></aside>
@@ -843,12 +878,20 @@ button:active{transform:scale(.985)}
     const vehicleCount = (groups||[]).filter(g=>g&&String(g.id||"")&&!String(g.id).startsWith("cat_")&&String(g.id)!==HEAT_GROUP_ID).length;
     const visibleItems = Array.isArray(items)?items.length:0;
     const lockedItems  = (Array.isArray(items)?items:[]).filter(it=>{ const rs=String((it&&it.rentalState)||""); return rs==="Active Rental"||rs==="Pre Check-In"; }).length;
-    document.getElementById("stVehicles").textContent = String(vehicleCount);
-    document.getElementById("stItems").textContent    = String(visibleItems);
+    document.getElementById("stVehicles").textContent   = String(vehicleCount);
+    document.getElementById("stItems").textContent      = String(visibleItems);
     document.getElementById("stUnassigned").textContent = String(unassignedCount||0);
-    document.getElementById("stLocked").textContent   = String(lockedItems);
-    document.getElementById("stRange").textContent    = `${fromEl?.value||'—'} → ${toEl?.value||'—'}`;
+    document.getElementById("stLocked").textContent     = String(lockedItems);
+    document.getElementById("stRange").textContent      = `${fromEl?.value||'—'}\n→ ${toEl?.value||'—'}`;
     uCountEl.textContent = String(unassignedCount||0);
+    // Drive card colour states
+    const uCard = document.getElementById("scardUnassigned");
+    if (uCard){ uCard.classList.toggle('warn', unassignedCount > 0 && unassignedCount <= 5); uCard.classList.toggle('alert', unassignedCount > 5); }
+    const lCard = document.getElementById("scardLocked");
+    if (lCard) lCard.classList.toggle('warn', lockedItems > 0);
+    // Drive drawer count badge
+    const dc = document.getElementById("drawerCount");
+    if (dc){ dc.textContent = String(unassignedCount||0); dc.classList.toggle('has-items', unassignedCount > 0); dc.classList.toggle('many-items', unassignedCount > 5); }
     writeFleetSnapshot();
     postToWix({type:"unassignedCount",count:unassignedCount||0,from:lastRange.from,to:lastRange.to});
   }
@@ -877,7 +920,8 @@ button:active{transform:scale(.985)}
         const loc = (p1||p2) ? `${p1}${p1&&p2?" → ":""}${p2}` : "";
         const tip = escHtml(tooltipText(item));
         const klass = /Active Rental|Pre Check-In/i.test(String(item.rentalState||'')) ? ' isLocked' : (!safe(item.assignedFleetId) ? ' isUnassigned' : '');
-        return `<div class="card${klass}" title="${tip}"><div class="rowMain"><span class="tL">${escHtml(hhmm(s))}</span><div class="mid"><div class="cust">${cn}</div><div class="loc">${escHtml(loc)}</div></div><span class="tR">${escHtml(hhmm(e))}</span></div></div>`;
+        const bnum  = item.bookingNumber ? `<div class="card-bnum">${escHtml(item.bookingNumber)}</div>` : '';
+        return `<div class="card${klass}" title="${tip}">${bnum}<div class="rowMain"><span class="tL">${escHtml(hhmm(s))}</span><div class="mid"><div class="cust">${cn}</div><div class="loc">${escHtml(loc)}</div></div><span class="tR">${escHtml(hhmm(e))}</span></div></div>`;
       },
 
       onMoving: function(item, callback){
