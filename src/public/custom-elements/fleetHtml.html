@@ -346,8 +346,14 @@
       </div>
       <div class="shell-page-sub">Fleet status board &middot; all vehicles live</div>
     </div>
+    <input class="input" id="globalSearch" placeholder="Plate, model, category, customer&#8230;" style="flex:1 1 auto;min-width:120px;max-width:480px" />
     <div class="shell-top-right">
       <select class="select" id="stationFilter" style="padding:5px 8px;font-size:11px"><option value="all">All stations</option></select>
+      <label class="rb-auto-label" id="autoLabel" title="Auto-refresh every 5 minutes">
+        <input type="checkbox" id="autoRefresh" /> Auto 5'
+      </label>
+      <button class="btn btnPrimary" id="btnRefresh" type="button" title="Refresh (R)">&#8635;</button>
+      <button class="rb-help-btn" id="btnHelp" type="button" title="Keyboard shortcuts (?)">?</button>
       <span class="rb-refresh-time" id="refreshTime"></span>
       <span class="shell-topdate" id="todayMeta">&#8212;</span>
       <div class="userMenuWrap" style="display:none">
@@ -367,16 +373,8 @@
 
   <main class="shell-content">
 
-    <!-- Controls row -->
+    <!-- Filter row -->
     <section class="surface rb-controls">
-      <div class="rb-row">
-        <input class="input" id="globalSearch" placeholder="Plate, model, category, customer&#8230;" style="flex:1 1 180px;min-width:100px" />
-        <label class="rb-auto-label" id="autoLabel" title="Auto-refresh every 5 minutes">
-          <input type="checkbox" id="autoRefresh" /> Auto 5'
-        </label>
-        <button class="btn btnPrimary" id="btnRefresh" type="button" title="Refresh (R)">&#8635;</button>
-        <button class="rb-help-btn" id="btnHelp" type="button" title="Keyboard shortcuts (?)">?</button>
-      </div>
       <div class="rb-row">
         <div class="rb-filters">
           <span class="rb-filter-label">Filter:</span>
