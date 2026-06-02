@@ -315,6 +315,44 @@
 
     @media(max-width:980px){.rb-board{grid-template-columns:1fr 1fr}}
     @media(max-width:640px){.rb-board{grid-template-columns:1fr}.rb-row{gap:6px}.tl-axis{height:50px}}
+
+    /* ── Stale data banner ── */
+    .rb-stale-banner{display:none;align-items:center;gap:10px;padding:8px 14px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);border-radius:12px;margin-bottom:12px;font:800 11px/1.35 system-ui;color:#B45309}
+    .rb-stale-banner.show{display:flex}
+    .rb-stale-text{flex:1;min-width:0}
+    .rb-stale-close{appearance:none;border:none;background:transparent;font:900 14px/1 system-ui;color:#B45309;cursor:pointer;padding:2px 6px;border-radius:4px;flex-shrink:0}
+    .rb-stale-close:hover{background:rgba(245,158,11,.12)}
+
+    /* ── Load error ── */
+    .rb-load-error{padding:24px 16px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+    .rb-load-error p{font:800 11.5px/1.5 system-ui;color:var(--muted);margin:0}
+
+    /* ── Expand-all button ── */
+    .rb-expand-all-btn{appearance:none;border:1px solid var(--border);background:transparent;border-radius:6px;padding:3px 6px;font:900 9px/1 system-ui;color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap}
+    .rb-expand-all-btn:hover{background:rgba(0,0,0,.05);color:var(--sub)}
+
+    /* ── Print / handoff sheet ── */
+    .rb-print-sheet{display:none}
+    @media print{
+      .shell,.sc-backdrop,.sc-panel,.rb-stale-banner,.rb-overdue-banner{display:none!important}
+      html,body{overflow:visible!important;height:auto!important;background:#fff!important}
+      .rb-print-sheet{display:block!important;padding:20px 24px;font-family:system-ui,sans-serif;color:#0F172A}
+    }
+    .ps-header{display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:2px solid #1a1208;margin-bottom:16px}
+    .ps-logo{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#6C522E,#A8844A);color:#fff;font:900 17px/1 system-ui;display:grid;place-items:center;flex:0 0 38px}
+    .ps-info{flex:1}
+    .ps-title{font:900 14px/1.2 system-ui}
+    .ps-date{font:700 11px/1 system-ui;color:#475569;margin-top:3px}
+    .ps-meta{font:700 10px/1.3 system-ui;color:#94A3B8;text-align:right}
+    .ps-table{width:100%;border-collapse:collapse;font:400 11px/1.4 system-ui;margin-bottom:16px}
+    .ps-table th{background:#F0F4FA;padding:6px 8px;text-align:left;font:700 8.5px/1 system-ui;text-transform:uppercase;letter-spacing:.06em;border:1px solid #E2E8F0}
+    .ps-table td{padding:6px 8px;border:1px solid #E2E8F0;vertical-align:top}
+    .ps-table tbody tr:nth-child(even) td{background:#FAFBFC}
+    .ps-co td:first-child{border-left:3px solid #A8844A}
+    .ps-ci td:first-child{border-left:3px solid #10B981}
+    .ps-type-co{color:#6C522E;font-weight:900;font-size:9px}
+    .ps-type-ci{color:#065F46;font-weight:900;font-size:9px}
+    .ps-footer{border-top:1px solid #E2E8F0;padding-top:10px;font:700 9px/1 system-ui;color:#94A3B8;text-align:center}
   </style>
 </head>
 <body>
@@ -399,9 +437,20 @@
             <button class="rb-fchip fc-novehicle" data-filter="novehicle" type="button">&#9888; No vehicle</button>
             <button class="rb-fchip fc-noflight" data-filter="noflight" type="button">No flight #</button>
             <button class="rb-fchip fc-overdue" data-filter="overdue" type="button">&#9210; Overdue</button>
+            <span style="flex:1"></span>
+            <button class="btn" id="btnNextProblem" type="button" title="Jump to next problem (N)">&#9889; Next problem</button>
+            <button class="btn" id="btnPrint" type="button" title="Print handoff sheet (P)">&#128438; Print</button>
           </div>
         </div>
       </section>
+
+      <!-- Stale data banner -->
+      <div class="rb-stale-banner" id="staleBanner">
+        <span>&#9201;</span>
+        <span class="rb-stale-text" id="staleText">Data may be outdated</span>
+        <button class="rb-btn" onclick="reloadData()" type="button">Refresh now</button>
+        <button class="rb-stale-close" onclick="this.parentElement.classList.remove('show')" type="button">&#215;</button>
+      </div>
 
       <!-- Overdue alert banner -->
       <div class="rb-overdue-banner" id="overdueBanner">
@@ -435,7 +484,7 @@
       <div class="rb-board" id="mainBoard">
         <div class="rb-col" id="colOut">
           <div class="rb-colhead">
-            <div class="rb-colhead-left"><strong>Check-outs</strong><span class="rb-badge" id="cntOut">0</span></div>
+            <div class="rb-colhead-left"><strong>Check-outs</strong><span class="rb-badge" id="cntOut">0</span><button class="rb-expand-all-btn" data-body="listOut" type="button" title="Expand / collapse all">&#8853;</button></div>
             <div class="rb-colhead-sort">
               <button class="rb-sort-btn active" data-col="out" data-sort="time" type="button">&#9201; Time &#8593;</button>
               <button class="rb-sort-btn" data-col="out" data-sort="name" type="button">A&#8211;Z</button>
@@ -446,7 +495,7 @@
         </div>
         <div class="rb-col" id="colIn">
           <div class="rb-colhead">
-            <div class="rb-colhead-left"><strong>Check-ins</strong><span class="rb-badge" id="cntIn">0</span></div>
+            <div class="rb-colhead-left"><strong>Check-ins</strong><span class="rb-badge" id="cntIn">0</span><button class="rb-expand-all-btn" data-body="listIn" type="button" title="Expand / collapse all">&#8853;</button></div>
             <div class="rb-colhead-sort">
               <button class="rb-sort-btn active" data-col="in" data-sort="time" type="button">&#9201; Time &#8593;</button>
               <button class="rb-sort-btn" data-col="in" data-sort="name" type="button">A&#8211;Z</button>
@@ -457,7 +506,7 @@
         </div>
         <div class="rb-col" id="colBookings">
           <div class="rb-colhead">
-            <div class="rb-colhead-left"><strong id="bookingsColLabel">Bookings</strong><span class="rb-badge" id="cntBookings">0</span></div>
+            <div class="rb-colhead-left"><strong id="bookingsColLabel">Bookings</strong><span class="rb-badge" id="cntBookings">0</span><button class="rb-expand-all-btn" data-body="listBookings" type="button" title="Expand / collapse all">&#8853;</button></div>
             <div class="rb-colhead-sort">
               <button class="rb-sort-btn active" data-col="bookings" data-sort="time" type="button">&#9201; Time &#8593;</button>
               <button class="rb-sort-btn" data-col="bookings" data-sort="name" type="button">A&#8211;Z</button>
@@ -471,6 +520,9 @@
     </main>
   </div>
 </div>
+
+<!-- Print / handoff sheet (hidden; shown only when printing) -->
+<div class="rb-print-sheet" id="printSheet"></div>
 
 <!-- Shortcut panel -->
 <div class="sc-backdrop" id="scBackdrop"></div>
@@ -488,6 +540,8 @@
     <div class="sc-key"><kbd>R</kbd></div><div class="sc-desc">Refresh data</div>
     <div class="sc-key"><kbd>/</kbd></div><div class="sc-desc">Focus search bar</div>
     <div class="sc-key"><kbd>V</kbd></div><div class="sc-desc">Toggle compact / card view</div>
+    <div class="sc-key"><kbd>N</kbd></div><div class="sc-desc">Jump to next problem card</div>
+    <div class="sc-key"><kbd>P</kbd></div><div class="sc-desc">Print handoff sheet</div>
     <div class="sc-section">General</div>
     <div class="sc-key"><kbd>?</kbd></div><div class="sc-desc">Show / hide this panel</div>
     <div class="sc-key"><kbd>Esc</kbd></div><div class="sc-desc">Close panel &middot; clear search</div>
@@ -526,16 +580,26 @@
     healthDot:     $('healthDot')
   };
 
+  const LS_PREFS = 'diamond_rb_prefs';
+  const LS_DATE  = 'diamond_rb_date';
+  let   _loadTimer = null;
+
   const state = {
-    data:        { tabs:{}, summary:{}, stations:[] },
-    search:      '',
-    station:     'all',
-    quickFilter: 'all',
-    sort:        { out:{key:'time',dir:'asc'}, in:{key:'time',dir:'asc'}, bookings:{key:'time',dir:'asc'} },
-    compact:     false,
-    autoTimer:   null,
-    cdTimer:     null,
-    user:        { name:'Operator', role:'Backroom' }
+    data:             { tabs:{}, summary:{}, stations:[] },
+    search:           '',
+    station:          'all',
+    quickFilter:      'all',
+    sort:             { out:{key:'time',dir:'asc'}, in:{key:'time',dir:'asc'}, bookings:{key:'time',dir:'asc'} },
+    compact:          false,
+    loading:          false,
+    loadError:        false,
+    lastRefreshTime:  null,
+    problemIndex:     0,
+    _savedStation:    null,
+    autoTimer:        null,
+    cdTimer:          null,
+    staleTimer:       null,
+    user:             { name:'Operator', role:'Backroom' }
   };
 
   /* ── Utilities ── */
@@ -554,6 +618,155 @@
     catch(_){ return dateStr||''; }
   }
 
+  /* ── Prefs persistence ── */
+  function savePrefs(){
+    try{ localStorage.setItem(LS_PREFS, JSON.stringify({
+      quickFilter: state.quickFilter,
+      station:     state.station,
+      sort:        state.sort,
+      compact:     state.compact
+    })); }catch(_){}
+  }
+  function loadPrefs(){
+    try{
+      const raw=localStorage.getItem(LS_PREFS); if(!raw) return;
+      const p=JSON.parse(raw);
+      if(p.quickFilter) state.quickFilter=p.quickFilter;
+      if(p.sort)        state.sort={...state.sort,...p.sort};
+      if(typeof p.compact==='boolean') state.compact=p.compact;
+      if(p.station)     state._savedStation=p.station;
+    }catch(_){}
+  }
+
+  /* ── Date memory ── */
+  function saveDateMemory(){
+    try{ localStorage.setItem(LS_DATE, els.datePick.value); }catch(_){}
+  }
+  function loadDateMemory(){
+    try{
+      const d=localStorage.getItem(LS_DATE);
+      if(d&&/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+    }catch(_){}
+    return ymd(new Date());
+  }
+
+  /* ── Restore UI from loaded prefs ── */
+  function restoreUIFromState(){
+    document.querySelectorAll('.rb-fchip').forEach(b=>
+      b.classList.toggle('active', b.getAttribute('data-filter')===state.quickFilter)
+    );
+    ['out','in','bookings'].forEach(refreshSortUI);
+    if(state.compact){
+      const b=$('btnCompact');
+      if(b){ b.classList.add('active'); b.innerHTML='&#8803; Table'; }
+      if(els.mainBoard) els.mainBoard.classList.add('compact-mode');
+    }
+  }
+
+  /* ── Load error display ── */
+  function renderLoadError(){
+    ['listOut','listIn','listBookings'].forEach(id=>{
+      const el=$(id); if(!el) return;
+      el.innerHTML=`<div class="rb-load-error"><p>&#9888; Could not load data.<br>Check connection or Wix backend.</p><button class="rb-btn" onclick="reloadData()">Retry</button></div>`;
+    });
+  }
+
+  /* ── Stale data banner ── */
+  function showStaleBanner(mins){
+    const b=$('staleBanner'),t=$('staleText'); if(!b) return;
+    if(t) t.textContent=`Data is ${mins} min old — may be outdated`;
+    b.classList.add('show');
+  }
+  function hideStaleBanner(){ const b=$('staleBanner'); if(b) b.classList.remove('show'); }
+  function checkStaleness(){
+    if(!state.lastRefreshTime||els.autoCheck.checked) return;
+    const mins=Math.round((Date.now()-state.lastRefreshTime)/60000);
+    if(mins>=10) showStaleBanner(mins); else hideStaleBanner();
+  }
+
+  /* ── Jump to next problem ── */
+  function jumpToNextProblem(){
+    const all=[...getTab('checkout'),...getTab('checkin')];
+    const problems=all
+      .filter(i=>isOverdue(i)||!hasVehicle(i)||(isAirport(i)&&!hasFlight(i)))
+      .sort((a,b)=>urgencyScore(a)-urgencyScore(b));
+    if(!problems.length){ setStatus('&#10003; No problems found'); return; }
+    const item=problems[state.problemIndex%problems.length];
+    state.problemIndex++;
+    const id=s(item._id||item.id||''); if(!id) return;
+    window._rbScrollToCard(id);
+    setTimeout(()=>{
+      const card=document.getElementById('rbc-'+id);
+      if(card&&!card.classList.contains('expanded')){
+        card.classList.add('expanded');
+        const btn=card.querySelector('.rb-expand-btn');
+        if(btn) btn.innerHTML='&#9650;';
+      }
+    }, 300);
+    setStatus(`Problem ${(state.problemIndex-1)%problems.length+1}/${problems.length}: ${esc(s(item.customerName||item.name||''))}`);
+  }
+
+  /* ── Expand / collapse all in a column ── */
+  function toggleExpandAll(bodyId){
+    const body=$(bodyId); if(!body) return;
+    const cards=[...body.querySelectorAll('.rb-card')].filter(c=>c.querySelector('.rb-card-details'));
+    if(!cards.length) return;
+    const expand=cards.some(c=>!c.classList.contains('expanded'));
+    cards.forEach(c=>{
+      c.classList.toggle('expanded',expand);
+      const btn=c.querySelector('.rb-expand-btn');
+      if(btn) btn.innerHTML=expand?'&#9650;':'&#9660;';
+    });
+    const togBtn=body.closest('.rb-col')?.querySelector('.rb-expand-all-btn');
+    if(togBtn) togBtn.textContent=expand?'⊟':'⊕'; /* ⊟ : ⊕ */
+  }
+
+  /* ── Print / handoff sheet ── */
+  function buildPrintSheet(){
+    const date=els.datePick.value||ymd(new Date());
+    const outs=sortItems(getTab('checkout'),'out');
+    const ins =sortItems(getTab('checkin'),'in');
+    const combined=[
+      ...outs.map(i=>({item:i,type:'checkout',t:asDate(i.pickupDateTime||i.start)||new Date(0)})),
+      ...ins.map(i=>({item:i,type:'checkin', t:asDate(i.dropoffDateTime||i.end)||new Date(0)}))
+    ].sort((a,b)=>a.t-b.t);
+
+    function psRow({item,type}){
+      const time=type==='checkin'?hhmm(item.dropoffDateTime||item.end):hhmm(item.pickupDateTime||item.start);
+      const name=esc(s(item.customerName||item.name||'—'));
+      const book=esc(s(item.bookingNumber||''));
+      const veh =esc(s(item.assignedVehicleLabel||item.assignedVehiclePlate||item.vehicleLabel||'—'));
+      const pickup=esc(s(item.pickuppoint||item.station||''));
+      const dropoff=esc(s(item.dropoffpoint||''));
+      const flight=esc(s(item.flightNumber||item.flight||''));
+      const phone=esc(getPhone(item)||'—');
+      const dur=esc(getDuration(item)||'');
+      return `<tr class="ps-${type==='checkin'?'ci':'co'}">
+        <td><strong>${esc(time||'—')}</strong></td>
+        <td><span class="ps-type-${type==='checkin'?'ci':'co'}">${type==='checkin'?'&#8595; IN':'&#8593; OUT'}</span></td>
+        <td>${name}${book?`<br><small style="color:#94A3B8">${book}</small>`:''}</td>
+        <td>${veh}${dur?` <small style="color:#A8844A">(${dur})</small>`:''}</td>
+        <td>${pickup?pickup+(dropoff?' &#8594; '+dropoff:''):'—'}</td>
+        <td>${flight||'—'}</td>
+        <td>${phone}</td>
+      </tr>`;
+    }
+
+    const label=dateLabel(date);
+    const ps=$('printSheet'); if(!ps) return;
+    ps.innerHTML=`<div class="ps-header">
+        <div class="ps-logo">D</div>
+        <div class="ps-info"><div class="ps-title">Diamond Rent-a-Car &middot; Daily Handoff</div><div class="ps-date">${esc(label)}</div></div>
+        <div class="ps-meta">Printed ${new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})}<br>${combined.length} total ops</div>
+      </div>
+      <table class="ps-table">
+        <thead><tr><th>Time</th><th>Type</th><th>Customer &middot; Booking</th><th>Vehicle &middot; Duration</th><th>Route</th><th>Flight</th><th>Phone</th></tr></thead>
+        <tbody>${combined.map(psRow).join('')}</tbody>
+      </table>
+      <div class="ps-footer">Diamond Rent-a-Car Backroom &middot; ${esc(label)} &middot; Confidential</div>`;
+  }
+  function printHandoff(){ buildPrintSheet(); window.print(); }
+
   /* ── Search highlight ── */
   function highlight(text, q){
     const safe = esc(text);
@@ -566,10 +779,22 @@
 
   /* ── Data request ── */
   function reloadData(){
+    clearTimeout(_loadTimer);
+    state.loading   = true;
+    state.loadError = false;
+    hideStaleBanner();
     const d = els.datePick.value || ymd(new Date());
     const btn=$('btnRefresh'); if(btn) btn.classList.add('spinning');
     postToWix({ type:'requestDailyData', date:d, startISO:new Date(d+'T00:00:00').toISOString(), endISO:new Date(d+'T23:59:59').toISOString() });
     setStatus('Loading…');
+    saveDateMemory();
+    _loadTimer = setTimeout(()=>{
+      state.loading   = false;
+      state.loadError = true;
+      const b=$('btnRefresh'); if(b) b.classList.remove('spinning');
+      setStatus('&#9888; No response — check connection');
+      renderLoadError();
+    }, 8000);
   }
 
   /* ── Item predicates ── */
@@ -1033,8 +1258,14 @@
     if(!bodyEl) return;
     if(cntEl) cntEl.textContent=String(items.length);
     if(!items.length){
-      const noun=type==='checkout'?'Check-outs':type==='checkin'?'Check-ins':'Bookings';
-      bodyEl.innerHTML=`<div class="rb-empty">${noun}<br><small style="font-weight:700;font-size:10px">${dateLabel(els.datePick.value)}</small><br><small style="font-size:10px;opacity:.7">No ops found</small></div>`;
+      if(state.loading){
+        bodyEl.innerHTML='<div class="rb-empty">Loading&#8230;</div>';
+      } else if(state.loadError){
+        bodyEl.innerHTML=`<div class="rb-load-error"><p>&#9888; Could not load data</p><button class="rb-btn" onclick="reloadData()">Retry</button></div>`;
+      } else {
+        const noun=type==='checkout'?'Check-outs':type==='checkin'?'Check-ins':'Bookings';
+        bodyEl.innerHTML=`<div class="rb-empty">${noun}<br><small style="font-weight:700;font-size:10px">${dateLabel(els.datePick.value)}</small><br><small style="font-size:10px;opacity:.7">No ops found</small></div>`;
+      }
       return;
     }
     bodyEl.innerHTML=items.map(item=>renderCard(item,type)).join('');
@@ -1045,7 +1276,12 @@
     const cur=els.station.value;
     while(els.station.options.length>1) els.station.remove(1);
     stations.forEach(st=>{ const o=document.createElement('option'); o.value=o.textContent=st; els.station.appendChild(o); });
-    if(cur&&cur!=='all') els.station.value=cur;
+    if(cur&&cur!=='all'){ els.station.value=cur; }
+    else if(state._savedStation&&state._savedStation!=='all'){
+      els.station.value=state._savedStation;
+      state.station=els.station.value;
+      state._savedStation=null;
+    }
   }
 
   function render(){
@@ -1068,10 +1304,9 @@
     renderStatsBar();
     updateCountdown();
     updateHealthDot();
-
     ['out','in','bookings'].forEach(refreshSortUI);
-
     if(state.compact) renderCompact();
+    savePrefs();
 
     try{ postToWix({type:'resizeShell',height:Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)}); }catch(_){}
   }
@@ -1087,12 +1322,19 @@
   $('btnRefresh').addEventListener('click',()=>reloadData());
   $('datePick').addEventListener('change',()=>reloadData());
   $('globalSearch').addEventListener('input',()=>{ state.search=els.search.value; render(); });
-  $('stationFilter').addEventListener('change',()=>{ state.station=els.station.value; render(); });
+  $('stationFilter').addEventListener('change',()=>{ state.station=els.station.value; savePrefs(); render(); });
   els.autoCheck.addEventListener('change',()=>{ if(els.autoCheck.checked){startAuto();els.autoLabel.classList.add('is-on');}else{stopAuto();els.autoLabel.classList.remove('is-on');} });
   $('btnCompact').addEventListener('click',toggleCompact);
   $('btnHelp').addEventListener('click',toggleShortcutPanel);
   $('scClose').addEventListener('click',closeShortcutPanel);
   $('scBackdrop').addEventListener('click',closeShortcutPanel);
+  $('btnNextProblem').addEventListener('click',jumpToNextProblem);
+  $('btnPrint').addEventListener('click',printHandoff);
+
+  /* Expand-all buttons */
+  document.querySelectorAll('.rb-expand-all-btn').forEach(btn=>
+    btn.addEventListener('click',()=>toggleExpandAll(btn.getAttribute('data-body')))
+  );
 
   /* Quick filters */
   document.querySelectorAll('.rb-fchip').forEach(btn=>
@@ -1132,6 +1374,8 @@
     else if(e.key==='t'||e.key==='T'){ els.datePick.value=ymd(new Date()); reloadData(); }
     else if(e.key==='r'||e.key==='R'){ reloadData(); }
     else if(e.key==='v'||e.key==='V'){ toggleCompact(); }
+    else if(e.key==='n'||e.key==='N'){ jumpToNextProblem(); }
+    else if(e.key==='p'||e.key==='P'){ printHandoff(); }
   });
 
   /* Countdown tick every 30s */
@@ -1177,6 +1421,11 @@
     }
 
     if(d.type==='loadDailyOps'){
+      clearTimeout(_loadTimer);
+      state.loading         = false;
+      state.loadError       = false;
+      state.lastRefreshTime = Date.now();
+      state.problemIndex    = 0;
       const btn=$('btnRefresh'); if(btn) btn.classList.remove('spinning');
 
       const tabs=d.tabs||{};
@@ -1214,8 +1463,11 @@
   });
 
   /* ── Auto-init ── */
+  loadPrefs();
+  restoreUIFromState();
+  els.datePick.value=loadDateMemory();
+  state.staleTimer=setInterval(checkStaleness, 60000);
   postToWix({type:'requestUserContext'});
-  els.datePick.value=ymd(new Date());
   reloadData();
 
 })();
