@@ -78,67 +78,123 @@ button:active{transform:scale(.985)}
 .userMenuItem.danger{color:var(--danger)}
 
 /* ── status strip ────────────────────────── */
-.status-strip{padding:4px 14px;background:rgba(168,132,74,.07);border-bottom:1px solid rgba(168,132,74,.14);font:900 10.5px/1 system-ui;color:#5b4323;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.status-strip{padding:3px 14px;background:linear-gradient(90deg,rgba(168,132,74,.09),rgba(168,132,74,.04));border-bottom:1px solid rgba(168,132,74,.16);font:900 10px/1 'ui-monospace','Cascadia Code',monospace;color:#6c4e1e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;letter-spacing:.01em}
 
 /* ── calendar wrapper ────────────────────── */
 .cal-wrap{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── column header bar ───────────────────── */
-.cal-header{display:flex;align-items:stretch;height:32px;flex-shrink:0;background:#f1f5f9;border-bottom:2px solid var(--border2)}
+.cal-header{display:flex;align-items:stretch;height:34px;flex-shrink:0;background:linear-gradient(180deg,#f8fafd,#eef2f9);border-bottom:2px solid rgba(168,132,74,.28)}
 .cal-col-hdr{
-  /* columns: 28px+84px+100px+60px = 272px = --lw; must match .fleetGroupCell column widths */
   display:grid;
-  grid-template-columns:28px 84px 100px 60px;
-  width:var(--lw);min-width:var(--lw);max-width:var(--lw);
+  grid-template-columns:28px 84px 100px minmax(60px,1fr);
+  width:var(--lw);min-width:var(--lw);
   flex-shrink:0;
-  border-right:2px solid var(--border2);
+  border-right:2px solid rgba(15,23,42,.13);
 }
-.col-h{font:1000 9px/1 system-ui;text-transform:uppercase;letter-spacing:.06em;color:#64748b;padding:0 7px;display:flex;align-items:center;border-right:1px solid rgba(15,23,42,.07);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.col-h{font:900 9px/1 system-ui;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;padding:0 6px;display:flex;align-items:center;border-right:1px solid rgba(15,23,42,.09);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .12s}
 .col-h:last-child{border-right:none}
+.col-h:first-child{justify-content:center;color:#cbd5e1}
 .cal-tl-hdr{flex:1;display:flex;align-items:center;gap:5px;padding:0 8px 0 10px;overflow:hidden;min-width:0}
 
-/* ── timeline ────────────────────────────── */
+/* ── timeline container ───────────────────── */
 #timeline{flex:1;min-height:0;overflow:hidden}
 
-/* Force left panel width */
-.vis-panel.vis-left{width:var(--lw)!important;max-width:var(--lw)!important;border-right:2px solid var(--border2)!important;background:#fafcff}
-.vis-labelset .vis-label{width:var(--lw)!important;min-width:var(--lw)!important;max-width:var(--lw)!important;border-bottom:1px solid rgba(15,23,42,.05)!important}
-.vis-label .vis-inner{padding:0!important;overflow:hidden}
+/* ── left panel — force width & style ───── */
+.vis-panel.vis-left{
+  width:var(--lw)!important;max-width:var(--lw)!important;
+  border-right:2px solid rgba(15,23,42,.12)!important;
+  background:linear-gradient(180deg,#f8fafd 0%,#f2f5fa 100%)
+}
+.vis-labelset .vis-label{
+  width:var(--lw)!important;min-width:var(--lw)!important;max-width:var(--lw)!important;
+  border-bottom:1px solid rgba(15,23,42,.06)!important;
+  outline:none!important;box-shadow:none!important;
+  height:34px!important
+}
+.vis-label .vis-inner{
+  padding:0!important;width:100%!important;height:100%!important;
+  overflow:hidden!important;display:flex!important;align-items:stretch!important;
+  min-height:0;box-sizing:border-box!important
+}
 
-/* vis-timeline misc */
-.vis-group{border-bottom:1px solid rgba(15,23,42,.04)!important}
-.vis-group.fleetRowOdd{background:rgba(148,163,184,.04)}
+/* ── vis group rows ───────────────────────── */
+.vis-group{
+  height:34px!important;border-bottom:1px solid rgba(15,23,42,.05)!important;
+  outline:none!important;box-shadow:none!important
+}
+.vis-group.fleetRowOdd{background:rgba(241,245,249,.55)}
 .vis-group.fleetRowEven{background:#fff}
-.vis-group.fleetCatGroup{background:linear-gradient(180deg,#f7f1e7,#fdf8f2)!important}
-.vis-item{border-radius:5px!important;border-width:0!important;color:#fff!important;font-size:10.5px!important;font-weight:900!important;padding:0!important;box-shadow:0 3px 10px rgba(0,0,0,.10)!important}
+.vis-group.fleetCatGroup,
+.vis-labelset .vis-label.fleetCatGroup{
+  background:linear-gradient(180deg,#fdf8f0,#faf3e6)!important;
+  height:26px!important
+}
+
+/* ── booking bar items ───────────────────── */
+.vis-item{
+  border-radius:5px!important;border-width:0!important;color:#fff!important;
+  font-size:10.5px!important;font-weight:900!important;padding:0!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.16)!important
+}
 .vis-item,.vis-item *{user-select:none!important}
-.vis-item.bkItem.bk{background:linear-gradient(135deg,rgba(168,85,247,.92),rgba(139,92,246,.86))!important}
-.vis-item.bkItem.pre{background:linear-gradient(135deg,rgba(168,85,247,.88),rgba(139,92,246,.80))!important;border:2px dashed rgba(255,255,255,.5)!important}
-.vis-item.bkItem.run{background:linear-gradient(135deg,rgba(34,197,94,.92),rgba(16,185,129,.86))!important}
-.vis-item.bkItem.in{background:linear-gradient(135deg,rgba(59,130,246,.95),rgba(37,99,235,.88))!important}
-.vis-item.bkItem.cnc{background:linear-gradient(135deg,rgba(239,68,68,.90),rgba(220,38,38,.84))!important;text-decoration:line-through!important;opacity:.85!important}
-.vis-item.bkItem.nr{background:linear-gradient(135deg,rgba(100,116,139,.88),rgba(71,85,105,.82))!important;border:2px dashed rgba(255,255,255,.4)!important}
-.vis-item.vis-selected{box-shadow:0 0 0 2px rgba(180,138,79,.6),0 6px 18px rgba(15,23,42,.16)!important}
-.vis-current-time{background:rgba(180,138,79,.72)!important;width:2px!important}
-.vis-time-axis .vis-text{font:900 9.5px/1 system-ui;color:#475569}
-.vis-time-axis .vis-grid.vis-major{border-color:rgba(15,23,42,.09)}
+.vis-item.bkItem.bk{background:linear-gradient(135deg,#7c3aed,#6d28d9)!important}
+.vis-item.bkItem.pre{background:linear-gradient(135deg,#9333ea,#7c3aed)!important;border:2px dashed rgba(255,255,255,.45)!important}
+.vis-item.bkItem.run{background:linear-gradient(135deg,#16a34a,#059669)!important}
+.vis-item.bkItem.in{background:linear-gradient(135deg,#2563eb,#1d4ed8)!important}
+.vis-item.bkItem.cnc{background:linear-gradient(135deg,#dc2626,#b91c1c)!important;text-decoration:line-through!important;opacity:.82!important}
+.vis-item.bkItem.nr{background:linear-gradient(135deg,#475569,#334155)!important;border:2px dashed rgba(255,255,255,.32)!important}
+.vis-item.vis-selected{box-shadow:0 0 0 2px rgba(168,132,74,.72),0 4px 14px rgba(15,23,42,.14)!important}
+.vis-current-time{background:linear-gradient(180deg,rgba(168,132,74,.9),rgba(168,132,74,.5))!important;width:2px!important}
+.vis-time-axis .vis-text{font:900 9.5px/1 system-ui;color:#64748b}
+.vis-time-axis .vis-text.vis-major{font-weight:1000;color:#334155}
+.vis-time-axis .vis-grid.vis-major{border-color:rgba(15,23,42,.10)}
 .vis-time-axis .vis-grid.vis-minor{border-color:rgba(15,23,42,.04)}
 
-/* ── backend group HTML — vehicle rows ───── */
-.vis-label .vis-inner{padding:0!important;width:100%;overflow:hidden;display:flex;align-items:stretch}
-.fleetGroupCell{display:flex;align-items:stretch;width:100%;height:100%}
-.fleetCol{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;padding:0 5px;border-right:1px solid rgba(15,23,42,.06);flex-shrink:0}
-.fleetCol:last-child{border-right:none}
-.fleetNo{width:28px;font:900 10px/1 system-ui;color:#94a3b8;justify-content:center;padding:0}
-.fleetPlate{width:84px;font:900 11px/1.1 system-ui;color:#0f172a;letter-spacing:.01em}
-.fleetModel{width:100px;font:800 10.5px/1.2 system-ui;color:#334155}
-.fleetStation{width:60px;font:700 10px/1.1 system-ui;color:#64748b}
-.fleetCategory{display:none}
+/* ── left panel row content — vehicle ───── */
+.fleetGroupCell{
+  display:flex!important;align-items:stretch!important;
+  width:100%!important;height:100%!important
+}
+.fleetCol{
+  display:flex!important;align-items:center!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+  padding:0 6px!important;
+  border-right:1px solid rgba(15,23,42,.09)!important;
+  flex-shrink:0!important;
+  font-variant-numeric:tabular-nums
+}
+.fleetCol:last-child{border-right:none!important}
+.fleetNo{
+  width:28px!important;min-width:28px!important;max-width:28px!important;
+  justify-content:center!important;padding:0 2px!important;
+  font:900 10px/1 system-ui!important;color:#94a3b8!important;
+  background:rgba(148,163,184,.07);border-right:1px solid rgba(15,23,42,.08)!important
+}
+.fleetPlate{
+  width:84px!important;min-width:84px!important;max-width:84px!important;
+  font:900 11px/1 ui-monospace,'Cascadia Code','Fira Code',monospace!important;
+  color:#0f172a!important;letter-spacing:.03em
+}
+.fleetModel{
+  width:100px!important;min-width:100px!important;max-width:100px!important;
+  font:700 10.5px/1.2 system-ui!important;color:#334155!important
+}
+.fleetStation{
+  flex:1 1 0!important;min-width:60px!important;
+  font:700 10px/1.1 system-ui!important;color:#64748b!important
+}
+.fleetCategory{display:none!important}
 
-/* ── backend group HTML — category rows ──── */
-.fleetCatCell{display:flex;align-items:center;gap:7px;width:100%;height:100%;padding:0 8px;background:linear-gradient(90deg,rgba(168,132,74,.09),transparent);cursor:pointer}
-.fleetCatCode{font:1000 12px/1 system-ui;color:#3b2a10}
-.fleetCatMeta{font:700 10px/1 system-ui;color:#8e6d3d}
+/* ── left panel row content — category ──── */
+.fleetCatCell{
+  display:flex!important;align-items:center!important;gap:8px!important;
+  width:100%!important;height:100%!important;padding:0 10px!important;
+  background:linear-gradient(90deg,rgba(168,132,74,.14),rgba(168,132,74,.03))!important;
+  border-left:3px solid rgba(168,132,74,.5)!important
+}
+.fleetCatCode{font:1000 12px/1 system-ui;color:#3b2a10;letter-spacing:.01em}
+.fleetCatMeta{font:700 10px/1 system-ui;color:#8e6d3d;margin-left:auto;padding-right:4px}
 
 /* ── item card ───────────────────────────── */
 .card{display:flex;flex-direction:column;border-radius:4px;padding:2px 5px;background:rgba(255,255,255,.09);pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,.12);height:100%;overflow:hidden}
@@ -673,9 +729,18 @@ button:active{transform:scale(.985)}
   function syncCalHeader(){
     const leftPanel=document.querySelector('#timeline .vis-panel.vis-left');
     const colHdr=document.getElementById('calColHdr');
-    if(leftPanel&&colHdr){
-      const w=leftPanel.offsetWidth;
-      if(w>0) colHdr.style.width=w+'px';
+    if(!leftPanel||!colHdr) return;
+    const w=leftPanel.offsetWidth;
+    if(w<10) return;
+    colHdr.style.width=w+'px';
+    colHdr.style.minWidth=w+'px';
+    // Last column fills remaining space after fixed cols
+    const lastCol=colHdr.querySelector('.col-h:last-child');
+    if(lastCol){
+      const fixed=28+84+100;
+      const rem=Math.max(60,w-fixed);
+      lastCol.style.minWidth=rem+'px';
+      lastCol.style.flex='1';
     }
   }
 
@@ -818,7 +883,10 @@ button:active{transform:scale(.985)}
 
       groupsDS.clear();
       groupsDS.add([{id:HEAT_GROUP_ID,content:'',visible:false}]);
-      groupsDS.add(groups);
+      groupsDS.add(groups.map(g=>{
+        const isCat=String(g.id||'').startsWith('cat_');
+        return{...g,style:(g.style||'')+(isCat?';height:26px':';height:34px')};
+      }));
 
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,group:e.group,start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
 
