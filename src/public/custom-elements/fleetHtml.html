@@ -117,8 +117,9 @@
 
     /* ── KPI summary ── */
     .rb-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:10px}
-    .rb-scard{padding:14px 16px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .14s}
-    .rb-scard:hover{box-shadow:var(--shadow-lg)}
+    .rb-scard{padding:14px 16px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow);position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .14s,transform .12s}
+    .rb-scard:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+    .rb-scard.scard-active{box-shadow:0 0 0 1px rgba(168,132,74,.35),var(--shadow);transform:translateY(-1px)}
     .rb-scard::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--border2);border-radius:0 3px 3px 0}
     .rb-scard.sc-ok::before{background:#10B981}
     .rb-scard.sc-out::before{background:var(--gold)}
@@ -139,15 +140,6 @@
     .rb-scard.sc-maint .rb-sv{color:#475569}
 
     /* ── Stats bar ── */
-    .rb-stats-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:var(--shadow)}
-    .rb-stat-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:var(--r-pill);border:1px solid var(--border);background:rgba(0,0,0,.03);font:800 10px/1 system-ui;color:var(--sub)}
-    .rb-stat-chip strong{font-weight:900;color:var(--text)}
-    .rb-stat-chip.ok{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.20);color:#065F46}
-    .rb-stat-chip.ok strong{color:#065F46}
-    .rb-stat-chip.out{background:rgba(168,132,74,.08);border-color:var(--gold-border);color:var(--gold2)}
-    .rb-stat-chip.out strong{color:var(--gold2)}
-    .rb-stat-chip.warn{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.20);color:#B45309}
-    .rb-stat-chip.warn strong{color:#B45309}
 
     /* ── Stale data banner ── */
     .rb-stale-banner{display:none;align-items:center;gap:10px;padding:8px 14px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);border-radius:12px;margin-bottom:12px;font:800 11px/1.35 system-ui;color:#B45309}
@@ -346,7 +338,15 @@
       </div>
       <div class="shell-page-sub">Fleet status board &middot; all vehicles live</div>
     </div>
+    <input class="input" id="globalSearch" placeholder="Plate, model, category, customer&#8230;" style="flex:1 1 auto;min-width:120px;max-width:480px" />
     <div class="shell-top-right">
+      <select class="select" id="stationFilter" style="padding:5px 8px;font-size:11px"><option value="all">All stations</option></select>
+      <label class="rb-auto-label" id="autoLabel" title="Auto-refresh every 5 minutes">
+        <input type="checkbox" id="autoRefresh" /> Auto 5'
+      </label>
+      <button class="btn btnPrimary" id="btnRefresh" type="button" title="Refresh (R)">&#8635;</button>
+      <button class="rb-help-btn" id="btnHelp" type="button" title="Keyboard shortcuts (?)">?</button>
+      <span class="rb-refresh-time" id="refreshTime"></span>
       <span class="shell-topdate" id="todayMeta">&#8212;</span>
       <div class="userMenuWrap" style="display:none">
         <button class="userMenuBtn" id="userMenuBtn" type="button">
@@ -365,38 +365,6 @@
 
   <main class="shell-content">
 
-    <!-- Controls row -->
-    <section class="surface rb-controls">
-      <div class="rb-row">
-        <input class="input" id="globalSearch" placeholder="Plate, model, category, customer&#8230;" style="flex:1 1 180px;min-width:100px" />
-        <select class="select" id="stationFilter"><option value="all">All stations</option></select>
-        <label class="rb-auto-label" id="autoLabel" title="Auto-refresh every 5 minutes">
-          <input type="checkbox" id="autoRefresh" /> Auto 5'
-        </label>
-        <button class="btn btnPrimary" id="btnRefresh" type="button" title="Refresh (R)">&#8635;</button>
-        <button class="rb-help-btn" id="btnHelp" type="button" title="Keyboard shortcuts (?)">?</button>
-        <span class="rb-status" id="status">Loading&#8230;</span>
-        <span class="rb-refresh-time" id="refreshTime"></span>
-      </div>
-      <div class="rb-row">
-        <div class="rb-filters">
-          <span class="rb-filter-label">Filter:</span>
-          <button class="rb-fchip active" data-filter="all" type="button">All</button>
-          <button class="rb-fchip fc-available" data-filter="available" type="button">&#10003; Available</button>
-          <button class="rb-fchip fc-out" data-filter="out" type="button">&#128663; Out</button>
-          <button class="rb-fchip fc-notready" data-filter="notready" type="button">&#9888; Not Ready</button>
-          <button class="rb-fchip fc-hold" data-filter="hold" type="button">&#128274; Hold</button>
-          <button class="rb-fchip fc-maintenance" data-filter="maintenance" type="button">&#128295; Maintenance</button>
-          <span style="flex:1"></span>
-          <button class="btn" id="btnNextProblem" type="button" title="Jump to next issue (N)">&#9889; Next issue</button>
-          <div class="view-toggle" title="Toggle view (V)">
-            <button class="vt-btn active" id="vtTable" type="button">&#9776; Table</button>
-            <button class="vt-btn" id="vtCards" type="button">&#9783; Cards</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Stale data banner -->
     <div class="rb-stale-banner" id="staleBanner">
       <span>&#9201;</span>
@@ -407,9 +375,6 @@
 
     <!-- KPI summary grid -->
     <div id="summaryGrid" class="rb-summary"></div>
-
-    <!-- Stats bar -->
-    <div class="rb-stats-bar" id="statsBar" style="display:none"></div>
 
     <!-- Table view (default) -->
     <div class="fleet-table-wrap" id="fleetTableWrap">
@@ -438,9 +403,7 @@
   <div class="sc-grid">
     <div class="sc-section">Actions</div>
     <div class="sc-key"><kbd>R</kbd></div><div class="sc-desc">Refresh fleet data</div>
-    <div class="sc-key"><kbd>V</kbd></div><div class="sc-desc">Toggle table / card view</div>
     <div class="sc-key"><kbd>/</kbd></div><div class="sc-desc">Focus search bar</div>
-    <div class="sc-key"><kbd>N</kbd></div><div class="sc-desc">Jump to next issue</div>
     <div class="sc-section">General</div>
     <div class="sc-key"><kbd>?</kbd></div><div class="sc-desc">Show / hide this panel</div>
     <div class="sc-key"><kbd>Esc</kbd></div><div class="sc-desc">Close panel &middot; clear search</div>
@@ -454,11 +417,9 @@
   const $ = (id) => document.getElementById(id);
 
   const els = {
-    status:          $('status'),
     search:          $('globalSearch'),
     station:         $('stationFilter'),
     summaryGrid:     $('summaryGrid'),
-    statsBar:        $('statsBar'),
     fleetGrid:       $('fleetGrid'),
     fleetTableWrap:  $('fleetTableWrap'),
     fleetTHead:      $('fleetTHead'),
@@ -466,9 +427,7 @@
     refreshTime:     $('refreshTime'),
     autoLabel:       $('autoLabel'),
     autoCheck:       $('autoRefresh'),
-    healthDot:       $('healthDot'),
-    vtTable:         $('vtTable'),
-    vtCards:         $('vtCards')
+    healthDot:       $('healthDot')
   };
 
   const LS_PREFS = 'diamond_rb_fleet_prefs';
@@ -480,14 +439,13 @@
     search:          '',
     station:         'all',
     quickFilter:     'all',
-    viewMode:         'table',
+    viewMode:         'table', /* permanent */
     tableSort:        { key: 'status', dir: 'asc' },
     groupByCategory:  true,
     collapsedCats:    new Set(),
     loading:          false,
     loadError:       false,
     lastRefreshTime: null,
-    problemIndex:    0,
     _savedStation:   null,
     autoTimer:       null,
     staleTimer:      null,
@@ -522,7 +480,6 @@
     try{ localStorage.setItem(LS_PREFS, JSON.stringify({
       quickFilter:     state.quickFilter,
       station:         state.station,
-      viewMode:        state.viewMode,
       tableSort:       state.tableSort,
       groupByCategory: state.groupByCategory,
       collapsedCats:   [...state.collapsedCats]
@@ -534,7 +491,7 @@
       const p=JSON.parse(raw);
       if(p.quickFilter)                              state.quickFilter=p.quickFilter;
       if(p.station)                                  state._savedStation=p.station;
-      if(p.viewMode==='cards'||p.viewMode==='table') state.viewMode=p.viewMode;
+      /* viewMode is always table — ignore saved value */
       if(p.tableSort&&p.tableSort.key)               state.tableSort=p.tableSort;
       if(p.groupByCategory!=null)                    state.groupByCategory=!!p.groupByCategory;
       if(Array.isArray(p.collapsedCats))             state.collapsedCats=new Set(p.collapsedCats);
@@ -562,12 +519,10 @@
     hideStaleBanner();
     const btn=$('btnRefresh'); if(btn) btn.classList.add('spinning');
     postToWix({ type:'requestFleetBoard' });
-    setStatus('Loading…');
     _loadTimer = setTimeout(()=>{
       state.loading   = false;
       state.loadError = true;
       const b=$('btnRefresh'); if(b) b.classList.remove('spinning');
-      setStatus('⚠ No response — check connection');
       renderView();
     }, 8000);
   }
@@ -583,7 +538,7 @@
       .map(s).join(' ').toLowerCase();
   }
 
-  function matchesFilter(v){
+  function matchesQuickFilter(v){
     const st = vehicleStatus(v);
     switch(state.quickFilter){
       case 'available':   return st==='available';
@@ -604,7 +559,7 @@
         if(vs&&vs!==stFilter) return false;
       }
       if(q&&!vehicleBlob(v).includes(q)) return false;
-      if(!matchesFilter(v)) return false;
+      if(!matchesQuickFilter(v)) return false;
       return true;
     });
   }
@@ -673,7 +628,6 @@
     { key:'status',   label:'Status',        sortable:true  },
     { key:'plate',    label:'Plate',         sortable:true  },
     { key:'model',    label:'Model',         sortable:true  },
-    { key:'category', label:'Category',      sortable:true  },
     { key:'station',  label:'Station',       sortable:true  },
     { key:'fuel',     label:'Fuel',          sortable:true  },
     { key:'mileage',  label:'Mileage',       sortable:true  },
@@ -704,8 +658,6 @@
     const statusCell   = `<td><span class="tbl-badge st-${esc(status)}">${STATUS_ICONS[status]||''} ${esc(STATUS_LABELS[status]||status)}</span></td>`;
     const plateCell    = `<td><span class="tbl-plate">${highlight(s(v.plate),q)}</span></td>`;
     const modelCell    = `<td><span class="tbl-model">${highlight(s(v.model||v.vehicleLabel||''),q)}</span></td>`;
-    const catTxt       = s(v.categoryLabel||v.categoryCode||'');
-    const categoryCell = `<td>${catTxt?`<span class="tbl-cat">${highlight(catTxt,q)}</span>`:'<span style="color:var(--muted)">&#8212;</span>'}</td>`;
     const stTxt        = s(v.currentStationLabel||v.currentStationCode||'');
     const stationCell  = `<td><span class="tbl-station">${stTxt?highlight(stTxt,q):'&#8212;'}</span></td>`;
     const fuel         = Number(v.fuelLevel)||0;
@@ -720,7 +672,7 @@
       const isDueToday= dropDate && ymd(dropDate)===today && !isOverdue;
       const dueBadge  = isOverdue ? `<span class="tbl-overdue">Overdue</span>` : isDueToday ? `<span class="tbl-duetoday">Due today</span>` : '';
       const nameHtml  = highlight(s(ar.customerName||''),q);
-      const bookHtml  = ar.bookingNumber||ar.bookingId ? `<span class="tbl-booking">${highlight(s(ar.bookingNumber||ar.bookingId||''),q)}</span>` : '';
+      const bookHtml  = ar.bookingNumber ? `<span class="tbl-booking">${highlight(s(ar.bookingNumber),q)}</span>` : '';
       const dropStr   = ar.dropoffDateTime ? hhmm(ar.dropoffDateTime) : '';
       rentalCell = `<td><span class="tbl-customer">${nameHtml}</span>${bookHtml}${dueBadge}${dropStr?`<span class="tbl-booking" style="margin-left:5px">&#8594;${dropStr}</span>`:''}</td>`;
     } else {
@@ -733,7 +685,7 @@
       ? `<button class="rb-btn" onclick="window._flAct('contract','${esc(s(ar.bookingId))}')">Contract</button>` : '';
     const actionsCell = `<td><div class="tbl-actions"><button class="rb-btn primary" onclick="window._flAct('card','${id}')">View</button>${contractBtn}</div></td>`;
 
-    return `<tr class="st-${esc(status)}" id="fvt-${id}">${statusCell}${plateCell}${modelCell}${categoryCell}${stationCell}${fuelCell}${mileageCell}${rentalCell}${actionsCell}</tr>`;
+    return `<tr class="st-${esc(status)}" id="fvt-${id}">${statusCell}${plateCell}${modelCell}${stationCell}${fuelCell}${mileageCell}${rentalCell}${actionsCell}</tr>`;
   }
 
   function renderTableBody(filtered){
@@ -862,27 +814,16 @@
     els.fleetGrid.innerHTML = filtered.map(renderCard).join('');
   }
 
-  /* ── View switching ── */
-  function setViewMode(mode){
-    state.viewMode = mode;
-    if(mode==='table'){
-      els.fleetTableWrap.classList.remove('hidden');
-      els.fleetGrid.classList.add('hidden');
-      els.vtTable.classList.add('active');
-      els.vtCards.classList.remove('active');
-    } else {
-      els.fleetGrid.classList.remove('hidden');
-      els.fleetTableWrap.classList.add('hidden');
-      els.vtCards.classList.add('active');
-      els.vtTable.classList.remove('active');
-    }
-    savePrefs();
-  }
-
   /* ── Master render ── */
-  function renderView(){
-    if(state.viewMode==='table') renderTable(); else renderGrid();
-  }
+  function renderView(){ renderTable(); }
+
+  /* ── Set quick filter (from KPI card clicks) ── */
+  window._flSetFilter = function(f){
+    state.quickFilter = (state.quickFilter===f && f!=='all') ? 'all' : f;
+    renderSummary();
+    renderView();
+    savePrefs();
+  };
 
   /* ── Render KPI summary ── */
   function renderSummary(){
@@ -901,21 +842,9 @@
       .map(({k,label,cls})=>{
         const val=sum[k]||0;
         const filter=k==='notReady'?'notready':(k==='total'?'all':k);
-        return `<div class="rb-scard ${cls}" onclick="window._flSetFilter('${esc(filter)}')" title="Filter by ${esc(label)}"><div class="rb-sk">${esc(label)}</div><div class="rb-sv">${esc(String(val))}</div></div>`;
+        const active = state.quickFilter===filter ? 'scard-active' : '';
+        return `<div class="rb-scard ${cls} ${active}" onclick="window._flSetFilter('${esc(filter)}')" title="Click to filter · click again to reset"><div class="rb-sk">${esc(label)}</div><div class="rb-sv">${esc(String(val))}</div></div>`;
       }).join('');
-  }
-
-  /* ── Render stats bar ── */
-  function renderStatsBar(){
-    const sum=state.summary;
-    if(!sum||!sum.total){ els.statsBar.style.display='none'; return; }
-    els.statsBar.style.display='';
-    const chips=[];
-    if(sum.available) chips.push(`<span class="rb-stat-chip ok">&#10003; Available: <strong>${sum.available}</strong></span>`);
-    if(sum.out)       chips.push(`<span class="rb-stat-chip out">&#128663; Out today: <strong>${sum.out}</strong></span>`);
-    const attention=(sum.notReady||0)+(sum.hold||0)+(sum.maintenance||0);
-    if(attention)     chips.push(`<span class="rb-stat-chip warn">&#9888; Needing attention: <strong>${attention}</strong></span>`);
-    els.statsBar.innerHTML=chips.join('&nbsp;&middot;&nbsp;');
   }
 
   /* ── Update health dot ── */
@@ -949,35 +878,11 @@
   /* ── Master render ── */
   function render(){
     renderSummary();
-    renderStatsBar();
     renderStations();
     updateHealthDot();
     renderView();
     savePrefs();
     try{ postToWix({type:'resizeShell',height:Math.max(document.documentElement.scrollHeight,document.body.scrollHeight)}); }catch(_){}
-  }
-
-  /* ── Jump to next problem ── */
-  function jumpToNextProblem(){
-    const problems=state.vehicles.filter(v=>{
-      const st=vehicleStatus(v);
-      if(st==='hold'||st==='notready') return true;
-      if(v.activeRental){ const d=asDate(v.activeRental.dropoffDateTime); if(d&&d<new Date()) return true; }
-      return false;
-    });
-    if(!problems.length){ setStatus('No issues found'); return; }
-    const v=problems[state.problemIndex%problems.length];
-    state.problemIndex++;
-    const id=s(v.fleetVehicleId||''); if(!id) return;
-
-    if(state.viewMode==='table'){
-      const row=document.getElementById('fvt-'+esc(id));
-      if(row){ row.scrollIntoView({behavior:'smooth',block:'center'}); row.classList.remove('highlight'); void row.offsetWidth; row.classList.add('highlight'); setTimeout(()=>row.classList.remove('highlight'),2100); }
-    } else {
-      const card=document.getElementById('fvc-'+esc(id));
-      if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.classList.remove('highlight'); void card.offsetWidth; card.classList.add('highlight'); setTimeout(()=>card.classList.remove('highlight'),2100); }
-    }
-    setStatus(`Issue ${(state.problemIndex-1)%problems.length+1}/${problems.length}: ${esc(s(v.plate||v.model||''))}`);
   }
 
   /* ── Auto-refresh ── */
@@ -993,14 +898,6 @@
   window._flAct = function(action, id){
     if(action==='card')          postToWix({type:'openVehicleCard', fleetVehicleId:id});
     else if(action==='contract') postToWix({type:'openContract', bookingId:id});
-  };
-  window._flSetFilter = function(f){
-    state.quickFilter=f;
-    document.querySelectorAll('.rb-fchip').forEach(btn=>
-      btn.classList.toggle('active', btn.getAttribute('data-filter')===f)
-    );
-    renderView();
-    savePrefs();
   };
   window._flToggleCat = function(cat){
     if(state.collapsedCats.has(cat)) state.collapsedCats.delete(cat);
@@ -1029,14 +926,6 @@
   $('btnHelp').addEventListener('click',toggleShortcutPanel);
   $('scClose').addEventListener('click',closeShortcutPanel);
   $('scBackdrop').addEventListener('click',closeShortcutPanel);
-  $('btnNextProblem').addEventListener('click',jumpToNextProblem);
-  els.vtTable.addEventListener('click',()=>setViewMode('table'));
-  els.vtCards.addEventListener('click',()=>setViewMode('cards'));
-
-  /* Quick filter chips */
-  document.querySelectorAll('.rb-fchip').forEach(btn=>
-    btn.addEventListener('click',()=>window._flSetFilter(btn.getAttribute('data-filter')))
-  );
 
   /* Keyboard shortcuts */
   document.addEventListener('keydown',e=>{
@@ -1050,8 +939,6 @@
     if(e.key==='?'&&!inInput){ e.preventDefault(); toggleShortcutPanel(); return; }
     if(inInput) return;
     if(e.key==='r'||e.key==='R') reloadData();
-    else if(e.key==='n'||e.key==='N') jumpToNextProblem();
-    else if(e.key==='v'||e.key==='V') setViewMode(state.viewMode==='table'?'cards':'table');
   });
 
   /* Sidebar nav */
@@ -1082,14 +969,6 @@
     }catch(_){ return false; }
   }
 
-  /* ── Restore UI from prefs ── */
-  function restoreUIFromState(){
-    document.querySelectorAll('.rb-fchip').forEach(b=>
-      b.classList.toggle('active', b.getAttribute('data-filter')===state.quickFilter)
-    );
-    setViewMode(state.viewMode);
-  }
-
   /* ── postMessage handler ── */
   window.addEventListener('message',event=>{
     if(event.origin&&!isTrusted(event.origin)) return;
@@ -1105,13 +984,10 @@
       state.loading         = false;
       state.loadError       = false;
       state.lastRefreshTime = Date.now();
-      state.problemIndex    = 0;
       const btn=$('btnRefresh'); if(btn) btn.classList.remove('spinning');
       state.vehicles = Array.isArray(d.vehicles) ? d.vehicles : [];
       state.summary  = d.summary || {};
       stampRefresh();
-      const sum=state.summary;
-      setStatus(`OK • total=${sum.total||0} available=${sum.available||0} out=${sum.out||0} hold=${sum.hold||0}`);
       render();
       return;
     }
@@ -1137,7 +1013,6 @@
 
   /* ── Auto-init ── */
   loadPrefs();
-  restoreUIFromState();
   state.staleTimer=setInterval(checkStaleness, 60000);
   postToWix({type:'requestUserContext'});
   reloadData();
