@@ -138,15 +138,6 @@
     .rb-scard.sc-maint .rb-sv{color:#475569}
 
     /* ── Stats bar ── */
-    .rb-stats-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:var(--shadow)}
-    .rb-stat-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:var(--r-pill);border:1px solid var(--border);background:rgba(0,0,0,.03);font:800 10px/1 system-ui;color:var(--sub)}
-    .rb-stat-chip strong{font-weight:900;color:var(--text)}
-    .rb-stat-chip.ok{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.20);color:#065F46}
-    .rb-stat-chip.ok strong{color:#065F46}
-    .rb-stat-chip.out{background:rgba(168,132,74,.08);border-color:var(--gold-border);color:var(--gold2)}
-    .rb-stat-chip.out strong{color:var(--gold2)}
-    .rb-stat-chip.warn{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.20);color:#B45309}
-    .rb-stat-chip.warn strong{color:#B45309}
 
     /* ── Stale data banner ── */
     .rb-stale-banner{display:none;align-items:center;gap:10px;padding:8px 14px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);border-radius:12px;margin-bottom:12px;font:800 11px/1.35 system-ui;color:#B45309}
@@ -383,9 +374,6 @@
     <!-- KPI summary grid -->
     <div id="summaryGrid" class="rb-summary"></div>
 
-    <!-- Stats bar -->
-    <div class="rb-stats-bar" id="statsBar" style="display:none"></div>
-
     <!-- Table view (default) -->
     <div class="fleet-table-wrap" id="fleetTableWrap">
       <table class="fleet-tbl">
@@ -430,7 +418,6 @@
     search:          $('globalSearch'),
     station:         $('stationFilter'),
     summaryGrid:     $('summaryGrid'),
-    statsBar:        $('statsBar'),
     fleetGrid:       $('fleetGrid'),
     fleetTableWrap:  $('fleetTableWrap'),
     fleetTHead:      $('fleetTHead'),
@@ -836,19 +823,6 @@
       }).join('');
   }
 
-  /* ── Render stats bar ── */
-  function renderStatsBar(){
-    const sum=state.summary;
-    if(!sum||!sum.total){ els.statsBar.style.display='none'; return; }
-    els.statsBar.style.display='';
-    const chips=[];
-    if(sum.available) chips.push(`<span class="rb-stat-chip ok">&#10003; Available: <strong>${sum.available}</strong></span>`);
-    if(sum.out)       chips.push(`<span class="rb-stat-chip out">&#128663; Out today: <strong>${sum.out}</strong></span>`);
-    const attention=(sum.notReady||0)+(sum.hold||0)+(sum.maintenance||0);
-    if(attention)     chips.push(`<span class="rb-stat-chip warn">&#9888; Needing attention: <strong>${attention}</strong></span>`);
-    els.statsBar.innerHTML=chips.join('&nbsp;&middot;&nbsp;');
-  }
-
   /* ── Update health dot ── */
   function updateHealthDot(){
     const dot=els.healthDot; if(!dot) return;
@@ -880,7 +854,6 @@
   /* ── Master render ── */
   function render(){
     renderSummary();
-    renderStatsBar();
     renderStations();
     updateHealthDot();
     renderView();
