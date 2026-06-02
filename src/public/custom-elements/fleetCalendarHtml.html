@@ -152,6 +152,14 @@ button:active{transform:scale(.985)}
   border-left:3px solid var(--gold)!important;
   height:24px!important
 }
+/* category row label text */
+.vis-labelset .vis-label.fleetCatGroup .vis-inner{
+  font:900 10.5px/1 system-ui,sans-serif!important;
+  color:var(--text)!important;
+  padding:0 8px 0 4px!important;
+  gap:6px!important;
+  align-items:center!important;
+}
 
 /* ── booking bar items ───────────────────── */
 .vis-item{
@@ -576,13 +584,10 @@ button:active{transform:scale(.985)}
   function _buildGroupContent(g, rowNo){
     const isCat=String(g.id||'').startsWith('cat_');
     if(isCat){
-      // flex:1 fills remaining space after vis-timeline's toggle arrow; background/border-left come from CSS on the label
       const catCode=escHtml(String(g.id||'').replace(/^cat_/,'')||'Other');
       const count=Array.isArray(g.nestedGroups)?g.nestedGroups.length:0;
-      return '<div style="display:flex;align-items:center;flex:1;min-width:0;align-self:stretch;padding:0 8px;gap:6px;overflow:hidden;">'
-        +'<span style="font:900 10.5px/1 system-ui,sans-serif;color:#0f172a;flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+catCode+'</span>'
-        +'<span style="font:700 9px/1 system-ui,sans-serif;color:#475569;padding:1px 5px;background:rgba(0,0,0,.06);border-radius:3px;border:1px solid rgba(15,23,42,.10);white-space:nowrap;flex-shrink:0;">'+count+' veh</span>'
-        +'</div>';
+      // Plain inline text — no wrapper div — avoids flex conflict with vis-timeline's ▼ toggle button
+      return catCode+'&nbsp;<small style="background:rgba(0,0,0,.08);border-radius:3px;padding:1px 4px;font-size:9px;font-weight:700;color:#475569;letter-spacing:.02em;">'+count+'</small>';
     }
     const no   =escHtml(String(rowNo||'—'));
     const plate=escHtml(safe(g.plate||'—'));
@@ -975,7 +980,7 @@ button:active{transform:scale(.985)}
         return{...g,content:html,_rowNo:rowNo,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
       }));
 
-      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,group:e.group||e.resource||'',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
+      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,type:'range',group:e.group||e.resource||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
 
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
@@ -1001,7 +1006,7 @@ button:active{transform:scale(.985)}
     if(data.type==='patchItems'){
       const items=Array.isArray(data.items)?data.items:[];
       lastUnassigned=Array.isArray(data.unassigned)?data.unassigned:[];
-      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,group:e.group||e.resource||'',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
+      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,type:'range',group:e.group||e.resource||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
       saveWorkspace(); saveResume();
