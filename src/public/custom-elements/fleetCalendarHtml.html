@@ -570,6 +570,33 @@ button:active{transform:scale(.985)}
   function fmtDateTime(d){ const dt=new Date(d); if(isNaN(dt.getTime())) return '-'; return `${pad2(dt.getDate())}/${pad2(dt.getMonth()+1)}/${dt.getFullYear()} ${hhmm(dt)}`; }
   function norm(s){ return (s??'').toString().toLowerCase().trim(); }
 
+  // ── Group content builders (inline styles — bypasses CSS class cascade issues) ──
+  function _escH(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  function _buildVehicleContent(g, rowNo){
+    const cat  =_escH(safe(g.categoryCode||'—'));
+    const no   =_escH(String(rowNo||'—'));
+    const plate=_escH(safe(g.plate||'—'));
+    const model=_escH(safe(g.model||'—'));
+    const stn  =_escH(safe(g.station||'—'));
+    return '<div style="display:flex;align-items:stretch;width:100%;height:100%;overflow:hidden">'
+      +`<span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:80px;min-width:80px;max-width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 3px;font:900 9.5px/1 system-ui,sans-serif;color:#6C522E;background:rgba(168,132,74,.10);border-right:1px solid rgba(168,132,74,.20);text-transform:uppercase;letter-spacing:.04em">${cat}</span>`
+      +`<span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:32px;min-width:32px;max-width:32px;overflow:hidden;white-space:nowrap;padding:0 2px;font:900 10px/1 system-ui,sans-serif;color:#94a3b8;background:rgba(148,163,184,.07);border-right:1px solid rgba(15,23,42,.08)">${no}</span>`
+      +`<span style="display:flex;align-items:center;flex-shrink:0;width:90px;min-width:90px;max-width:90px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px;font:900 10.5px/1 ui-monospace,monospace,system-ui;color:#6C522E;background:rgba(168,132,74,.07);border-right:1px solid rgba(168,132,74,.15)">${plate}</span>`
+      +`<span style="display:flex;align-items:center;flex-shrink:0;width:90px;min-width:90px;max-width:90px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px;font:700 10px/1.2 system-ui,sans-serif;color:#334155;border-right:1px solid rgba(15,23,42,.08)">${model}</span>`
+      +`<span style="display:flex;align-items:center;flex:1;min-width:75px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 4px;font:700 10px/1.1 system-ui,sans-serif;color:#64748b">${stn}</span>`
+      +'</div>';
+  }
+
+  function _buildCategoryContent(g){
+    const catCode=_escH(String(g.id||'').replace(/^cat_/,''));
+    const count=Array.isArray(g.nestedGroups)?g.nestedGroups.length:0;
+    return '<div style="display:flex;align-items:center;width:100%;height:100%;padding:0 8px 0 10px;background:#E8EEF7;border-left:3px solid #A8844A;border-top:1px solid rgba(15,23,42,.14);gap:6px;overflow:hidden">'
+      +`<span style="font:900 10.5px/1 system-ui,sans-serif;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;min-width:0"><span style="color:#A8844A;font-size:9px;flex-shrink:0">&#9658;</span>${catCode}</span>`
+      +(count?`<span style="font:700 9px/1 system-ui,sans-serif;color:#475569;margin-left:auto;padding:1px 5px;background:rgba(0,0,0,.05);border-radius:3px;border:1px solid rgba(15,23,42,.10);white-space:nowrap;flex-shrink:0">${count}&thinsp;veh</span>`:'')
+      +'</div>';
+  }
+
   function assertVisReady(){
     if(!window.vis||!vis.DataSet||!vis.Timeline) throw new Error('vis-timeline not loaded.');
   }
@@ -928,9 +955,16 @@ button:active{transform:scale(.985)}
 
       groupsDS.clear();
       groupsDS.add([{id:HEAT_GROUP_ID,content:'',visible:false}]);
+      const _catRowIdx={};
       groupsDS.add(groups.map(g=>{
         const isCat=String(g.id||'').startsWith('cat_');
-        return{...g,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
+        if(isCat){
+          return{...g,content:_buildCategoryContent(g),style:(g.style||'')+';height:24px'};
+        } else {
+          const cat=safe(g.categoryCode||'');
+          _catRowIdx[cat]=(_catRowIdx[cat]||0)+1;
+          return{...g,content:_buildVehicleContent(g,_catRowIdx[cat]),style:(g.style||'')+';height:20px'};
+        }
       }));
 
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,group:e.group,start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
