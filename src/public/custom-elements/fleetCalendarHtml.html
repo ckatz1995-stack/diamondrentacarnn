@@ -1047,6 +1047,16 @@ button:active{transform:scale(.985)}
     setStatus('READY • waiting for data…');
     renderFleetModeButtons();
     syncCalHeader();
+
+    // Wix resizes the iframe AFTER vis-timeline has already initialized (sometimes at height 0).
+    // A ResizeObserver fires whenever the #timeline container changes size — covers Wix
+    // late-sizing the iframe, sidebar collapse, and any window resize.
+    if(window.ResizeObserver){
+      const _tlRO=new ResizeObserver(()=>{
+        if(timeline) try{ timeline.redraw(); syncCalHeader(); }catch(_){}
+      });
+      _tlRO.observe(document.getElementById('timeline'));
+    }
   }
 
   // ── Event listeners ──────────────────────────────────────
@@ -1270,8 +1280,15 @@ button:active{transform:scale(.985)}
         setTimeout(()=>{ suppressRangeEvents=false; },0);
       } else{
         applyRange(fromEl.value,toEl.value,false);
-        // Fit to show all items if any exist; otherwise just center on today
-        setTimeout(()=>{ try{ if(lastLoadedItems.length>0){ timeline.fit({animation:false}); } else { timeline.moveTo(new Date(),{animation:true}); } }catch(_){} },300);
+        // Fit+redraw cascade: Wix may size the iframe late; redraw at 100/300/800ms
+        // so items become visible even if the container was 0-height at init time.
+        [100,300,800].forEach(ms=>setTimeout(()=>{
+          try{
+            timeline.redraw();
+            if(lastLoadedItems.length>0) timeline.fit({animation:false});
+            syncCalHeader();
+          }catch(_){}
+        },ms));
       }
 
       updateStats(lastUnassigned.length);
