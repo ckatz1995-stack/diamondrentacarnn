@@ -428,6 +428,7 @@ button:active{transform:scale(.985)}
     <button id="btnUnassigned" type="button">Unassigned (<span id="uCount">0</span>)</button>
     <button id="btnAutoAssign" class="btnPri" type="button">Auto-assign</button>
     <button id="btnRefresh" type="button" title="Refresh data">⟳</button>
+    <button id="btnDiag" type="button" title="Show diagnostic info" style="background:#fff3cd;border-color:#e6ac00;font-weight:900">?</button>
     <details class="moreMenu">
       <summary>More ▾</summary>
       <div class="moreMenuPop">
@@ -543,6 +544,17 @@ button:active{transform:scale(.985)}
   </div>
 </div>
 
+<!-- Diagnostic panel -->
+<div id="diagPanel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:18px;max-width:640px;width:96vw;max-height:82vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid #e2e8f0;padding-bottom:10px">
+      <strong style="font:900 14px/1 system-ui;color:#0f172a">Fleet Calendar — Diagnostics</strong>
+      <button id="diagClose" type="button" style="padding:5px 12px;border-radius:8px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;font:900 11px/1 system-ui">Close</button>
+    </div>
+    <pre id="diagContent" style="font:700 11.5px/1.6 ui-monospace,'Cascadia Code',monospace;color:#0f172a;margin:0;white-space:pre-wrap;word-break:break-all">Loading…</pre>
+  </div>
+</div>
+
 <script>
   function postToWix(msg){ window.parent.postMessage(msg,'*'); }
   function reportHeight(extra){
@@ -576,7 +588,7 @@ button:active{transform:scale(.985)}
   const bOverlay     = document.getElementById('bOverlay');
   const bClose       = document.getElementById('bClose');
 
-  function setStatus(msg){ if(statusBar) statusBar.textContent=msg||''; }
+  function setStatus(msg){ if(statusBar){ statusBar.textContent=msg||''; statusBar.title=msg||''; } }
   function safe(v){ return (v==null?'':String(v)).trim(); }
   function escHtml(s){ return String(s??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
   function pad2(n){ return String(n).padStart(2,'0'); }
@@ -1148,6 +1160,68 @@ button:active{transform:scale(.985)}
     btn.addEventListener('click',()=>{ const route=btn.getAttribute('data-route'); if(route) postToWix({type:'navigate',route}); });
   });
 
+  // ── Diagnostic panel ────────────────────────────────────
+  document.getElementById('diagClose')?.addEventListener('click',()=>{ document.getElementById('diagPanel').style.display='none'; });
+  document.getElementById('diagPanel')?.addEventListener('click',(e)=>{ if(e.target===document.getElementById('diagPanel')) document.getElementById('diagPanel').style.display='none'; });
+  document.getElementById('btnDiag')?.addEventListener('click',()=>{
+    const panel=document.getElementById('diagPanel');
+    const content=document.getElementById('diagContent');
+    if(!panel||!content) return;
+    try{
+      const ds_items=itemsDS?itemsDS.get():[];
+      const ds_groups=groupsDS?groupsDS.get():[];
+      const win=timeline?timeline.getWindow():{start:null,end:null};
+      const first=ds_items[0]||null;
+      const firstGrpObj=first&&groupsDS?groupsDS.get(String(first.group||'')):null;
+      const lines=[
+        '=== DATASET ===',
+        'itemsDS.length: '+(itemsDS?itemsDS.length:'(null)'),
+        'groupsDS.length: '+(groupsDS?groupsDS.length:'(null)'),
+        'lastLoadedItems: '+lastLoadedItems.length,
+        '',
+        '=== TIMELINE WINDOW ===',
+        'start: '+(win.start?win.start.toISOString():'null'),
+        'end:   '+(win.end?win.end.toISOString():'null'),
+        '',
+        '=== FIRST ITEM IN itemsDS ===',
+        first?[
+          'id:        '+first.id,
+          'group:     '+first.group,
+          'start:     '+(first.start instanceof Date?first.start.toISOString():String(first.start)),
+          'end:       '+(first.end instanceof Date?first.end.toISOString():String(first.end)),
+          'className: '+(first.className||''),
+          'style:     '+(first.style||''),
+          'group in groupsDS: '+(firstGrpObj?'YES (id='+firstGrpObj.id+', visible='+firstGrpObj.visible+')':'NO — orphan item!'),
+        ].join('\n'):'(no items in itemsDS)',
+        '',
+        '=== FILTERS ===',
+        'searchBox.value:   "'+(searchBox.value||'')+'"',
+        'stationFilter:     "'+(document.getElementById('stationFilter')?.value||'')+'"',
+        'fleetViewMode:     '+fleetViewMode,
+        '',
+        '=== DATE INPUTS ===',
+        'fromDate:     '+fromEl.value,
+        'toDate:       '+toEl.value,
+        'lastRange.from: '+lastRange.from,
+        'lastRange.to:   '+lastRange.to,
+        '',
+        '=== VIS-TIMELINE STATUS ===',
+        'vis loaded:  '+!!(window.vis&&vis.DataSet&&vis.Timeline),
+        'timeline:    '+(timeline?'created':'null'),
+        'groupsDS:    '+(groupsDS?'created':'null'),
+        'itemsDS:     '+(itemsDS?'created':'null'),
+        '',
+        '=== KNOWN GROUP IDs (first 5) ===',
+        [..._knownGroupIds].slice(0,5).join('\n')||'(empty)',
+      ];
+      content.textContent=lines.join('\n');
+      panel.style.display='flex';
+    }catch(diagErr){
+      content.textContent='Diagnostic error: '+(diagErr?.message||String(diagErr));
+      panel.style.display='flex';
+    }
+  });
+
   // ── Trusted origin check ─────────────────────────────────
   const TRUSTED_PARENT_SUFFIXES=['wix.com','wixsite.com','parastorage.com','wixstatic.com'];
   function isTrustedParentOrigin(origin){ const raw=String(origin||'').trim().toLowerCase(); if(!raw) return true; try{ const host=new URL(raw).hostname.toLowerCase(); if(!host) return false; if(TRUSTED_PARENT_SUFFIXES.some(s=>host===s||host.endsWith('.'+s))) return true; try{ const ref=document.referrer; if(ref){ const rh=new URL(ref).hostname.toLowerCase(); if(rh&&host===rh) return true; } }catch(_){} return false; }catch(_){ return false; } }
@@ -1196,7 +1270,8 @@ button:active{transform:scale(.985)}
         setTimeout(()=>{ suppressRangeEvents=false; },0);
       } else{
         applyRange(fromEl.value,toEl.value,false);
-        setTimeout(()=>{ try{ timeline.moveTo(new Date(),{animation:true}); }catch(_){} },250);
+        // Fit to show all items if any exist; otherwise just center on today
+        setTimeout(()=>{ try{ if(lastLoadedItems.length>0){ timeline.fit({animation:false}); } else { timeline.moveTo(new Date(),{animation:true}); } }catch(_){} },300);
       }
 
       updateStats(lastUnassigned.length);
@@ -1205,7 +1280,7 @@ button:active{transform:scale(.985)}
       syncCalHeader();
       const _inVehicle=lastLoadedItems.filter(i=>i.group&&i.group!=='unassigned'&&i.group!==HEAT_GROUP_ID&&!String(i.group).startsWith('cat_')).length;
       const _inUnassigned=lastLoadedItems.filter(i=>i.group==='unassigned').length;
-      setStatus(`Loaded: ${groups.filter(g=>!String(g.id).startsWith('cat_')&&g.id!=='unassigned'&&g.id!==HEAT_GROUP_ID).length} vehicles · ${items.length} bookings (${_inVehicle} assigned, ${_inUnassigned} unassigned) · ${fromEl.value} → ${toEl.value}`);
+      setStatus(`${items.length} bookings (${_inVehicle} assigned, ${_inUnassigned} unassigned) · ${groups.filter(g=>!String(g.id).startsWith('cat_')&&g.id!=='unassigned'&&g.id!==HEAT_GROUP_ID).length} vehicles · search="${searchBox.value||''}" · ${fromEl.value}→${toEl.value} · DS=${itemsDS?itemsDS.length:0}`);
       return;
     }
 
