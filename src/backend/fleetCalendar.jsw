@@ -48,6 +48,8 @@ const VF = {
   plate: "plate",
   model: "model",
   category: "category",
+  categoryCode: "categoryCode",
+  categoryLabel: "categoryLabel",
   active: "active",
   station: "station",
   mileage: "mileage",
@@ -142,6 +144,8 @@ async function ensureFieldMapping() {
     VF.plate = _pickKey(v, ["Plate", "plate"], VF.plate);
     VF.model = _pickKey(v, ["Model", "model"], VF.model);
     VF.category = _pickKey(v, ["Category", "category"], VF.category);
+    VF.categoryCode  = _pickKey(v, ["categoryCode", "CategoryCode", "catCode", "CatCode"], VF.categoryCode);
+    VF.categoryLabel = _pickKey(v, ["categoryLabel", "CategoryLabel", "catLabel", "CatLabel"], VF.categoryLabel);
     VF.active = _pickKey(v, ["Active", "active"], VF.active);
     VF.station = _pickKey(v, ["Station", "station", "CurrentStation", "currentStation"], VF.station);
     VF.mileage = _pickKey(v, ["Mileage", "mileage", "Kms", "kms"], VF.mileage);
@@ -166,7 +170,7 @@ async function getFleetMetaById(vehicleId) {
     if (!item) return null;
     const plate = String(item?.[VF.plate] || item?.plate || "").trim();
     const model = String(item?.[VF.model] || item?.model || "").trim();
-    const assignedCategoryCode = catCode(item?.[VF.category] || item?.category || "");
+    const assignedCategoryCode = fleetCatCode(item) || catCode(item?.[VF.category] || item?.category || "");
     return {
       plate,
       model,
@@ -230,9 +234,23 @@ function catCode(v) {
   return String(first).replace("Χ","X").toUpperCase();
 }
 
-// ✅ Fleet category code helper (used by buildGroups / assign logic)
+// Fleet category code — mirrors vehicleCard.jsw: reads categoryCode/categoryLabel directly
 function fleetCatCode(vehicle) {
+  // 1. Direct categoryCode field (string like "A")
+  const directCode = _safeText(vehicle?.[VF.categoryCode] || vehicle?.categoryCode || vehicle?.CategoryCode);
+  if (directCode && !isOpaqueCategoryId(directCode)) return directCode.toUpperCase();
+  // 2. Extract from categoryLabel field (string like "A - Hyundai i10")
+  const fromLabel = catCode(vehicle?.[VF.categoryLabel] || vehicle?.categoryLabel || vehicle?.CategoryLabel);
+  if (fromLabel) return fromLabel;
+  // 3. Fall back to reference/category field
   return catCode(vehicle?.[VF.category]) || "Other";
+}
+
+// Fleet category full label — tries direct label field first
+function fleetCatLabel(vehicle) {
+  const direct = _safeText(vehicle?.[VF.categoryLabel] || vehicle?.categoryLabel || vehicle?.CategoryLabel);
+  if (direct) return direct;
+  return catLabel(vehicle?.[VF.category]) || "";
 }
 
 
@@ -399,8 +417,8 @@ export async function confirmAndAutoAssign({ authToken, bookingId } = {}) {
 
   const fleet = await fetchFleet();
   const candidates = (fleet || []).filter(v => {
-    const vcat = catCode(v?.[VF.category]);
-    return !cat || vcat === cat || catLabel(v?.[VF.category]) === cat;
+    const vcat = fleetCatCode(v);
+    return !cat || vcat === cat || fleetCatLabel(v).startsWith(cat);
   });
 
   for (const v of candidates) {
@@ -468,14 +486,19 @@ export async function acknowledgeUnassignedInRange({ authToken, from, to } = {})
  */
 
 async function fetchVehicleCategoryMap() {
-  // Maps Vehicles._id -> Vehicles.category (A/B/...) for decoding Fleet.Category references
+  // Maps VehiclesNew._id -> short category code (e.g. "A") for resolving Fleet.category reference fields
   try {
     const res = await wixData.query("VehiclesNew").limit(1000).find({ suppressAuth: true });
     const map = {};
     for (const v of (res.items || [])) {
       const id = String(v._id || "");
-      const code = String(v.category || v.Category || "").trim() || (String(v.title || v.Title || "").split(" - ")[0] || "").trim();
-      if (id && code) map[id] = code;
+      if (!id) continue;
+      // Try direct code field, then extract from title like "A - Hyundai i10"
+      const raw = String(v.categoryCode || v.CategoryCode || v.category || v.Category || "").trim()
+        || (String(v.title || v.Title || "").split(/\s*[-–]\s*/)[0] || "").trim();
+      const code = catCode(raw) || raw.toUpperCase();
+      const label = String(v.categoryLabel || v.CategoryLabel || v.title || v.Title || raw || "").trim();
+      if (id && code) { map[id] = code; if (label) map[`${id}_label`] = label; }
     }
     return map;
   } catch (_) {
@@ -513,11 +536,19 @@ async function fetchBookingsInRange(fromISO, toISO) {
  * TRANSFORMS
  * =========================
  */
-function buildGroups(fleet) {
+function buildGroups(fleet, vehicleCategoryMap) {
+  const catMap = vehicleCategoryMap || {};
   const byCat = new Map();
 
   for (const v of (fleet || [])) {
-    const cat = fleetCatCode(v) || "Other";
+    let cat = fleetCatCode(v);
+    // Last resort: look up the category reference in vehicleCategoryMap
+    if (!cat || cat === "Other") {
+      const catRef = v?.[VF.category];
+      const refId_ = typeof catRef === "object" ? String(catRef?._id || catRef?.id || "") : String(catRef || "");
+      if (refId_ && catMap[refId_]) cat = String(catMap[refId_]).toUpperCase();
+    }
+    cat = cat || "Other";
     if (!byCat.has(cat)) byCat.set(cat, []);
     byCat.get(cat).push(v);
   }
@@ -539,7 +570,9 @@ function buildGroups(fleet) {
     });
 
     // Use full label (e.g. "A - Hyundai i10") for display; fall back to short code
-    const fullCatLabel = catLabel(vehicles[0]?.[VF.category]) || cat;
+    const catRef0 = vehicles[0]?.[VF.category];
+    const refId0 = typeof catRef0 === "object" ? String(catRef0?._id || catRef0?.id || "") : String(catRef0 || "");
+    const fullCatLabel = fleetCatLabel(vehicles[0]) || catLabel(catRef0) || (refId0 && catMap[`${refId0}_label`]) || cat;
 
     // Category header row — flat (no nestedGroups) so vis-timeline renders it as a normal label
     groups.push({
