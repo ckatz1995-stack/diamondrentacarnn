@@ -428,6 +428,7 @@ button:active{transform:scale(.985)}
     <button id="btnUnassigned" type="button">Unassigned (<span id="uCount">0</span>)</button>
     <button id="btnAutoAssign" class="btnPri" type="button">Auto-assign</button>
     <button id="btnRefresh" type="button" title="Refresh data">⟳</button>
+    <button id="btnDiag" type="button" title="Show diagnostic info" style="background:#fff3cd;border-color:#e6ac00;font-weight:900">?</button>
     <details class="moreMenu">
       <summary>More ▾</summary>
       <div class="moreMenuPop">
@@ -543,6 +544,20 @@ button:active{transform:scale(.985)}
   </div>
 </div>
 
+<!-- Diagnostic panel -->
+<div id="diagPanel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:18px;max-width:640px;width:96vw;max-height:82vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid #e2e8f0;padding-bottom:10px">
+      <strong style="font:900 14px/1 system-ui;color:#0f172a">Fleet Calendar — Diagnostics</strong>
+      <div style="display:flex;gap:6px">
+        <button id="diagForceRender" type="button" style="padding:5px 12px;border-radius:8px;border:1px solid #86efac;background:#f0fdf4;cursor:pointer;font:900 11px/1 system-ui;color:#166534">Force Render</button>
+        <button id="diagClose" type="button" style="padding:5px 12px;border-radius:8px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;font:900 11px/1 system-ui">Close</button>
+      </div>
+    </div>
+    <pre id="diagContent" style="font:700 11.5px/1.6 ui-monospace,'Cascadia Code',monospace;color:#0f172a;margin:0;white-space:pre-wrap;word-break:break-all">Loading…</pre>
+  </div>
+</div>
+
 <script>
   function postToWix(msg){ window.parent.postMessage(msg,'*'); }
   function reportHeight(extra){
@@ -576,7 +591,7 @@ button:active{transform:scale(.985)}
   const bOverlay     = document.getElementById('bOverlay');
   const bClose       = document.getElementById('bClose');
 
-  function setStatus(msg){ if(statusBar) statusBar.textContent=msg||''; }
+  function setStatus(msg){ if(statusBar){ statusBar.textContent=msg||''; statusBar.title=msg||''; } }
   function safe(v){ return (v==null?'':String(v)).trim(); }
   function escHtml(s){ return String(s??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
   function pad2(n){ return String(n).padStart(2,'0'); }
@@ -607,7 +622,9 @@ button:active{transform:scale(.985)}
   function buildItemContent(item){
     const cn=escHtml(item.customerName||'—');
     const tip=escHtml(tooltipText(item));
-    return `<div class="card" title="${tip}" style="height:100%;display:flex;align-items:center;padding:0 4px;overflow:hidden;white-space:nowrap"><span class="cust" style="overflow:hidden;text-overflow:ellipsis;font:700 10px/1 system-ui;flex:1">${cn}</span></div>`;
+    // Use block span rather than a height:100% flex-div — inside vis-timeline's
+    // inline-block .vis-item-content, percentage heights resolve to 0.
+    return `<span title="${tip}" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 10px/1.2 system-ui;padding:0 4px;line-height:28px">${cn}</span>`;
   }
 
   const HEAT_GROUP_ID      = '__heat__';
@@ -1030,9 +1047,20 @@ button:active{transform:scale(.985)}
     timeline.on('select',(props)=>{ try{ const id=props?.items?.[0]; selectedFleetId=id?String(id):''; }catch(_){} });
     timeline.on('doubleClick',(props)=>{ try{ const id=props?.item; if(!id) return; const it=itemsDS.get(id); if(it) openBookingModal(it); }catch(_){} });
 
+    window._tlInitHeight=document.getElementById('timeline').offsetHeight;
     setStatus('READY • waiting for data…');
     renderFleetModeButtons();
     syncCalHeader();
+
+    // Wix resizes the iframe AFTER vis-timeline has already initialized (sometimes at height 0).
+    // A ResizeObserver fires whenever the #timeline container changes size — covers Wix
+    // late-sizing the iframe, sidebar collapse, and any window resize.
+    if(window.ResizeObserver){
+      const _tlRO=new ResizeObserver(()=>{
+        if(timeline) try{ timeline.redraw(); syncCalHeader(); }catch(_){}
+      });
+      _tlRO.observe(document.getElementById('timeline'));
+    }
   }
 
   // ── Event listeners ──────────────────────────────────────
@@ -1146,6 +1174,88 @@ button:active{transform:scale(.985)}
     btn.addEventListener('click',()=>{ const route=btn.getAttribute('data-route'); if(route) postToWix({type:'navigate',route}); });
   });
 
+  // ── Diagnostic panel ────────────────────────────────────
+  document.getElementById('diagClose')?.addEventListener('click',()=>{ document.getElementById('diagPanel').style.display='none'; });
+  document.getElementById('diagPanel')?.addEventListener('click',(e)=>{ if(e.target===document.getElementById('diagPanel')) document.getElementById('diagPanel').style.display='none'; });
+  document.getElementById('diagForceRender')?.addEventListener('click',()=>{
+    try{
+      timeline.setItems(itemsDS);
+      timeline.setGroups(groupsDS);
+      [0,100,250,500,1000].forEach(ms=>setTimeout(()=>{
+        try{ timeline.redraw(); if(lastLoadedItems.length>0) timeline.fit({animation:false}); syncCalHeader(); }catch(_){}
+      },ms));
+      document.getElementById('diagContent').textContent='Force render triggered — close this panel to see result.';
+    }catch(e){ document.getElementById('diagContent').textContent='Force render error: '+(e?.message||String(e)); }
+  });
+  document.getElementById('btnDiag')?.addEventListener('click',()=>{
+    const panel=document.getElementById('diagPanel');
+    const content=document.getElementById('diagContent');
+    if(!panel||!content) return;
+    try{
+      const ds_items=itemsDS?itemsDS.get():[];
+      const ds_groups=groupsDS?groupsDS.get():[];
+      const win=timeline?timeline.getWindow():{start:null,end:null};
+      const first=ds_items[0]||null;
+      const firstGrpObj=first&&groupsDS?groupsDS.get(String(first.group||'')):null;
+      const lines=[
+        '=== DATASET ===',
+        'itemsDS.length: '+(itemsDS?itemsDS.length:'(null)'),
+        'groupsDS.length: '+(groupsDS?groupsDS.length:'(null)'),
+        'lastLoadedItems: '+lastLoadedItems.length,
+        '',
+        '=== TIMELINE WINDOW ===',
+        'start: '+(win.start?win.start.toISOString():'null'),
+        'end:   '+(win.end?win.end.toISOString():'null'),
+        '',
+        '=== FIRST ITEM IN itemsDS ===',
+        first?[
+          'id:        '+first.id,
+          'group:     '+first.group,
+          'start:     '+(first.start instanceof Date?first.start.toISOString():String(first.start)),
+          'end:       '+(first.end instanceof Date?first.end.toISOString():String(first.end)),
+          'className: '+(first.className||''),
+          'style:     '+(first.style||''),
+          'group in groupsDS: '+(firstGrpObj?'YES (id='+firstGrpObj.id+', visible='+firstGrpObj.visible+')':'NO — orphan item!'),
+        ].join('\n'):'(no items in itemsDS)',
+        '',
+        '=== FILTERS ===',
+        'searchBox.value:   "'+(searchBox.value||'')+'"',
+        'stationFilter:     "'+(document.getElementById('stationFilter')?.value||'')+'"',
+        'fleetViewMode:     '+fleetViewMode,
+        '',
+        '=== DATE INPUTS ===',
+        'fromDate:     '+fromEl.value,
+        'toDate:       '+toEl.value,
+        'lastRange.from: '+lastRange.from,
+        'lastRange.to:   '+lastRange.to,
+        '',
+        '=== VIS-TIMELINE STATUS ===',
+        'vis loaded:  '+!!(window.vis&&vis.DataSet&&vis.Timeline),
+        'timeline:    '+(timeline?'created':'null'),
+        'groupsDS:    '+(groupsDS?'created':'null'),
+        'itemsDS:     '+(itemsDS?'created':'null'),
+        '',
+        '=== KNOWN GROUP IDs (first 5) ===',
+        [..._knownGroupIds].slice(0,5).join('\n')||'(empty)',
+        '',
+        '=== DOM RENDER STATE ===',
+        '#timeline initHeight (at boot): '+(window._tlInitHeight??'?'),
+        '#timeline offsetHeight now: '+(document.getElementById('timeline')?.offsetHeight??0),
+        '#timeline offsetWidth now:  '+(document.getElementById('timeline')?.offsetWidth??0),
+        '.vis-panel.vis-left  H: '+(document.querySelector('#timeline .vis-panel.vis-left')?.offsetHeight??'—'),
+        '.vis-panel.vis-center H: '+(document.querySelector('#timeline .vis-panel.vis-center')?.offsetHeight??'—'),
+        '.vis-content         H: '+(document.querySelector('#timeline .vis-content')?.offsetHeight??'—'),
+        '.vis-item count in DOM: '+document.querySelectorAll('#timeline .vis-item').length,
+        (()=>{ const fi=document.querySelector('#timeline .vis-item'); if(!fi) return '(no .vis-item in DOM)'; const cs=window.getComputedStyle(fi); return 'first .vis-item: display='+cs.display+' visibility='+cs.visibility+' opacity='+cs.opacity+' left='+fi.style.left+' top='+fi.style.top+' width='+fi.style.width+' height='+fi.style.height; })(),
+      ];
+      content.textContent=lines.join('\n');
+      panel.style.display='flex';
+    }catch(diagErr){
+      content.textContent='Diagnostic error: '+(diagErr?.message||String(diagErr));
+      panel.style.display='flex';
+    }
+  });
+
   // ── Trusted origin check ─────────────────────────────────
   const TRUSTED_PARENT_SUFFIXES=['wix.com','wixsite.com','parastorage.com','wixstatic.com'];
   function isTrustedParentOrigin(origin){ const raw=String(origin||'').trim().toLowerCase(); if(!raw) return true; try{ const host=new URL(raw).hostname.toLowerCase(); if(!host) return false; if(TRUSTED_PARENT_SUFFIXES.some(s=>host===s||host.endsWith('.'+s))) return true; try{ const ref=document.referrer; if(ref){ const rh=new URL(ref).hostname.toLowerCase(); if(rh&&host===rh) return true; } }catch(_){} return false; }catch(_){ return false; } }
@@ -1153,7 +1263,8 @@ button:active{transform:scale(.985)}
   // ── Message handler ──────────────────────────────────────
   window.addEventListener('message',(evt)=>{
     if(evt.origin&&!isTrustedParentOrigin(evt.origin)) return;
-    const data=evt.data;
+    let data=evt.data;
+    if(typeof data==='string'){ try{ data=JSON.parse(data); }catch(_){ return; } }
     if(!data||!data.type) return;
 
     if(data.type==='userContext'){ applyUserContext(data); postToWix({type:'requestPreference',key:'fleetCalColumns'}); return; }
@@ -1181,10 +1292,13 @@ button:active{transform:scale(.985)}
       applyGroupFilter();
       populateStationFilter();
 
-      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
+      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
 
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
+      // Force vis-timeline to rebind — covers cases where DataSet events don't propagate
+      try{ timeline.setItems(itemsDS); }catch(_){}
       if(searchBox.value) renderFromCache(searchBox.value);
+      try{ timeline.redraw(); }catch(_){}
 
       if(keep&&keep.start&&keep.end){
         suppressRangeEvents=true; timeline.setWindow(keep.start,keep.end,{animation:false});
@@ -1192,7 +1306,15 @@ button:active{transform:scale(.985)}
         setTimeout(()=>{ suppressRangeEvents=false; },0);
       } else{
         applyRange(fromEl.value,toEl.value,false);
-        setTimeout(()=>{ try{ timeline.moveTo(new Date(),{animation:true}); }catch(_){} },250);
+        // Fit+redraw cascade: Wix may size the iframe late; redraw at 100/300/800ms
+        // so items become visible even if the container was 0-height at init time.
+        [100,300,800].forEach(ms=>setTimeout(()=>{
+          try{
+            timeline.redraw();
+            if(lastLoadedItems.length>0) timeline.fit({animation:false});
+            syncCalHeader();
+          }catch(_){}
+        },ms));
       }
 
       updateStats(lastUnassigned.length);
@@ -1201,16 +1323,17 @@ button:active{transform:scale(.985)}
       syncCalHeader();
       const _inVehicle=lastLoadedItems.filter(i=>i.group&&i.group!=='unassigned'&&i.group!==HEAT_GROUP_ID&&!String(i.group).startsWith('cat_')).length;
       const _inUnassigned=lastLoadedItems.filter(i=>i.group==='unassigned').length;
-      setStatus(`Loaded: ${groups.filter(g=>!String(g.id).startsWith('cat_')&&g.id!=='unassigned'&&g.id!==HEAT_GROUP_ID).length} vehicles · ${items.length} bookings (${_inVehicle} assigned, ${_inUnassigned} unassigned) · ${fromEl.value} → ${toEl.value}`);
+      setStatus(`${items.length} bookings (${_inVehicle} assigned, ${_inUnassigned} unassigned) · ${groups.filter(g=>!String(g.id).startsWith('cat_')&&g.id!=='unassigned'&&g.id!==HEAT_GROUP_ID).length} vehicles · search="${searchBox.value||''}" · ${fromEl.value}→${toEl.value} · DS=${itemsDS?itemsDS.length:0}`);
       return;
     }
 
     if(data.type==='patchItems'){
       const items=Array.isArray(data.items)?data.items:[];
       lastUnassigned=Array.isArray(data.unassigned)?data.unassigned:[];
-      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
+      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
+      try{ timeline.redraw(); }catch(_){}
       saveWorkspace(); saveResume();
       renderUnassignedDrawer();
       updateStats(lastUnassigned.length);
