@@ -284,9 +284,12 @@ export async function saveVehicleCardData({ sessionToken, fleetVehicleId, patch 
 export async function getFleetBoard({ sessionToken } = {}) {
   await requireStaffAccess({ sessionToken, area: 'fleet', action: 'View' });
 
-  // 1. All active fleet vehicles
+  // 1. All active fleet vehicles — include category reference so vehicles added
+  // via Wix CMS (which only populate the reference, not the direct string fields)
+  // still resolve categoryCode / categoryLabel correctly.
   const fleetRes = await wixData.query('FleetNew')
     .eq('active', true)
+    .include('category')
     .limit(500)
     .find({ suppressAuth: true });
   const vehicles = fleetRes.items || [];
@@ -344,8 +347,8 @@ export async function getFleetBoard({ sessionToken } = {}) {
       plate:                txt(v.plate),
       model:                txt(v.model),
       vehicleLabel:         txt(v.vehicleLabel || [txt(v.plate), txt(v.model)].filter(Boolean).join(' - ')),
-      categoryCode:         txt(v.categoryCode),
-      categoryLabel:        txt(v.categoryLabel),
+      categoryCode:         txt(v.categoryCode  || v.category?.categoryCode),
+      categoryLabel:        txt(v.categoryLabel || v.category?.categoryLabel || v.category?.title),
       status:               txt(v.status),
       operationalStatus:    txt(v.operationalStatus),
       currentStationCode:   txt(v.currentStationCode),
