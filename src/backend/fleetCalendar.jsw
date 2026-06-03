@@ -315,8 +315,9 @@ export async function getFleetCalendarData({ authToken, from, to } = {}) {
   const fleet = await fetchFleet();
   const bookings = await fetchBookingsInRange(iso(f), iso(t));
 
+  const fleetById = new Map((fleet || []).map(v => [String(v?._id || ""), v]));
   const groups = buildGroups(fleet, vehicleCategoryMap);
-  const { items, unassigned } = buildItems(bookings);
+  const { items, unassigned } = buildItems(bookings, fleetById, vehicleCategoryMap);
   const heat = buildHeatmap({ from: f, to: t, fleet, items });
 
   return { groups, items, unassigned, heat };
@@ -640,7 +641,7 @@ function buildGroups(fleet, vehicleCategoryMap) {
   return groups;
 }
 
-function buildItems(bookings) {
+function buildItems(bookings, fleetById, categoryMap) {
   const items = [];
   const unassigned = [];
 
@@ -654,10 +655,12 @@ function buildItems(bookings) {
 
     const assignedId = refId(b?.[F.assignedFleetId]);
     const rentalState = String(b?.[F.rentalState] || "Booking");
+    const fleetVehicle = (fleetById && assignedId) ? fleetById.get(assignedId) : null;
 
+    const categoryRefId = String(b?.[F.categoryId] || b?.[F.category] || "").trim();
     const bookedLabel =
-      catLabel(b?.[F.categoryId]) ||
-      catLabel(b?.[F.category]) ||
+      (categoryMap && categoryRefId && categoryMap[`${categoryRefId}_label`]) ||
+      (!isOpaqueCategoryId(categoryRefId) ? (catLabel(b?.[F.categoryId]) || catLabel(b?.[F.category])) : "") ||
       "";
 
     const bookingNo = String(
@@ -669,9 +672,11 @@ function buildItems(bookings) {
 
     const text = `${bookingNo}${bookedLabel ? " • " + bookedLabel : ""}${status ? " • " + status : ""}`;
 
-    const assignedVehiclePlate = String(b?.assignedVehiclePlate || "");
-    const assignedVehicleModel = String(b?.assignedVehicleModel || "");
-    const assignedVehicleLabel = String(b?.assignedVehicleLabel || [assignedVehiclePlate, assignedVehicleModel].filter(Boolean).join(" • ") || "");
+    const assignedVehiclePlate = _safeText(fleetVehicle?.[VF.plate] || fleetVehicle?.plate || b?.assignedVehiclePlate || "");
+    const assignedVehicleModel = _safeText(fleetVehicle?.[VF.model] || fleetVehicle?.model || b?.assignedVehicleModel || "");
+    const assignedVehicleLabel = assignedVehiclePlate
+      ? (assignedVehicleModel ? `${assignedVehiclePlate} · ${assignedVehicleModel}` : assignedVehiclePlate)
+      : (assignedVehicleModel || "");
     const source = String(b?.source || b?.Source || "");
     const agent = String(b?.agent || b?.Agent || "");
     const remarks = String(b?.remarks || b?.internalMemo || b?.pickupComment || b?.dropoffComment || "");
