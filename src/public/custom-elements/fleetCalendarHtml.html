@@ -1250,6 +1250,15 @@ button:active{transform:scale(.985)}
         '.vis-content         H: '+(document.querySelector('#timeline .vis-content')?.offsetHeight??'—'),
         '.vis-item count in DOM: '+document.querySelectorAll('#timeline .vis-item').length,
         (()=>{ const fi=document.querySelector('#timeline .vis-item'); if(!fi) return '(no .vis-item in DOM)'; const cs=window.getComputedStyle(fi); return 'first .vis-item: display='+cs.display+' visibility='+cs.visibility+' opacity='+cs.opacity+' left='+fi.style.left+' top='+fi.style.top+' width='+fi.style.width+' height='+fi.style.height; })(),
+        '',
+        '=== ALL ITEMS IN DataSet ===',
+        ...(itemsDS?itemsDS.get():[]).map((it,i)=>{
+          const grp=groupsDS?groupsDS.get(String(it.group||'')):'?';
+          return `[${i}] id=${it.id.slice(-6)} group=${String(it.group||'').slice(-6)} grpOK=${grp?'Y':'N'} start=${it.start instanceof Date?it.start.toISOString().slice(5,16):String(it.start).slice(5,16)} end=${it.end instanceof Date?it.end.toISOString().slice(5,16):String(it.end).slice(5,16)}`;
+        }),
+        '',
+        '=== ALL .vis-item DOM positions ===',
+        ...(()=>{ const els=document.querySelectorAll('#timeline .vis-item'); return els.length?[...els].map((el,i)=>{ const id=(el.dataset.id||'?').slice(-6); return `[${i}] id=${id} top=${el.style.top} left=${el.style.left} w=${el.style.width} vis=${window.getComputedStyle(el).visibility}`; }):[''+(0)+' items in DOM']; })(),
       ];
       content.textContent=lines.join('\n');
       panel.style.display='flex';
