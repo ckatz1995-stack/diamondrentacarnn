@@ -152,9 +152,9 @@ button:active{transform:scale(.985)}
   border-left:3px solid var(--gold)!important;
   height:24px!important
 }
-/* Indent .vis-inner to clear vis-timeline's absolutely-positioned ▼ toggle button */
+/* Category header row inner — no toggle button (flat groups), simple padding */
 .vis-labelset .vis-label.fleetCatGroup .vis-inner{
-  padding-left:20px!important;
+  padding:0 8px!important;
   gap:6px!important;
   align-items:center!important;
 }
@@ -965,7 +965,7 @@ button:active{transform:scale(.985)}
         const id=String(g.id||'');
         if(id.startsWith('cat_')){
           const label=safe(g.catLabel||id.replace(/^cat_/,'')||'Other');
-          const count=Array.isArray(g.nestedGroups)?g.nestedGroups.length:0;
+          const count=g.vehicleCount!=null?Number(g.vehicleCount):(Array.isArray(g.nestedGroups)?g.nestedGroups.length:0);
           _catDataMap.set(id,{label,count});
           _catLabelOrder.push(id);
         }

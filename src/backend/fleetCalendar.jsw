@@ -541,13 +541,12 @@ function buildGroups(fleet) {
     // Use full label (e.g. "A - Hyundai i10") for display; fall back to short code
     const fullCatLabel = catLabel(vehicles[0]?.[VF.category]) || cat;
 
-    // Parent category group
+    // Category header row — flat (no nestedGroups) so vis-timeline renders it as a normal label
     groups.push({
       id: parentId,
       content: renderCategoryHeader(fullCatLabel, vehicles.length),
       catLabel: fullCatLabel,
-      nestedGroups: vehicles.map(v => v[VF.id]),
-      showNested: true,
+      vehicleCount: vehicles.length,
       className: "fleetCatGroup"
     });
 
@@ -598,12 +597,12 @@ function buildGroups(fleet) {
     }
   }
 
-  // Unassigned pseudo-category
+  // Unassigned pseudo-category (flat, same as other category headers)
   groups.push({
     id: "cat_Unassigned",
     content: renderCategoryHeader("Unassigned", 1),
-    nestedGroups: ["unassigned"],
-    showNested: true,
+    catLabel: "Unassigned",
+    vehicleCount: 1,
     className: "fleetCatGroup"
   });
   groups.push({ id: "unassigned", content: `<div class="fleetGroupCell"><span class="fleetCol fleetNo">—</span><span class="fleetCol fleetPlate">Unassigned</span><span class="fleetCol fleetModel">Queue</span><span class="fleetCol fleetStation">—</span></div>`, className: "fleetRowEven" });
