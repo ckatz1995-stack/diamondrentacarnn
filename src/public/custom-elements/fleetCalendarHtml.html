@@ -1318,10 +1318,13 @@ button:active{transform:scale(.985)}
         setTimeout(()=>{ suppressRangeEvents=false; },0);
       } else{
         applyRange(fromEl.value,toEl.value,false);
-        // Fit+redraw cascade: Wix may size the iframe late; redraw at 100/300/800ms
-        // so items become visible even if the container was 0-height at init time.
+        // Force-layout cascade: vis-timeline caches group heights at first render (may be 0
+        // if CSS hasn't applied yet). setGroups() forces a full re-read of label.offsetHeight
+        // so item top positions are recalculated with the correct 24/28px row heights.
         [100,300,800].forEach(ms=>setTimeout(()=>{
           try{
+            timeline.setGroups(groupsDS);
+            timeline.setItems(itemsDS);
             timeline.redraw();
             if(lastLoadedItems.length>0) timeline.fit({animation:false});
             syncCalHeader();
@@ -1345,7 +1348,7 @@ button:active{transform:scale(.985)}
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
-      try{ timeline.redraw(); }catch(_){}
+      try{ timeline.setGroups(groupsDS); timeline.setItems(itemsDS); timeline.redraw(); }catch(_){}
       saveWorkspace(); saveResume();
       renderUnassignedDrawer();
       updateStats(lastUnassigned.length);
