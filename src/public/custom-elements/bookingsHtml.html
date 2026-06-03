@@ -13,7 +13,7 @@
       --gold-bg:rgba(180,138,79,.10);--gold-border:rgba(168,132,74,.22);
       --ok:#166534;--warn:#92400E;--danger:#991B1B;--info:#1E3A8A;
       --shadow:0 2px 12px rgba(15,23,42,.06);--shadow-lg:0 8px 28px rgba(15,23,42,.14);
-      --r:14px;--r-lg:18px;--r-pill:999px;--sb-w:220px;
+      --r:14px;--r-lg:18px;--r-pill:999px;--sb-w:220px;--sb-cw:44px;
       --table-template:minmax(92px,1.1fr) minmax(78px,.82fr) minmax(140px,1.3fr) minmax(130px,1.15fr) minmax(130px,1.15fr) minmax(120px,1fr) minmax(84px,.78fr);
     }
     /* ── Base ── */
@@ -49,6 +49,15 @@
 .sb-item-label{flex:1;min-width:0;font-size:13px}
 .sb-section{font:900 9px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:12px 12px 4px;margin-top:2px;pointer-events:none}
 .sb-footer{flex:0 0 auto;padding:12px 8px;border-top:1px solid rgba(255,255,255,.08)}
+.sb{transition:width .2s cubic-bezier(.4,0,.2,1)}
+.sb.sb-collapsed{width:var(--sb-cw)!important;min-width:var(--sb-cw)!important;flex:0 0 var(--sb-cw)!important;padding:10px 4px 16px}
+.sb.sb-collapsed .sb-brand-text{opacity:0;pointer-events:none;width:0;overflow:hidden}
+.sb.sb-collapsed .sb-section{opacity:0;height:14px;padding:10px 0 4px}
+.sb.sb-collapsed .sb-item-label{opacity:0;width:0;flex:0 0 0;overflow:hidden}
+.sb.sb-collapsed .sb-item{justify-content:center;padding:8px 0}
+.sb.sb-collapsed .sb-toggle{margin:0 auto}
+.sb-toggle{display:flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;border:1px solid rgba(255,255,255,.15);border-radius:5px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);cursor:pointer;font-size:9px;font-weight:900;transition:background .12s;flex-shrink:0;padding:0;appearance:none}
+.sb-toggle:hover{background:rgba(255,255,255,.16);color:#fff}
 .shell-content::-webkit-scrollbar{width:5px}
 .shell-content::-webkit-scrollbar-track{background:transparent}
 .shell-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
@@ -394,13 +403,14 @@
 </head>
 <body>
 <div class="shell">
-<nav class="sb">
+<nav class="sb" id="sidebar">
   <div class="sb-brand">
     <div class="sb-logo">D</div>
     <div class="sb-brand-text">
       <span class="sb-brand-name">DIAMOND</span>
       <span class="sb-brand-sub">Backroom</span>
     </div>
+    <button class="sb-toggle" id="sbToggle" type="button" title="Toggle sidebar">▶</button>
   </div>
   <div class="sb-nav">
       <div class="sb-section">Ops</div>
@@ -1447,6 +1457,33 @@
       }
     });
   })();
+
+// Sidebar collapse/expand
+(function(){
+  const sidebar=document.getElementById('sidebar');
+  const sbToggle=document.getElementById('sbToggle');
+  if(!sidebar||!sbToggle) return;
+  try{
+    if(localStorage.getItem('diamond.sb.collapsed')==='1'){
+      sidebar.classList.add('sb-collapsed'); sbToggle.textContent='▶';
+    } else {
+      sidebar.classList.remove('sb-collapsed'); sbToggle.textContent='◀';
+    }
+  }catch(_){}
+  sidebar.addEventListener('mouseenter',()=>{
+    if(sidebar.classList.contains('sb-collapsed')){sidebar._sbHover=true;sidebar.classList.remove('sb-collapsed');}
+  });
+  sidebar.addEventListener('mouseleave',()=>{
+    if(sidebar._sbHover){sidebar._sbHover=false;sidebar.classList.add('sb-collapsed');}
+  });
+  sbToggle.addEventListener('click',()=>{
+    sidebar._sbHover=false;
+    const willCollapse=!sidebar.classList.contains('sb-collapsed');
+    sidebar.classList.toggle('sb-collapsed',willCollapse);
+    sbToggle.textContent=willCollapse?'▶':'◀';
+    try{localStorage.setItem('diamond.sb.collapsed',willCollapse?'1':'0');}catch(_){}
+  });
+})();
 </script>
 
 <!-- New Booking Modal -->
