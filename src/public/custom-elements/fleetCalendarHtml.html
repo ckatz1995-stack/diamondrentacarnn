@@ -997,7 +997,8 @@ button:active{transform:scale(.985)}
       stack:false,
       orientation:{axis:'top',item:'top'},
       margin:{item:1,axis:2},
-      groupHeightMode:'fixed',
+      groupHeightMode:'auto',
+      groupMinHeight:28,
       xss:{disabled:true},
       editable:{add:false,remove:false,updateTime:false,updateGroup:true},
       multiselect:false,
@@ -1259,6 +1260,12 @@ button:active{transform:scale(.985)}
         '',
         '=== ALL .vis-item DOM positions ===',
         ...(()=>{ const els=document.querySelectorAll('#timeline .vis-item'); return els.length?[...els].map((el,i)=>{ const id=(el.dataset.id||'?').slice(-6); return `[${i}] id=${id} top=${el.style.top} left=${el.style.left} w=${el.style.width} vis=${window.getComputedStyle(el).visibility}`; }):[''+(0)+' items in DOM']; })(),
+        '',
+        '=== LABEL offsetHeights (first 6) ===',
+        ...(()=>{ const lbls=document.querySelectorAll('#timeline .vis-labelset .vis-label'); return [...lbls].slice(0,6).map((l,i)=>`[${i}] offsetH=${l.offsetHeight} inlineH=${l.style.height} computed=${window.getComputedStyle(l).height}`); })(),
+        '',
+        '=== VIS-GROUP offsetHeights (first 6) ===',
+        ...(()=>{ const grps=document.querySelectorAll('#timeline .vis-group'); return [...grps].slice(0,6).map((g,i)=>`[${i}] offsetH=${g.offsetHeight} inlineH=${g.style.height} computed=${window.getComputedStyle(g).height}`); })(),
       ];
       content.textContent=lines.join('\n');
       panel.style.display='flex';
@@ -1307,10 +1314,22 @@ button:active{transform:scale(.985)}
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
 
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
-      // Force vis-timeline to rebind — covers cases where DataSet events don't propagate
       try{ timeline.setItems(itemsDS); }catch(_){}
       if(searchBox.value) renderFromCache(searchBox.value);
       try{ timeline.redraw(); }catch(_){}
+
+      // Height-fix cascade: always runs regardless of window state.
+      // groupHeightMode:'auto'+groupMinHeight:28 ensures heights≥28 even when
+      // label.offsetHeight=0 (CSS timing race). setGroups forces a full re-read
+      // so item top positions are recalculated with the correct row heights.
+      [100,300,800].forEach(ms=>setTimeout(()=>{
+        try{
+          timeline.setGroups(groupsDS);
+          timeline.setItems(itemsDS);
+          timeline.redraw();
+          syncCalHeader();
+        }catch(_){}
+      },ms));
 
       if(keep&&keep.start&&keep.end){
         suppressRangeEvents=true; timeline.setWindow(keep.start,keep.end,{animation:false});
@@ -1318,18 +1337,7 @@ button:active{transform:scale(.985)}
         setTimeout(()=>{ suppressRangeEvents=false; },0);
       } else{
         applyRange(fromEl.value,toEl.value,false);
-        // Force-layout cascade: vis-timeline caches group heights at first render (may be 0
-        // if CSS hasn't applied yet). setGroups() forces a full re-read of label.offsetHeight
-        // so item top positions are recalculated with the correct 24/28px row heights.
-        [100,300,800].forEach(ms=>setTimeout(()=>{
-          try{
-            timeline.setGroups(groupsDS);
-            timeline.setItems(itemsDS);
-            timeline.redraw();
-            if(lastLoadedItems.length>0) timeline.fit({animation:false});
-            syncCalHeader();
-          }catch(_){}
-        },ms));
+        setTimeout(()=>{ if(lastLoadedItems.length>0) try{ timeline.fit({animation:false}); }catch(_){} },850);
       }
 
       updateStats(lastUnassigned.length);
