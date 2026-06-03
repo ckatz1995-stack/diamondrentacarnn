@@ -152,14 +152,6 @@ button:active{transform:scale(.985)}
   border-left:3px solid var(--gold)!important;
   height:24px!important
 }
-/* category row label text */
-.vis-labelset .vis-label.fleetCatGroup .vis-inner{
-  font:900 10.5px/1 system-ui,sans-serif!important;
-  color:var(--text)!important;
-  padding:0 8px 0 4px!important;
-  gap:6px!important;
-  align-items:center!important;
-}
 
 /* ── booking bar items ───────────────────── */
 .vis-item{
@@ -196,15 +188,6 @@ button:active{transform:scale(.985)}
 }
 .fleetCol:last-child{border-right:none!important}
 
-/* CSS order to put fleetCategory first */
-.fleetCategory{
-  order:-1!important;display:flex!important;width:80px!important;min-width:80px!important;max-width:80px!important;
-  justify-content:center!important;align-items:center!important;
-  font:900 9.5px/1 system-ui!important;color:var(--gold2)!important;
-  background:rgba(168,132,74,.10)!important;border-right:1px solid rgba(168,132,74,.20)!important;
-  flex-shrink:0!important;padding:0 4px!important;letter-spacing:.04em;
-  text-transform:uppercase!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important
-}
 .fleetNo{
   order:0!important;
   width:32px!important;min-width:32px!important;max-width:32px!important;
@@ -214,7 +197,7 @@ button:active{transform:scale(.985)}
 }
 .fleetPlate{
   order:1!important;
-  width:90px!important;min-width:90px!important;max-width:90px!important;
+  width:130px!important;min-width:130px!important;max-width:130px!important;
   font:900 10.5px/1 ui-monospace,'Cascadia Code','Fira Code',monospace!important;
   color:var(--gold2)!important;letter-spacing:.03em;
   background:rgba(168,132,74,.07)!important;
@@ -222,14 +205,15 @@ button:active{transform:scale(.985)}
 }
 .fleetModel{
   order:2!important;
-  width:90px!important;min-width:90px!important;max-width:90px!important;
+  width:130px!important;min-width:130px!important;max-width:130px!important;
   font:700 10px/1.2 system-ui!important;color:#334155!important
 }
 .fleetStation{
   order:3!important;
-  flex:1 1 0!important;min-width:75px!important;
+  flex:1 1 0!important;min-width:70px!important;
   font:700 10px/1.1 system-ui!important;color:#64748b!important
 }
+.fleetCategory{display:none!important}
 
 /* ── left panel row content — category ──── */
 .fleetCatCell{
@@ -578,30 +562,6 @@ button:active{transform:scale(.985)}
   function fmtDateTime(d){ const dt=new Date(d); if(isNaN(dt.getTime())) return '-'; return `${pad2(dt.getDate())}/${pad2(dt.getMonth()+1)}/${dt.getFullYear()} ${hhmm(dt)}`; }
   function norm(s){ return (s??'').toString().toLowerCase().trim(); }
 
-  // ── Group content builders — all inline styles, bypasses vis-timeline XSS tag stripping ──
-  const _grpHtmlCache = new Map();
-
-  function _buildGroupContent(g, rowNo){
-    const isCat=String(g.id||'').startsWith('cat_');
-    if(isCat){
-      const catCode=escHtml(String(g.id||'').replace(/^cat_/,'')||'Other');
-      const count=Array.isArray(g.nestedGroups)?g.nestedGroups.length:0;
-      // Plain inline text — no wrapper div — avoids flex conflict with vis-timeline's ▼ toggle button
-      return catCode+'&nbsp;<small style="background:rgba(0,0,0,.08);border-radius:3px;padding:1px 4px;font-size:9px;font-weight:700;color:#475569;letter-spacing:.02em;">'+count+'</small>';
-    }
-    const no   =escHtml(String(rowNo||'—'));
-    const plate=escHtml(safe(g.plate||'—'));
-    const model=escHtml(safe(g.model||'—'));
-    const stn  =escHtml(safe(g.station||'—'));
-    const S='display:flex;align-items:center;overflow:hidden;white-space:nowrap;box-sizing:border-box;flex-shrink:0;';
-    return '<div style="display:flex;align-items:stretch;flex:1;min-width:0;align-self:stretch;overflow:hidden;">'
-      +'<span style="'+S+'width:32px;min-width:32px;max-width:32px;justify-content:center;font:900 10px/1 system-ui,sans-serif;color:#94a3b8;background:rgba(148,163,184,.14);border-right:1px solid rgba(15,23,42,.09);padding:0 2px;">'+no+'</span>'
-      +'<span style="'+S+'width:130px;min-width:130px;max-width:130px;font:900 10.5px/1 ui-monospace,\'Cascadia Code\',monospace;color:#6C522E;background:rgba(168,132,74,.11);border-right:1px solid rgba(168,132,74,.22);padding:0 4px;letter-spacing:.03em;">'+plate+'</span>'
-      +'<span style="'+S+'width:130px;min-width:130px;max-width:130px;font:700 10px/1.2 system-ui,sans-serif;color:#334155;border-right:1px solid rgba(15,23,42,.08);padding:0 4px;">'+model+'</span>'
-      +'<span style="display:flex;align-items:center;flex:1;min-width:0;font:700 10px/1.1 system-ui,sans-serif;color:#64748b;padding:0 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+stn+'</span>'
-      +'</div>';
-  }
-
   function assertVisReady(){
     if(!window.vis||!vis.DataSet||!vis.Timeline) throw new Error('vis-timeline not loaded.');
   }
@@ -808,10 +768,6 @@ button:active{transform:scale(.985)}
       zoomMin:1000*60*60*6,
       zoomMax:1000*60*60*24*90,
 
-      groupTemplate:function(group){
-        return _grpHtmlCache.get(String(group?.id||''))||String(group?.content||group?.id||'');
-      },
-
       template:function(item){
         const cn=escHtml(item.customerName||'—');
         const tip=escHtml(tooltipText(item));
@@ -965,19 +921,9 @@ button:active{transform:scale(.985)}
 
       groupsDS.clear();
       groupsDS.add([{id:HEAT_GROUP_ID,content:'',visible:false}]);
-      _grpHtmlCache.clear();
-      const _catRowIdx={};
       groupsDS.add(groups.map(g=>{
         const isCat=String(g.id||'').startsWith('cat_');
-        let rowNo;
-        if(!isCat){
-          const cat=safe(g.categoryCode||'');
-          _catRowIdx[cat]=(_catRowIdx[cat]||0)+1;
-          rowNo=_catRowIdx[cat];
-        }
-        const html=_buildGroupContent({...g,_rowNo:rowNo},rowNo);
-        _grpHtmlCache.set(String(g.id||''),html);
-        return{...g,content:html,_rowNo:rowNo,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
+        return{...g, style:(g.style||'')+(isCat?';height:24px':';height:20px')};
       }));
 
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,type:'range',group:e.group||e.resource||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });

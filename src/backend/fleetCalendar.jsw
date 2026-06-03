@@ -260,24 +260,15 @@ function yesNo(value) {
 }
 
 function renderCategoryHeader(cat, count) {
-  return `<div class="fleetCatCell"><span class="fleetCatCode">${escHtml(cat || "Other")}</span><span class="fleetCatMeta">${escHtml(String(count || 0))} vehicles</span></div>`;
+  return `<div class="fleetCatCell"><span class="fleetCatCode">${escHtml(cat || "Other")}</span><span class="fleetCatMeta">${escHtml(String(count || 0))} veh</span></div>`;
 }
 
-function renderVehicleRow(v, index, cat) {
+function renderVehicleRow(v, index) {
   const plate = _safeText(v?.[VF.plate] || v?.plate || v?.[VF.id] || "—");
   const model = _safeText(v?.[VF.model] || v?.model || "—");
   const station = _safeText(v?.[VF.station] || v?.station || "—");
-  const category = _safeText(fleetCatCode(v) || cat || "—");
   const no = String(index + 1);
-  return `
-    <div class="fleetGroupCell">
-      <span class="fleetCol fleetNo">${escHtml(no)}</span>
-      <span class="fleetCol fleetPlate">${escHtml(plate)}</span>
-      <span class="fleetCol fleetModel">${escHtml(model)}</span>
-      <span class="fleetCol fleetStation">${escHtml(station)}</span>
-      <span class="fleetCol fleetCategory">${escHtml(category)}</span>
-    </div>
-  `;
+  return `<div class="fleetGroupCell"><span class="fleetCol fleetNo">${escHtml(no)}</span><span class="fleetCol fleetPlate">${escHtml(plate)}</span><span class="fleetCol fleetModel">${escHtml(model)}</span><span class="fleetCol fleetStation">${escHtml(station)}</span></div>`;
 }
 
 
@@ -547,10 +538,13 @@ function buildGroups(fleet) {
       return px.localeCompare(py, "el");
     });
 
+    // Use full label (e.g. "A - Hyundai i10") for display; fall back to short code
+    const fullCatLabel = catLabel(vehicles[0]?.[VF.category]) || cat;
+
     // Parent category group
     groups.push({
       id: parentId,
-      content: renderCategoryHeader(cat, vehicles.length),
+      content: renderCategoryHeader(fullCatLabel, vehicles.length),
       nestedGroups: vehicles.map(v => v[VF.id]),
       showNested: true,
       className: "fleetCatGroup"
@@ -583,7 +577,7 @@ function buildGroups(fleet) {
       ].filter(Boolean);
       groups.push({
         id: v[VF.id],
-        content: renderVehicleRow(v, idx, cat),
+        content: renderVehicleRow(v, idx),
         plate,
         model,
         station,
@@ -611,7 +605,7 @@ function buildGroups(fleet) {
     showNested: true,
     className: "fleetCatGroup"
   });
-  groups.push({ id: "unassigned", content: `<div class="fleetGroupCell"><span class="fleetCol fleetNo">—</span><span class="fleetCol fleetPlate">Unassigned</span><span class="fleetCol fleetModel">Queue</span><span class="fleetCol fleetStation">—</span><span class="fleetCol fleetCategory">—</span></div>`, className: "fleetRowEven" });
+  groups.push({ id: "unassigned", content: `<div class="fleetGroupCell"><span class="fleetCol fleetNo">—</span><span class="fleetCol fleetPlate">Unassigned</span><span class="fleetCol fleetModel">Queue</span><span class="fleetCol fleetStation">—</span></div>`, className: "fleetRowEven" });
 
   return groups;
 }
