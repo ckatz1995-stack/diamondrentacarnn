@@ -294,6 +294,75 @@
     @keyframes row-flash{0%,100%{background:transparent}40%,60%{background:rgba(168,132,74,.12)}}
     .fleet-tbl tr.highlight td{animation:row-flash 2s ease}
 
+    /* ── Vehicle Card Panel ── */
+    .shell-main{position:relative}
+    .vc-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.22);z-index:100;opacity:0;pointer-events:none;transition:opacity .22s;backdrop-filter:blur(1px)}
+    .vc-backdrop.open{opacity:1;pointer-events:all}
+    .vc-panel{position:absolute;top:0;right:0;bottom:0;width:680px;max-width:100%;background:var(--surface);border-left:1px solid var(--border2);box-shadow:-4px 0 28px rgba(15,23,42,.12);z-index:101;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .26s cubic-bezier(.4,0,.2,1);overflow:hidden}
+    .vc-panel.open{transform:translateX(0)}
+    .vc-topbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex:0 0 auto;min-height:52px}
+    .vc-back{appearance:none;border:1px solid var(--border2);background:rgba(0,0,0,.03);border-radius:8px;padding:5px 12px 5px 8px;font:900 11px/1 system-ui;color:var(--sub);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .12s;flex-shrink:0}
+    .vc-back:hover{background:rgba(0,0,0,.07)}
+    .vc-topbar-title{font:900 13px/1 system-ui;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .vc-topbar-btns{display:flex;gap:6px;flex-shrink:0}
+    .vc-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 16px 24px}
+    .vc-body::-webkit-scrollbar{width:4px}
+    .vc-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+    .vc-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:14px;margin-bottom:14px}
+    .vc-hdr-left{flex:1;min-width:0}
+    .vc-plate{display:inline-flex;align-items:center;padding:4px 10px;background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:7px;font:900 14px/1 system-ui,monospace;color:var(--gold2);letter-spacing:.08em;margin-bottom:6px}
+    .vc-model{font:900 14px/1.3 system-ui;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
+    .vc-hdr-sub{font:800 10px/1 system-ui;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .vc-cat{display:inline-flex;align-items:center;padding:2px 7px;border-radius:var(--r-pill);background:rgba(0,0,0,.04);border:1px solid var(--border);font:900 9px/1 system-ui;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}
+    .vc-status-badge{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:var(--r-pill);font:900 10px/1 system-ui;border:1px solid transparent;flex-shrink:0;align-self:flex-start}
+    .vc-status-badge.st-available{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22);color:#065F46}
+    .vc-status-badge.st-out{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold2)}
+    .vc-status-badge.st-notready{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.22);color:#B45309}
+    .vc-status-badge.st-hold{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
+    .vc-status-badge.st-maintenance{background:rgba(148,163,184,.10);border-color:rgba(148,163,184,.22);color:#475569}
+    .vc-metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:14px}
+    .vc-metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    .vc-metric-lbl{font:900 9px/1 system-ui;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px}
+    .vc-metric-val{font:900 18px/1 system-ui;color:var(--text);letter-spacing:-.01em}
+    .vc-metric-sub{font:700 9px/1 system-ui;color:var(--muted);margin-top:2px}
+    .vc-specs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px}
+    .vc-spec{font:800 10px/1 system-ui;color:var(--sub);white-space:nowrap}
+    .vc-sec{font:900 9px/1 system-ui;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;display:flex;align-items:center;gap:8px}
+    .vc-sec::after{content:'';flex:1;height:1px;background:var(--border)}
+    .vc-notes{margin-bottom:14px;padding:8px 11px;background:rgba(168,132,74,.06);border-left:3px solid var(--gold-border);border-radius:0 8px 8px 0;font:800 10.5px/1.5 system-ui;color:var(--sub);white-space:pre-wrap;word-break:break-word}
+    .vc-fuel-row{display:inline-flex;gap:3px;align-items:center}
+    .vc-fseg{width:14px;height:10px;border-radius:2px}
+    .vc-fseg.on-low{background:#EF4444}
+    .vc-fseg.on{background:var(--gold)}
+    .vc-fseg.off{background:rgba(15,23,42,.1)}
+    .vc-hist{border:1px solid var(--border2);border-radius:12px;overflow:hidden;background:var(--surface);margin-bottom:14px}
+    .vc-hist table{width:100%;border-collapse:collapse;font-size:10.5px}
+    .vc-hist th{padding:6px 9px;font:900 9px/1 system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border2);text-align:left;white-space:nowrap}
+    .vc-hist td{padding:6px 9px;border-bottom:1px solid var(--border);vertical-align:middle;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .vc-hist tr:last-child td{border-bottom:none}
+    .vc-hist tbody tr:hover td{background:rgba(0,0,0,.015)}
+    .vh-state{display:inline-flex;padding:2px 6px;border-radius:var(--r-pill);font:900 9px/1 system-ui;border:1px solid transparent;white-space:nowrap}
+    .vh-state.open{background:rgba(16,185,129,.10);color:#065F46;border-color:rgba(16,185,129,.22)}
+    .vh-state.bk{background:var(--gold-bg);color:var(--gold2);border-color:var(--gold-border)}
+    .vh-state.closed{background:rgba(100,116,139,.07);color:#475569;border-color:rgba(100,116,139,.18)}
+    .vh-pay{display:inline-flex;padding:2px 6px;border-radius:var(--r-pill);font:900 9px/1 system-ui;border:1px solid transparent;white-space:nowrap}
+    .vh-pay.paid{background:rgba(16,185,129,.08);color:#065F46;border-color:rgba(16,185,129,.18)}
+    .vh-pay.partial{background:rgba(245,158,11,.08);color:#B45309;border-color:rgba(245,158,11,.18)}
+    .vh-pay.unpaid{background:rgba(239,68,68,.08);color:#B91C1C;border-color:rgba(239,68,68,.18)}
+    .vc-form{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+    .vc-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .vc-fg-full{grid-column:1/-1}
+    .vc-flabel{font:900 9px/1 system-ui;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px;display:block}
+    .vc-finput,.vc-fsel{appearance:none;border:1px solid var(--border2);background:var(--surface);border-radius:7px;padding:5px 8px;font:800 11px/1.2 system-ui;color:var(--text);outline:none;width:100%}
+    .vc-finput:focus,.vc-fsel:focus{border-color:var(--gold-border);box-shadow:0 0 0 2px rgba(154,110,30,.08)}
+    .vc-form-btns{display:flex;gap:7px;margin-top:10px;align-items:center}
+    .vc-save-notice{padding:5px 10px;border-radius:7px;font:900 10px/1.2 system-ui;border:1px solid transparent;margin-bottom:8px}
+    .vc-save-notice.ok{background:rgba(16,185,129,.10);color:#065F46;border-color:rgba(16,185,129,.22)}
+    .vc-save-notice.err{background:rgba(239,68,68,.08);color:#B91C1C;border-color:rgba(239,68,68,.22)}
+    .vc-spin-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:12px;color:var(--muted);font:800 11px/1.5 system-ui}
+    .vc-spinner{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+    .vc-err{padding:28px 20px;text-align:center;font:800 11px/1.6 system-ui;color:var(--muted)}
+
     /* ── Shortcut panel ── */
     .sc-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:9998;display:none;backdrop-filter:blur(3px)}
     .sc-backdrop.show{display:block}
@@ -400,6 +469,25 @@
     </div>
 
   </main>
+
+  <!-- Vehicle Card Panel -->
+  <div class="vc-backdrop" id="vcBackdrop"></div>
+  <div class="vc-panel" id="vcPanel">
+    <div class="vc-topbar">
+      <button class="vc-back" id="vcBack" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><polyline points="15 18 9 12 15 6"/></svg>
+        Fleet
+      </button>
+      <span class="vc-topbar-title" id="vcTopTitle">Vehicle Card</span>
+      <div class="vc-topbar-btns">
+        <button class="btn" id="vcEditBtn" type="button">Edit</button>
+        <button class="btn btnPrimary" id="vcRefreshBtn" type="button" title="Refresh">&#8635;</button>
+      </div>
+    </div>
+    <div class="vc-body" id="vcBody">
+      <div class="vc-spin-wrap"><div class="vc-spinner"></div>Loading vehicle&#8230;</div>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -484,6 +572,170 @@
 
   /* ── Status sort order ── */
   const STATUS_ORDER = { available:0, out:1, notready:2, hold:3, maintenance:4 };
+
+  /* ── Vehicle Card Panel ── */
+  const vcState = { open:false, data:null, editMode:false, saving:false, fleetVehicleId:'' };
+
+  function vcOpen(d){
+    vcState.data=d; vcState.editMode=false; vcState.saving=false;
+    vcState.fleetVehicleId=s(d?.fleet?.fleetVehicleId||d?.fleet?._id||'');
+    vcState.open=true;
+    $('vcPanel')?.classList.add('open');
+    $('vcBackdrop')?.classList.add('open');
+    vcRender();
+  }
+  function vcClose(){
+    vcState.open=false; vcState.editMode=false;
+    $('vcPanel')?.classList.remove('open');
+    $('vcBackdrop')?.classList.remove('open');
+  }
+
+  function vcFuelHtml(level){
+    const n=Math.max(0,Math.min(5,Math.round(Number(level)||0)));
+    let h='';
+    for(let i=1;i<=5;i++) h+=`<span class="vc-fseg ${i<=n?(n<=1?'on-low':'on'):'off'}"></span>`;
+    return `<span class="vc-fuel-row">${h}</span>`;
+  }
+  function vcEur(cents){ return '€'+(Number(cents)||0).toFixed(2); }
+  function vcDateShort(iso){ const d=asDate(iso); if(!d) return '—'; try{ return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }catch(_){ return ymd(iso); } }
+  function vcDateRange(a,b){ const s1=vcDateShort(a),s2=vcDateShort(b); if(s1==='—') return '—'; return s1===s2?s1:`${s1} → ${s2}`; }
+  function vcStCls(rs){ const r=String(rs||'').toLowerCase(); if(/open|active|check.?out|pre.?check/i.test(r)) return 'open'; if(/booking|reserved/i.test(r)) return 'bk'; return 'closed'; }
+  function vcPayCls(ps,bal){ const p=String(ps||'').toLowerCase(); if(p==='paid'||p==='complete'||p==='completed') return 'paid'; if(Number(bal)>0) return p==='unpaid'?'unpaid':'partial'; return p.includes('partial')?'partial':'paid'; }
+
+  function vcRender(){
+    const body=$('vcBody'); if(!body) return;
+    const { fleet:f, category:cat, summary:sm, rentals } = vcState.data||{};
+    if(!f){ body.innerHTML='<div class="vc-err">No vehicle data.</div>'; return; }
+
+    const st=vehicleStatus(f);
+    const stLabel={available:'Available',out:'Out',notready:'Not Ready',hold:'Hard Hold',maintenance:'Maintenance'}[st]||st;
+    const tt=$('vcTopTitle'); if(tt) tt.textContent=`${esc(f.plate||'—')} · ${esc(f.model||'—')}`;
+    const eb=$('vcEditBtn'); if(eb) eb.textContent=vcState.editMode?'Cancel':'Edit';
+
+    let h='';
+
+    // Header
+    h+=`<div class="vc-hdr">
+      <div class="vc-hdr-left">
+        <div class="vc-plate">${esc(f.plate||'—')}</div>
+        <div class="vc-model">${esc(f.model||'—')}</div>
+        <div class="vc-hdr-sub">
+          ${f.categoryLabel||cat?.categoryLabel?`<span class="vc-cat">${esc(f.categoryLabel||cat?.categoryLabel||f.categoryCode||'')}</span>`:''}
+          ${f.currentStationLabel?`<span>&#9679; ${esc(f.currentStationLabel)}</span>`:''}
+          ${f.fuelType?`<span>${esc(f.fuelType)}</span>`:''}
+        </div>
+      </div>
+      <span class="vc-status-badge st-${st}">${esc(stLabel)}</span>
+    </div>`;
+
+    // Metrics
+    const rev=sm?.lifetimeRevenue||0, exp=sm?.outstandingExposure||0;
+    h+=`<div class="vc-metrics">
+      <div class="vc-metric"><div class="vc-metric-lbl">Mileage</div><div class="vc-metric-val">${f.mileage!=null?Number(f.mileage).toLocaleString('en'):'—'}</div><div class="vc-metric-sub">km</div></div>
+      <div class="vc-metric"><div class="vc-metric-lbl">Fuel</div><div class="vc-metric-val">${f.fuelLevel!=null?Math.round(Number(f.fuelLevel))+'/5':'—'}</div><div class="vc-metric-sub">${vcFuelHtml(f.fuelLevel)}</div></div>
+      <div class="vc-metric"><div class="vc-metric-lbl">Rentals</div><div class="vc-metric-val">${sm?.totalRentals||0}</div><div class="vc-metric-sub">lifetime</div></div>
+      <div class="vc-metric"><div class="vc-metric-lbl">Revenue</div><div class="vc-metric-val" style="font-size:13px">${vcEur(rev)}</div><div class="vc-metric-sub">${exp>0?vcEur(exp)+' due':''}</div></div>
+    </div>`;
+
+    // Specs
+    if(cat){
+      const specs=[];
+      if(cat.seats) specs.push(`${esc(cat.seats)} seats`);
+      if(cat.doors) specs.push(`${esc(cat.doors)} doors`);
+      if(cat.transmission) specs.push(esc(cat.transmission));
+      if(cat.airCondition!=null) specs.push(cat.airCondition?'A/C ✓':'A/C ✗');
+      if(cat.engineCc) specs.push(esc(cat.engineCc)+'cc');
+      if(cat.basePricePerDay) specs.push(vcEur(cat.basePricePerDay)+'/day');
+      if(specs.length) h+=`<div class="vc-specs">${specs.map(sp=>`<span class="vc-spec">${sp}</span>`).join('<span style="color:var(--muted);margin:0 2px">·</span>')}</div>`;
+    }
+
+    // Flags
+    const flags=[];
+    if(f.readyToGo) flags.push('<span class="fv-flag ready">Ready to Go</span>');
+    else flags.push('<span class="fv-flag notready">Not Ready</span>');
+    if(f.hardHold) flags.push('<span class="fv-flag hold">Hard Hold</span>');
+    h+=`<div class="fv-flags">${flags.join('')}</div>`;
+
+    // Notes
+    if(f.notes) h+=`<div class="vc-notes">${esc(f.notes)}</div>`;
+
+    // Edit form
+    if(vcState.editMode){
+      const opOpts=['active','service','maintenance','blocked','inactive'].map(o=>`<option value="${o}"${(f.operationalStatus||'').toLowerCase()===o?' selected':''}>${o}</option>`).join('');
+      h+=`<div class="vc-sec" style="margin-top:4px">Edit Vehicle</div>
+      <div class="vc-form" id="vcForm">
+        <div id="vcNotice"></div>
+        <div class="vc-form-grid">
+          <div><label class="vc-flabel">Plate</label><input class="vc-finput" id="vcFPlate" value="${esc(f.plate||'')}"></div>
+          <div><label class="vc-flabel">Model</label><input class="vc-finput" id="vcFModel" value="${esc(f.model||'')}"></div>
+          <div><label class="vc-flabel">Mileage (km)</label><input class="vc-finput" type="number" id="vcFMileage" value="${f.mileage??''}"></div>
+          <div><label class="vc-flabel">Fuel Level (0–5)</label><input class="vc-finput" type="number" min="0" max="5" id="vcFFuel" value="${f.fuelLevel??''}"></div>
+          <div><label class="vc-flabel">Category Code</label><input class="vc-finput" id="vcFCat" value="${esc(f.categoryCode||cat?.categoryCode||'')}"></div>
+          <div><label class="vc-flabel">Station Code</label><input class="vc-finput" id="vcFStation" value="${esc(f.currentStationCode||'')}"></div>
+          <div><label class="vc-flabel">Operational Status</label><select class="vc-fsel" id="vcFOpStatus"><option value="">—</option>${opOpts}</select></div>
+          <div style="display:flex;align-items:flex-end;gap:12px;padding-bottom:4px">
+            <label style="display:flex;align-items:center;gap:5px;font:800 11px/1 system-ui;cursor:pointer"><input type="checkbox" id="vcFReady" ${f.readyToGo?'checked':''} style="accent-color:var(--gold)"> Ready</label>
+            <label style="display:flex;align-items:center;gap:5px;font:800 11px/1 system-ui;cursor:pointer"><input type="checkbox" id="vcFHold" ${f.hardHold?'checked':''} style="accent-color:#EF4444"> Hard Hold</label>
+          </div>
+          <div class="vc-fg-full"><label class="vc-flabel">Notes</label><textarea class="vc-finput" id="vcFNotes" rows="2" style="resize:vertical">${esc(f.notes||'')}</textarea></div>
+        </div>
+        <div class="vc-form-btns">
+          <button class="btn btnPrimary" id="vcSaveBtn" type="button">Save</button>
+          <button class="btn" id="vcCancelEdit" type="button">Cancel</button>
+          <span id="vcSaveSpin" class="hidden" style="font:800 10px/1 system-ui;color:var(--muted)">Saving&#8230;</span>
+        </div>
+      </div>`;
+    }
+
+    // Rental history
+    h+=`<div class="vc-sec" style="margin-top:${vcState.editMode?'14px':'0'}">Rental History${Array.isArray(rentals)&&rentals.length?' ('+rentals.length+')':''}</div>`;
+    if(Array.isArray(rentals)&&rentals.length){
+      h+=`<div class="vc-hist"><table>
+        <thead><tr><th>Booking</th><th>Customer</th><th>Period</th><th>State</th><th>Payment</th><th>Gross</th></tr></thead>
+        <tbody>`;
+      for(const r of rentals){
+        const sc=vcStCls(r.rentalState), pc=vcPayCls(r.paymentStatus,r.totalBalance);
+        const rsLabel=esc(r.rentalState||'—');
+        h+=`<tr>
+          <td style="font:900 10px/1 system-ui;color:var(--gold2)">#${esc(r.bookingNumber||r.bookingId||'—')}</td>
+          <td title="${esc(r.customerName||'')}" style="font:800 10.5px/1.2 system-ui">${esc(r.customerName||'—')}</td>
+          <td style="font:700 10px/1.3 system-ui;color:var(--sub)">${vcDateRange(r.pickupDateTime||r.checkoutAt,r.dropoffDateTime||r.checkinAt)}</td>
+          <td><span class="vh-state ${sc}">${rsLabel}</span></td>
+          <td><span class="vh-pay ${pc}">${esc(r.paymentStatus||'—')}</span></td>
+          <td style="font:800 10.5px/1 system-ui;white-space:nowrap">${vcEur(r.totalGross)}</td>
+        </tr>`;
+      }
+      h+='</tbody></table></div>';
+    } else {
+      h+='<div class="vc-err" style="padding:14px;font-size:10.5px">No rental history.</div>';
+    }
+
+    body.innerHTML=h;
+
+    // Wire edit form after innerHTML
+    $('vcSaveBtn')?.addEventListener('click',vcSave);
+    $('vcCancelEdit')?.addEventListener('click',()=>{ vcState.editMode=false; vcRender(); });
+  }
+
+  function vcSave(){
+    if(vcState.saving) return;
+    const patch={};
+    const g=(id)=>$(id);
+    if(g('vcFPlate'))  patch.plate            = g('vcFPlate').value.trim();
+    if(g('vcFModel'))  patch.model            = g('vcFModel').value.trim();
+    if(g('vcFMileage')&&g('vcFMileage').value!=='') patch.mileage  = Number(g('vcFMileage').value);
+    if(g('vcFFuel')&&g('vcFFuel').value!=='')       patch.fuelLevel= Number(g('vcFFuel').value);
+    if(g('vcFCat'))    patch.categoryCode      = g('vcFCat').value.trim();
+    if(g('vcFStation'))patch.currentStationCode= g('vcFStation').value.trim();
+    if(g('vcFOpStatus'))patch.operationalStatus= g('vcFOpStatus').value;
+    if(g('vcFReady'))  patch.readyToGo        = g('vcFReady').checked;
+    if(g('vcFHold'))   patch.hardHold         = g('vcFHold').checked;
+    if(g('vcFNotes'))  patch.notes            = g('vcFNotes').value.trim();
+    vcState.saving=true;
+    const spin=g('vcSaveSpin'); if(spin) spin.classList.remove('hidden');
+    const saveBtn=g('vcSaveBtn'); if(saveBtn) saveBtn.disabled=true;
+    postToWix({ type:'saveVehicleCard', fleetVehicleId:vcState.fleetVehicleId, patch });
+  }
 
   /* ── Prefs persistence ── */
   function savePrefs(){
@@ -937,10 +1189,23 @@
   $('scClose').addEventListener('click',closeShortcutPanel);
   $('scBackdrop').addEventListener('click',closeShortcutPanel);
 
+  /* Vehicle card panel buttons */
+  $('vcBack')?.addEventListener('click',vcClose);
+  $('vcBackdrop')?.addEventListener('click',vcClose);
+  $('vcEditBtn')?.addEventListener('click',()=>{ vcState.editMode=!vcState.editMode; vcRender(); });
+  $('vcRefreshBtn')?.addEventListener('click',()=>{
+    if(vcState.fleetVehicleId){
+      const body=$('vcBody');
+      if(body) body.innerHTML='<div class="vc-spin-wrap"><div class="vc-spinner"></div>Refreshing&#8230;</div>';
+      postToWix({type:'openVehicleCard',fleetVehicleId:vcState.fleetVehicleId});
+    }
+  });
+
   /* Keyboard shortcuts */
   document.addEventListener('keydown',e=>{
     const inInput=e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT';
     if(e.key==='Escape'){
+      if(vcState.open){ vcClose(); return; }
       closeShortcutPanel();
       if(els.search&&els.search.value){ els.search.value=''; state.search=''; renderView(); }
       return;
@@ -999,6 +1264,40 @@
       state.summary  = d.summary || {};
       stampRefresh();
       render();
+      return;
+    }
+
+    if(d.type==='vcLoading'){
+      const body=$('vcBody');
+      if(body) body.innerHTML='<div class="vc-spin-wrap"><div class="vc-spinner"></div>Loading vehicle&#8230;</div>';
+      $('vcPanel')?.classList.add('open');
+      $('vcBackdrop')?.classList.add('open');
+      vcState.open=true; vcState.editMode=false;
+      return;
+    }
+
+    if(d.type==='vehicleCardData'){
+      if(!d.success||!d.fleet){
+        const body=$('vcBody');
+        if(body) body.innerHTML=`<div class="vc-err">Failed to load vehicle.<br><span style="font-size:10px">${esc(d.message||'Unknown error')}</span></div>`;
+        return;
+      }
+      vcOpen(d);
+      return;
+    }
+
+    if(d.type==='vehicleCardSaved'){
+      vcState.saving=false;
+      $('vcSaveSpin')?.classList.add('hidden');
+      const saveBtn=$('vcSaveBtn'); if(saveBtn) saveBtn.disabled=false;
+      const notice=$('vcNotice');
+      if(!d.success){
+        if(notice){ notice.className='vc-save-notice err'; notice.textContent=d.message||'Save failed.'; }
+        return;
+      }
+      if(d.fleet) vcState.data={...vcState.data, fleet:d.fleet};
+      vcState.editMode=false;
+      vcRender();
       return;
     }
 

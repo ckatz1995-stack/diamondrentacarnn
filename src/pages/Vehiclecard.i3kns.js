@@ -1,5 +1,5 @@
 import wixLocation from 'wix-location';
-import { getFleetBoard } from 'backend/vehicleCard.jsw';
+import { getFleetBoard, getVehicleCardData, saveVehicleCardData } from 'backend/vehicleCard.jsw';
 import { buildUserContext, logoutBackroom, requireBackroomAccess, getSessionToken } from 'public/backroomAuth';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 import { APP_ROUTES as ROUTES } from 'public/appRoutes';
@@ -67,10 +67,36 @@ $w.onReady(async function () {
     if (msg.type === 'openVehicleCard') {
       const fleetVehicleId = String(msg.fleetVehicleId || msg.vehicleId || '').trim();
       if (!fleetVehicleId) return;
-      const params = new URLSearchParams();
-      params.set('fleetVehicleId', fleetVehicleId);
-      params.set('from', 'fleet');
-      wixLocation.to(`${ROUTES.vehiclecard}?${params.toString()}`);
+      post({ type: 'vcLoading', fleetVehicleId });
+      try {
+        const res = await getVehicleCardData({ sessionToken: resolveAuthToken(), fleetVehicleId });
+        if (res?.success === false) {
+          post({ type: 'vehicleCardData', success: false, message: res.message || 'Error loading vehicle' });
+          return;
+        }
+        post({ type: 'vehicleCardData', success: true, fleet: res.fleet, category: res.category, summary: res.summary, rentals: res.rentals });
+      } catch (error) {
+        logSuppressed('getVehicleCardData failed', error);
+        post({ type: 'vehicleCardData', success: false, message: error?.message || String(error) });
+      }
+      return;
+    }
+
+    if (msg.type === 'saveVehicleCard') {
+      const fleetVehicleId = String(msg.fleetVehicleId || '').trim();
+      const patch = msg.patch || {};
+      if (!fleetVehicleId) return;
+      try {
+        const res = await saveVehicleCardData({ sessionToken: resolveAuthToken(), fleetVehicleId, patch });
+        if (res?.success === false) {
+          post({ type: 'vehicleCardSaved', success: false, message: res.message || 'Save failed' });
+          return;
+        }
+        post({ type: 'vehicleCardSaved', success: true, fleet: res.fleet });
+      } catch (error) {
+        logSuppressed('saveVehicleCardData failed', error);
+        post({ type: 'vehicleCardSaved', success: false, message: error?.message || String(error) });
+      }
       return;
     }
 
