@@ -718,10 +718,13 @@ button:active{transform:scale(.985)}
     }
 
     // Build the final styled + ordered list (order field drives groupOrder comparator)
-    const styled=[{id:HEAT_GROUP_ID,content:'',visible:false,order:-1},
+    // height is set explicitly so vis-timeline uses it directly instead of reading
+    // offsetHeight from the DOM (which returns 0 when CSS hasn't applied yet).
+    const styled=[{id:HEAT_GROUP_ID,content:'',visible:false,order:-1,height:0},
       ...filtered.map((g,idx)=>{
         const isCat=String(g.id||'').startsWith('cat_');
-        return{...g,order:idx,style:(g.style||'')+(isCat?';height:28px':';height:28px')};
+        const h=isCat?24:28;
+        return{...g,order:idx,height:h,style:(g.style||'')+(isCat?';height:24px':';height:28px')};
       })];
 
     // _knownGroupIds tracks ALL valid vehicle/group IDs — including collapsed ones.
