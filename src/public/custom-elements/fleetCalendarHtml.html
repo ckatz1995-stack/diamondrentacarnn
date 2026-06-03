@@ -687,12 +687,16 @@ button:active{transform:scale(.985)}
       // vehicle rows pushed above inside their cat; skip at top level
     }
 
-    // Build the final styled list
-    const styled=[{id:HEAT_GROUP_ID,content:'',visible:false},
-      ...filtered.map(g=>{
+    // Build the final styled + ordered list (order field drives groupOrder comparator)
+    const styled=[{id:HEAT_GROUP_ID,content:'',visible:false,order:-1},
+      ...filtered.map((g,idx)=>{
         const isCat=String(g.id||'').startsWith('cat_');
-        return{...g,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
+        return{...g,order:idx,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
       })];
+
+    // Update known group IDs so item mapper can fall back orphaned items to 'unassigned'
+    _knownGroupIds=new Set(styled.map(g=>String(g.id||'')));
+    _knownGroupIds.add('unassigned');
 
     // Diff-based update — avoids the full clear→add flash
     const existingIds=new Set(groupsDS.getIds());
@@ -795,6 +799,7 @@ button:active{transform:scale(.985)}
   const pendingOldGroup = new Map();
   const COL_WIDTHS_KEY = 'diamond.fleet.colWidths.v1';
   let _colWidths = {plate:130,model:130};
+  let _knownGroupIds = new Set(['unassigned']); // updated by applyGroupFilter; used to fallback orphaned items
 
   function applyUserContext(ctx){
     const name=safe(ctx&&(ctx.name||ctx.email)||'Operator')||'Operator';
@@ -964,6 +969,7 @@ button:active{transform:scale(.985)}
       multiselect:false,
       zoomMin:1000*60*60*6,
       zoomMax:1000*60*60*24*90,
+      groupOrder:function(a,b){ return (a.order??9999)-(b.order??9999); },
 
       // groupTemplate: return a real DOM Element for category rows (bypasses vis-timeline's
       // innerHTML/XSS handling which silently drops content on nested-group parent rows).
@@ -1168,7 +1174,7 @@ button:active{transform:scale(.985)}
       applyGroupFilter();
       populateStationFilter();
 
-      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,type:'range',group:e.group||e.resource||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
+      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; return{id:e.id,type:'range',group:grp||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
 
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
@@ -1186,15 +1192,16 @@ button:active{transform:scale(.985)}
       saveWorkspace(); saveResume();
       renderUnassignedDrawer();
       syncCalHeader();
-      const _assignedCnt=lastLoadedItems.filter(i=>i.group&&i.group!==HEAT_GROUP_ID).length;
-      setStatus(`Loaded: groups=${groups.length} · items=${items.length} (${_assignedCnt} assigned) · unassigned=${lastUnassigned.length}`);
+      const _inVehicle=lastLoadedItems.filter(i=>i.group&&i.group!=='unassigned'&&i.group!==HEAT_GROUP_ID).length;
+      const _inUnassigned=lastLoadedItems.filter(i=>i.group==='unassigned').length;
+      setStatus(`Loaded: groups=${groups.length} · items=${items.length} (${_inVehicle} in vehicle rows, ${_inUnassigned} in unassigned row)`);
       return;
     }
 
     if(data.type==='patchItems'){
       const items=Array.isArray(data.items)?data.items:[];
       lastUnassigned=Array.isArray(data.unassigned)?data.unassigned:[];
-      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,type:'range',group:e.group||e.resource||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
+      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; return{id:e.id,type:'range',group:grp||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
       saveWorkspace(); saveResume();
