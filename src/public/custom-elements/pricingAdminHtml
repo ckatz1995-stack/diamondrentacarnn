@@ -19,7 +19,7 @@
       --shadow:0 12px 24px rgba(15,23,42,.06);
       --radius:18px;
       --gold:#A8844A;--gold2:#6C522E;--gold-bg:rgba(168,132,74,0.08);--gold-border:rgba(168,132,74,0.30);
-      --r:14px;--r-lg:18px;--r-pill:999px;--sb-w:220px;
+      --r:14px;--r-lg:18px;--r-pill:999px;--sb-w:200px;--sb-cw:44px;
       --surface:#FFFFFF;--surface2:#E8EEF7;--border:rgba(15,23,42,0.10);--border2:rgba(15,23,42,0.14);
       --shadow-lg:0 12px 32px rgba(15,23,42,0.12);--sub:#475569;--ok:#16A34A;--teal:#0D9488;
     }
@@ -29,20 +29,28 @@
     /* ── shell layout ─────────────────────────────── */
     html,body{height:100%;overflow:hidden}
     .shell{display:flex;height:100vh;overflow:hidden}
-    .sb{width:var(--sb-w);flex:0 0 var(--sb-w);background:linear-gradient(180deg,#2a1f0e 0%,#3d2b12 55%,#4f3a22 100%);display:flex;flex-direction:column;gap:2px;padding:12px 8px;overflow-y:auto;overflow-x:hidden;border-right:1px solid rgba(255,255,255,.06)}
-    .sb-brand{display:flex;align-items:center;gap:10px;padding:10px 10px 16px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:6px;flex:0 0 auto}
-    .sb-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold));display:grid;place-items:center;color:#fff;font-weight:900;font-size:15px;flex:0 0 auto}
-    .sb-brand-text{min-width:0}
-    .sb-brand-name{font-size:13px;font-weight:900;color:#fff;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .sb-brand-sub{font-size:10px;color:rgba(255,255,255,.55);font-weight:700;white-space:nowrap}
-    .sb-section{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.38);padding:10px 10px 4px;flex:0 0 auto}
-    .sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;border:0;background:transparent;color:rgba(255,255,255,.72);font-size:13px;font-weight:800;cursor:pointer;width:100%;text-align:left;transition:background .14s,color .14s;flex:0 0 auto;box-shadow:none!important}
-    .sb-item:hover{background:rgba(255,255,255,.08);color:#fff}
-    .sb-item.active{background:linear-gradient(135deg,rgba(168,132,74,.22),rgba(168,132,74,.10));color:var(--gold);border:1px solid rgba(168,132,74,.20)}
-    .sb-item svg{flex:0 0 18px;width:18px;height:18px;opacity:.75}
+    .sb{width:var(--sb-w);min-width:var(--sb-w);background:linear-gradient(180deg,#2a1f0e 0%,#3d2b12 55%,#4f3a22 100%);display:flex;flex-direction:column;gap:1px;padding:10px 6px 16px;overflow-y:auto;overflow-x:hidden;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06);transition:width .2s cubic-bezier(.4,0,.2,1),min-width .2s cubic-bezier(.4,0,.2,1)}
+    .sb.sb-collapsed{width:var(--sb-cw);min-width:var(--sb-cw);padding:10px 4px 16px}
+    .sb-brand{display:flex;align-items:center;gap:8px;padding:8px 4px 12px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:4px;min-width:0;overflow:hidden}
+    .sb-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold));display:grid;place-items:center;color:#fff;font-weight:900;font-size:15px;flex-shrink:0}
+    .sb-brand-text{display:flex;flex-direction:column;gap:2px;overflow:hidden;white-space:nowrap;flex:1;min-width:0;transition:opacity .15s}
+    .sb.sb-collapsed .sb-brand-text{opacity:0;pointer-events:none;width:0}
+    .sb-brand-title{font:1000 12px/1 system-ui;color:#fff;letter-spacing:-.01em}
+    .sb-brand-sub{font:800 9px/1 system-ui;color:rgba(255,255,255,.45)}
+    .sb-toggle{display:flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;border:1px solid rgba(255,255,255,.15);border-radius:5px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);cursor:pointer;font-size:9px;font-weight:900;transition:background .12s;flex-shrink:0;padding:0}
+    .sb-toggle:hover{background:rgba(255,255,255,.16);color:#fff}
+    .sb.sb-collapsed .sb-toggle{margin:0 auto}
+    .sb-section{font:900 9px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:10px 6px 4px;margin-top:2px;pointer-events:none;white-space:nowrap;overflow:hidden;transition:opacity .15s}
+    .sb.sb-collapsed .sb-section{opacity:0;height:14px;padding:10px 0 4px}
+    .sb-item{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;color:rgba(255,255,255,.62);border-radius:8px;padding:8px 6px;font:800 11px/1.2 system-ui;cursor:pointer;text-align:left;transition:background .12s,color .12s;box-shadow:none!important;white-space:nowrap;min-width:0;overflow:hidden}
+    .sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+    .sb-item.active{background:linear-gradient(135deg,rgba(168,132,74,.22),rgba(168,132,74,.10));color:var(--gold);border:1px solid rgba(168,132,74,.22)}
+    .sb-item svg{flex:0 0 17px;width:17px;height:17px;opacity:.75;flex-shrink:0}
     .sb-item.active svg{opacity:1}
     .sb-icon{width:20px;text-align:center;flex:0 0 auto;font-size:14px}
-    .sb-item-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sb-item-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:opacity .15s}
+    .sb.sb-collapsed .sb-item-label{opacity:0;width:0;flex:0 0 0}
+    .sb.sb-collapsed .sb-item{justify-content:center;padding:8px 0}
     .shell-main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
     .shell-top{height:62px;flex:0 0 62px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px}
     .shell-page-title{font-size:17px;font-weight:950;letter-spacing:-.02em;color:var(--text,#0f172a);white-space:nowrap}
@@ -75,7 +83,7 @@
     .top-user-chip:hover{background:var(--gold-bg);border-color:var(--gold-border)}
     .top-logout-btn{appearance:none;border:1px solid var(--border2);background:#fff;color:var(--danger,#B91C1C);border-radius:10px;padding:8px 12px;font:900 12px system-ui,-apple-system,sans-serif;cursor:pointer;white-space:nowrap}
     .top-logout-btn:hover{background:#fef2f2;border-color:rgba(185,28,28,.20)}
-    @media(max-width:900px){.sb-brand-text,.sb-item-label,.sb-brand-sub,.sb-section{display:none}.sb{width:54px;flex:0 0 54px}.sb-item{justify-content:center;padding:10px}}
+
     .hero{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px}
     .panel{background:linear-gradient(180deg,#fdfaf4 0%,#f7f1e6 100%);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
     .hero-main{padding:18px 20px}
@@ -404,13 +412,14 @@
 </head>
 <body>
   <div class="shell">
-    <nav class="sb">
+    <nav class="sb" id="sidebar">
       <div class="sb-brand">
         <div class="sb-logo">D</div>
         <div class="sb-brand-text">
-          <div class="sb-brand-name">DIAMOND</div>
+          <div class="sb-brand-title">DIAMOND</div>
           <div class="sb-brand-sub">Backroom</div>
         </div>
+        <button class="sb-toggle" id="sbToggle" type="button" title="Toggle sidebar">▶</button>
       </div>
       <div class="sb-section">Ops</div>
       <button class="sb-item" data-route="home" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="sb-item-label">Myroom</span></button>
@@ -3849,6 +3858,29 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       if (els.filterAuditType) els.filterAuditType.addEventListener('change', (e) => { state.filters.auditType = e.target.value; renderAuditTable(); requestResize(); });
       els.filterRuleType.addEventListener('change', (e) => { state.filters.ruleType = e.target.value; renderFeesTable(); requestResize(); });
       els.refreshAuditBtn.addEventListener('click', () => { setBusy(true); post('refreshStaffAccess', {}); });
+      // sidebar collapse
+      const sidebar=document.getElementById('sidebar');
+      const sbToggle=document.getElementById('sbToggle');
+      try{
+        if(localStorage.getItem('diamond.sb.collapsed')==='1'){
+          sidebar.classList.add('sb-collapsed'); sbToggle.textContent='▶';
+        } else {
+          sidebar.classList.remove('sb-collapsed'); sbToggle.textContent='◀';
+        }
+      }catch(_){}
+      sidebar.addEventListener('mouseenter',()=>{
+        if(sidebar.classList.contains('sb-collapsed')){sidebar._sbHover=true;sidebar.classList.remove('sb-collapsed');}
+      });
+      sidebar.addEventListener('mouseleave',()=>{
+        if(sidebar._sbHover){sidebar._sbHover=false;sidebar.classList.add('sb-collapsed');}
+      });
+      if(sbToggle) sbToggle.addEventListener('click',()=>{
+        sidebar._sbHover=false;
+        const willCollapse=!sidebar.classList.contains('sb-collapsed');
+        sidebar.classList.toggle('sb-collapsed',willCollapse);
+        sbToggle.textContent=willCollapse?'▶':'◀';
+        try{ localStorage.setItem('diamond.sb.collapsed',willCollapse?'1':'0'); }catch(_){}
+      });
       // shell sidebar navigation
       document.querySelectorAll('.sb-item[data-route]').forEach(btn => btn.addEventListener('click', () => {
         const route = btn.getAttribute('data-route');
