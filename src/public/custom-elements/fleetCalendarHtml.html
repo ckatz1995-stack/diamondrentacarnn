@@ -969,6 +969,36 @@ button:active{transform:scale(.985)}
     return filtered;
   }
 
+  // Bypass vis-timeline's internal height table by directly calculating each item's
+  // correct top offset from group order + fixed row heights, then patching the DOM.
+  // Called after every redraw since vis-timeline may reset positions.
+  function patchItemTops(){
+    if(!groupsDS||!itemsDS) return;
+    try{
+      const sorted=groupsDS.get().filter(g=>g.visible!==false).sort((a,b)=>(a.order??9999)-(b.order??9999));
+      const grpTop={},grpRowH={};
+      let cum=0;
+      sorted.forEach(g=>{
+        const gid=String(g.id||'');
+        grpTop[gid]=cum;
+        const h=gid===HEAT_GROUP_ID?0:gid.startsWith('cat_')?24:28;
+        grpRowH[gid]=h; cum+=h;
+      });
+      const itGrp={};
+      (itemsDS.get()||[]).forEach(it=>{ itGrp[String(it.id||'')]=String(it.group||''); });
+      document.querySelectorAll('#timeline .vis-item').forEach(el=>{
+        const gid=itGrp[String(el.dataset.id||'')];
+        if(gid===undefined) return;
+        const gt=grpTop[gid];
+        if(gt===undefined) return;
+        const rowH=grpRowH[gid]??28;
+        const ih=el.offsetHeight||20;
+        const newTop=(gt+Math.max(0,Math.floor((rowH-ih)/2)))+'px';
+        if(el.style.top!==newTop) el.style.top=newTop;
+      });
+    }catch(_){}
+  }
+
   function syncCalHeader(){
     const leftPanel=document.querySelector('#timeline .vis-panel.vis-left');
     const colHdr=document.getElementById('calColHdr');
@@ -1047,7 +1077,7 @@ button:active{transform:scale(.985)}
       if(suppressRangeEvents) return;
       try{ keepWindow=timeline.getWindow(); userWindowDirty=true; }catch(e){}
     });
-    timeline.on('changed',()=>requestAnimationFrame(()=>{ syncCalHeader(); _patchCatRows(); }));
+    timeline.on('changed',()=>requestAnimationFrame(()=>{ syncCalHeader(); _patchCatRows(); patchItemTops(); }));
     timeline.on('select',(props)=>{ try{ const id=props?.items?.[0]; selectedFleetId=id?String(id):''; }catch(_){} });
     timeline.on('doubleClick',(props)=>{ try{ const id=props?.item; if(!id) return; const it=itemsDS.get(id); if(it) openBookingModal(it); }catch(_){} });
 
@@ -1183,10 +1213,12 @@ button:active{transform:scale(.985)}
   document.getElementById('diagPanel')?.addEventListener('click',(e)=>{ if(e.target===document.getElementById('diagPanel')) document.getElementById('diagPanel').style.display='none'; });
   document.getElementById('diagForceRender')?.addEventListener('click',()=>{
     try{
+      const saved=groupsDS.get();
+      groupsDS.clear();
+      groupsDS.add(saved);
       timeline.setItems(itemsDS);
-      timeline.setGroups(groupsDS);
       [0,100,250,500,1000].forEach(ms=>setTimeout(()=>{
-        try{ timeline.redraw(); if(lastLoadedItems.length>0) timeline.fit({animation:false}); syncCalHeader(); }catch(_){}
+        try{ timeline.redraw(); patchItemTops(); if(lastLoadedItems.length>0) timeline.fit({animation:false}); syncCalHeader(); }catch(_){}
       },ms));
       document.getElementById('diagContent').textContent='Force render triggered — close this panel to see result.';
     }catch(e){ document.getElementById('diagContent').textContent='Force render error: '+(e?.message||String(e)); }
@@ -1319,14 +1351,18 @@ button:active{transform:scale(.985)}
       try{ timeline.redraw(); }catch(_){}
 
       // Height-fix cascade: always runs regardless of window state.
-      // groupHeightMode:'auto'+groupMinHeight:28 ensures heights≥28 even when
-      // label.offsetHeight=0 (CSS timing race). setGroups forces a full re-read
-      // so item top positions are recalculated with the correct row heights.
+      // clear()+add() forces vis-timeline to treat all groups as NEW so it
+      // creates fresh label elements and measures offsetHeight (now 28 since CSS
+      // has applied). patchItemTops() is a direct DOM fallback — calculates
+      // correct top from group order if vis-timeline's internal table is still off.
       [100,300,800].forEach(ms=>setTimeout(()=>{
         try{
-          timeline.setGroups(groupsDS);
+          const saved=groupsDS.get();
+          groupsDS.clear();
+          groupsDS.add(saved);
           timeline.setItems(itemsDS);
           timeline.redraw();
+          patchItemTops();
           syncCalHeader();
         }catch(_){}
       },ms));
@@ -1356,7 +1392,7 @@ button:active{transform:scale(.985)}
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
-      try{ timeline.setGroups(groupsDS); timeline.setItems(itemsDS); timeline.redraw(); }catch(_){}
+      try{ timeline.setGroups(groupsDS); timeline.setItems(itemsDS); timeline.redraw(); patchItemTops(); }catch(_){}
       saveWorkspace(); saveResume();
       renderUnassignedDrawer();
       updateStats(lastUnassigned.length);
