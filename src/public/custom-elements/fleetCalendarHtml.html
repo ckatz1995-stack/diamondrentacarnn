@@ -214,7 +214,7 @@ button:active{transform:scale(.985)}
   width:130px!important;min-width:130px!important;max-width:130px!important;
   font:700 10px/1.2 system-ui!important;color:#334155!important
 }
-.fleetStation{
+.fleetMileage{
   order:3!important;
   flex:1 1 0!important;min-width:70px!important;
   font:700 10px/1.1 system-ui!important;color:#64748b!important
@@ -225,6 +225,11 @@ button:active{transform:scale(.985)}
 .fleetCatCell{
   display:flex!important;align-items:center!important;gap:6px!important;
   width:100%!important;height:100%!important;overflow:hidden!important
+}
+.fleetCatToggle{
+  flex-shrink:0;width:14px;text-align:center;
+  font:900 8px/1 system-ui!important;color:var(--sub)!important;
+  pointer-events:none
 }
 .fleetCatCode{
   font:900 10.5px/1 system-ui,sans-serif!important;color:var(--text)!important;letter-spacing:.02em;
@@ -239,6 +244,7 @@ button:active{transform:scale(.985)}
   border:1px solid var(--border);
   white-space:nowrap
 }
+.vis-labelset .vis-label.fleetCatGroup{cursor:pointer!important}
 
 /* ── item card — compact single-line ────── */
 .card{display:flex;align-items:center;border-radius:2px;padding:0 4px;pointer-events:none;white-space:nowrap;height:100%;overflow:hidden}
@@ -404,6 +410,11 @@ button:active{transform:scale(.985)}
     <input class="input" id="searchBox" placeholder="Search booking / name…" style="width:175px"/>
     <button id="btnClearSearch" type="button" title="Clear search">✕</button>
     <div class="tb-sep"></div>
+    <span class="tb-lbl">Station</span>
+    <select class="input" id="stationFilter" style="width:115px">
+      <option value="">All stations</option>
+    </select>
+    <div class="tb-sep"></div>
     <button id="btnUnassigned" type="button">Unassigned (<span id="uCount">0</span>)</button>
     <button id="btnAutoAssign" class="btnPri" type="button">Auto-assign</button>
     <button id="btnRefresh" type="button" title="Refresh data">⟳</button>
@@ -434,7 +445,7 @@ button:active{transform:scale(.985)}
         <div class="col-h">#</div>
         <div class="col-h">Reg. No</div>
         <div class="col-h">Model</div>
-        <div class="col-h">Station</div>
+        <div class="col-h">Mileage</div>
       </div>
       <div class="cal-tl-hdr">
         <div style="flex:1 1 0;min-width:6px"></div>
@@ -590,9 +601,12 @@ button:active{transform:scale(.985)}
 
   // Per-category data for DOM-element-based group rendering (bypasses vis-timeline nested-parent blank issue)
   const _catDataMap = new Map(); // groupId → {label, count}
-  let   _catLabelOrder = [];     // ordered array of category group ids (for DOM patching fallback)
+  let   _catLabelOrder = [];     // ordered array of visible category group ids (after filter)
+  let   _allGroups    = [];      // full groups array from last loadData (before any filtering)
+  let   _collapsedCats= new Set(); // set of cat group IDs currently collapsed
+  let   _stationFilter= '';     // active station filter code; empty = all
 
-  // Post-render DOM patch: inject category labels directly into .vis-inner when vis-timeline leaves them blank
+  // Post-render DOM patch: inject category labels + collapse toggle into .vis-inner
   function _patchCatRows(){
     if(!_catLabelOrder.length) return;
     const labelEls=document.querySelectorAll('#timeline .vis-labelset .vis-label.fleetCatGroup');
@@ -600,12 +614,102 @@ button:active{transform:scale(.985)}
       if(i>=_catLabelOrder.length) return;
       const inner=el.querySelector('.vis-inner');
       if(!inner) return;
-      if(inner.querySelector('.fleetCatCode')) return; // already patched
-      const d=_catDataMap.get(_catLabelOrder[i]);
+      const catId=_catLabelOrder[i];
+      const d=_catDataMap.get(catId);
       if(!d) return;
-      inner.innerHTML='<span class="fleetCatCode">'+escHtml(d.label)+'</span>'
+      const icon=_collapsedCats.has(catId)?'▶':'▼';
+      inner.innerHTML='<span class="fleetCatToggle">'+icon+'</span>'
+        +'<span class="fleetCatCode">'+escHtml(d.label)+'</span>'
         +'<span class="fleetCatMeta">'+escHtml(String(d.count))+' veh</span>';
+      el.style.cursor='pointer';
     });
+  }
+
+  // Returns true if vehicle group passes the current station filter
+  function matchStation(g){
+    if(!_stationFilter) return true;
+    const f=_stationFilter.toUpperCase();
+    const code=safe(g.stationCode||'').toUpperCase();
+    const label=safe(g.stationLabel||g.station||'').toUpperCase();
+    return code===f||label===f||code.startsWith(f)||label.startsWith(f);
+  }
+
+  // Rebuild groupsDS from _allGroups applying station filter + collapse state
+  function applyGroupFilter(){
+    if(!_allGroups.length||!groupsDS) return;
+
+    // Pass 1: determine visible vehicles per category (station filter)
+    const visibleByCat=new Map();
+    let currentCatId=null;
+    for(const g of _allGroups){
+      const gId=String(g.id||'');
+      if(gId===HEAT_GROUP_ID) continue;
+      if(gId.startsWith('cat_')){
+        currentCatId=gId;
+        if(!visibleByCat.has(gId)) visibleByCat.set(gId,[]);
+      } else if(currentCatId){
+        const isSpecial=gId==='unassigned';
+        if(isSpecial||matchStation(g)) visibleByCat.get(currentCatId).push(g);
+      }
+    }
+
+    // Update _catDataMap + _catLabelOrder with filtered view
+    _catDataMap.clear(); _catLabelOrder=[];
+    for(const g of _allGroups){
+      const gId=String(g.id||'');
+      if(!gId.startsWith('cat_')) continue;
+      const vehicles=visibleByCat.get(gId)||[];
+      if(!vehicles.length) continue;
+      const label=safe(g.catLabel||gId.replace(/^cat_/,'')||'Other');
+      _catDataMap.set(gId,{label,count:vehicles.length});
+      _catLabelOrder.push(gId);
+    }
+
+    // Pass 2: build output list (cat header + expanded vehicle rows)
+    const filtered=[];
+    for(const g of _allGroups){
+      const gId=String(g.id||'');
+      if(gId===HEAT_GROUP_ID) continue;
+      if(gId.startsWith('cat_')){
+        const vehicles=visibleByCat.get(gId)||[];
+        if(!vehicles.length) continue;
+        filtered.push(g);
+        if(!_collapsedCats.has(gId)) filtered.push(...vehicles);
+      }
+      // vehicle rows pushed above inside their cat; skip at top level
+    }
+
+    groupsDS.clear();
+    groupsDS.add([{id:HEAT_GROUP_ID,content:'',visible:false}]);
+    groupsDS.add(filtered.map(g=>{
+      const isCat=String(g.id||'').startsWith('cat_');
+      return{...g,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
+    }));
+    setTimeout(_patchCatRows,80);
+  }
+
+  // Populate the station filter dropdown from current _allGroups data
+  function populateStationFilter(){
+    const sel=document.getElementById('stationFilter');
+    if(!sel||!_allGroups.length) return;
+    const seen=new Map();
+    for(const g of _allGroups){
+      const gId=String(g.id||'');
+      if(gId.startsWith('cat_')||gId===HEAT_GROUP_ID||gId==='unassigned') continue;
+      const code=safe(g.stationCode||'');
+      const label=safe(g.stationLabel||g.station||code||'');
+      if(code&&!seen.has(code)) seen.set(code,label);
+    }
+    if(!seen.size) return;
+    const prev=sel.value;
+    sel.innerHTML='<option value="">All stations</option>';
+    for(const [code,label] of [...seen.entries()].sort()){
+      const opt=document.createElement('option');
+      opt.value=code;
+      opt.textContent=(label&&label!==code)?`${code} – ${label}`:code;
+      sel.appendChild(opt);
+    }
+    if(prev) sel.value=prev;
   }
 
   let groupsDS, itemsDS, timeline;
@@ -888,6 +992,27 @@ button:active{transform:scale(.985)}
   document.getElementById('timeline')?.addEventListener('contextmenu',(e)=>{ const itemEl=e.target.closest('.vis-item'); if(!itemEl){ hideCtxMenu(); return; } const id=itemEl.getAttribute('data-id')||itemEl.dataset.id; if(!id) return; e.preventDefault(); openCtxMenu(String(id),e.clientX,e.clientY); });
   document.getElementById('timeline')?.addEventListener('mousemove',(e)=>{ const itemEl=e.target.closest('.vis-item'); if(!itemEl){ hideHoverTip(); return; } const id=itemEl.getAttribute('data-id')||itemEl.dataset.id; if(!id||!itemsDS){ hideHoverTip(); return; } const it=itemsDS.get(String(id)); if(!it){ hideHoverTip(); return; } showHoverTip(it,e.clientX,e.clientY); });
   document.getElementById('timeline')?.addEventListener('mouseleave',hideHoverTip);
+
+  // Category row click — toggle collapse
+  document.getElementById('timeline')?.addEventListener('click',(e)=>{
+    const labelEl=e.target.closest('.vis-label.fleetCatGroup');
+    if(!labelEl) return;
+    const allLabels=[...document.querySelectorAll('#timeline .vis-labelset .vis-label.fleetCatGroup')];
+    const idx=allLabels.indexOf(labelEl);
+    if(idx<0||idx>=_catLabelOrder.length) return;
+    const catId=_catLabelOrder[idx];
+    if(_collapsedCats.has(catId)) _collapsedCats.delete(catId);
+    else _collapsedCats.add(catId);
+    applyGroupFilter();
+  });
+
+  // Station filter dropdown
+  document.getElementById('stationFilter')?.addEventListener('change',(e)=>{
+    _stationFilter=safe(e.target.value);
+    applyGroupFilter();
+    setStatus(_stationFilter?`STATION: ${_stationFilter} · filtered`:'STATION: All stations');
+  });
+
   document.addEventListener('click',(e)=>{ if(!fleetCtxMenu?.contains(e.target)) hideCtxMenu(); });
   fleetCtxMenu?.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-ctx]'); if(!btn) return; const it=itemsDS&&ctxItemId?itemsDS.get(ctxItemId):null; const act=btn.getAttribute('data-ctx'); hideCtxMenu(); if(!it) return; if(act==='contract') return openFleetContract(it); if(act==='vehicle') return openFleetVehicleCard(it); if(act==='daily') return openFleetDaily(it); if(act==='bookings') return openFleetBookings(it); if(act==='auto'){ postToWix({type:'autoAssignSingle',bookingId:safe(it.id)}); return; } if(act==='unassign'){ postToWix({type:'moveBooking',bookingId:safe(it.id),newVehicleId:''}); return; } });
 
@@ -959,25 +1084,10 @@ button:active{transform:scale(.985)}
       let keep=null;
       if(userWindowDirty&&keepWindow) keep=keepWindow;
 
-      // Build category lookup before adding groups (groupTemplate reads this)
-      _catDataMap.clear(); _catLabelOrder=[];
-      for(const g of groups){
-        const id=String(g.id||'');
-        if(id.startsWith('cat_')){
-          const label=safe(g.catLabel||id.replace(/^cat_/,'')||'Other');
-          const count=g.vehicleCount!=null?Number(g.vehicleCount):(Array.isArray(g.nestedGroups)?g.nestedGroups.length:0);
-          _catDataMap.set(id,{label,count});
-          _catLabelOrder.push(id);
-        }
-      }
-
-      groupsDS.clear();
-      groupsDS.add([{id:HEAT_GROUP_ID,content:'',visible:false}]);
-      groupsDS.add(groups.map(g=>{
-        const isCat=String(g.id||'').startsWith('cat_');
-        return{...g, style:(g.style||'')+(isCat?';height:24px':';height:20px')};
-      }));
-      setTimeout(_patchCatRows,80);
+      // Store all groups and apply filter (handles catDataMap, collapse, station filter)
+      _allGroups=groups;
+      applyGroupFilter();
+      populateStationFilter();
 
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,type:'range',group:e.group||e.resource||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
 
