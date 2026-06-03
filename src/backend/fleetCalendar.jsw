@@ -508,11 +508,8 @@ async function fetchVehicleCategoryMap() {
 
 async function fetchFleet() {
   await ensureFieldMapping();
-
-  let q = wixData.query(COLLECTIONS.Fleet).include(VF.category).limit(1000);
-  // filter active if field exists
-  try { q = q.eq(VF.active, true); } catch (_) {}
-  const res = await q.find({ suppressAuth: true });
+  // No active filter — include all vehicles so bookings assigned to any vehicle are visible
+  const res = await wixData.query(COLLECTIONS.Fleet).include(VF.category).limit(1000).find({ suppressAuth: true });
   return res.items || [];
 }
 
