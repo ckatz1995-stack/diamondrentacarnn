@@ -284,9 +284,9 @@ function renderCategoryHeader(cat, count) {
 function renderVehicleRow(v, index) {
   const plate = _safeText(v?.[VF.plate] || v?.plate || v?.[VF.id] || "—");
   const model = _safeText(v?.[VF.model] || v?.model || "—");
-  const station = _safeText(v?.[VF.station] || v?.station || "—");
+  const mileage = _safeText(v?.[VF.mileage] || v?.mileage || "—");
   const no = String(index + 1);
-  return `<div class="fleetGroupCell"><span class="fleetCol fleetNo">${escHtml(no)}</span><span class="fleetCol fleetPlate">${escHtml(plate)}</span><span class="fleetCol fleetModel">${escHtml(model)}</span><span class="fleetCol fleetStation">${escHtml(station)}</span></div>`;
+  return `<div class="fleetGroupCell"><span class="fleetCol fleetNo">${escHtml(no)}</span><span class="fleetCol fleetPlate">${escHtml(plate)}</span><span class="fleetCol fleetModel">${escHtml(model)}</span><span class="fleetCol fleetMileage">${escHtml(mileage)}</span></div>`;
 }
 
 
