@@ -1193,9 +1193,13 @@ button:active{transform:scale(.985)}
       saveWorkspace(); saveResume();
       renderUnassignedDrawer();
       syncCalHeader();
-      const _inVehicle=lastLoadedItems.filter(i=>i.group&&i.group!=='unassigned'&&i.group!==HEAT_GROUP_ID).length;
+      const _inVehicle=lastLoadedItems.filter(i=>i.group&&i.group!=='unassigned'&&i.group!==HEAT_GROUP_ID&&!String(i.group).startsWith('cat_')).length;
       const _inUnassigned=lastLoadedItems.filter(i=>i.group==='unassigned').length;
-      setStatus(`Loaded: groups=${groups.length} · items=${items.length} (${_inVehicle} in vehicle rows, ${_inUnassigned} in unassigned row)`);
+      // Debug: sample first item's raw backend group vs first vehicle group id
+      const _firstItemRawGrp=items.length?String(items[0].group||items[0].resource||'—').slice(0,24):'—';
+      const _firstVehGrp=groups.find(g=>g.id&&!String(g.id).startsWith('cat_')&&g.id!=='unassigned'&&g.id!==HEAT_GROUP_ID);
+      const _firstVehId=_firstVehGrp?String(_firstVehGrp.id||'—').slice(0,24):'—';
+      setStatus(`Loaded: grps=${groups.length} items=${items.length} (${_inVehicle} in rows, ${_inUnassigned} unassigned) · dbg: item.grp="${_firstItemRawGrp}" veh.id="${_firstVehId}"`);
       return;
     }
 
