@@ -694,9 +694,10 @@ button:active{transform:scale(.985)}
         return{...g,order:idx,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
       })];
 
-    // Update known group IDs so item mapper can fall back orphaned items to 'unassigned'
-    _knownGroupIds=new Set(styled.map(g=>String(g.id||'')));
-    _knownGroupIds.add('unassigned');
+    // _knownGroupIds tracks ALL valid vehicle/group IDs — including collapsed ones.
+    // We use _allGroups (not just styled) so items in collapsed categories keep their
+    // correct group assignment; they become visible again when the category is expanded.
+    _knownGroupIds=new Set([..._allGroups.map(g=>String(g.id||'')),'unassigned']);
 
     // Diff-based update — avoids the full clear→add flash
     const existingIds=new Set(groupsDS.getIds());
