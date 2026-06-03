@@ -1,6 +1,7 @@
 
 import wixLocation from 'wix-location';
 import { getFleetCalendarData, moveBookingVehicleOnly, confirmAndAutoAssign } from 'backend/fleetCalendar';
+import { savePreference, getPreference } from 'backend/staffPreferences';
 import { buildUserContext, logoutBackroom, requireBackroomAccess } from 'public/backroomAuth';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 import { APP_ROUTES as ROUTES } from 'public/appRoutes';
@@ -99,6 +100,23 @@ $w.onReady(async function () {
       return;
     }
 
+    if (msg.type === 'savePreference') {
+      const key = String(msg.key || '').trim();
+      if (key) savePreference({ authToken: authState.sessionToken, prefKey: key, prefValue: msg.value }).catch(() => {});
+      return;
+    }
+
+    if (msg.type === 'requestPreference') {
+      const key = String(msg.key || '').trim();
+      if (!key) return;
+      try {
+        const result = await getPreference({ authToken: authState.sessionToken, prefKey: key });
+        post({ type: 'preferenceData', key, value: result?.value ?? null });
+      } catch (_) {
+        post({ type: 'preferenceData', key, value: null });
+      }
+      return;
+    }
 
     if (msg.type === 'openOnDaily') {
       const bookingId = String(msg.bookingId || '').trim();
