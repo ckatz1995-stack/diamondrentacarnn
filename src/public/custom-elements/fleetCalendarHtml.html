@@ -131,7 +131,7 @@ button:active{transform:scale(.985)}
   width:var(--lw)!important;min-width:var(--lw)!important;max-width:var(--lw)!important;
   border-bottom:1px solid rgba(15,23,42,.06)!important;
   outline:none!important;box-shadow:none!important;
-  height:20px!important
+  height:28px!important
 }
 .vis-label .vis-inner{
   padding:0!important;width:100%!important;height:100%!important;
@@ -141,7 +141,7 @@ button:active{transform:scale(.985)}
 
 /* ── vis group rows ───────────────────────── */
 .vis-group{
-  height:20px!important;border-bottom:1px solid rgba(15,23,42,.05)!important;
+  height:28px!important;border-bottom:1px solid rgba(15,23,42,.05)!important;
   outline:none!important;box-shadow:none!important
 }
 .vis-group.fleetRowOdd{background:#ffffff}
@@ -167,6 +167,8 @@ button:active{transform:scale(.985)}
   box-shadow:none!important
 }
 .vis-item,.vis-item *{user-select:none!important}
+/* background is set via inline style on each item; these are fallback + override for selected */
+.vis-item.bkItem{display:block!important;min-height:10px!important}
 .vis-item.bkItem.bk{background:#ddb900!important;color:#000!important}
 .vis-item.bkItem.pre{background:#ffc000!important;color:#000!important}
 .vis-item.bkItem.run{background:#5cb85c!important;color:#fff!important}
@@ -596,6 +598,17 @@ button:active{transform:scale(.985)}
     if(rs==='Closed Rental') return 'in';
     return 'bk';
   }
+  const CLS_BG={bk:'#ddb900',pre:'#ffc000',run:'#5cb85c',in:'#c0504d',cnc:'#808080',nr:'#546e7a'};
+  const CLS_FG={bk:'#000',pre:'#000',run:'#fff',in:'#fff',cnc:'#fff',nr:'#fff'};
+  function itemInlineStyle(cls,isLocked,isUnassigned){
+    const bg=CLS_BG[cls]||'#ddb900'; const fg=CLS_FG[cls]||'#000';
+    return `background:${bg};color:${fg};border-radius:3px;${isLocked?'outline:2px solid rgba(180,35,24,.55);':''}${isUnassigned?'outline:2px solid rgba(180,138,79,.55);':''}`;
+  }
+  function buildItemContent(item){
+    const cn=escHtml(item.customerName||'—');
+    const tip=escHtml(tooltipText(item));
+    return `<div class="card" title="${tip}" style="height:100%;display:flex;align-items:center;padding:0 4px;overflow:hidden;white-space:nowrap"><span class="cust" style="overflow:hidden;text-overflow:ellipsis;font:700 10px/1 system-ui;flex:1">${cn}</span></div>`;
+  }
 
   const HEAT_GROUP_ID      = '__heat__';
   const FLEET_SNAPSHOT_KEY = 'diamond.fleet.snapshot.v1';
@@ -691,7 +704,7 @@ button:active{transform:scale(.985)}
     const styled=[{id:HEAT_GROUP_ID,content:'',visible:false,order:-1},
       ...filtered.map((g,idx)=>{
         const isCat=String(g.id||'').startsWith('cat_');
-        return{...g,order:idx,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
+        return{...g,order:idx,style:(g.style||'')+(isCat?';height:28px':';height:28px')};
       })];
 
     // _knownGroupIds tracks ALL valid vehicle/group IDs — including collapsed ones.
@@ -991,13 +1004,6 @@ button:active{transform:scale(.985)}
         return String(group?.content||group?.id||'');
       },
 
-      template:function(item){
-        const cn=escHtml(item.customerName||'—');
-        const tip=escHtml(tooltipText(item));
-        const klass=/Active Rental|Pre Check-In/i.test(String(item.rentalState||''))?' isLocked':(!safe(item.assignedFleetId)?' isUnassigned':'');
-        return `<div class="card${klass}" title="${tip}"><div class="cust">${cn}</div></div>`;
-      },
-
       onMoving:function(item,callback){
         if(String(item.group||'')===HEAT_GROUP_ID){callback(null);return;}
         if(String(item.group||'').startsWith('cat_')){setStatus('BLOCK: cannot drop onto a category row');callback(null);return;}
@@ -1175,7 +1181,7 @@ button:active{transform:scale(.985)}
       applyGroupFilter();
       populateStationFilter();
 
-      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; return{id:e.id,type:'range',group:grp||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
+      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
 
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
@@ -1209,7 +1215,7 @@ button:active{transform:scale(.985)}
     if(data.type==='patchItems'){
       const items=Array.isArray(data.items)?data.items:[];
       lastUnassigned=Array.isArray(data.unassigned)?data.unassigned:[];
-      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; return{id:e.id,type:'range',group:grp||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
+      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
       saveWorkspace(); saveResume();
