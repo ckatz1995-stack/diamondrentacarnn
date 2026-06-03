@@ -152,6 +152,12 @@ button:active{transform:scale(.985)}
   border-left:3px solid var(--gold)!important;
   height:24px!important
 }
+/* Indent .vis-inner to clear vis-timeline's absolutely-positioned ▼ toggle button */
+.vis-labelset .vis-label.fleetCatGroup .vis-inner{
+  padding-left:20px!important;
+  gap:6px!important;
+  align-items:center!important;
+}
 
 /* ── booking bar items ───────────────────── */
 .vis-item{
@@ -218,21 +224,17 @@ button:active{transform:scale(.985)}
 /* ── left panel row content — category ──── */
 .fleetCatCell{
   display:flex!important;align-items:center!important;gap:6px!important;
-  width:100%!important;height:100%!important;padding:0 8px 0 10px!important;
-  background:var(--surface2)!important;
-  border-left:3px solid var(--gold)!important;
-  border-top:1px solid var(--border2)!important
+  width:100%!important;height:100%!important;overflow:hidden!important
 }
 .fleetCatCode{
-  font:900 10.5px/1 system-ui;color:var(--text);letter-spacing:.02em;
-  display:flex;align-items:center;gap:4px
+  font:900 10.5px/1 system-ui,sans-serif!important;color:var(--text)!important;letter-spacing:.02em;
+  flex:1!important;min-width:0!important;overflow:hidden;white-space:nowrap;text-overflow:ellipsis
 }
-.fleetCatCode::before{content:"▸";font-size:9px;color:var(--gold);flex-shrink:0}
 .fleetCatMeta{
-  font:700 9px/1 system-ui;color:var(--sub);
-  margin-left:auto;
+  font:700 9px/1 system-ui,sans-serif!important;color:var(--sub)!important;
+  flex-shrink:0;
   padding:1px 5px;
-  background:rgba(0,0,0,.05);
+  background:rgba(0,0,0,.07);
   border-radius:3px;
   border:1px solid var(--border);
   white-space:nowrap
@@ -586,6 +588,26 @@ button:active{transform:scale(.985)}
   const SAVED_VIEWS_KEY       = 'diamond.backroom.savedViews.v1';
   try{ localStorage.removeItem(FLEET_SNAPSHOT_KEY); localStorage.removeItem(SAVED_VIEWS_KEY); }catch(_){}
 
+  // Per-category data for DOM-element-based group rendering (bypasses vis-timeline nested-parent blank issue)
+  const _catDataMap = new Map(); // groupId → {label, count}
+  let   _catLabelOrder = [];     // ordered array of category group ids (for DOM patching fallback)
+
+  // Post-render DOM patch: inject category labels directly into .vis-inner when vis-timeline leaves them blank
+  function _patchCatRows(){
+    if(!_catLabelOrder.length) return;
+    const labelEls=document.querySelectorAll('#timeline .vis-labelset .vis-label.fleetCatGroup');
+    labelEls.forEach((el,i)=>{
+      if(i>=_catLabelOrder.length) return;
+      const inner=el.querySelector('.vis-inner');
+      if(!inner) return;
+      if(inner.querySelector('.fleetCatCode')) return; // already patched
+      const d=_catDataMap.get(_catLabelOrder[i]);
+      if(!d) return;
+      inner.innerHTML='<span class="fleetCatCode">'+escHtml(d.label)+'</span>'
+        +'<span class="fleetCatMeta">'+escHtml(String(d.count))+' veh</span>';
+    });
+  }
+
   let groupsDS, itemsDS, timeline;
   let lastLoadedItems = [];
   let lastUnassigned  = [];
@@ -768,6 +790,24 @@ button:active{transform:scale(.985)}
       zoomMin:1000*60*60*6,
       zoomMax:1000*60*60*24*90,
 
+      // groupTemplate: return a real DOM Element for category rows (bypasses vis-timeline's
+      // innerHTML/XSS handling which silently drops content on nested-group parent rows).
+      // Return content string for vehicle rows (vis-timeline sets as innerHTML with xss disabled).
+      groupTemplate:function(group){
+        const id=String(group?.id||'');
+        if(id.startsWith('cat_')){
+          const d=_catDataMap.get(id);
+          if(!d) return null;
+          const div=document.createElement('div');
+          div.className='fleetCatCell';
+          const s1=document.createElement('span'); s1.className='fleetCatCode'; s1.textContent=d.label;
+          const s2=document.createElement('span'); s2.className='fleetCatMeta'; s2.textContent=d.count+' veh';
+          div.appendChild(s1); div.appendChild(s2);
+          return div;
+        }
+        return String(group?.content||group?.id||'');
+      },
+
       template:function(item){
         const cn=escHtml(item.customerName||'—');
         const tip=escHtml(tooltipText(item));
@@ -797,7 +837,7 @@ button:active{transform:scale(.985)}
       if(suppressRangeEvents) return;
       try{ keepWindow=timeline.getWindow(); userWindowDirty=true; }catch(e){}
     });
-    timeline.on('changed',()=>requestAnimationFrame(syncCalHeader));
+    timeline.on('changed',()=>requestAnimationFrame(()=>{ syncCalHeader(); _patchCatRows(); }));
     timeline.on('select',(props)=>{ try{ const id=props?.items?.[0]; selectedFleetId=id?String(id):''; }catch(_){} });
     timeline.on('doubleClick',(props)=>{ try{ const id=props?.item; if(!id) return; const it=itemsDS.get(id); if(it) openBookingModal(it); }catch(_){} });
 
@@ -919,12 +959,25 @@ button:active{transform:scale(.985)}
       let keep=null;
       if(userWindowDirty&&keepWindow) keep=keepWindow;
 
+      // Build category lookup before adding groups (groupTemplate reads this)
+      _catDataMap.clear(); _catLabelOrder=[];
+      for(const g of groups){
+        const id=String(g.id||'');
+        if(id.startsWith('cat_')){
+          const label=safe(g.catLabel||id.replace(/^cat_/,'')||'Other');
+          const count=Array.isArray(g.nestedGroups)?g.nestedGroups.length:0;
+          _catDataMap.set(id,{label,count});
+          _catLabelOrder.push(id);
+        }
+      }
+
       groupsDS.clear();
       groupsDS.add([{id:HEAT_GROUP_ID,content:'',visible:false}]);
       groupsDS.add(groups.map(g=>{
         const isCat=String(g.id||'').startsWith('cat_');
         return{...g, style:(g.style||'')+(isCat?';height:24px':';height:20px')};
       }));
+      setTimeout(_patchCatRows,80);
 
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); return{id:e.id,type:'range',group:e.group||e.resource||'unassigned',start:e.start,end:e.end,bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:e.className||`bkItem ${cls}`}; });
 

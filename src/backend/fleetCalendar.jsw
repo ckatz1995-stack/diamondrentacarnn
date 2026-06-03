@@ -545,6 +545,7 @@ function buildGroups(fleet) {
     groups.push({
       id: parentId,
       content: renderCategoryHeader(fullCatLabel, vehicles.length),
+      catLabel: fullCatLabel,
       nestedGroups: vehicles.map(v => v[VF.id]),
       showNested: true,
       className: "fleetCatGroup"
