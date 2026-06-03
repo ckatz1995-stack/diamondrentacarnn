@@ -1195,11 +1195,14 @@ button:active{transform:scale(.985)}
       syncCalHeader();
       const _inVehicle=lastLoadedItems.filter(i=>i.group&&i.group!=='unassigned'&&i.group!==HEAT_GROUP_ID&&!String(i.group).startsWith('cat_')).length;
       const _inUnassigned=lastLoadedItems.filter(i=>i.group==='unassigned').length;
-      // Debug: sample first item's raw backend group vs first vehicle group id
-      const _firstItemRawGrp=items.length?String(items[0].group||items[0].resource||'—').slice(0,24):'—';
-      const _firstVehGrp=groups.find(g=>g.id&&!String(g.id).startsWith('cat_')&&g.id!=='unassigned'&&g.id!==HEAT_GROUP_ID);
-      const _firstVehId=_firstVehGrp?String(_firstVehGrp.id||'—').slice(0,24):'—';
-      setStatus(`Loaded: grps=${groups.length} items=${items.length} (${_inVehicle} in rows, ${_inUnassigned} unassigned) · dbg: item.grp="${_firstItemRawGrp}" veh.id="${_firstVehId}"`);
+      const _firstItem=lastLoadedItems.find(i=>i.group&&i.group!=='unassigned');
+      const _fi=_firstItem?`start=${String(_firstItem.start||'').slice(0,10)} end=${String(_firstItem.end||'').slice(0,10)}`:'no-assigned-item';
+      setStatus(`Loaded: grps=${groups.length} items=${items.length} (${_inVehicle} in rows, ${_inUnassigned} unassigned) · ${_fi}`);
+      setTimeout(()=>{
+        const domItems=document.querySelectorAll('#timeline .vis-item').length;
+        const domGroups=document.querySelectorAll('#timeline .vis-label').length;
+        setStatus(`DOM: items=${domItems} labels=${domGroups} · DS: ${_inVehicle} in rows, ${_inUnassigned} unassigned · ${_fi}`);
+      },600);
       return;
     }
 
