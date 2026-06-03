@@ -549,7 +549,10 @@ button:active{transform:scale(.985)}
   <div style="background:#fff;border-radius:14px;padding:18px;max-width:640px;width:96vw;max-height:82vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid #e2e8f0;padding-bottom:10px">
       <strong style="font:900 14px/1 system-ui;color:#0f172a">Fleet Calendar — Diagnostics</strong>
-      <button id="diagClose" type="button" style="padding:5px 12px;border-radius:8px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;font:900 11px/1 system-ui">Close</button>
+      <div style="display:flex;gap:6px">
+        <button id="diagForceRender" type="button" style="padding:5px 12px;border-radius:8px;border:1px solid #86efac;background:#f0fdf4;cursor:pointer;font:900 11px/1 system-ui;color:#166534">Force Render</button>
+        <button id="diagClose" type="button" style="padding:5px 12px;border-radius:8px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;font:900 11px/1 system-ui">Close</button>
+      </div>
     </div>
     <pre id="diagContent" style="font:700 11.5px/1.6 ui-monospace,'Cascadia Code',monospace;color:#0f172a;margin:0;white-space:pre-wrap;word-break:break-all">Loading…</pre>
   </div>
@@ -1044,6 +1047,7 @@ button:active{transform:scale(.985)}
     timeline.on('select',(props)=>{ try{ const id=props?.items?.[0]; selectedFleetId=id?String(id):''; }catch(_){} });
     timeline.on('doubleClick',(props)=>{ try{ const id=props?.item; if(!id) return; const it=itemsDS.get(id); if(it) openBookingModal(it); }catch(_){} });
 
+    window._tlInitHeight=document.getElementById('timeline').offsetHeight;
     setStatus('READY • waiting for data…');
     renderFleetModeButtons();
     syncCalHeader();
@@ -1173,6 +1177,16 @@ button:active{transform:scale(.985)}
   // ── Diagnostic panel ────────────────────────────────────
   document.getElementById('diagClose')?.addEventListener('click',()=>{ document.getElementById('diagPanel').style.display='none'; });
   document.getElementById('diagPanel')?.addEventListener('click',(e)=>{ if(e.target===document.getElementById('diagPanel')) document.getElementById('diagPanel').style.display='none'; });
+  document.getElementById('diagForceRender')?.addEventListener('click',()=>{
+    try{
+      timeline.setItems(itemsDS);
+      timeline.setGroups(groupsDS);
+      [0,100,250,500,1000].forEach(ms=>setTimeout(()=>{
+        try{ timeline.redraw(); if(lastLoadedItems.length>0) timeline.fit({animation:false}); syncCalHeader(); }catch(_){}
+      },ms));
+      document.getElementById('diagContent').textContent='Force render triggered — close this panel to see result.';
+    }catch(e){ document.getElementById('diagContent').textContent='Force render error: '+(e?.message||String(e)); }
+  });
   document.getElementById('btnDiag')?.addEventListener('click',()=>{
     const panel=document.getElementById('diagPanel');
     const content=document.getElementById('diagContent');
@@ -1223,6 +1237,16 @@ button:active{transform:scale(.985)}
         '',
         '=== KNOWN GROUP IDs (first 5) ===',
         [..._knownGroupIds].slice(0,5).join('\n')||'(empty)',
+        '',
+        '=== DOM RENDER STATE ===',
+        '#timeline initHeight (at boot): '+(window._tlInitHeight??'?'),
+        '#timeline offsetHeight now: '+(document.getElementById('timeline')?.offsetHeight??0),
+        '#timeline offsetWidth now:  '+(document.getElementById('timeline')?.offsetWidth??0),
+        '.vis-panel.vis-left  H: '+(document.querySelector('#timeline .vis-panel.vis-left')?.offsetHeight??'—'),
+        '.vis-panel.vis-center H: '+(document.querySelector('#timeline .vis-panel.vis-center')?.offsetHeight??'—'),
+        '.vis-content         H: '+(document.querySelector('#timeline .vis-content')?.offsetHeight??'—'),
+        '.vis-item count in DOM: '+document.querySelectorAll('#timeline .vis-item').length,
+        (()=>{ const fi=document.querySelector('#timeline .vis-item'); if(!fi) return '(no .vis-item in DOM)'; const cs=window.getComputedStyle(fi); return 'first .vis-item: display='+cs.display+' visibility='+cs.visibility+' opacity='+cs.opacity+' left='+fi.style.left+' top='+fi.style.top+' width='+fi.style.width+' height='+fi.style.height; })(),
       ];
       content.textContent=lines.join('\n');
       panel.style.display='flex';
@@ -1271,6 +1295,8 @@ button:active{transform:scale(.985)}
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
 
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
+      // Force vis-timeline to rebind — covers cases where DataSet events don't propagate
+      try{ timeline.setItems(itemsDS); }catch(_){}
       if(searchBox.value) renderFromCache(searchBox.value);
       try{ timeline.redraw(); }catch(_){}
 
