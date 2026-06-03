@@ -1,0 +1,53 @@
+// backend/staffPreferences.jsw
+// Cross-device user preference storage — keyed by staff email + prefKey.
+// Requires a "StaffPreferences" collection with fields: email (text), prefKey (text), prefValue (text).
+import wixData from 'wix-data';
+import { requireStaffAccess } from 'backend/staffAccess.jsw';
+
+const COLLECTION = 'StaffPreferences';
+
+export async function savePreference({ authToken, prefKey, prefValue } = {}) {
+  const state = await requireStaffAccess({ sessionToken: authToken, area: 'fleet', action: 'View' });
+  const email = String(state?.email || '').trim().toLowerCase();
+  if (!email || !prefKey) return { success: false };
+
+  try {
+    const q = await wixData.query(COLLECTION)
+      .eq('email', email)
+      .eq('prefKey', String(prefKey))
+      .limit(1)
+      .find({ suppressAuth: true });
+
+    const stored = typeof prefValue === 'string' ? prefValue : JSON.stringify(prefValue ?? null);
+
+    if (q.items.length > 0) {
+      await wixData.update(COLLECTION, { ...q.items[0], prefValue: stored }, { suppressAuth: true });
+    } else {
+      await wixData.insert(COLLECTION, { email, prefKey: String(prefKey), prefValue: stored }, { suppressAuth: true });
+    }
+    return { success: true };
+  } catch (err) {
+    return { success: false };
+  }
+}
+
+export async function getPreference({ authToken, prefKey } = {}) {
+  const state = await requireStaffAccess({ sessionToken: authToken, area: 'fleet', action: 'View' });
+  const email = String(state?.email || '').trim().toLowerCase();
+  if (!email || !prefKey) return { success: false, value: null };
+
+  try {
+    const q = await wixData.query(COLLECTION)
+      .eq('email', email)
+      .eq('prefKey', String(prefKey))
+      .limit(1)
+      .find({ suppressAuth: true });
+
+    if (!q.items.length) return { success: true, value: null };
+    const raw = String(q.items[0].prefValue || '');
+    const value = raw ? JSON.parse(raw) : null;
+    return { success: true, value };
+  } catch (_) {
+    return { success: false, value: null };
+  }
+}

@@ -17,7 +17,8 @@
   --sub:#475569;--text:#0f172a;
   --danger:#B91C1C;
   --ring:rgba(168,132,74,.18);--pri1:#A8844A;--pri2:#6C522E;
-  --lw:362px; /* 32+130+130+70 (no GROUP column) */
+  --col-no:32px;--col-plate:130px;--col-model:130px;
+  --lw:calc(var(--col-no) + var(--col-plate) + var(--col-model) + 70px);
   --sb-w:200px;--sb-cw:44px; /* sidebar expanded / collapsed width */
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -107,7 +108,7 @@ button:active{transform:scale(.985)}
 .cal-header{display:flex;align-items:stretch;height:38px;flex-shrink:0;background:#f8f8f8;border-bottom:2px solid #d0d0d0}
 .cal-col-hdr{
   display:grid;
-  grid-template-columns:32px 130px 130px minmax(70px,1fr);
+  grid-template-columns:var(--col-no) var(--col-plate) var(--col-model) minmax(70px,1fr);
   width:var(--lw);min-width:var(--lw);
   flex-shrink:0;
   border-right:2px solid rgba(15,23,42,.13);
@@ -203,7 +204,7 @@ button:active{transform:scale(.985)}
 }
 .fleetPlate{
   order:1!important;
-  width:130px!important;min-width:130px!important;max-width:130px!important;
+  width:var(--col-plate)!important;min-width:var(--col-plate)!important;max-width:var(--col-plate)!important;
   font:900 10.5px/1 ui-monospace,'Cascadia Code','Fira Code',monospace!important;
   color:var(--gold2)!important;letter-spacing:.03em;
   background:rgba(168,132,74,.07)!important;
@@ -211,9 +212,16 @@ button:active{transform:scale(.985)}
 }
 .fleetModel{
   order:2!important;
-  width:130px!important;min-width:130px!important;max-width:130px!important;
+  width:var(--col-model)!important;min-width:var(--col-model)!important;max-width:var(--col-model)!important;
   font:700 10px/1.2 system-ui!important;color:#334155!important
 }
+/* ── column resize handle ─────────────────── */
+.col-h{position:relative}
+.col-resize{
+  position:absolute;right:-3px;top:0;width:6px;height:100%;
+  cursor:col-resize;z-index:10;background:transparent;user-select:none
+}
+.col-resize:hover,.col-resize.dragging{background:rgba(168,132,74,.45)}
 .fleetMileage{
   order:3!important;
   flex:1 1 0!important;min-width:70px!important;
@@ -679,13 +687,23 @@ button:active{transform:scale(.985)}
       // vehicle rows pushed above inside their cat; skip at top level
     }
 
-    groupsDS.clear();
-    groupsDS.add([{id:HEAT_GROUP_ID,content:'',visible:false}]);
-    groupsDS.add(filtered.map(g=>{
-      const isCat=String(g.id||'').startsWith('cat_');
-      return{...g,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
-    }));
-    setTimeout(_patchCatRows,80);
+    // Build the final styled list
+    const styled=[{id:HEAT_GROUP_ID,content:'',visible:false},
+      ...filtered.map(g=>{
+        const isCat=String(g.id||'').startsWith('cat_');
+        return{...g,style:(g.style||'')+(isCat?';height:24px':';height:20px')};
+      })];
+
+    // Diff-based update — avoids the full clear→add flash
+    const existingIds=new Set(groupsDS.getIds());
+    const wantedIds=new Set(styled.map(g=>g.id));
+    const toRemove=[...existingIds].filter(id=>!wantedIds.has(id));
+    const toAdd=styled.filter(g=>!existingIds.has(g.id));
+    const toUpdate=styled.filter(g=>existingIds.has(g.id));
+    if(toRemove.length) groupsDS.remove(toRemove);
+    if(toUpdate.length) groupsDS.update(toUpdate);
+    if(toAdd.length) groupsDS.add(toAdd);
+    setTimeout(_patchCatRows,50);
   }
 
   // Populate the station filter dropdown from current _allGroups data
@@ -712,6 +730,58 @@ button:active{transform:scale(.985)}
     if(prev) sel.value=prev;
   }
 
+  // ── Column resize ────────────────────────────────────────
+  function applyColWidths(w,redraw){
+    _colWidths={
+      plate:Math.max(60,Math.min(320,Math.round(w.plate||130))),
+      model:Math.max(60,Math.min(320,Math.round(w.model||130)))
+    };
+    const r=document.documentElement;
+    r.style.setProperty('--col-plate',_colWidths.plate+'px');
+    r.style.setProperty('--col-model',_colWidths.model+'px');
+    if(redraw&&timeline) try{timeline.redraw();}catch(_){}
+    syncCalHeader();
+  }
+
+  function saveColWidths(){
+    try{localStorage.setItem(COL_WIDTHS_KEY,JSON.stringify(_colWidths));}catch(_){}
+    postToWix({type:'savePreference',key:'fleetCalColumns',value:_colWidths});
+  }
+
+  function loadColWidthsLocal(){
+    try{
+      const raw=localStorage.getItem(COL_WIDTHS_KEY);
+      if(raw){const w=JSON.parse(raw); if(w&&(w.plate||w.model)) applyColWidths(w,false);}
+    }catch(_){}
+  }
+
+  function initColResize(){
+    const colHdr=document.getElementById('calColHdr');
+    if(!colHdr) return;
+    const cols=colHdr.querySelectorAll('.col-h');
+    [{idx:1,key:'plate'},{idx:2,key:'model'}].forEach(({idx,key})=>{
+      const col=cols[idx];
+      if(!col) return;
+      const handle=document.createElement('div');
+      handle.className='col-resize';
+      col.appendChild(handle);
+      handle.addEventListener('mousedown',(e)=>{
+        e.preventDefault();
+        const startX=e.clientX, startW=_colWidths[key];
+        handle.classList.add('dragging');
+        const onMove=(me)=>applyColWidths({..._colWidths,[key]:startW+(me.clientX-startX)},true);
+        const onUp=()=>{
+          handle.classList.remove('dragging');
+          document.removeEventListener('mousemove',onMove);
+          document.removeEventListener('mouseup',onUp);
+          saveColWidths();
+        };
+        document.addEventListener('mousemove',onMove);
+        document.addEventListener('mouseup',onUp);
+      });
+    });
+  }
+
   let groupsDS, itemsDS, timeline;
   let lastLoadedItems = [];
   let lastUnassigned  = [];
@@ -723,6 +793,8 @@ button:active{transform:scale(.985)}
   let selectedFleetId = '';
   let ctxItemId = '';
   const pendingOldGroup = new Map();
+  const COL_WIDTHS_KEY = 'diamond.fleet.colWidths.v1';
+  let _colWidths = {plate:130,model:130};
 
   function applyUserContext(ctx){
     const name=safe(ctx&&(ctx.name||ctx.email)||'Operator')||'Operator';
@@ -866,11 +938,10 @@ button:active{transform:scale(.985)}
     if(w<10) return;
     colHdr.style.width=w+'px';
     colHdr.style.minWidth=w+'px';
-    // Last column fills remaining space after fixed cols (80+32+90+90=292)
     const lastCol=colHdr.querySelector('.col-h:last-child');
     if(lastCol){
-      const fixed=80+32+90+90;
-      const rem=Math.max(75,w-fixed);
+      const fixed=32+_colWidths.plate+_colWidths.model;
+      const rem=Math.max(60,w-fixed);
       lastCol.style.minWidth=rem+'px';
       lastCol.style.flex='1';
     }
@@ -904,9 +975,10 @@ button:active{transform:scale(.985)}
           if(!d) return null;
           const div=document.createElement('div');
           div.className='fleetCatCell';
+          const icon=document.createElement('span'); icon.className='fleetCatToggle'; icon.textContent=_collapsedCats.has(id)?'▶':'▼';
           const s1=document.createElement('span'); s1.className='fleetCatCode'; s1.textContent=d.label;
           const s2=document.createElement('span'); s2.className='fleetCatMeta'; s2.textContent=d.count+' veh';
-          div.appendChild(s1); div.appendChild(s2);
+          div.appendChild(icon); div.appendChild(s1); div.appendChild(s2);
           return div;
         }
         return String(group?.content||group?.id||'');
@@ -1071,8 +1143,15 @@ button:active{transform:scale(.985)}
     const data=evt.data;
     if(!data||!data.type) return;
 
-    if(data.type==='userContext'){ applyUserContext(data); return; }
+    if(data.type==='userContext'){ applyUserContext(data); postToWix({type:'requestPreference',key:'fleetCalColumns'}); return; }
     if(data.type==='resume') return;
+    if(data.type==='preferenceData'){
+      if(data.key==='fleetCalColumns'&&data.value&&(data.value.plate||data.value.model)){
+        applyColWidths(data.value,!!timeline);
+        try{localStorage.setItem(COL_WIDTHS_KEY,JSON.stringify(data.value));}catch(_){}
+      }
+      return;
+    }
     if(data.type==='toast'){ setStatus(String(data.message||'OK')); return; }
     if(data.type==='showError'){ setStatus(String(data.message||'Error')); return; }
 
@@ -1146,9 +1225,11 @@ button:active{transform:scale(.985)}
   // ── Init ─────────────────────────────────────────────────
   (function init(){
     try{
+      loadColWidthsLocal();
       initRangeDefaults();
       restoreWorkspace();
       initTimeline();
+      initColResize();
       postToWix({type:'calendarReady',from:lastRange.from,to:lastRange.to});
       postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to});
       setStatus('READY • requesting data…');
