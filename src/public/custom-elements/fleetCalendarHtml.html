@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<!-- Custom dependency-free timeline renderer (FleetTimeline). vis-data kept only for DataSet. -->
-<script src="https://unpkg.com/vis-data@7.1.4/dist/vis-data.min.js"></script>
+<!-- Fully dependency-free: FleetTimeline + FleetDataSet are both inline. No CDN scripts needed. -->
 <style>
 :root{
   --gold:#A8844A;--gold2:#6C522E;
@@ -637,7 +636,7 @@ button:active{transform:scale(.985)}
   function norm(s){ return (s??'').toString().toLowerCase().trim(); }
 
   function assertVisReady(){
-    if(!window.vis||!vis.DataSet) throw new Error('vis-data (DataSet) not loaded.');
+    if(typeof FleetDataSet==='undefined') throw new Error('FleetDataSet not defined (inline script error).');
   }
   function getClass(status,rentalState){
     const st=String(status||'');
@@ -1018,6 +1017,40 @@ button:active{transform:scale(.985)}
     if(lastCol){ lastCol.style.minWidth='60px'; lastCol.style.flex='1'; }
   }
 
+  // ── Inline DataSet (replaces vis-data CDN) ───────────────────────
+  // Minimal DataSet that satisfies the app's usage: get/add/update/remove/clear/getIds/on/length.
+  class FleetDataSet{
+    constructor(init){
+      this._m=new Map();
+      this._cbs=[];
+      if(Array.isArray(init)&&init.length) this.add(init);
+    }
+    get length(){ return this._m.size; }
+    get(id){
+      if(id===undefined||id===null) return [...this._m.values()];
+      const k=String(id); return this._m.has(k)?this._m.get(k):null;
+    }
+    add(items){
+      const arr=Array.isArray(items)?items:[items];
+      arr.forEach(it=>{ if(it&&it.id!=null) this._m.set(String(it.id),it); });
+      this._fire();
+    }
+    update(items){
+      const arr=Array.isArray(items)?items:[items];
+      arr.forEach(it=>{ if(it&&it.id!=null){ const k=String(it.id); this._m.set(k,{...(this._m.get(k)||{}),...it}); } });
+      this._fire();
+    }
+    remove(ids){
+      const arr=Array.isArray(ids)?ids:[ids];
+      arr.forEach(id=>{ if(id!=null) this._m.delete(String(id)); });
+      this._fire();
+    }
+    clear(){ this._m.clear(); this._fire(); }
+    getIds(){ return [...this._m.keys()]; }
+    on(ev,fn){ if(typeof fn==='function') this._cbs.push(fn); }
+    _fire(){ this._cbs.forEach(fn=>{ try{ fn(); }catch(_){} }); }
+  }
+
   // ── Custom dependency-free timeline ──────────────────────────────
   // Drop-in replacement for vis.Timeline. Renders pure DOM: a frozen left column of
   // vehicle/category rows + a right track with a time axis and absolutely-positioned
@@ -1244,8 +1277,8 @@ button:active{transform:scale(.985)}
 
   function initTimeline(){
     assertVisReady();
-    groupsDS=new vis.DataSet([]);
-    itemsDS=new vis.DataSet([]);
+    groupsDS=new FleetDataSet([]);
+    itemsDS=new FleetDataSet([]);
 
     const options={ zoomMin:1000*60*60*6, zoomMax:1000*60*60*24*90 };
     timeline=new FleetTimeline(document.getElementById('timeline'),itemsDS,groupsDS,options);
@@ -1435,7 +1468,7 @@ button:active{transform:scale(.985)}
         'lastRange.to:   '+lastRange.to,
         '',
         '=== RENDERER STATUS ===',
-        'DataSet loaded: '+!!(window.vis&&vis.DataSet),
+        'DataSet loaded: '+(typeof FleetDataSet!=='undefined'),
         'engine:      '+(timeline instanceof FleetTimeline?'FleetTimeline (custom)':(timeline?'created':'null')),
         'groupsDS:    '+(groupsDS?'created':'null'),
         'itemsDS:     '+(itemsDS?'created':'null'),
