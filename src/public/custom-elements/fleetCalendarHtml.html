@@ -975,54 +975,66 @@ button:active{transform:scale(.985)}
   function patchItemTops(){
     if(!groupsDS||!itemsDS) return;
     try{
-      // Build cumulative top map from group order + fixed row heights
-      const sorted=groupsDS.get().filter(g=>g.visible!==false).sort((a,b)=>(a.order??9999)-(b.order??9999));
-      const grpTop={},grpH={};
+      // vis-timeline elements carry NO data-id, so we can't map them by id.
+      // Instead we match DOM rows to data groups BY INDEX — vis-timeline renders
+      // foreground groups, background groups and left labels all in the same
+      // group-order we control via the `order` field. This sidesteps the broken
+      // internal height/top cache (poisoned by the 0px-tall iframe at init).
+      const ordered=groupsDS.get()
+        .filter(g=>g.visible!==false && String(g.id||'')!==HEAT_GROUP_ID)
+        .sort((a,b)=>(a.order??9999)-(b.order??9999));
+      const rowH=gid=>String(gid||'').startsWith('cat_')?24:28;
+
+      const fg =[...document.querySelectorAll('#timeline .vis-foreground .vis-group')];
+      const bg =[...document.querySelectorAll('#timeline .vis-background .vis-group')];
+      const lbl=[...document.querySelectorAll('#timeline .vis-labelset .vis-label')];
+
+      // Compute cumulative top per ordered group, then force-position every DOM row.
       let cum=0;
-      sorted.forEach(g=>{
-        const gid=String(g.id||'');
-        grpTop[gid]=cum;
-        const h=gid===HEAT_GROUP_ID?0:gid.startsWith('cat_')?24:28;
-        grpH[gid]=h; cum+=h;
+      const tops=[];
+      ordered.forEach((g,i)=>{
+        const h=rowH(g.id);
+        tops.push(cum);
+        // Foreground row holds the booking bars — absolute-position it so its
+        // children (the .vis-item bars) land in the correct vertical band.
+        const f=fg[i];
+        if(f){
+          f.style.setProperty('position','absolute','important');
+          f.style.setProperty('top',cum+'px','important');
+          f.style.setProperty('left','0','important');
+          f.style.setProperty('right','0','important');
+          f.style.setProperty('width','100%','important');
+          f.style.setProperty('height',h+'px','important');
+          f.style.setProperty('overflow','visible','important');
+        }
+        // Background row draws the zebra striping.
+        const b=bg[i];
+        if(b){
+          b.style.setProperty('top',cum+'px','important');
+          b.style.setProperty('height',h+'px','important');
+        }
+        // Left-panel label must stay row-aligned.
+        const l=lbl[i];
+        if(l){
+          l.style.setProperty('height',h+'px','important');
+          l.style.setProperty('min-height',h+'px','important');
+        }
+        cum+=h;
       });
 
-      // Patch .vis-group rows (right panel) — height AND top.
-      // vis-timeline absolutely positions groups using el.style.top derived from its
-      // internal cumulative height table (still all 0s), so all rows overlap at y=0.
-      // We override both top and height with !important inline styles.
-      document.querySelectorAll('#timeline .vis-content .vis-group').forEach(el=>{
-        const gid=String(el.dataset.id||el.dataset.group||'');
-        const h=(gid&&grpH[gid]!=null)?grpH[gid]:28;
-        const t=(gid&&grpTop[gid]!=null)?grpTop[gid]:null;
-        el.style.setProperty('height',h+'px','important');
-        el.style.setProperty('min-height',h+'px','important');
-        if(t!==null) el.style.setProperty('top',t+'px','important');
-      });
+      // Stretch the row containers so the now-absolute foreground rows aren't clipped.
+      const total=cum;
+      ['.vis-foreground','.vis-background','.vis-itemset','.vis-data-axis']
+        .forEach(sel=>{ const c=document.querySelector('#timeline '+sel); if(c) c.style.setProperty('height',total+'px','important'); });
 
-      // Patch .vis-label rows (left panel) same way so labels stay aligned with rows
-      document.querySelectorAll('#timeline .vis-labelset .vis-label').forEach(el=>{
-        const gid=String(el.dataset.id||el.dataset.group||'');
-        const h=(gid&&grpH[gid]!=null)?grpH[gid]:28;
-        const t=(gid&&grpTop[gid]!=null)?grpTop[gid]:null;
-        el.style.setProperty('height',h+'px','important');
-        el.style.setProperty('min-height',h+'px','important');
-        if(t!==null) el.style.setProperty('top',t+'px','important');
-      });
-
-      // For items in FLAT container (not inside .vis-group): also patch item tops.
-      // (In the group-container layout above, items at top≈0 within a correctly
-      //  positioned group are already visible — no item patching needed.)
-      const sampleItem=document.querySelector('#timeline .vis-item');
-      if(!sampleItem||sampleItem.parentElement?.classList.contains('vis-group')) return;
-      const itGrp={};
-      (itemsDS.get()||[]).forEach(it=>{ itGrp[String(it.id||'')]=String(it.group||''); });
-      document.querySelectorAll('#timeline .vis-item').forEach(el=>{
-        const gid=itGrp[String(el.dataset.id||'')];
-        if(!gid||grpTop[gid]==null) return;
-        const rowH=grpH[gid]??28;
-        const ih=el.offsetHeight||20;
-        const newTop=(grpTop[gid]+Math.max(0,Math.floor((rowH-ih)/2)))+'px';
-        if(el.style.top!==newTop) el.style.top=newTop;
+      // Finally pin each booking bar to the TOP of its own foreground row (vis sets
+      // top≈0.5px relative to the group, which is correct once the group is placed).
+      document.querySelectorAll('#timeline .vis-foreground .vis-group').forEach(grpEl=>{
+        grpEl.querySelectorAll('.vis-item').forEach(it=>{
+          const ih=it.offsetHeight||20;
+          const pad=Math.max(0,Math.floor((28-ih)/2));
+          it.style.setProperty('top',pad+'px','important');
+        });
       });
     }catch(_){}
   }
@@ -1324,8 +1336,8 @@ button:active{transform:scale(.985)}
         '=== LABEL offsetHeights (first 6) ===',
         ...(()=>{ const lbls=document.querySelectorAll('#timeline .vis-labelset .vis-label'); return [...lbls].slice(0,6).map((l,i)=>`[${i}] offsetH=${l.offsetHeight} inlineH=${l.style.height} important=${l.style.getPropertyPriority('height')}`); })(),
         '',
-        '=== VIS-GROUP position+top (first 6 in .vis-content) ===',
-        ...(()=>{ const grps=document.querySelectorAll('#timeline .vis-content .vis-group'); return [...grps].slice(0,6).map((g,i)=>{ const cs=window.getComputedStyle(g); return `[${i}] id=${(g.dataset.id||'?').slice(-8)} cls=${g.className.split(' ').pop()} pos=${cs.position} top=${g.style.top} H=${g.offsetHeight} overflow=${cs.overflow}`; }); })(),
+        '=== FOREGROUND rows (top/height by index, first 8) ===',
+        ...(()=>{ const grps=document.querySelectorAll('#timeline .vis-foreground .vis-group'); return [...grps].slice(0,8).map((g,i)=>{ const cs=window.getComputedStyle(g); const nItems=g.querySelectorAll('.vis-item').length; return `[${i}] pos=${cs.position} top=${g.style.top||cs.top} H=${g.offsetHeight} items=${nItems}`; }); })(),
       ];
       content.textContent=lines.join('\n');
       panel.style.display='flex';
