@@ -715,8 +715,22 @@ button:active{transform:scale(.985)}
   function escHtml(s){ return String(s??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
   function pad2(n){ return String(n).padStart(2,'0'); }
   function toISODate(d){ const dt=new Date(d); return `${dt.getFullYear()}-${pad2(dt.getMonth()+1)}-${pad2(dt.getDate())}`; }
-  function hhmm(d){ const dt=new Date(d); if(isNaN(dt.getTime())) return '--:--'; return `${pad2(dt.getHours())}:${pad2(dt.getMinutes())}`; }
-  function fmtDateTime(d){ const dt=new Date(d); if(isNaN(dt.getTime())) return '-'; return `${pad2(dt.getDate())}/${pad2(dt.getMonth()+1)}/${dt.getFullYear()} ${hhmm(dt)}`; }
+
+  // ── Single source of truth for all date/time display ──────────────────────────
+  // Edit here to change formats app-wide; no browser locale is used anywhere.
+  const FMT = {
+    DOW: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    MON: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    time(d){ const t=new Date(d); if(isNaN(t)) return '--:--'; return pad2(t.getHours())+':'+pad2(t.getMinutes()); },
+    date(d){ const t=new Date(d); if(isNaN(t)) return '—'; return pad2(t.getDate())+'/'+pad2(t.getMonth()+1)+'/'+t.getFullYear(); },
+    datetime(d){ const t=new Date(d); if(isNaN(t)) return '—'; return FMT.date(t)+' '+FMT.time(t); },
+    today(){ const d=new Date(); return FMT.DOW[d.getDay()]+' '+pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear(); },
+    axisDay(d){ return pad2(d.getDate())+'/'+pad2(d.getMonth()+1); },
+    axisMonth(d){ return FMT.MON[d.getMonth()]+' '+d.getFullYear(); },
+  };
+
+  function hhmm(d){ return FMT.time(d); }
+  function fmtDateTime(d){ return FMT.datetime(d); }
   function norm(s){ return (s??'').toString().toLowerCase().trim(); }
 
   function assertVisReady(){
@@ -1467,8 +1481,6 @@ button:active{transform:scale(.985)}
     _ticks(){ const out=[]; const s=new Date(this.win.start); s.setHours(0,0,0,0); const end=+this.win.end; let d=new Date(s),guard=0; while(+d<=end+864e5&&guard++<800){ const day=d.getDay(); out.push({date:new Date(d),frac:this._frac(d),weekend:(day===0||day===6)}); d=new Date(d.getTime()+864e5); } return out; }
     _renderAxis(ticks,days){
       this.axisEl.innerHTML='';
-      const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const todayISO=toISODate(new Date());
       const step=days>21?7:(days>10?2:1);
 
@@ -1488,7 +1500,7 @@ button:active{transform:scale(.985)}
               const m=_mk('div','ftl-axis-month');
               m.style.left=(a*100)+'%'; m.style.width=((b-a)*100)+'%';
               const md=visTicks[segStart].date;
-              m.textContent=MON[md.getMonth()]+' '+md.getFullYear();
+              m.textContent=FMT.axisMonth(md);
               this.axisEl.appendChild(m);
             }
             segStart=i;
@@ -1502,7 +1514,7 @@ button:active{transform:scale(.985)}
         const d=tk.date; const isToday=toISODate(d)===todayISO;
         const t=_mk('div','ftl-axis-tick'+(isToday?' ftl-ax-today':(tk.weekend?' ftl-ax-weekend':'')));
         t.style.left=(tk.frac*100)+'%';
-        t.innerHTML='<span class="ftl-ax-dow">'+DOW[d.getDay()]+'</span><span class="ftl-ax-date">'+d.getDate()+'/'+(d.getMonth()+1)+'</span>';
+        t.innerHTML='<span class="ftl-ax-dow">'+FMT.DOW[d.getDay()]+'</span><span class="ftl-ax-date">'+FMT.axisDay(d)+'</span>';
         this.axisEl.appendChild(t);
       });
     }
@@ -1703,7 +1715,7 @@ button:active{transform:scale(.985)}
   window.addEventListener('error',(e)=>{ try{ setStatus('JS ERROR: '+(e.message||'unknown')); }catch(_){} });
   window.addEventListener('unhandledrejection',(e)=>{ const r=e?.reason; try{ setStatus('PROMISE ERROR: '+((r&&r.message)?r.message:String(r))); }catch(_){} });
 
-  try{ todayMeta.textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'}); }catch(_){}
+  try{ todayMeta.textContent=FMT.today(); }catch(_){}
 
   document.getElementById('btnApplyRange').addEventListener('click',()=>{ const ok=applyRange(fromEl.value,toEl.value,true); if(!ok) setStatus('RANGE ERROR: invalid date range'); else{ userWindowDirty=false; setStatus(`RANGE: ${fromEl.value} → ${toEl.value}`); postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); } });
   document.getElementById('range7d').addEventListener('click',()=>{ if(presetRange(7)){ userWindowDirty=false; postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); setStatus(`RANGE: ${fromEl.value} → ${toEl.value}`); } });
