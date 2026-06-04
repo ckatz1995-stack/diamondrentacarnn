@@ -975,49 +975,53 @@ button:active{transform:scale(.985)}
   function patchItemTops(){
     if(!groupsDS||!itemsDS) return;
     try{
-      // ALWAYS: force .vis-group row heights via !important inline so vis-timeline
-      // cannot override them, regardless of its internal height table value.
-      document.querySelectorAll('#timeline .vis-group').forEach(el=>{
-        const h=el.classList.contains('fleetCatGroup')?24:28;
-        el.style.setProperty('height',h+'px','important');
-        el.style.setProperty('min-height',h+'px','important');
-      });
-      // Also fix label heights so vis-timeline measures correct offsetHeight on next redraw.
-      document.querySelectorAll('#timeline .vis-labelset .vis-label').forEach(el=>{
-        const h=el.classList.contains('fleetCatGroup')?24:28;
-        el.style.setProperty('height',h+'px','important');
-        el.style.setProperty('min-height',h+'px','important');
-      });
-
-      // CONDITIONAL: fix item top positions only when items live in a flat container
-      // (not inside .vis-group). If items are inside their group container, the height
-      // patch above is sufficient; patching top with cumulative values would be wrong.
-      const sampleItem=document.querySelector('#timeline .vis-item');
-      if(!sampleItem) return;
-      const itemsInGroups=sampleItem.parentElement?.classList.contains('vis-group');
-      if(itemsInGroups) return;
-
-      // Items are in a flat .vis-content container: calculate cumulative group tops
-      // and set each item's absolute top directly.
+      // Build cumulative top map from group order + fixed row heights
       const sorted=groupsDS.get().filter(g=>g.visible!==false).sort((a,b)=>(a.order??9999)-(b.order??9999));
-      const grpTop={},grpRowH={};
+      const grpTop={},grpH={};
       let cum=0;
       sorted.forEach(g=>{
         const gid=String(g.id||'');
         grpTop[gid]=cum;
         const h=gid===HEAT_GROUP_ID?0:gid.startsWith('cat_')?24:28;
-        grpRowH[gid]=h; cum+=h;
+        grpH[gid]=h; cum+=h;
       });
+
+      // Patch .vis-group rows (right panel) — height AND top.
+      // vis-timeline absolutely positions groups using el.style.top derived from its
+      // internal cumulative height table (still all 0s), so all rows overlap at y=0.
+      // We override both top and height with !important inline styles.
+      document.querySelectorAll('#timeline .vis-content .vis-group').forEach(el=>{
+        const gid=String(el.dataset.id||el.dataset.group||'');
+        const h=(gid&&grpH[gid]!=null)?grpH[gid]:28;
+        const t=(gid&&grpTop[gid]!=null)?grpTop[gid]:null;
+        el.style.setProperty('height',h+'px','important');
+        el.style.setProperty('min-height',h+'px','important');
+        if(t!==null) el.style.setProperty('top',t+'px','important');
+      });
+
+      // Patch .vis-label rows (left panel) same way so labels stay aligned with rows
+      document.querySelectorAll('#timeline .vis-labelset .vis-label').forEach(el=>{
+        const gid=String(el.dataset.id||el.dataset.group||'');
+        const h=(gid&&grpH[gid]!=null)?grpH[gid]:28;
+        const t=(gid&&grpTop[gid]!=null)?grpTop[gid]:null;
+        el.style.setProperty('height',h+'px','important');
+        el.style.setProperty('min-height',h+'px','important');
+        if(t!==null) el.style.setProperty('top',t+'px','important');
+      });
+
+      // For items in FLAT container (not inside .vis-group): also patch item tops.
+      // (In the group-container layout above, items at top≈0 within a correctly
+      //  positioned group are already visible — no item patching needed.)
+      const sampleItem=document.querySelector('#timeline .vis-item');
+      if(!sampleItem||sampleItem.parentElement?.classList.contains('vis-group')) return;
       const itGrp={};
       (itemsDS.get()||[]).forEach(it=>{ itGrp[String(it.id||'')]=String(it.group||''); });
       document.querySelectorAll('#timeline .vis-item').forEach(el=>{
         const gid=itGrp[String(el.dataset.id||'')];
-        if(gid===undefined) return;
-        const gt=grpTop[gid];
-        if(gt===undefined) return;
-        const rowH=grpRowH[gid]??28;
+        if(!gid||grpTop[gid]==null) return;
+        const rowH=grpH[gid]??28;
         const ih=el.offsetHeight||20;
-        const newTop=(gt+Math.max(0,Math.floor((rowH-ih)/2)))+'px';
+        const newTop=(grpTop[gid]+Math.max(0,Math.floor((rowH-ih)/2)))+'px';
         if(el.style.top!==newTop) el.style.top=newTop;
       });
     }catch(_){}
@@ -1320,8 +1324,8 @@ button:active{transform:scale(.985)}
         '=== LABEL offsetHeights (first 6) ===',
         ...(()=>{ const lbls=document.querySelectorAll('#timeline .vis-labelset .vis-label'); return [...lbls].slice(0,6).map((l,i)=>`[${i}] offsetH=${l.offsetHeight} inlineH=${l.style.height} important=${l.style.getPropertyPriority('height')}`); })(),
         '',
-        '=== VIS-GROUP heights (first 6) ===',
-        ...(()=>{ const grps=document.querySelectorAll('#timeline .vis-group'); return [...grps].slice(0,6).map((g,i)=>`[${i}] cls=${g.className.split(' ').slice(-1)} offsetH=${g.offsetHeight} inlineH=${g.style.height} important=${g.style.getPropertyPriority('height')} overflow=${window.getComputedStyle(g).overflow}`); })(),
+        '=== VIS-GROUP position+top (first 6 in .vis-content) ===',
+        ...(()=>{ const grps=document.querySelectorAll('#timeline .vis-content .vis-group'); return [...grps].slice(0,6).map((g,i)=>{ const cs=window.getComputedStyle(g); return `[${i}] id=${(g.dataset.id||'?').slice(-8)} cls=${g.className.split(' ').pop()} pos=${cs.position} top=${g.style.top} H=${g.offsetHeight} overflow=${cs.overflow}`; }); })(),
       ];
       content.textContent=lines.join('\n');
       panel.style.display='flex';
