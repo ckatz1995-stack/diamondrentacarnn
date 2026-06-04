@@ -1202,7 +1202,7 @@ button:active{transform:scale(.97)}
   function openCtxMenu(id,x,y){ if(!fleetCtxMenu) return; const it=itemsDS&&id?itemsDS.get(id):null; if(!it) return; ctxItemId=String(id); selectedFleetId=String(id); ctxHeadEl.textContent=`${safe(it.bookingNumber)||safe(it.id)||'Item'} • ${safe(it.customerName)||'—'}`; fleetCtxMenu.style.left=`${Math.max(8,x)}px`; fleetCtxMenu.style.top=`${Math.max(8,y)}px`; fleetCtxMenu.classList.add('open'); }
 
   function updateStats(unassignedCount){
-    uCountEl.textContent=String(unassignedCount||0);
+    if(uCountEl) uCountEl.textContent=String(unassignedCount||0);
     if(drawerBadge){ drawerBadge.textContent=String(unassignedCount||0); drawerBadge.classList.toggle('has-items',unassignedCount>0); drawerBadge.classList.toggle('many-items',unassignedCount>5); }
     postToWix({type:'unassignedCount',count:unassignedCount||0,from:lastRange.from,to:lastRange.to});
   }
@@ -1362,10 +1362,11 @@ button:active{transform:scale(.97)}
     setOptions(o){ if(!o) return; if(o.min!=null){ const d=new Date(o.min); if(!isNaN(d)) this.min=d; } if(o.max!=null){ const d=new Date(o.max); if(!isNaN(d)) this.max=d; } }
     getWindow(){ return {start:new Date(this.win.start),end:new Date(this.win.end)}; }
     setWindow(s,e){ const a=new Date(s),b=new Date(e); if(isNaN(a)||isNaN(b)||b<=a) return; this.win={start:a,end:b}; this.redraw(); }
-    moveTo(date){ const d=new Date(date); if(isNaN(d)) return; const span=this.win.end-this.win.start; this.win={start:new Date(d.getTime()-span/2),end:new Date(d.getTime()+span/2)}; this.redraw(); this._emit('rangechanged',this.getWindow()); }
+    _clampWin(s,e){ const rS=lastRange.from?+new Date(lastRange.from):-Infinity; const rE=lastRange.to?+new Date(lastRange.to):Infinity; const span=e-s; let ns=s,ne=e; if(ns<rS){ns=rS;ne=ns+span;} if(ne>rE){ne=rE;ns=Math.max(rS,ne-span);} return{start:new Date(ns),end:new Date(ne)}; }
+    moveTo(date){ const d=new Date(date); if(isNaN(d)) return; const span=this.win.end-this.win.start; this.win=this._clampWin(d.getTime()-span/2,d.getTime()+span/2); this.redraw(); this._emit('rangechanged',this.getWindow()); }
     zoomIn(f){ this._zoom(1-(Number(f)||0.3)); }
     zoomOut(f){ this._zoom(1+(Number(f)||0.3)); }
-    _zoom(mult){ const c=(this.win.start.getTime()+this.win.end.getTime())/2; let span=(this.win.end-this.win.start)*mult; const minSpan=this.options.zoomMin||6*36e5; const maxSpan=this.options.zoomMax||90*864e5; span=Math.min(maxSpan,Math.max(minSpan,span)); this.win={start:new Date(c-span/2),end:new Date(c+span/2)}; this.redraw(); this._emit('rangechanged',this.getWindow()); }
+    _zoom(mult){ const c=(this.win.start.getTime()+this.win.end.getTime())/2; let span=(this.win.end-this.win.start)*mult; const minSpan=this.options.zoomMin||6*36e5; const maxSpan=this.options.zoomMax||90*864e5; span=Math.min(maxSpan,Math.max(minSpan,span)); this.win=this._clampWin(c-span/2,c+span/2); this.redraw(); this._emit('rangechanged',this.getWindow()); }
     fit(){ const items=this._items(); let mn=Infinity,mx=-Infinity; items.forEach(it=>{ const s=+new Date(it.start),e=+new Date(it.end); if(s<mn)mn=s; if(e>mx)mx=e; }); if(!isFinite(mn)||!isFinite(mx)||mx<=mn){ this.redraw(); return; } const pad=Math.max(36e5,(mx-mn)*0.03); this.win={start:new Date(mn-pad),end:new Date(mx+pad)}; this.redraw(); this._emit('rangechanged',this.getWindow()); }
     setSelection(ids){ this.selection=new Set((ids||[]).map(String)); this.redraw(); const first=[...this.selection][0]; if(first){ const bar=this.trackEl.querySelector('.vis-item[data-id="'+String(first).replace(/"/g,'\\"')+'"]'); if(bar) try{ bar.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(_){} } }
     redraw(){ this._readDensity(); this._render(); }
@@ -1704,6 +1705,8 @@ button:active{transform:scale(.97)}
       let tpan=null;  // single-finger touch pan: {x, winStart, winEnd}
       const tw=()=>Math.max(1,this.trackEl.getBoundingClientRect().width);
 
+      const clamp=(s,e)=>this._clampWin(s,e);
+
       // ── Pointer pan (mouse / stylus) ─────────────────────────
       this.trackEl.addEventListener('pointerdown',(e)=>{
         if(e.button!==0||e.target.closest('.vis-item')) return;
@@ -1713,7 +1716,7 @@ button:active{transform:scale(.97)}
       window.addEventListener('pointermove',(e)=>{
         if(!pan||e.pointerId!==pan.pointerId) return;
         const shift=-(e.clientX-pan.x)/tw()*(pan.winEnd-pan.winStart);
-        this.win={start:new Date(pan.winStart+shift),end:new Date(pan.winEnd+shift)};
+        this.win=clamp(pan.winStart+shift,pan.winEnd+shift);
         this.redraw(); this._emit('rangechanged',this.getWindow()); userWindowDirty=true;
       });
       window.addEventListener('pointerup',(e)=>{
@@ -1732,7 +1735,7 @@ button:active{transform:scale(.97)}
         const maxSpan=this.options.zoomMax||90*864e5;
         const newSpan=Math.min(maxSpan,Math.max(minSpan,span*(e.deltaY>0?1.25:0.8)));
         const anchor=+this.win.start+frac*span;
-        this.win={start:new Date(anchor-frac*newSpan),end:new Date(anchor+(1-frac)*newSpan)};
+        this.win=clamp(anchor-frac*newSpan,anchor+(1-frac)*newSpan);
         this.redraw(); this._emit('rangechanged',this.getWindow()); userWindowDirty=true;
       },{passive:false});
 
@@ -1760,13 +1763,13 @@ button:active{transform:scale(.97)}
           const maxSpan=this.options.zoomMax||90*864e5;
           const newSpan=Math.min(maxSpan,Math.max(minSpan,span0*(pinch.d0/Math.max(1,nd))));
           const anchor=pinch.winStart+pinch.frac*span0;
-          this.win={start:new Date(anchor-pinch.frac*newSpan),end:new Date(anchor+(1-pinch.frac)*newSpan)};
+          this.win=clamp(anchor-pinch.frac*newSpan,anchor+(1-pinch.frac)*newSpan);
           this.redraw(); this._emit('rangechanged',this.getWindow()); userWindowDirty=true;
         } else if(tpan&&e.touches.length===1){
           e.preventDefault();
           const span=tpan.winEnd-tpan.winStart;
           const shift=-(e.touches[0].clientX-tpan.x)/tw()*span;
-          this.win={start:new Date(tpan.winStart+shift),end:new Date(tpan.winEnd+shift)};
+          this.win=clamp(tpan.winStart+shift,tpan.winEnd+shift);
           this.redraw(); this._emit('rangechanged',this.getWindow()); userWindowDirty=true;
         }
       },{passive:false});
