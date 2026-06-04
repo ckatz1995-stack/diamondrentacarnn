@@ -1651,7 +1651,7 @@ button:active{transform:scale(.97)}
     _renderAxis(ticks,days){
       this.axisEl.innerHTML='';
       const todayISO=toISODate(new Date());
-      const step=days>30?7:(days>14?2:1);
+      const step=days>30?2:1;
       ticks.forEach((tk,i)=>{
         if(tk.frac<0||tk.frac>1) return; if(i%step!==0) return;
         const d=tk.date; const isToday=toISODate(d)===todayISO;
@@ -2265,6 +2265,9 @@ button:active{transform:scale(.97)}
       initRangeDefaults();
       restoreWorkspace();
       initTimeline();
+      // Sync lastRange to the restored (or default) dates now that timeline exists,
+      // so the first requestReload uses the correct range.
+      try{ applyRange(fromEl.value,toEl.value,false); }catch(_){}
       initColResize();
       postToWix({type:'calendarReady',from:lastRange.from,to:lastRange.to});
       setLoading(true);
