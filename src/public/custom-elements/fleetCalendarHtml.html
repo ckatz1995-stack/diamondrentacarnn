@@ -146,6 +146,12 @@ button:active{transform:scale(.97)}
 .dp-day.dp-today{color:#6c522e;font-weight:700}
 .dp-day.dp-today:not(.dp-sel){background:rgba(168,132,74,.13);box-shadow:inset 0 0 0 1px rgba(168,132,74,.28)}
 .dp-day.dp-sel{background:linear-gradient(135deg,var(--pri1),var(--pri2));color:#fff;font-weight:700;box-shadow:0 2px 6px rgba(108,82,46,.32)}
+.dp-hint{font:500 10px/1.3 var(--f);color:var(--sub);text-align:center;background:var(--surface2);border-radius:6px;padding:3px 8px;margin-bottom:6px;letter-spacing:.01em}
+.dp-in-range{background:rgba(168,132,74,.13);border-radius:0;color:var(--text)}
+.dp-in-range:hover{background:rgba(168,132,74,.24)}
+.dp-range-start{background:linear-gradient(135deg,var(--pri1),var(--pri2));color:#fff;font-weight:700;box-shadow:0 2px 6px rgba(108,82,46,.28);border-radius:6px 0 0 6px}
+.dp-range-end{background:linear-gradient(135deg,var(--pri1),var(--pri2));color:#fff;font-weight:700;box-shadow:0 2px 6px rgba(108,82,46,.28);border-radius:0 6px 6px 0}
+.dp-range-start.dp-range-end{border-radius:6px}
 /* ── timeline search expand ─────────────── */
 .tl-srch{display:flex;align-items:center;flex-shrink:0}
 .tl-srch-toggle{width:32px;height:32px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--sub);transition:background .12s,color .12s,border-color .12s;padding:0;box-shadow:0 1px 2px rgba(15,23,42,.06);flex-shrink:0}
@@ -571,32 +577,19 @@ button:active{transform:scale(.97)}
         <div class="col-h">Mileage</div>
       </div>
       <div class="cal-tl-hdr">
-        <!-- From date picker -->
-        <span class="tb-lbl">From</span>
-        <div class="dp-wrap" id="dpFromWrap">
-          <button class="dp-btn" id="dpFromBtn" type="button">
+        <!-- Date range picker -->
+        <div class="dp-wrap" id="dpRangeWrap">
+          <button class="dp-btn" id="dpRangeBtn" type="button">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v4M11 1v4M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <span id="dpFromLbl">—</span>
+            <span id="dpRangeLbl">—</span>
           </button>
           <input type="hidden" id="fromDate"/>
-          <div class="dp-popup" id="dpFromPop">
-            <div class="dp-hd"><button class="dp-nav" id="dpFromPrev" type="button">‹</button><span class="dp-mon-lbl" id="dpFromMonLbl"></span><button class="dp-nav" id="dpFromNext" type="button">›</button></div>
-            <div class="dp-dow"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
-            <div class="dp-grid" id="dpFromGrid"></div>
-          </div>
-        </div>
-        <!-- To date picker -->
-        <span class="tb-lbl">To</span>
-        <div class="dp-wrap" id="dpToWrap">
-          <button class="dp-btn" id="dpToBtn" type="button">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v4M11 1v4M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <span id="dpToLbl">—</span>
-          </button>
           <input type="hidden" id="toDate"/>
-          <div class="dp-popup" id="dpToPop">
-            <div class="dp-hd"><button class="dp-nav" id="dpToPrev" type="button">‹</button><span class="dp-mon-lbl" id="dpToMonLbl"></span><button class="dp-nav" id="dpToNext" type="button">›</button></div>
+          <div class="dp-popup" id="dpRangePop">
+            <div class="dp-hint" id="dpRangeHint">Select start date</div>
+            <div class="dp-hd"><button class="dp-nav" id="dpRangePrev" type="button">‹</button><span class="dp-mon-lbl" id="dpRangeMonLbl"></span><button class="dp-nav" id="dpRangeNext" type="button">›</button></div>
             <div class="dp-dow"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
-            <div class="dp-grid" id="dpToGrid"></div>
+            <div class="dp-grid" id="dpRangeGrid"></div>
           </div>
         </div>
         <button id="range7d" type="button">7d</button>
@@ -733,7 +726,7 @@ button:active{transform:scale(.97)}
   const fromEl      = document.getElementById('fromDate');
   const toEl        = document.getElementById('toDate');
   const searchBox   = document.getElementById('searchBox');
-  let dpFrom=null, dpTo=null;
+  let dpRange=null;
   const drawer      = document.getElementById('unassignedDrawer');
   const drawerBody  = document.getElementById('drawerBody');
   const drawerMeta  = document.getElementById('drawerMeta');
@@ -771,30 +764,39 @@ button:active{transform:scale(.97)}
   function fmtDateTime(d){ return FMT.datetime(d); }
   function norm(s){ return (s??'').toString().toLowerCase().trim(); }
 
-  class DatePicker {
-    constructor(btnId,lblId,popId,monId,prevId,nextId,gridId,hidId){
+  class DateRangePicker {
+    constructor(btnId,lblId,popId,hintId,monId,prevId,nextId,gridId,fromHidId,toHidId){
       this.btn=document.getElementById(btnId); this.lbl=document.getElementById(lblId);
-      this.pop=document.getElementById(popId); this.monLbl=document.getElementById(monId);
-      this.prevBtn=document.getElementById(prevId); this.nextBtn=document.getElementById(nextId);
-      this.grid=document.getElementById(gridId); this.hid=document.getElementById(hidId);
-      this._val=null; this._vY=null; this._vM=null; this._open=false; this.onChange=null;
+      this.pop=document.getElementById(popId); this.hint=document.getElementById(hintId);
+      this.monLbl=document.getElementById(monId); this.prevBtn=document.getElementById(prevId);
+      this.nextBtn=document.getElementById(nextId); this.grid=document.getElementById(gridId);
+      this.fromHid=document.getElementById(fromHidId); this.toHid=document.getElementById(toHidId);
+      this._from=null; this._to=null; this._step=0; this._hover=null;
+      this._vY=null; this._vM=null; this._open=false; this.onChange=null;
       if(this.btn) this.btn.addEventListener('click',(e)=>{e.stopPropagation();this.toggle();});
       if(this.prevBtn) this.prevBtn.addEventListener('click',(e)=>{e.stopPropagation();this._nav(-1);});
       if(this.nextBtn) this.nextBtn.addEventListener('click',(e)=>{e.stopPropagation();this._nav(1);});
-      document.addEventListener('click',(e)=>{if(this._open&&this.pop&&!this.pop.contains(e.target)&&this.btn&&!this.btn.contains(e.target)) this.close();});
-      document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&this._open) this.close();});
+      document.addEventListener('click',(e)=>{if(this._open&&this.pop&&!this.pop.contains(e.target)&&this.btn&&!this.btn.contains(e.target)){if(this._step===1){this._step=0;this._from=null;this._hover=null;}this.close();}});
+      document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&this._open){if(this._step===1){this._step=0;this._from=null;this._hover=null;this._renderGrid();}else this.close();}});
     }
-    get value(){ return this._val?`${this._val.getFullYear()}-${pad2(this._val.getMonth()+1)}-${pad2(this._val.getDate())}`:''; }
-    set value(s){
-      const p=s&&/^\d{4}-\d{2}-\d{2}$/.test(s)?s:null;
-      if(p){const[y,m,d]=p.split('-').map(Number);this._val=new Date(y,m-1,d);this._vY=y;this._vM=m-1;}else{this._val=null;}
-      if(this.hid) this.hid.value=p||'';
-      this._sync();
+    get fromValue(){ return this._from?`${this._from.getFullYear()}-${pad2(this._from.getMonth()+1)}-${pad2(this._from.getDate())}`:''; }
+    get toValue(){ return this._to?`${this._to.getFullYear()}-${pad2(this._to.getMonth()+1)}-${pad2(this._to.getDate())}`:''; }
+    setRange(fromYMD,toYMD){
+      const pf=/^\d{4}-\d{2}-\d{2}$/.test(String(fromYMD||''))?fromYMD:null;
+      const pt=/^\d{4}-\d{2}-\d{2}$/.test(String(toYMD||''))?toYMD:null;
+      if(pf){const[y,m,d]=pf.split('-').map(Number);this._from=new Date(y,m-1,d);}else this._from=null;
+      if(pt){const[y,m,d]=pt.split('-').map(Number);this._to=new Date(y,m-1,d);}else this._to=null;
+      if(this.fromHid) this.fromHid.value=pf||'';
+      if(this.toHid) this.toHid.value=pt||'';
+      this._step=0; this._hover=null; this._syncBtn();
     }
-    _sync(){ if(this.lbl) this.lbl.textContent=this._val?`${pad2(this._val.getDate())}/${pad2(this._val.getMonth()+1)}/${this._val.getFullYear()}`:'—'; }
+    _syncBtn(){
+      const f=this._from,t=this._to;
+      if(this.lbl) this.lbl.textContent=(f&&t)?`${pad2(f.getDate())}/${pad2(f.getMonth()+1)} → ${pad2(t.getDate())}/${pad2(t.getMonth()+1)}`:f?`${pad2(f.getDate())}/${pad2(f.getMonth()+1)} → ?`:'—';
+    }
     toggle(){ this._open?this.close():this.open(); }
     open(){
-      if(this._vY===null){const n=new Date();this._vY=n.getFullYear();this._vM=n.getMonth();}
+      if(this._vY===null){const base=this._from||new Date();this._vY=base.getFullYear();this._vM=base.getMonth();}
       this._renderGrid(); this._open=true;
       if(this.btn) this.btn.classList.add('dp-open');
       if(this.pop){
@@ -812,9 +814,10 @@ button:active{transform:scale(.97)}
     _renderGrid(){
       const y=this._vY,m=this._vM;
       if(this.monLbl) this.monLbl.textContent=FMT.MON[m]+' '+y;
+      if(this.hint) this.hint.textContent=this._step===1?'Now select end date':'Select start date';
       if(!this.grid) return;
       const today=new Date();today.setHours(0,0,0,0);
-      const sel=this._val?new Date(this._val.getFullYear(),this._val.getMonth(),this._val.getDate()):null;
+      const f=this._from,t=this._to,hov=this._hover;
       const dIM=new Date(y,m+1,0).getDate(),dIP=new Date(y,m,0).getDate(),startDay=new Date(y,m,1).getDay();
       const cells=[];
       for(let i=startDay-1;i>=0;i--) cells.push({d:new Date(y,m-1,dIP-i),o:true});
@@ -826,20 +829,34 @@ button:active{transform:scale(.97)}
         if(o) b.classList.add('dp-other');
         const dw=d.getDay();if(dw===0||dw===6) b.classList.add('dp-weekend');
         if(d.getTime()===today.getTime()) b.classList.add('dp-today');
-        if(sel&&d.getTime()===sel.getTime()) b.classList.add('dp-sel');
+        const dt=d.getTime();
+        let rS=f?f.getTime():null,rE=t?t.getTime():null;
+        if(this._step===1&&f&&hov){rS=Math.min(f.getTime(),hov.getTime());rE=Math.max(f.getTime(),hov.getTime());}
+        if(rS!==null&&rE!==null){
+          if(dt===rS&&dt===rE){b.classList.add('dp-range-start','dp-range-end');}
+          else if(dt===rS){b.classList.add('dp-range-start');}
+          else if(dt===rE){b.classList.add('dp-range-end');}
+          else if(dt>rS&&dt<rE){b.classList.add('dp-in-range');}
+        } else if(f&&dt===f.getTime()){b.classList.add('dp-range-start','dp-range-end');}
+        b.addEventListener('mouseover',()=>{if(this._step===1){this._hover=new Date(d);this._renderGrid();}});
         b.addEventListener('click',(e)=>{
           e.stopPropagation();
-          this._val=new Date(d);this._vY=d.getFullYear();this._vM=d.getMonth();
-          const ymd=`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-          if(this.hid) this.hid.value=ymd; this._sync(); this.close();
-          if(this.onChange) this.onChange(ymd);
+          if(this._step===0){this._from=new Date(d);this._to=null;this._step=1;this._hover=null;this._renderGrid();}
+          else{
+            let from=this._from,to=new Date(d);if(+to<+from){[from,to]=[to,from];}
+            this._from=from;this._to=to;this._step=0;this._hover=null;
+            if(this.fromHid) this.fromHid.value=this.fromValue;
+            if(this.toHid) this.toHid.value=this.toValue;
+            this._syncBtn();this.close();
+            if(this.onChange) this.onChange(this.fromValue,this.toValue);
+          }
         });
         this.grid.appendChild(b);
       });
     }
   }
-  dpFrom=new DatePicker('dpFromBtn','dpFromLbl','dpFromPop','dpFromMonLbl','dpFromPrev','dpFromNext','dpFromGrid','fromDate');
-  dpTo  =new DatePicker('dpToBtn','dpToLbl','dpToPop','dpToMonLbl','dpToPrev','dpToNext','dpToGrid','toDate');
+  dpRange=new DateRangePicker('dpRangeBtn','dpRangeLbl','dpRangePop','dpRangeHint','dpRangeMonLbl','dpRangePrev','dpRangeNext','dpRangeGrid','fromDate','toDate');
+  dpRange.onChange=(f,t)=>{ const ok=applyRange(f,t,true); if(!ok) setStatus('RANGE ERROR: invalid date range'); else{ userWindowDirty=false; setStatus(`RANGE: ${f} → ${t}`); postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); } };
 
   function assertVisReady(){
     if(typeof FleetDataSet==='undefined') throw new Error('FleetDataSet not defined (inline script error).');
@@ -1096,7 +1113,7 @@ button:active{transform:scale(.97)}
   function saveWorkspace(){ try{ localStorage.setItem(WORKSPACE_KEY,JSON.stringify({from:fromEl?.value||'',to:toEl?.value||'',search:searchBox?.value||'',viewMode:fleetViewMode})); }catch(_){} }
   function pushWorkspaceHistory(entry){ try{ if(!entry||!entry.route) return; const raw=JSON.parse(localStorage.getItem(WORKSPACE_HISTORY_KEY)||'[]'); const list=Array.isArray(raw)?raw.filter(it=>it&&typeof it==='object'&&it.route!==entry.route):[]; list.unshift(entry); localStorage.setItem(WORKSPACE_HISTORY_KEY,JSON.stringify(list.slice(0,6))); }catch(_){} }
   function saveResume(){ try{ const entry={route:'fleet',routeLabel:'Fleet',title:'Fleet calendar',subtitle:`${fromEl?.value||'—'} → ${toEl?.value||'—'}${(searchBox?.value||'').trim()?' • search active':''}`,updatedAt:new Date().toISOString()}; localStorage.setItem(RESUME_WORKSPACE_KEY,JSON.stringify(entry)); pushWorkspaceHistory(entry); }catch(_){} }
-  function restoreWorkspace(){ const ws=loadWorkspace(); if(!ws) return; if(/^\d{4}-\d{2}-\d{2}$/.test(String(ws.from||''))){ if(dpFrom) dpFrom.value=ws.from; else if(fromEl) fromEl.value=ws.from; } if(/^\d{4}-\d{2}-\d{2}$/.test(String(ws.to||''))){ if(dpTo) dpTo.value=ws.to; else if(toEl) toEl.value=ws.to; } if(searchBox&&typeof ws.search==='string') searchBox.value=ws.search; if(typeof ws.viewMode==='string'&&['all','attention','locked'].includes(ws.viewMode)) fleetViewMode=ws.viewMode; }
+  function restoreWorkspace(){ const ws=loadWorkspace(); if(!ws) return; const vf=/^\d{4}-\d{2}-\d{2}$/.test(String(ws.from||'')); const vt=/^\d{4}-\d{2}-\d{2}$/.test(String(ws.to||'')); if(dpRange){if(vf||vt) dpRange.setRange(vf?ws.from:'',vt?ws.to:'');}else{if(vf&&fromEl) fromEl.value=ws.from; if(vt&&toEl) toEl.value=ws.to;} if(searchBox&&typeof ws.search==='string') searchBox.value=ws.search; if(typeof ws.viewMode==='string'&&['all','attention','locked'].includes(ws.viewMode)) fleetViewMode=ws.viewMode; }
   function upsertPinnedWorkspace(entry){ try{ if(!entry||!entry.route) return; const raw=JSON.parse(localStorage.getItem(PINNED_WORKSPACES_KEY)||'[]'); const list=Array.isArray(raw)?raw.filter(it=>it&&typeof it==='object'&&it.route!==entry.route):[]; list.unshift(entry); localStorage.setItem(PINNED_WORKSPACES_KEY,JSON.stringify(list.slice(0,6))); }catch(_){} }
   function upsertHandoffQueue(entry){ try{ if(!entry||!entry.id) return; const raw=JSON.parse(localStorage.getItem(HANDOFF_QUEUE_KEY)||'[]'); const list=Array.isArray(raw)?raw.filter(it=>it&&typeof it==='object'&&it.id!==entry.id):[]; list.unshift(entry); localStorage.setItem(HANDOFF_QUEUE_KEY,JSON.stringify(list.slice(0,8))); }catch(_){} }
   function upsertSavedView(entry){ try{ if(!entry||!entry.id) return; const raw=JSON.parse(localStorage.getItem(SAVED_VIEWS_KEY)||'[]'); const list=Array.isArray(raw)?raw.filter(it=>it&&typeof it==='object'&&it.id!==entry.id):[]; list.unshift(entry); localStorage.setItem(SAVED_VIEWS_KEY,JSON.stringify(list.slice(0,12))); }catch(_){} }
@@ -1104,15 +1121,13 @@ button:active{transform:scale(.97)}
   function initRangeDefaults(){
     const now=new Date(); const start=new Date(now); start.setHours(0,0,0,0);
     const p14=new Date(now.getTime()+1000*60*60*24*14);
-    if(dpFrom) dpFrom.value=toISODate(start); else fromEl.value=toISODate(start);
-    if(dpTo)   dpTo.value=toISODate(p14);   else toEl.value=toISODate(p14);
+    if(dpRange) dpRange.setRange(toISODate(start),toISODate(p14)); else{ fromEl.value=toISODate(start); toEl.value=toISODate(p14); }
     lastRange={from:start.toISOString(),to:new Date(p14.setHours(23,59,59,999)).toISOString()};
   }
   function presetRange(days){
     const start=new Date(); start.setHours(0,0,0,0);
     const end=new Date(start.getTime()+1000*60*60*24*(Math.max(1,Number(days||14))-1));
-    if(dpFrom) dpFrom.value=toISODate(start); else fromEl.value=toISODate(start);
-    if(dpTo)   dpTo.value=toISODate(end);   else toEl.value=toISODate(end);
+    if(dpRange) dpRange.setRange(toISODate(start),toISODate(end)); else{ fromEl.value=toISODate(start); toEl.value=toISODate(end); }
     return applyRange(fromEl.value,toEl.value,true);
   }
   function applyRange(fromDate,toDate,animate){
@@ -1615,7 +1630,7 @@ button:active{transform:scale(.97)}
     _renderAxis(ticks,days){
       this.axisEl.innerHTML='';
       const todayISO=toISODate(new Date());
-      const step=days>21?7:(days>10?2:1);
+      const step=days>30?7:(days>14?2:1);
       ticks.forEach((tk,i)=>{
         if(tk.frac<0||tk.frac>1) return; if(i%step!==0) return;
         const d=tk.date; const isToday=toISODate(d)===todayISO;
@@ -2146,7 +2161,7 @@ button:active{transform:scale(.97)}
       populateStationFilter();
 
       // Exclude unconfirmed booking requests
-      const confirmedItems=items.filter(e=>{ const rs=String(e.rentalState||'').toLowerCase(); const st=String(e.status||'').toLowerCase(); return !rs.includes('request')&&st!=='pending'&&st!=='request'; });
+      const confirmedItems=items.filter(e=>{ const rs=String(e.rentalState||'').toLowerCase(); const st=String(e.status||'').toLowerCase(); return !rs.includes('request')&&!rs.includes('quote')&&st!=='pending'&&st!=='request'&&st!=='quote'&&st!=='waiting'; });
       let _stagingDirty=false;
       lastLoadedItems=confirmedItems.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; let grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const eId=String(e.id||''); if(stagingSet.has(eId)){ if(grp==='unassigned') grp=STAGING_GROUP_ID; else{ stagingSet.delete(eId); _stagingDirty=true; } } const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
 
@@ -2190,7 +2205,8 @@ button:active{transform:scale(.97)}
     }
 
     if(data.type==='patchItems'){
-      const items=Array.isArray(data.items)?data.items:[];
+      const _rawPatch=Array.isArray(data.items)?data.items:[];
+      const items=_rawPatch.filter(e=>{ const rs=String(e.rentalState||'').toLowerCase(); const st=String(e.status||'').toLowerCase(); return !rs.includes('request')&&!rs.includes('quote')&&st!=='pending'&&st!=='request'&&st!=='quote'&&st!=='waiting'; });
       lastUnassigned=Array.isArray(data.unassigned)?data.unassigned:[];
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
