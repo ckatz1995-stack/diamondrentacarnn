@@ -811,38 +811,58 @@ button:active{transform:scale(.97)}
     }
     close(){ this._open=false; if(this.btn) this.btn.classList.remove('dp-open'); if(this.pop) this.pop.classList.remove('dp-open'); }
     _nav(d){ this._vM+=d; if(this._vM>11){this._vM=0;this._vY++;}if(this._vM<0){this._vM=11;this._vY--;} this._renderGrid(); }
-    _renderGrid(){
-      const y=this._vY,m=this._vM;
-      if(this.monLbl) this.monLbl.textContent=FMT.MON[m]+' '+y;
-      if(this.hint) this.hint.textContent=this._step===1?'Now select end date':'Select start date';
+    _applyRangeClasses(){
       if(!this.grid) return;
-      const today=new Date();today.setHours(0,0,0,0);
       const f=this._from,t=this._to,hov=this._hover;
-      const dIM=new Date(y,m+1,0).getDate(),dIP=new Date(y,m,0).getDate(),startDay=new Date(y,m,1).getDay();
-      const cells=[];
-      for(let i=startDay-1;i>=0;i--) cells.push({d:new Date(y,m-1,dIP-i),o:true});
-      for(let i=1;i<=dIM;i++) cells.push({d:new Date(y,m,i),o:false});
-      for(let i=1;cells.length<42;i++) cells.push({d:new Date(y,m+1,i),o:true});
-      this.grid.innerHTML='';
-      cells.forEach(({d,o})=>{
-        const b=document.createElement('button');b.type='button';b.className='dp-day';b.textContent=d.getDate();
-        if(o) b.classList.add('dp-other');
-        const dw=d.getDay();if(dw===0||dw===6) b.classList.add('dp-weekend');
-        if(d.getTime()===today.getTime()) b.classList.add('dp-today');
-        const dt=d.getTime();
-        let rS=f?f.getTime():null,rE=t?t.getTime():null;
-        if(this._step===1&&f&&hov){rS=Math.min(f.getTime(),hov.getTime());rE=Math.max(f.getTime(),hov.getTime());}
+      let rS=f?f.getTime():null,rE=t?t.getTime():null;
+      if(this._step===1&&f&&hov){rS=Math.min(f.getTime(),hov.getTime());rE=Math.max(f.getTime(),hov.getTime());}
+      this.grid.querySelectorAll('button.dp-day').forEach(b=>{
+        b.classList.remove('dp-range-start','dp-range-end','dp-in-range');
+        const dt=Number(b.dataset.ts);
         if(rS!==null&&rE!==null){
           if(dt===rS&&dt===rE){b.classList.add('dp-range-start','dp-range-end');}
           else if(dt===rS){b.classList.add('dp-range-start');}
           else if(dt===rE){b.classList.add('dp-range-end');}
           else if(dt>rS&&dt<rE){b.classList.add('dp-in-range');}
         } else if(f&&dt===f.getTime()){b.classList.add('dp-range-start','dp-range-end');}
-        b.addEventListener('mouseover',()=>{if(this._step===1){this._hover=new Date(d);this._renderGrid();}});
+      });
+    }
+    _renderGrid(){
+      const y=this._vY,m=this._vM;
+      if(this.monLbl) this.monLbl.textContent=FMT.MON[m]+' '+y;
+      if(this.hint) this.hint.textContent=this._step===1?'Now select end date':'Select start date';
+      if(!this.grid) return;
+      const today=new Date();today.setHours(0,0,0,0);
+      const dIM=new Date(y,m+1,0).getDate(),dIP=new Date(y,m,0).getDate(),startDay=new Date(y,m,1).getDay();
+      const cells=[];
+      for(let i=startDay-1;i>=0;i--) cells.push({d:new Date(y,m-1,dIP-i),o:true});
+      for(let i=1;i<=dIM;i++) cells.push({d:new Date(y,m,i),o:false});
+      for(let i=1;cells.length<42;i++) cells.push({d:new Date(y,m+1,i),o:true});
+      this.grid.innerHTML='';
+      // single delegated listener for hover preview — no DOM rebuild on mouse move
+      this.grid.addEventListener('mouseover',(e)=>{
+        if(this._step!==1) return;
+        const b=e.target.closest('button.dp-day');
+        if(!b) return;
+        this._hover=new Date(Number(b.dataset.ts));
+        this._applyRangeClasses();
+      });
+      this.grid.addEventListener('mouseleave',()=>{
+        if(this._step!==1) return;
+        this._hover=null; this._applyRangeClasses();
+      });
+      cells.forEach(({d,o})=>{
+        const b=document.createElement('button');b.type='button';b.className='dp-day';
+        b.textContent=d.getDate(); b.dataset.ts=d.getTime();
+        if(o) b.classList.add('dp-other');
+        const dw=d.getDay();if(dw===0||dw===6) b.classList.add('dp-weekend');
+        if(d.getTime()===today.getTime()) b.classList.add('dp-today');
         b.addEventListener('click',(e)=>{
           e.stopPropagation();
-          if(this._step===0){this._from=new Date(d);this._to=null;this._step=1;this._hover=null;this._renderGrid();}
-          else{
+          if(this._step===0){
+            this._from=new Date(d);this._to=null;this._step=1;this._hover=null;
+            this._renderGrid();
+          } else {
             let from=this._from,to=new Date(d);if(+to<+from){[from,to]=[to,from];}
             this._from=from;this._to=to;this._step=0;this._hover=null;
             if(this.fromHid) this.fromHid.value=this.fromValue;
@@ -853,6 +873,7 @@ button:active{transform:scale(.97)}
         });
         this.grid.appendChild(b);
       });
+      this._applyRangeClasses();
     }
   }
   dpRange=new DateRangePicker('dpRangeBtn','dpRangeLbl','dpRangePop','dpRangeHint','dpRangeMonLbl','dpRangePrev','dpRangeNext','dpRangeGrid','fromDate','toDate');
