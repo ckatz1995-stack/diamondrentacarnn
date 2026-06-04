@@ -107,7 +107,7 @@ button:active{transform:scale(.97)}
 .cal-wrap{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── column header bar ───────────────────── */
-.cal-header{display:flex;align-items:stretch;height:40px;flex-shrink:0;background:linear-gradient(180deg,#fbfbfc,#f1f3f6);border-bottom:1px solid rgba(15,23,42,.14)}
+.cal-header{display:flex;align-items:stretch;height:46px;flex-shrink:0;background:linear-gradient(180deg,#fbfbfc,#f1f3f6);border-bottom:1px solid rgba(15,23,42,.14)}
 .cal-col-hdr{
   display:grid;
   grid-template-columns:var(--col-no) var(--col-plate) var(--col-model) minmax(70px,1fr);
@@ -118,7 +118,7 @@ button:active{transform:scale(.97)}
 .col-h{font:500 10.5px/1.4 var(--f);text-transform:uppercase;letter-spacing:.06em;color:#64748b;padding:0 8px;display:flex;align-items:center;border-right:1px solid rgba(15,23,42,.07);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .12s}
 .col-h:last-child{border-right:none}
 .col-h:first-child{justify-content:center;color:#cbd5e1}
-.cal-tl-hdr{flex:1;display:flex;align-items:center;gap:5px;padding:0 8px 0 10px;overflow:hidden;min-width:0}
+.cal-tl-hdr{flex:1;display:flex;align-items:center;gap:6px;padding:0 12px;overflow-x:auto;min-width:0}
 .ftl-legend{display:flex;align-items:center;gap:9px;overflow:hidden;flex-shrink:1;min-width:0}
 .ftl-legend .lg{display:inline-flex;align-items:center;gap:4px;font:500 9.5px/1 var(--f);color:#64748b;white-space:nowrap}
 .ftl-legend .lg i{width:11px;height:11px;border-radius:3px;display:inline-block;box-shadow:0 1px 1px rgba(15,23,42,.15)}
@@ -505,6 +505,14 @@ button:active{transform:scale(.97)}
       <div class="top-page-title">Fleet Calendar</div>
       <div class="top-page-sub" id="todayMeta">—</div>
     </div>
+    <div style="flex:1;max-width:360px;display:flex;align-items:center;gap:6px;margin:0 16px">
+      <input class="input" id="searchBox" placeholder="Search booking / name…" style="flex:1;min-width:0"/>
+      <button id="btnClearSearch" type="button" title="Clear search" style="flex-shrink:0;padding:6px 9px">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button id="btnRefresh" type="button" title="Refresh data">⟳ Refresh</button>
+      <button id="btnDiag" type="button" title="Show diagnostic info" style="padding:6px 9px;background:#fff3cd;border-color:#e6ac00;font-weight:700">?</button>
+    </div>
     <div class="userWrap">
       <button class="userBtn" id="userMenuBtn" type="button">
         <div class="userAvatar" id="userBadge">O</div>
@@ -517,48 +525,6 @@ button:active{transform:scale(.97)}
         <button class="userMenuItem danger" data-menu-action="logout" type="button">Log out</button>
       </div>
     </div>
-  </div>
-
-  <!-- Toolbar -->
-  <div class="toolbar">
-    <span class="tb-lbl">From</span>
-    <input class="input" id="fromDate" type="date" style="width:120px"/>
-    <span class="tb-lbl">To</span>
-    <input class="input" id="toDate" type="date" style="width:120px"/>
-    <button id="range7d" type="button">7d</button>
-    <button id="range14d" type="button">14d</button>
-    <button id="range30d" type="button">30d</button>
-    <button id="btnApplyRange" class="btnPri" type="button">Apply</button>
-    <button id="btnToday" type="button">◎ Today</button>
-    <div class="tb-sep"></div>
-    <input class="input" id="searchBox" placeholder="Search booking / name…" style="width:175px"/>
-    <button id="btnClearSearch" type="button" title="Clear search">✕</button>
-    <div class="tb-sep"></div>
-    <span class="tb-lbl">Station</span>
-    <select class="input" id="stationFilter" style="width:115px">
-      <option value="">All stations</option>
-    </select>
-    <div class="tb-sep"></div>
-    <span class="tb-lbl">View</span>
-    <div id="fleetModeButtons" style="display:flex;gap:2px"></div>
-    <div class="tb-sep"></div>
-    <button id="btnUnassigned" type="button">Unassigned (<span id="uCount">0</span>)</button>
-    <button id="btnAutoAssign" class="btnPri" type="button">Auto-assign</button>
-    <button id="btnRefresh" type="button" title="Refresh data">⟳</button>
-    <button id="btnDiag" type="button" title="Show diagnostic info" style="background:#fff3cd;border-color:#e6ac00;font-weight:700">?</button>
-    <details class="moreMenu">
-      <summary>More ▾</summary>
-      <div class="moreMenuPop">
-        <button id="btnFocusNextUnassigned" type="button">Next unassigned</button>
-        <button id="btnJumpDailyFromRange" type="button">Open Daily</button>
-        <button id="btnJumpBookingsRange" type="button">Open Bookings</button>
-        <button id="btnCopyFleetSummary" type="button">Copy summary</button>
-        <button id="btnCopyUnassigned" type="button">Copy unassigned list</button>
-        <button id="btnCopyLocked" type="button">Copy locked list</button>
-        <button id="btnQueueFleetIssue" type="button">Queue follow-up</button>
-        <button id="btnExportFleetJson" type="button">Export JSON</button>
-      </div>
-    </details>
   </div>
 
   <!-- Status strip -->
@@ -576,19 +542,20 @@ button:active{transform:scale(.97)}
         <div class="col-h">Mileage</div>
       </div>
       <div class="cal-tl-hdr">
-        <div class="ftl-legend" id="ftlLegend">
-          <span class="lg"><i style="background:#ddb900"></i>Booking</span>
-          <span class="lg"><i style="background:#ffc000"></i>Pre check-in</span>
-          <span class="lg"><i style="background:#5cb85c"></i>Active</span>
-          <span class="lg"><i style="background:#c0504d"></i>Closed</span>
-          <span class="lg"><i style="background:#808080"></i>Canceled</span>
-        </div>
-        <div style="flex:1 1 0;min-width:6px"></div>
-        <button id="btnDensity" type="button" title="Toggle row density">≡ Density</button>
-        <button id="btnZoomOut" type="button" style="padding:3px 7px;font-size:14px;font-weight:700">−</button>
-        <button id="btnZoomIn" type="button" style="padding:3px 7px;font-size:14px;font-weight:700">+</button>
-        <button id="btnFitTimeline" type="button">Fit</button>
-        <button id="btnNowFocus" type="button">Now</button>
+        <span class="tb-lbl">From</span>
+        <input class="input" id="fromDate" type="date" style="width:128px"/>
+        <span class="tb-lbl">To</span>
+        <input class="input" id="toDate" type="date" style="width:128px"/>
+        <button id="range7d" type="button">7d</button>
+        <button id="range14d" type="button">14d</button>
+        <button id="range30d" type="button">30d</button>
+        <button id="btnApplyRange" class="btnPri" type="button">Apply</button>
+        <button id="btnToday" type="button">Today</button>
+        <div style="flex:1 1 0;min-width:8px"></div>
+        <span class="tb-lbl">Station</span>
+        <select class="input" id="stationFilter" style="width:130px">
+          <option value="">All stations</option>
+        </select>
       </div>
     </div>
 
@@ -1694,7 +1661,7 @@ button:active{transform:scale(.97)}
       }
       pendingOldGroup.set(String(id),String(cur&&cur.group||''));
       try{ this.itemsDS.update({id,group:gid}); }catch(_){}
-      const newVehicleId=(gid==='unassigned')?'':gid;
+      const newVehicleId=(gid==='unassigned')?null:gid;
       postToWix({type:'moveBooking',bookingId:id,newVehicleId});
       setStatus('Moving booking → '+(newVehicleId?gid.slice(-6):'Unassigned')+' …');
     }
@@ -1717,8 +1684,8 @@ button:active{transform:scale(.97)}
     setStatus('READY • waiting for data…');
     renderFleetModeButtons();
     syncCalHeader();
-    // restore saved density (default: normal)
-    try{ const d=localStorage.getItem(DENSITY_KEY)||'normal'; applyDensity(d); }catch(_){}
+    // Always use compact row density
+    try{ timeline.setDensity('compact'); }catch(_){}
 
     if(window.ResizeObserver){
       const _tlRO=new ResizeObserver(()=>{ if(timeline) try{ timeline.redraw(); syncCalHeader(); }catch(_){} });
@@ -1745,16 +1712,10 @@ button:active{transform:scale(.97)}
   document.getElementById('range30d').addEventListener('click',()=>{ if(presetRange(30)){ userWindowDirty=false; postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); setStatus(`RANGE: ${fromEl.value} → ${toEl.value}`); } });
   document.getElementById('btnRefresh').addEventListener('click',()=>{ saveWorkspace(); saveResume(); setLoading(true); postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); });
   document.getElementById('btnToday').addEventListener('click',()=>{ try{ timeline.moveTo(new Date(),{animation:true}); }catch(_){} });
-  document.getElementById('btnZoomOut').addEventListener('click',()=>{ try{ timeline&&timeline.zoomOut(0.35); }catch(_){} });
-  document.getElementById('btnZoomIn').addEventListener('click',()=>{ try{ timeline&&timeline.zoomIn(0.35); }catch(_){} });
-  document.getElementById('btnFitTimeline').addEventListener('click',()=>{ try{ timeline&&timeline.fit({animation:true}); }catch(_){} });
-  document.getElementById('btnNowFocus').addEventListener('click',()=>{ try{ timeline&&timeline.moveTo(new Date(),{animation:true}); }catch(_){} });
   const DENSITY_KEY='diamond.fleet.density.v1';
   const DENSITY_CYCLE=['comfortable','normal','compact'];
   function applyDensity(mode){ try{ timeline&&timeline.setDensity(mode); }catch(_){} try{ localStorage.setItem(DENSITY_KEY,mode); }catch(_){} const lbl={comfortable:'≡ Comfortable',normal:'≡ Normal',compact:'≡ Compact'}[mode]||'≡ Density'; const b=document.getElementById('btnDensity'); if(b) b.textContent=lbl; }
   document.getElementById('btnDensity')?.addEventListener('click',()=>{ let cur='normal'; try{ cur=localStorage.getItem(DENSITY_KEY)||'normal'; }catch(_){} const next=DENSITY_CYCLE[(DENSITY_CYCLE.indexOf(cur)+1)%DENSITY_CYCLE.length]; applyDensity(next); });
-  document.getElementById('btnUnassigned').addEventListener('click',openUnassigned);
-  document.getElementById('btnAutoAssign').addEventListener('click',()=>postToWix({type:'autoAssignUnassigned',from:lastRange.from,to:lastRange.to}));
   document.getElementById('btnCopyFleetSummary')?.addEventListener('click',()=>copyTextWithFallback(buildFleetSummary(),'Fleet summary copied.','Copy failed.'));
   document.getElementById('btnCopyUnassigned')?.addEventListener('click',()=>copyTextWithFallback(buildUnassignedCopy(),'Unassigned list copied.','Copy failed.'));
   document.getElementById('btnCopyLocked')?.addEventListener('click',()=>copyTextWithFallback(buildLockedCopy(),'Locked list copied.','Copy failed.'));
@@ -1835,7 +1796,7 @@ button:active{transform:scale(.97)}
         if(!newGid||!itemId) return;
         pendingOldGroup.set(String(itemId),String(it.group||''));
         try{ itemsDS.update({id:itemId,group:newGid}); }catch(_){}
-        postToWix({type:'moveBooking',bookingId:itemId,newVehicleId:newGid==='unassigned'?'':newGid});
+        postToWix({type:'moveBooking',bookingId:itemId,newVehicleId:newGid==='unassigned'?null:newGid});
         setStatus('Moving booking → '+(newGid==='unassigned'?'Unassigned':newGid.slice(-8))+' …');
       });
     });
@@ -2041,7 +2002,9 @@ button:active{transform:scale(.97)}
       applyGroupFilter();
       populateStationFilter();
 
-      lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
+      // Exclude unconfirmed booking requests
+      const confirmedItems=items.filter(e=>{ const rs=String(e.rentalState||'').toLowerCase(); const st=String(e.status||'').toLowerCase(); return !rs.includes('request')&&st!=='pending'&&st!=='request'; });
+      lastLoadedItems=confirmedItems.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
 
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
