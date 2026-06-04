@@ -1255,6 +1255,134 @@ button:active{transform:scale(.985)}
       return '<div class="ftl-bar-in" title="'+escHtml(tooltipText(it))+'">'+parts+'</div>';
     }
 
+    // ── conflict detection ──
+    _computeConflicts(){
+      const out=new Set();
+      try{
+        const items=this._items().filter(it=>it.group&&it.group!=='unassigned'&&!String(it.group).startsWith('cat_')&&it.group!==HEAT_GROUP_ID);
+        // group by vehicle
+        const byGroup=new Map();
+        items.forEach(it=>{ const g=String(it.group); if(!byGroup.has(g)) byGroup.set(g,[]); byGroup.get(g).push(it); });
+        byGroup.forEach((list)=>{
+          list.sort((a,b)=>+new Date(a.start)-+new Date(b.start));
+          for(let i=0;i<list.length;i++){
+            const a=list[i]; const ae=+new Date(a.end);
+            for(let j=i+1;j<list.length;j++){
+              const b=list[j]; const bs=+new Date(b.start);
+              if(bs>=ae) break; // sorted, no more overlaps with a
+              out.add(String(a.id)); out.add(String(b.id));
+            }
+          }
+        });
+      }catch(_){}
+      return out;
+    }
+
+    // ── utilization per vehicle ──
+    _computeUtil(groups,conflicts){
+      const result={};
+      try{
+        const ws=+this.win.start, we=+this.win.end, span=Math.max(1,we-ws);
+        const items=this._items();
+        groups.forEach(g=>{
+          const gid=String(g.id);
+          if(gid.startsWith('cat_')||gid===HEAT_GROUP_ID||gid==='unassigned') return;
+          const gItems=items.filter(it=>String(it.group)===gid);
+          if(!gItems.length){ result[gid]={pct:0,conflict:false}; return; }
+          // merge overlapping intervals clipped to window
+          const intervals=gItems.map(it=>[ Math.max(ws,+new Date(it.start)), Math.min(we,+new Date(it.end)) ]).filter(([s,e])=>s<e).sort((a,b)=>a[0]-b[0]);
+          let covered=0,curS=-1,curE=-1;
+          for(const [s,e] of intervals){ if(s>curE){ if(curE>=0) covered+=curE-curS; curS=s;curE=e; } else { curE=Math.max(curE,e); } }
+          if(curE>=0) covered+=curE-curS;
+          const pct=covered/span;
+          const hasConflict=gItems.some(it=>conflicts.has(String(it.id)));
+          result[gid]={pct,conflict:hasConflict};
+        });
+      }catch(_){}
+      return result;
+    }
+
+    // ── time cursor ──
+    _bindCursor(){
+      if(!this.trackEl) return;
+      const cursor=this.cursorEl;
+      if(!cursor) return;
+      const dateEl=cursor.querySelector('.ftl-cursor-date');
+      const onMove=(e)=>{
+        const rect=this.trackEl.getBoundingClientRect();
+        const x=e.clientX-rect.left;
+        if(x<0||x>rect.width){ cursor.style.display='none'; return; }
+        const frac=x/Math.max(1,rect.width);
+        const ms=+this.win.start+(+this.win.end-+this.win.start)*frac;
+        const d=new Date(ms);
+        cursor.style.left=x+'px';
+        cursor.style.display='block';
+        if(dateEl){
+          const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+          const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          dateEl.textContent=DOW[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+' '+pad2(d.getHours())+':'+pad2(d.getMinutes());
+        }
+      };
+      const onLeave=()=>{ if(cursor) cursor.style.display='none'; };
+      this.trackEl.addEventListener('mousemove',onMove);
+      this.trackEl.addEventListener('mouseleave',onLeave);
+    }
+
+    // ── mini-map ──
+    _renderMiniMap(){
+      const el=this.mmTrackEl;
+      if(!el) return;
+      try{
+        el.innerHTML='';
+        const items=this._items();
+        if(!items.length||!lastRange||!lastRange.from||!lastRange.to) return;
+        const rS=+new Date(lastRange.from), rE=+new Date(lastRange.to);
+        const rSpan=Math.max(1,rE-rS);
+        // draw item bars
+        items.forEach(it=>{
+          if(!it.start||!it.end) return;
+          const s=+new Date(it.start), e=+new Date(it.end);
+          if(e<=rS||s>=rE) return;
+          const L=Math.max(0,(s-rS)/rSpan)*100;
+          const W=Math.max(0.3,Math.min(1,(e-rS)/rSpan)-Math.max(0,(s-rS)/rSpan))*100;
+          const bar=_mk('div','ftl-mmap-bar');
+          bar.style.left=L+'%';
+          bar.style.width=W+'%';
+          // pick color from CLS_BG via className
+          let clsKey='bk';
+          try{ const m=(it.className||'').match(/\b(bk|pre|run|in|cnc|nr)\b/); if(m) clsKey=m[1]; }catch(_){}
+          bar.style.background=(CLS_BG[clsKey]||'#ddb900');
+          el.appendChild(bar);
+        });
+        // viewport rectangle
+        const wS=+this.win.start, wE=+this.win.end;
+        const vpL=Math.max(0,(wS-rS)/rSpan)*100;
+        const vpW=Math.max(0.5,Math.min(100,(wE-rS)/rSpan)*100-vpL);
+        const vp=_mk('div','ftl-mmap-viewport');
+        vp.style.left=vpL+'%';
+        vp.style.width=vpW+'%';
+        el.appendChild(vp);
+      }catch(_){}
+    }
+
+    _bindMiniMap(){
+      const el=this.mmTrackEl;
+      if(!el) return;
+      const seek=(e)=>{
+        if(!lastRange||!lastRange.from||!lastRange.to) return;
+        const rect=el.getBoundingClientRect();
+        const x=Math.max(0,Math.min(1,(e.clientX-rect.left)/Math.max(1,rect.width)));
+        const rS=+new Date(lastRange.from), rE=+new Date(lastRange.to);
+        const target=new Date(rS+(rE-rS)*x);
+        this.moveTo(target);
+      };
+      let dragging=false;
+      el.addEventListener('mousedown',(e)=>{ dragging=true; seek(e); e.preventDefault(); });
+      window.addEventListener('mousemove',(e)=>{ if(dragging) seek(e); });
+      window.addEventListener('mouseup',()=>{ dragging=false; });
+      el.addEventListener('click',(e)=>seek(e));
+    }
+
     // ── render ──
     _render(){
       if(!this.trackEl) return;
@@ -1485,6 +1613,15 @@ button:active{transform:scale(.985)}
       const rs=String(cur&&cur.rentalState||'');
       if(rs==='Active Rental'||rs==='Pre Check-In'){ setStatus('LOCKED: Active Rental / Pre Check-In cannot be moved'); this.redraw(); return; }
       if(String(cur&&cur.group||'')===gid){ this.redraw(); return; }
+      // conflict check — abort if dragged item overlaps an existing booking on the target vehicle
+      if(gid!=='unassigned'&&cur&&cur.start&&cur.end){
+        try{
+          const dragS=+new Date(cur.start), dragE=+new Date(cur.end);
+          const existing=(this.itemsDS.get()||[]).filter(it=>String(it.group)===gid&&String(it.id)!==String(id)&&it.start&&it.end);
+          const clash=existing.some(it=>{ const s=+new Date(it.start),e=+new Date(it.end); return s<dragE&&e>dragS; });
+          if(clash){ setStatus('CONFLICT: '+this._labels[gid]+' already has an overlapping booking — move blocked'); this.redraw(); return; }
+        }catch(_){}
+      }
       pendingOldGroup.set(String(id),String(cur&&cur.group||''));
       try{ this.itemsDS.update({id,group:gid}); }catch(_){}
       const newVehicleId=(gid==='unassigned')?'':gid;
@@ -1586,8 +1723,73 @@ button:active{transform:scale(.985)}
     setStatus(_stationFilter?`STATION: ${_stationFilter} · filtered`:'STATION: All stations');
   });
 
-  document.addEventListener('click',(e)=>{ if(!fleetCtxMenu?.contains(e.target)) hideCtxMenu(); });
-  fleetCtxMenu?.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-ctx]'); if(!btn) return; const it=itemsDS&&ctxItemId?itemsDS.get(ctxItemId):null; const act=btn.getAttribute('data-ctx'); hideCtxMenu(); if(!it) return; if(act==='contract') return openFleetContract(it); if(act==='vehicle') return openFleetVehicleCard(it); if(act==='daily') return openFleetDaily(it); if(act==='bookings') return openFleetBookings(it); if(act==='auto'){ postToWix({type:'autoAssignSingle',bookingId:safe(it.id)}); return; } if(act==='unassign'){ postToWix({type:'moveBooking',bookingId:safe(it.id),newVehicleId:''}); return; } });
+  document.addEventListener('click',(e)=>{ if(!fleetCtxMenu?.contains(e.target)) hideCtxMenu(); if(!e.target.closest('.ftl-move-panel')) closeMovePanel(); });
+  fleetCtxMenu?.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-ctx]'); if(!btn) return; const it=itemsDS&&ctxItemId?itemsDS.get(ctxItemId):null; const act=btn.getAttribute('data-ctx'); hideCtxMenu(); if(!it) return; if(act==='contract') return openFleetContract(it); if(act==='vehicle') return openFleetVehicleCard(it); if(act==='daily') return openFleetDaily(it); if(act==='bookings') return openFleetBookings(it); if(act==='auto'){ postToWix({type:'autoAssignSingle',bookingId:safe(it.id)}); return; } if(act==='move'){ openMovePanel(safe(it.id),fleetCtxMenu.getBoundingClientRect().right+4,fleetCtxMenu.getBoundingClientRect().top); return; } if(act==='unassign'){ postToWix({type:'moveBooking',bookingId:safe(it.id),newVehicleId:''}); return; } });
+
+  // ── Move-to-vehicle panel ──────────────────────────────────
+  let _movePanelEl=null;
+  function closeMovePanel(){ if(_movePanelEl){ _movePanelEl.classList.remove('open'); } }
+  function openMovePanel(itemId,x,y){
+    const it=itemsDS&&itemId?itemsDS.get(itemId):null;
+    if(!it||!groupsDS) return;
+    if(!_movePanelEl){
+      _movePanelEl=document.createElement('div');
+      _movePanelEl.className='ftl-move-panel';
+      document.body.appendChild(_movePanelEl);
+    }
+    const dragS=+new Date(it.start), dragE=+new Date(it.end);
+    const allItems=itemsDS.get()||[];
+    const allGroups=(groupsDS.get()||[]).filter(g=>{ const gid=String(g.id||''); return !gid.startsWith('cat_')&&gid!=='unassigned'&&gid!==HEAT_GROUP_ID&&g.visible!==false; });
+    const rows=allGroups.map(g=>{
+      const gid=String(g.id);
+      if(gid===String(it.group||'')) return null; // current vehicle
+      const clash=allItems.some(bi=>String(bi.group)===gid&&String(bi.id)!==itemId&&bi.start&&bi.end&&+new Date(bi.start)<dragE&&+new Date(bi.end)>dragS);
+      const hasBks=allItems.some(bi=>String(bi.group)===gid&&String(bi.id)!==itemId);
+      return {gid,label:g.plate||g.label||g.vehicleLabel||gid,clash,hasBks};
+    }).filter(Boolean);
+    _movePanelEl.innerHTML='<div class="ftl-move-head"><span>Move to vehicle</span><button type="button" style="border:0;background:transparent;cursor:pointer;font:900 11px/1 system-ui;color:var(--sub)" onclick="closeMovePanel()">✕</button></div>'
+      +'<div class="ftl-move-list">'
+      +(rows.length?rows.map(r=>{
+        const dot=r.clash?'#ef4444':(r.hasBks?'#f59e0b':'#22c55e');
+        const title=r.clash?'Conflict — has overlapping booking':(r.hasBks?'Has bookings, no conflict':'Free');
+        return '<button class="ftl-move-item" type="button" data-move-gid="'+escHtml(r.gid)+'" title="'+escHtml(title)+'"><span class="ftl-mi-dot" style="background:'+dot+'"></span>'+escHtml(r.label)+'</button>';
+      }).join(''):'<div style="padding:10px 12px;font:800 11px/1.2 system-ui;color:var(--sub)">No other vehicles available.</div>')
+      +'</div>';
+    _movePanelEl.style.left=Math.min(window.innerWidth-310,Math.max(8,x))+'px';
+    _movePanelEl.style.top=Math.min(window.innerHeight-320,Math.max(8,y))+'px';
+    _movePanelEl.classList.add('open');
+    _movePanelEl.querySelectorAll('[data-move-gid]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const newGid=btn.getAttribute('data-move-gid');
+        closeMovePanel();
+        if(!newGid||!itemId) return;
+        pendingOldGroup.set(String(itemId),String(it.group||''));
+        try{ itemsDS.update({id:itemId,group:newGid}); }catch(_){}
+        postToWix({type:'moveBooking',bookingId:itemId,newVehicleId:newGid==='unassigned'?'':newGid});
+        setStatus('Moving booking → '+(newGid==='unassigned'?'Unassigned':newGid.slice(-8))+' …');
+      });
+    });
+  }
+
+  // ── Keyboard navigation ───────────────────────────────────
+  document.addEventListener('keydown',(e)=>{
+    const tag=(document.activeElement&&document.activeElement.tagName)||'';
+    if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)) return;
+    if(!timeline) return;
+    const win=timeline.getWindow();
+    const span=win.end-win.start;
+    if(e.key==='ArrowLeft'){ timeline.moveTo(new Date(win.start.getTime()+span*0.25)); e.preventDefault(); return; }
+    if(e.key==='ArrowRight'){ timeline.moveTo(new Date(win.start.getTime()+span*0.75)); e.preventDefault(); return; }
+    if(e.key==='+'||e.key==='='){ timeline.zoomIn(0.3); e.preventDefault(); return; }
+    if(e.key==='-'){ timeline.zoomOut(0.3); e.preventDefault(); return; }
+    if(e.key==='t'||e.key==='T'){ timeline.moveTo(new Date()); e.preventDefault(); return; }
+    if(e.key==='f'||e.key==='F'){ timeline.fit(); e.preventDefault(); return; }
+    if(e.key==='Escape'){
+      timeline.selection=new Set(); timeline.redraw();
+      selectedFleetId=''; hideCtxMenu(); hideHoverTip(); closeMovePanel();
+      e.preventDefault(); return;
+    }
+  });
 
   if(drawerTbody) drawerTbody.addEventListener('click',(e)=>{ const btn=e.target.closest('button'); if(!btn) return; const act=btn.getAttribute('data-drawer-act'); const id=btn.getAttribute('data-id'); if(!id) return; const item=(lastUnassigned||[]).find(it=>String(it.id||'')===String(id)); if(act==='focus'){ postToWix({type:'focusBooking',bookingId:id}); selectedFleetId=id; return; } if(act==='auto'){ postToWix({type:'autoAssignSingle',bookingId:id}); return; } if(act==='contract'){ openFleetContract(item||{id}); return; } });
 
@@ -1784,6 +1986,13 @@ button:active{transform:scale(.985)}
         applyRange(fromEl.value,toEl.value,false);
       }
       try{ timeline.setItems(itemsDS); timeline.redraw(); }catch(_){}
+
+      // Scroll to today on first load if user hasn't moved the window manually
+      if(!userWindowDirty&&lastRange.from&&lastRange.to){
+        const todayMs=new Date().setHours(12,0,0,0);
+        const rS=+new Date(lastRange.from), rE=+new Date(lastRange.to);
+        if(todayMs>=rS&&todayMs<=rE){ try{ timeline.moveTo(new Date(todayMs)); }catch(_){} }
+      }
 
       updateStats(lastUnassigned.length);
       saveWorkspace(); saveResume();
