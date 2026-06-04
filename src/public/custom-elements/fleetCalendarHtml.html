@@ -193,6 +193,51 @@ button:active{transform:scale(.985)}
 #timeline.ftl-loading .ftl-track::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(168,132,74,.07) 50%,transparent 70%);background-size:200% 100%;animation:ftlShimmer 1.1s linear infinite;pointer-events:none;z-index:8}
 @keyframes ftlShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
+/* ── minimap overview strip ──────────────── */
+.ftl-minimap{display:flex;height:34px;flex-shrink:0;background:linear-gradient(180deg,#f3f4f6,#eaedf2);border-bottom:1px solid #d0d0d0;position:relative;overflow:hidden}
+.ftl-mmap-corner{flex:0 0 var(--lw);min-width:var(--lw);max-width:var(--lw);border-right:2px solid rgba(15,23,42,.13);display:flex;align-items:center;justify-content:center;font:900 9px/1 system-ui;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;background:linear-gradient(180deg,#f3f4f6,#eaedf2)}
+.ftl-mmap-track{flex:1;position:relative;overflow:hidden;cursor:crosshair}
+.ftl-mmap-bar{position:absolute;top:5px;height:10px;border-radius:2px;opacity:.72;pointer-events:none}
+.ftl-mmap-viewport{position:absolute;top:0;bottom:0;background:rgba(168,132,74,.18);border:1px solid rgba(168,132,74,.5);pointer-events:none;border-radius:2px}
+
+/* ── time cursor line ────────────────────── */
+.ftl-cursor-line{position:absolute;top:0;bottom:0;width:1px;background:rgba(168,132,74,.8);pointer-events:none;z-index:20;display:none}
+.ftl-cursor-date{position:absolute;top:2px;transform:translateX(-50%);background:#0f172a;color:#f2c879;border-radius:4px;padding:2px 5px;font:800 9px/1.3 ui-monospace,monospace;white-space:nowrap;pointer-events:none}
+
+/* ── vehicle utilization strip ───────────── */
+.ftl-util-bar{position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:0;transition:background .2s}
+.u-free{background:#22c55e}
+.u-mid{background:#f59e0b}
+.u-full{background:#ef4444}
+.u-conflict{background:#ef4444;animation:ftl-upulse 1s ease-in-out infinite}
+@keyframes ftl-upulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── conflict bar highlight ──────────────── */
+.ftl-track .vis-item.ftl-conflict{outline:2px solid rgba(220,38,38,.75);outline-offset:-1px;box-shadow:0 0 6px rgba(220,38,38,.45),0 1px 2px rgba(15,23,42,.18)!important}
+
+/* ── move-to-vehicle panel ───────────────── */
+.ftl-move-panel{position:fixed;min-width:240px;max-width:300px;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:0 18px 40px rgba(15,23,42,.18);z-index:1000004;overflow:hidden;display:none}
+.ftl-move-panel.open{display:block}
+.ftl-move-head{padding:9px 12px;background:var(--gold-bg);border-bottom:1px solid var(--border);font:1000 11px/1.2 system-ui;color:#6c522e;display:flex;align-items:center;justify-content:space-between}
+.ftl-move-list{max-height:260px;overflow-y:auto}
+.ftl-move-item{width:100%;border:0;background:#fff;padding:9px 12px;text-align:left;font:900 11px/1.2 system-ui;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;border-radius:0;box-shadow:none}
+.ftl-move-item:last-child{border-bottom:none}
+.ftl-move-item:hover{background:rgba(168,132,74,.08)}
+.ftl-mi-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── print ───────────────────────────────── */
+@media print{
+  .sb,.toolbar,.status-strip,.drawer,#bOverlay,#uOverlay,#diagPanel,
+  .ftl-minimap,.ftl-cursor-line,.ftl-move-panel,
+  .shell-top,.cal-header{display:none!important}
+  .shell{display:block!important}
+  .shell-main{display:block!important;overflow:visible!important}
+  .cal-wrap{overflow:visible!important;height:auto!important}
+  #timeline{overflow:visible!important;height:auto!important}
+  .ftl-scroll{overflow:visible!important;height:auto!important}
+  .ftl-track,.ftl-left{overflow:visible!important}
+}
+
 /* ── left panel — force width & style ───── */
 .vis-panel.vis-left{
   width:var(--lw)!important;max-width:var(--lw)!important;
@@ -580,6 +625,7 @@ button:active{transform:scale(.985)}
   <button class="ctxItem" data-ctx="daily" type="button">Open in Daily</button>
   <button class="ctxItem" data-ctx="bookings" type="button">Open in Bookings</button>
   <button class="ctxItem" data-ctx="auto" type="button">Auto-assign</button>
+  <button class="ctxItem" data-ctx="move" type="button">Move to vehicle…</button>
   <button class="ctxItem danger" data-ctx="unassign" type="button">Unassign</button>
 </div>
 
@@ -1140,16 +1186,29 @@ button:active{transform:scale(.985)}
       this.corner=_mk('div','ftl-head-corner');
       this.axisEl=_mk('div','ftl-axis');
       head.appendChild(this.corner); head.appendChild(this.axisEl);
+      // minimap strip between head and scroll
+      const mm=_mk('div','ftl-minimap');
+      const mmCorner=_mk('div','ftl-mmap-corner'); mmCorner.textContent='Overview';
+      this.mmTrackEl=_mk('div','ftl-mmap-track');
+      mm.appendChild(mmCorner); mm.appendChild(this.mmTrackEl);
+      this.mmEl=mm;
       this.scrollEl=_mk('div','ftl-scroll');
       this.bodyEl=_mk('div','ftl-body');
       this.leftEl=_mk('div','ftl-left');
       this.trackEl=_mk('div','ftl-track');
       this.bodyEl.appendChild(this.leftEl); this.bodyEl.appendChild(this.trackEl);
       this.scrollEl.appendChild(this.bodyEl);
-      this.container.appendChild(head); this.container.appendChild(this.scrollEl);
+      this.container.appendChild(head);
+      this.container.appendChild(mm);
+      this.container.appendChild(this.scrollEl);
+      // cursor overlay inside trackEl (re-appended after innerHTML clear in _render)
+      this.cursorEl=_mk('div','ftl-cursor-line');
+      this.cursorEl.innerHTML='<span class="ftl-cursor-date"></span>';
       // live drag tooltip (appended to body so it floats above everything)
       this.dragTip=_mk('div','ftl-dragtip');
       document.body.appendChild(this.dragTip);
+      this._bindCursor();
+      this._bindMiniMap();
     }
     _showDragTip(html,x,y){ if(!this.dragTip) return; this.dragTip.innerHTML=html; this.dragTip.style.left=Math.min(window.innerWidth-220,x+16)+'px'; this.dragTip.style.top=Math.min(window.innerHeight-60,y+16)+'px'; this.dragTip.classList.add('open'); }
     _hideDragTip(){ this.dragTip&&this.dragTip.classList.remove('open'); }
@@ -1206,6 +1265,9 @@ button:active{transform:scale(.985)}
       const total=cum;
       this._lay={groups,top,h,total};
 
+      const conflicts=this._computeConflicts();
+      const util=this._computeUtil(groups,conflicts);
+
       // LEFT column
       this._labels={};
       const lf=document.createDocumentFragment();
@@ -1225,6 +1287,14 @@ button:active{transform:scale(.985)}
         } else {
           row.innerHTML=String(g.content||gid);
           this._labels[gid]=(gid==='unassigned')?'Unassigned': (g.plate||g.label||g.vehicleLabel||(row.textContent||'').replace(/\s+/g,' ').trim().slice(0,28)||gid);
+          // utilization strip
+          const uinfo=util[gid];
+          if(uinfo){
+            const ubar=_mk('div','ftl-util-bar');
+            ubar.classList.add(uinfo.conflict?'u-conflict':(uinfo.pct<0.4?'u-free':(uinfo.pct<0.85?'u-mid':'u-full')));
+            row.style.position='relative';
+            row.appendChild(ubar);
+          }
         }
         lf.appendChild(row);
       });
@@ -1284,6 +1354,7 @@ button:active{transform:scale(.985)}
         if(fS<0) { bar.style.borderTopLeftRadius='0'; bar.style.borderBottomLeftRadius='0'; }
         if(fE>1) { bar.style.borderTopRightRadius='0'; bar.style.borderBottomRightRadius='0'; }
         if(this.selection.has(String(it.id))) bar.classList.add('vis-selected');
+        if(conflicts.has(String(it.id))) bar.classList.add('ftl-conflict');
         bar.innerHTML=this._barContent(it,Math.round((R-L)*trackW));
         bf.appendChild(bar); shown++;
       });
@@ -1294,6 +1365,8 @@ button:active{transform:scale(.985)}
       this.trackEl.appendChild(shade);
       this.trackEl.appendChild(grid);
       this.trackEl.appendChild(bf);
+      // re-attach cursor overlay (cleared by innerHTML='')
+      if(this.cursorEl) this.trackEl.appendChild(this.cursorEl);
       if(!groups.length){ const em=_mk('div','ftl-empty'); em.innerHTML='<div style="font-size:30px;opacity:.4">🚗</div><div>No vehicles to display.</div><div style="font:700 11px/1.4 system-ui;color:#cbd5e1">Adjust the station filter or expand a category.</div>'; this.trackEl.appendChild(em); }
 
       this._renderAxis(ticks,days);
@@ -1302,6 +1375,7 @@ button:active{transform:scale(.985)}
       // reserve the scrollbar width on the head so axis width == track width.
       try{ const sb=this.scrollEl.offsetWidth-this.scrollEl.clientWidth; this.headEl.style.paddingRight=(sb>0?sb:0)+'px'; }catch(_){}
 
+      this._renderMiniMap();
       this._emit('changed');
     }
 
