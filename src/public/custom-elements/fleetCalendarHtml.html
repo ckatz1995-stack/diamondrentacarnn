@@ -3,9 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link href="https://unpkg.com/vis-timeline@7.7.4/styles/vis-timeline-graph2d.min.css" rel="stylesheet"/>
+<!-- Custom dependency-free timeline renderer (FleetTimeline). vis-data kept only for DataSet. -->
 <script src="https://unpkg.com/vis-data@7.1.4/dist/vis-data.min.js"></script>
-<script src="https://unpkg.com/vis-timeline@7.7.4/standalone/umd/vis-timeline-graph2d.min.js"></script>
 <style>
 :root{
   --gold:#A8844A;--gold2:#6C522E;
@@ -118,8 +117,45 @@ button:active{transform:scale(.985)}
 .col-h:first-child{justify-content:center;color:#cbd5e1}
 .cal-tl-hdr{flex:1;display:flex;align-items:center;gap:5px;padding:0 8px 0 10px;overflow:hidden;min-width:0}
 
-/* ── timeline container ───────────────────── */
-#timeline{flex:1;min-height:0;overflow:hidden}
+/* ── timeline container (custom FleetTimeline) ───────────────────── */
+#timeline{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;background:#fff;position:relative}
+
+/* head: time axis (left corner spacer aligns with vehicle columns) */
+.ftl-head{display:flex;height:30px;flex-shrink:0;background:#f8f8f8;border-bottom:1px solid #d0d0d0}
+.ftl-head-corner{flex:0 0 var(--lw);min-width:var(--lw);max-width:var(--lw);border-right:2px solid rgba(15,23,42,.13);background:#f8f8f8}
+.ftl-axis{flex:1;position:relative;overflow:hidden}
+.ftl-axis-tick{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;padding-left:5px;border-left:1px solid rgba(15,23,42,.12);white-space:nowrap;pointer-events:none}
+.ftl-ax-dow{font:900 8px/1 system-ui;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em}
+.ftl-ax-date{font:900 10px/1.15 system-ui;color:#334155}
+
+/* scroll body: single vertical scroller moves left + track together */
+.ftl-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
+.ftl-body{display:flex;align-items:flex-start;min-height:100%}
+
+/* left vehicle/category column */
+.ftl-left{flex:0 0 var(--lw);min-width:var(--lw);max-width:var(--lw);position:relative;border-right:2px solid rgba(15,23,42,.13);background:#fff}
+.ftl-lrow{display:flex;align-items:stretch;box-sizing:border-box;overflow:hidden;border-bottom:1px solid rgba(15,23,42,.06)}
+.ftl-lrow.fleetRowEven{background:#ffffff}
+.ftl-lrow.fleetRowOdd{background:#f2f2f2}
+.ftl-lrow.fleetCatGroup{background:var(--surface2);border-top:1px solid var(--border2);border-left:3px solid var(--gold);cursor:pointer}
+.ftl-lrow.ftl-droptarget{background:rgba(168,132,74,.16)}
+
+/* right track: row stripes + gridlines + bars */
+.ftl-track{flex:1;position:relative;overflow:hidden;min-width:0}
+.ftl-row{box-sizing:border-box;border-bottom:1px solid rgba(15,23,42,.05)}
+.ftl-row.fleetRowEven{background:#ffffff}
+.ftl-row.fleetRowOdd{background:#fafafa}
+.ftl-row.fleetCatGroup{background:var(--surface2);border-top:1px solid var(--border2)}
+.ftl-row.ftl-droptarget{background:rgba(168,132,74,.14);outline:2px dashed rgba(168,132,74,.6);outline-offset:-2px}
+.ftl-grid{position:absolute;top:0;left:0;right:0;pointer-events:none;z-index:1}
+.ftl-gridline{position:absolute;top:0;bottom:0;width:1px;background:rgba(15,23,42,.06)}
+.ftl-gridline.ftl-weekend{background:rgba(15,23,42,.12)}
+.ftl-now{position:absolute;top:0;width:2px;background:rgba(168,132,74,.9);z-index:5;pointer-events:none}
+
+/* bars are .vis-item so existing contextmenu/hover/drag wiring keeps working */
+.ftl-track .vis-item{position:absolute;z-index:4;cursor:pointer;overflow:hidden;box-sizing:border-box}
+.ftl-track .vis-item.dragging{opacity:.9;z-index:50;box-shadow:0 8px 20px rgba(15,23,42,.35);cursor:grabbing}
+.ftl-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 12px/1.4 system-ui;color:#94a3b8;pointer-events:none;text-align:center}
 
 /* ── left panel — force width & style ───── */
 .vis-panel.vis-left{
@@ -601,7 +637,7 @@ button:active{transform:scale(.985)}
   function norm(s){ return (s??'').toString().toLowerCase().trim(); }
 
   function assertVisReady(){
-    if(!window.vis||!vis.DataSet||!vis.Timeline) throw new Error('vis-timeline not loaded.');
+    if(!window.vis||!vis.DataSet) throw new Error('vis-data (DataSet) not loaded.');
   }
   function getClass(status,rentalState){
     const st=String(status||'');
@@ -969,90 +1005,240 @@ button:active{transform:scale(.985)}
     return filtered;
   }
 
-  // Bypass vis-timeline's internal height table by directly calculating each item's
-  // correct top offset from group order + fixed row heights, then patching the DOM.
-  // Called after every redraw since vis-timeline may reset positions.
-  function patchItemTops(){
-    if(!groupsDS||!itemsDS) return;
-    try{
-      // vis-timeline elements carry NO data-id, so we can't map them by id.
-      // Instead we match DOM rows to data groups BY INDEX — vis-timeline renders
-      // foreground groups, background groups and left labels all in the same
-      // group-order we control via the `order` field. This sidesteps the broken
-      // internal height/top cache (poisoned by the 0px-tall iframe at init).
-      const ordered=groupsDS.get()
-        .filter(g=>g.visible!==false && String(g.id||'')!==HEAT_GROUP_ID)
-        .sort((a,b)=>(a.order??9999)-(b.order??9999));
-      const rowH=gid=>String(gid||'').startsWith('cat_')?24:28;
+  // patchItemTops is retained as a harmless no-op: the custom FleetTimeline renderer
+  // positions every row and bar deterministically, so no post-render DOM patching is needed.
+  function patchItemTops(){ /* custom renderer handles all layout */ }
 
-      const fg =[...document.querySelectorAll('#timeline .vis-foreground .vis-group')];
-      const bg =[...document.querySelectorAll('#timeline .vis-background .vis-group')];
-      const lbl=[...document.querySelectorAll('#timeline .vis-labelset .vis-label')];
-
-      // Compute cumulative top per ordered group, then force-position every DOM row.
-      let cum=0;
-      const tops=[];
-      ordered.forEach((g,i)=>{
-        const h=rowH(g.id);
-        tops.push(cum);
-        // Foreground row holds the booking bars — absolute-position it so its
-        // children (the .vis-item bars) land in the correct vertical band.
-        const f=fg[i];
-        if(f){
-          f.style.setProperty('position','absolute','important');
-          f.style.setProperty('top',cum+'px','important');
-          f.style.setProperty('left','0','important');
-          f.style.setProperty('right','0','important');
-          f.style.setProperty('width','100%','important');
-          f.style.setProperty('height',h+'px','important');
-          f.style.setProperty('overflow','visible','important');
-        }
-        // Background row draws the zebra striping.
-        const b=bg[i];
-        if(b){
-          b.style.setProperty('top',cum+'px','important');
-          b.style.setProperty('height',h+'px','important');
-        }
-        // Left-panel label must stay row-aligned.
-        const l=lbl[i];
-        if(l){
-          l.style.setProperty('height',h+'px','important');
-          l.style.setProperty('min-height',h+'px','important');
-        }
-        cum+=h;
-      });
-
-      // Stretch the row containers so the now-absolute foreground rows aren't clipped.
-      const total=cum;
-      ['.vis-foreground','.vis-background','.vis-itemset','.vis-data-axis']
-        .forEach(sel=>{ const c=document.querySelector('#timeline '+sel); if(c) c.style.setProperty('height',total+'px','important'); });
-
-      // Finally pin each booking bar to the TOP of its own foreground row (vis sets
-      // top≈0.5px relative to the group, which is correct once the group is placed).
-      document.querySelectorAll('#timeline .vis-foreground .vis-group').forEach(grpEl=>{
-        grpEl.querySelectorAll('.vis-item').forEach(it=>{
-          const ih=it.offsetHeight||20;
-          const pad=Math.max(0,Math.floor((28-ih)/2));
-          it.style.setProperty('top',pad+'px','important');
-        });
-      });
-    }catch(_){}
+  // Keep the column header aligned. Left panel width is fixed by --lw (CSS var) so this is
+  // mostly a safety net that keeps the last header column flexing to fill the remaining space.
+  function syncCalHeader(){
+    const colHdr=document.getElementById('calColHdr');
+    if(!colHdr) return;
+    const lastCol=colHdr.querySelector('.col-h:last-child');
+    if(lastCol){ lastCol.style.minWidth='60px'; lastCol.style.flex='1'; }
   }
 
-  function syncCalHeader(){
-    const leftPanel=document.querySelector('#timeline .vis-panel.vis-left');
-    const colHdr=document.getElementById('calColHdr');
-    if(!leftPanel||!colHdr) return;
-    const w=leftPanel.offsetWidth;
-    if(w<10) return;
-    colHdr.style.width=w+'px';
-    colHdr.style.minWidth=w+'px';
-    const lastCol=colHdr.querySelector('.col-h:last-child');
-    if(lastCol){
-      const fixed=32+_colWidths.plate+_colWidths.model;
-      const rem=Math.max(60,w-fixed);
-      lastCol.style.minWidth=rem+'px';
-      lastCol.style.flex='1';
+  // ── Custom dependency-free timeline ──────────────────────────────
+  // Drop-in replacement for vis.Timeline. Renders pure DOM: a frozen left column of
+  // vehicle/category rows + a right track with a time axis and absolutely-positioned
+  // booking bars. Bars are <div class="vis-item" data-id> so the existing context-menu,
+  // hover and selection wiring keeps working unchanged.
+  function _mk(tag,cls){ const d=document.createElement(tag); if(cls) d.className=cls; return d; }
+
+  class FleetTimeline{
+    constructor(container,itemsDS,groupsDS,options){
+      this.container=container;
+      this.itemsDS=itemsDS;
+      this.groupsDS=groupsDS;
+      this.options=options||{};
+      this.handlers={};
+      this.selection=new Set();
+      this.min=null; this.max=null;
+      const now=Date.now();
+      this.win={start:new Date(now),end:new Date(now+14*864e5)};
+      this.ROW=28; this.CAT=24; this.BAR=26;
+      this._raf=null;
+      this._lay={groups:[],top:{},h:{},total:0};
+      this._build();
+      this._subscribe();
+      this._bindPointer();
+      this.redraw();
+    }
+
+    on(ev,fn){ (this.handlers[ev]||(this.handlers[ev]=[])).push(fn); return this; }
+    _emit(ev,p){ (this.handlers[ev]||[]).forEach(fn=>{ try{ fn(p); }catch(_){} }); }
+
+    _build(){
+      this.container.innerHTML='';
+      const head=_mk('div','ftl-head');
+      this.headEl=head;
+      this.corner=_mk('div','ftl-head-corner');
+      this.axisEl=_mk('div','ftl-axis');
+      head.appendChild(this.corner); head.appendChild(this.axisEl);
+      this.scrollEl=_mk('div','ftl-scroll');
+      this.bodyEl=_mk('div','ftl-body');
+      this.leftEl=_mk('div','ftl-left');
+      this.trackEl=_mk('div','ftl-track');
+      this.bodyEl.appendChild(this.leftEl); this.bodyEl.appendChild(this.trackEl);
+      this.scrollEl.appendChild(this.bodyEl);
+      this.container.appendChild(head); this.container.appendChild(this.scrollEl);
+    }
+
+    _subscribe(){
+      const sched=()=>this._schedule();
+      try{ this.itemsDS&&this.itemsDS.on&&this.itemsDS.on('*',sched); }catch(_){}
+      try{ this.groupsDS&&this.groupsDS.on&&this.groupsDS.on('*',sched); }catch(_){}
+    }
+    _schedule(){ if(this._raf) return; this._raf=requestAnimationFrame(()=>{ this._raf=null; this.redraw(); }); }
+
+    // ── public API (mirrors the vis.Timeline surface used by the app) ──
+    setItems(ds){ if(ds) this.itemsDS=ds; this.redraw(); }
+    setGroups(ds){ if(ds) this.groupsDS=ds; this.redraw(); }
+    setOptions(o){ if(!o) return; if(o.min!=null){ const d=new Date(o.min); if(!isNaN(d)) this.min=d; } if(o.max!=null){ const d=new Date(o.max); if(!isNaN(d)) this.max=d; } }
+    getWindow(){ return {start:new Date(this.win.start),end:new Date(this.win.end)}; }
+    setWindow(s,e){ const a=new Date(s),b=new Date(e); if(isNaN(a)||isNaN(b)||b<=a) return; this.win={start:a,end:b}; this.redraw(); }
+    moveTo(date){ const d=new Date(date); if(isNaN(d)) return; const span=this.win.end-this.win.start; this.win={start:new Date(d.getTime()-span/2),end:new Date(d.getTime()+span/2)}; this.redraw(); this._emit('rangechanged',this.getWindow()); }
+    zoomIn(f){ this._zoom(1-(Number(f)||0.3)); }
+    zoomOut(f){ this._zoom(1+(Number(f)||0.3)); }
+    _zoom(mult){ const c=(this.win.start.getTime()+this.win.end.getTime())/2; let span=(this.win.end-this.win.start)*mult; const minSpan=this.options.zoomMin||6*36e5; const maxSpan=this.options.zoomMax||90*864e5; span=Math.min(maxSpan,Math.max(minSpan,span)); this.win={start:new Date(c-span/2),end:new Date(c+span/2)}; this.redraw(); this._emit('rangechanged',this.getWindow()); }
+    fit(){ const items=this._items(); let mn=Infinity,mx=-Infinity; items.forEach(it=>{ const s=+new Date(it.start),e=+new Date(it.end); if(s<mn)mn=s; if(e>mx)mx=e; }); if(!isFinite(mn)||!isFinite(mx)||mx<=mn){ this.redraw(); return; } const pad=Math.max(36e5,(mx-mn)*0.03); this.win={start:new Date(mn-pad),end:new Date(mx+pad)}; this.redraw(); this._emit('rangechanged',this.getWindow()); }
+    setSelection(ids){ this.selection=new Set((ids||[]).map(String)); this.redraw(); const first=[...this.selection][0]; if(first){ const bar=this.trackEl.querySelector('.vis-item[data-id="'+String(first).replace(/"/g,'\\"')+'"]'); if(bar) try{ bar.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(_){} } }
+    redraw(){ this._render(); }
+    destroy(){ try{ this.container.innerHTML=''; }catch(_){} }
+
+    // ── data helpers ──
+    _groups(){ let gs=[]; try{ gs=this.groupsDS.get()||[]; }catch(_){ gs=[]; } return gs.filter(g=>g&&g.visible!==false&&String(g.id)!==HEAT_GROUP_ID).sort((a,b)=>(a.order??9999)-(b.order??9999)); }
+    _items(){ try{ return this.itemsDS.get()||[]; }catch(_){ return []; } }
+    _frac(t){ const s=+this.win.start,e=+this.win.end,span=Math.max(1,e-s); return ((+new Date(t))-s)/span; }
+
+    // ── render ──
+    _render(){
+      if(!this.trackEl) return;
+      const groups=this._groups();
+      const items=this._items();
+      const top={},h={}; let cum=0;
+      groups.forEach(g=>{ const gid=String(g.id); const isCat=gid.startsWith('cat_'); const hh=isCat?this.CAT:this.ROW; top[gid]=cum; h[gid]=hh; cum+=hh; });
+      const total=cum;
+      this._lay={groups,top,h,total};
+
+      // LEFT column
+      const lf=document.createDocumentFragment();
+      groups.forEach(g=>{
+        const gid=String(g.id); const isCat=gid.startsWith('cat_');
+        const row=_mk('div','ftl-lrow '+(g.className||'')+(isCat?' fleetCatGroup':''));
+        row.style.height=h[gid]+'px';
+        row.dataset.gid=gid;
+        if(isCat){
+          const d=_catDataMap.get(gid);
+          const label=d?d.label:(g.catLabel||gid.replace(/^cat_/,'')||'Other');
+          const count=d?d.count:(g.vehicleCount||0);
+          const collapsed=_collapsedCats.has(gid);
+          row.innerHTML='<div class="fleetCatCell"><span class="fleetCatToggle">'+(collapsed?'▶':'▼')+'</span><span class="fleetCatCode">'+escHtml(label)+'</span><span class="fleetCatMeta">'+escHtml(String(count))+' veh</span></div>';
+          row.addEventListener('click',()=>{ if(_collapsedCats.has(gid)) _collapsedCats.delete(gid); else _collapsedCats.add(gid); applyGroupFilter(); });
+        } else {
+          row.innerHTML=String(g.content||gid);
+        }
+        lf.appendChild(row);
+      });
+      this.leftEl.innerHTML=''; this.leftEl.style.height=total+'px'; this.leftEl.appendChild(lf);
+
+      // TRACK: row stripes
+      const tf=document.createDocumentFragment();
+      groups.forEach(g=>{ const gid=String(g.id); const isCat=gid.startsWith('cat_'); const bg=_mk('div','ftl-row '+(g.className||'')+(isCat?' fleetCatGroup':'')); bg.style.height=h[gid]+'px'; bg.dataset.gid=gid; tf.appendChild(bg); });
+
+      // TRACK: gridlines + now marker
+      const grid=_mk('div','ftl-grid'); grid.style.height=total+'px';
+      const ticks=this._ticks();
+      const days=Math.max(1,Math.round((this.win.end-this.win.start)/864e5));
+      const drawEvery=days>60?7:1;
+      ticks.forEach((tk,i)=>{ if(tk.frac<0||tk.frac>1) return; if(i%drawEvery!==0) return; const ln=_mk('div','ftl-gridline'+(tk.weekend?' ftl-weekend':'')); ln.style.left=(tk.frac*100)+'%'; grid.appendChild(ln); });
+      const nf=this._frac(new Date()); if(nf>=0&&nf<=1){ const nl=_mk('div','ftl-now'); nl.style.left=(nf*100)+'%'; nl.style.height=total+'px'; grid.appendChild(nl); }
+
+      // TRACK: bars
+      const bf=document.createDocumentFragment();
+      const known=new Set(groups.map(g=>String(g.id)));
+      let shown=0;
+      items.forEach(it=>{
+        const gid=String(it.group||'unassigned');
+        if(!known.has(gid)) return;
+        const fS=this._frac(it.start),fE=this._frac(it.end);
+        if(fE<=0||fS>=1) return;
+        const L=Math.max(0,fS),R=Math.min(1,fE);
+        const bar=_mk('div','vis-item '+(it.className||'bkItem'));
+        bar.setAttribute('data-id',String(it.id));
+        if(it.style) bar.style.cssText=it.style;
+        bar.style.position='absolute';
+        bar.style.left=(L*100)+'%';
+        bar.style.width='max('+Math.max(0,(R-L)*100)+'%, 8px)';
+        bar.style.top=(top[gid]+Math.max(0,Math.round((h[gid]-this.BAR)/2)))+'px';
+        bar.style.height=this.BAR+'px';
+        if(this.selection.has(String(it.id))) bar.classList.add('vis-selected');
+        bar.innerHTML=String(it.content||'');
+        bf.appendChild(bar); shown++;
+      });
+
+      this.trackEl.innerHTML='';
+      this.trackEl.style.height=total+'px';
+      this.trackEl.appendChild(tf);
+      this.trackEl.appendChild(grid);
+      this.trackEl.appendChild(bf);
+      if(!groups.length){ const em=_mk('div','ftl-empty'); em.textContent='No vehicles to display.'; this.trackEl.appendChild(em); }
+
+      this._renderAxis(ticks,days);
+
+      // Keep the time axis aligned with the track when a vertical scrollbar is present:
+      // reserve the scrollbar width on the head so axis width == track width.
+      try{ const sb=this.scrollEl.offsetWidth-this.scrollEl.clientWidth; this.headEl.style.paddingRight=(sb>0?sb:0)+'px'; }catch(_){}
+
+      this._emit('changed');
+    }
+
+    _ticks(){ const out=[]; const s=new Date(this.win.start); s.setHours(0,0,0,0); const end=+this.win.end; let d=new Date(s),guard=0; while(+d<=end+864e5&&guard++<800){ const day=d.getDay(); out.push({date:new Date(d),frac:this._frac(d),weekend:(day===0||day===6)}); d=new Date(d.getTime()+864e5); } return out; }
+    _renderAxis(ticks,days){
+      this.axisEl.innerHTML='';
+      const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const step=days>21?7:(days>10?2:1);
+      ticks.forEach((tk,i)=>{ if(tk.frac<0||tk.frac>1) return; if(i%step!==0) return; const t=_mk('div','ftl-axis-tick'); t.style.left=(tk.frac*100)+'%'; const d=tk.date; t.innerHTML='<span class="ftl-ax-dow">'+DOW[d.getDay()]+'</span><span class="ftl-ax-date">'+d.getDate()+'/'+(d.getMonth()+1)+'</span>'; this.axisEl.appendChild(t); });
+    }
+
+    // ── pointer: click / dblclick / drag-to-reassign ──
+    _groupAtY(y){ const {groups,top,h}=this._lay; for(const g of groups){ const gid=String(g.id); if(y>=top[gid]&&y<top[gid]+h[gid]) return gid; } if(groups.length){ const last=String(groups[groups.length-1].id); if(y>=top[last]) return last; } return ''; }
+    _rowEls(gid){ return [ this.leftEl.querySelector('.ftl-lrow[data-gid="'+gid+'"]'), this.trackEl.querySelector('.ftl-row[data-gid="'+gid+'"]') ]; }
+    _clearDrop(){ this.container.querySelectorAll('.ftl-droptarget').forEach(el=>el.classList.remove('ftl-droptarget')); }
+    _markDrop(gid){ this._clearDrop(); if(!gid||gid.startsWith('cat_')) return; this._rowEls(gid).forEach(el=>el&&el.classList.add('ftl-droptarget')); }
+
+    _bindPointer(){
+      let st=null;
+      const lockedRS=it=>/Active Rental|Pre Check-In/i.test(String(it&&it.rentalState||''));
+      const getItem=id=>{ try{ return this.itemsDS.get(id); }catch(_){ return null; } };
+
+      this.trackEl.addEventListener('pointerdown',(e)=>{
+        if(e.button!==0) return;
+        const bar=e.target.closest('.vis-item'); if(!bar) return;
+        const id=bar.getAttribute('data-id'); if(!id) return;
+        st={id,bar,x:e.clientX,y:e.clientY,moved:false,locked:lockedRS(getItem(id))};
+      });
+
+      window.addEventListener('pointermove',(e)=>{
+        if(!st) return;
+        const dx=e.clientX-st.x, dy=e.clientY-st.y;
+        if(!st.moved && (Math.abs(dx)>4||Math.abs(dy)>4)){
+          if(st.locked){ setStatus('LOCKED: Active Rental / Pre Check-In cannot be moved'); st=null; return; }
+          st.moved=true; st.bar.classList.add('dragging');
+        }
+        if(st.moved){
+          e.preventDefault();
+          const rect=this.trackEl.getBoundingClientRect();
+          const y=e.clientY-rect.top;
+          st.bar.style.top=(y-this.BAR/2)+'px';
+          this._markDrop(this._groupAtY(y));
+        }
+      },{passive:false});
+
+      window.addEventListener('pointerup',(e)=>{
+        if(!st) return; const s=st; st=null;
+        if(!s.moved){ this.selection=new Set([String(s.id)]); this._emit('select',{items:[s.id]}); this.redraw(); return; }
+        s.bar.classList.remove('dragging'); this._clearDrop();
+        const rect=this.trackEl.getBoundingClientRect();
+        const gid=this._groupAtY(e.clientY-rect.top);
+        this._drop(s.id,gid);
+      });
+
+      this.trackEl.addEventListener('dblclick',(e)=>{ const bar=e.target.closest('.vis-item'); if(!bar) return; const id=bar.getAttribute('data-id'); if(id) this._emit('doubleClick',{item:id}); });
+    }
+
+    _drop(id,gid){
+      const cur=(()=>{ try{ return this.itemsDS.get(id); }catch(_){ return null; } })();
+      if(!gid){ this.redraw(); return; }
+      if(gid.startsWith('cat_')||gid===HEAT_GROUP_ID){ setStatus('BLOCK: invalid target group'); this.redraw(); return; }
+      const rs=String(cur&&cur.rentalState||'');
+      if(rs==='Active Rental'||rs==='Pre Check-In'){ setStatus('LOCKED: Active Rental / Pre Check-In cannot be moved'); this.redraw(); return; }
+      if(String(cur&&cur.group||'')===gid){ this.redraw(); return; }
+      pendingOldGroup.set(String(id),String(cur&&cur.group||''));
+      try{ this.itemsDS.update({id,group:gid}); }catch(_){}
+      const newVehicleId=(gid==='unassigned')?'':gid;
+      postToWix({type:'moveBooking',bookingId:id,newVehicleId});
+      setStatus('Moving booking → '+(newVehicleId?gid.slice(-6):'Unassigned')+' …');
     }
   }
 
@@ -1061,63 +1247,11 @@ button:active{transform:scale(.985)}
     groupsDS=new vis.DataSet([]);
     itemsDS=new vis.DataSet([]);
 
-    const options={
-      locale:'en',
-      selectable:true,
-      stack:false,
-      orientation:{axis:'top',item:'top'},
-      margin:{item:1,axis:2},
-      groupHeightMode:'auto',
-      groupMinHeight:28,
-      xss:{disabled:true},
-      editable:{add:false,remove:false,updateTime:false,updateGroup:true},
-      multiselect:false,
-      zoomMin:1000*60*60*6,
-      zoomMax:1000*60*60*24*90,
-      groupOrder:function(a,b){ return (a.order??9999)-(b.order??9999); },
+    const options={ zoomMin:1000*60*60*6, zoomMax:1000*60*60*24*90 };
+    timeline=new FleetTimeline(document.getElementById('timeline'),itemsDS,groupsDS,options);
 
-      // groupTemplate: return a real DOM Element for category rows (bypasses vis-timeline's
-      // innerHTML/XSS handling which silently drops content on nested-group parent rows).
-      // Return content string for vehicle rows (vis-timeline sets as innerHTML with xss disabled).
-      groupTemplate:function(group){
-        const id=String(group?.id||'');
-        if(id.startsWith('cat_')){
-          const d=_catDataMap.get(id);
-          if(!d) return null;
-          const div=document.createElement('div');
-          div.className='fleetCatCell';
-          const icon=document.createElement('span'); icon.className='fleetCatToggle'; icon.textContent=_collapsedCats.has(id)?'▶':'▼';
-          const s1=document.createElement('span'); s1.className='fleetCatCode'; s1.textContent=d.label;
-          const s2=document.createElement('span'); s2.className='fleetCatMeta'; s2.textContent=d.count+' veh';
-          div.appendChild(icon); div.appendChild(s1); div.appendChild(s2);
-          return div;
-        }
-        return String(group?.content||group?.id||'');
-      },
-
-      onMoving:function(item,callback){
-        if(String(item.group||'')===HEAT_GROUP_ID){callback(null);return;}
-        if(String(item.group||'').startsWith('cat_')){setStatus('BLOCK: cannot drop onto a category row');callback(null);return;}
-        try{ const cur=itemsDS.get(item.id); const rs=String(cur?.rentalState||''); if(rs==='Active Rental'||rs==='Pre Check-In'){setStatus('LOCKED: Active Rental / Pre Check-In cannot be moved');callback(null);return;} }catch(_){}
-        callback(item);
-      },
-
-      onMove:function(item,callback){
-        if(String(item.group||'')===HEAT_GROUP_ID){callback(null);return;}
-        if(String(item.group||'').startsWith('cat_')){setStatus('BLOCK: invalid target group');callback(null);return;}
-        try{ const cur=itemsDS.get(item.id); const rs=String(cur?.rentalState||''); if(rs==='Active Rental'||rs==='Pre Check-In'){setStatus('LOCKED: Active Rental / Pre Check-In cannot be moved');callback(null);return;} pendingOldGroup.set(String(item.id),String(cur?.group||'')); }catch(_){}
-        postToWix({type:'moveBooking',bookingId:item.id,newVehicleId:item.group});
-        callback(item);
-      }
-    };
-
-    timeline=new vis.Timeline(document.getElementById('timeline'),itemsDS,groupsDS,options);
-
-    timeline.on('rangechanged',()=>{
-      if(suppressRangeEvents) return;
-      try{ keepWindow=timeline.getWindow(); userWindowDirty=true; }catch(e){}
-    });
-    timeline.on('changed',()=>requestAnimationFrame(()=>{ syncCalHeader(); _patchCatRows(); patchItemTops(); }));
+    timeline.on('rangechanged',()=>{ if(suppressRangeEvents) return; try{ keepWindow=timeline.getWindow(); userWindowDirty=true; }catch(e){} });
+    timeline.on('changed',()=>{ syncCalHeader(); });
     timeline.on('select',(props)=>{ try{ const id=props?.items?.[0]; selectedFleetId=id?String(id):''; }catch(_){} });
     timeline.on('doubleClick',(props)=>{ try{ const id=props?.item; if(!id) return; const it=itemsDS.get(id); if(it) openBookingModal(it); }catch(_){} });
 
@@ -1126,13 +1260,8 @@ button:active{transform:scale(.985)}
     renderFleetModeButtons();
     syncCalHeader();
 
-    // Wix resizes the iframe AFTER vis-timeline has already initialized (sometimes at height 0).
-    // A ResizeObserver fires whenever the #timeline container changes size — covers Wix
-    // late-sizing the iframe, sidebar collapse, and any window resize.
     if(window.ResizeObserver){
-      const _tlRO=new ResizeObserver(()=>{
-        if(timeline) try{ timeline.redraw(); syncCalHeader(); }catch(_){}
-      });
+      const _tlRO=new ResizeObserver(()=>{ if(timeline) try{ timeline.redraw(); syncCalHeader(); }catch(_){} });
       _tlRO.observe(document.getElementById('timeline'));
     }
   }
@@ -1305,24 +1434,22 @@ button:active{transform:scale(.985)}
         'lastRange.from: '+lastRange.from,
         'lastRange.to:   '+lastRange.to,
         '',
-        '=== VIS-TIMELINE STATUS ===',
-        'vis loaded:  '+!!(window.vis&&vis.DataSet&&vis.Timeline),
-        'timeline:    '+(timeline?'created':'null'),
+        '=== RENDERER STATUS ===',
+        'DataSet loaded: '+!!(window.vis&&vis.DataSet),
+        'engine:      '+(timeline instanceof FleetTimeline?'FleetTimeline (custom)':(timeline?'created':'null')),
         'groupsDS:    '+(groupsDS?'created':'null'),
         'itemsDS:     '+(itemsDS?'created':'null'),
         '',
         '=== KNOWN GROUP IDs (first 5) ===',
         [..._knownGroupIds].slice(0,5).join('\n')||'(empty)',
         '',
-        '=== DOM RENDER STATE ===',
-        '#timeline initHeight (at boot): '+(window._tlInitHeight??'?'),
-        '#timeline offsetHeight now: '+(document.getElementById('timeline')?.offsetHeight??0),
-        '#timeline offsetWidth now:  '+(document.getElementById('timeline')?.offsetWidth??0),
-        '.vis-panel.vis-left  H: '+(document.querySelector('#timeline .vis-panel.vis-left')?.offsetHeight??'—'),
-        '.vis-panel.vis-center H: '+(document.querySelector('#timeline .vis-panel.vis-center')?.offsetHeight??'—'),
-        '.vis-content         H: '+(document.querySelector('#timeline .vis-content')?.offsetHeight??'—'),
-        '.vis-item count in DOM: '+document.querySelectorAll('#timeline .vis-item').length,
-        (()=>{ const fi=document.querySelector('#timeline .vis-item'); if(!fi) return '(no .vis-item in DOM)'; const cs=window.getComputedStyle(fi); return 'first .vis-item: display='+cs.display+' visibility='+cs.visibility+' opacity='+cs.opacity+' left='+fi.style.left+' top='+fi.style.top+' width='+fi.style.width+' height='+fi.style.height; })(),
+        '=== DOM RENDER STATE (FleetTimeline) ===',
+        '#timeline offsetHeight: '+(document.getElementById('timeline')?.offsetHeight??0),
+        '#timeline offsetWidth:  '+(document.getElementById('timeline')?.offsetWidth??0),
+        '.ftl-left  H: '+(document.querySelector('#timeline .ftl-left')?.offsetHeight??'—')+' W: '+(document.querySelector('#timeline .ftl-left')?.offsetWidth??'—'),
+        '.ftl-track H: '+(document.querySelector('#timeline .ftl-track')?.offsetHeight??'—')+' W: '+(document.querySelector('#timeline .ftl-track')?.offsetWidth??'—'),
+        '.ftl-lrow count: '+document.querySelectorAll('#timeline .ftl-lrow').length,
+        '.vis-item (bars) in DOM: '+document.querySelectorAll('#timeline .ftl-track .vis-item').length,
         '',
         '=== ALL ITEMS IN DataSet ===',
         ...(itemsDS?itemsDS.get():[]).map((it,i)=>{
@@ -1330,14 +1457,15 @@ button:active{transform:scale(.985)}
           return `[${i}] id=${it.id.slice(-6)} group=${String(it.group||'').slice(-6)} grpOK=${grp?'Y':'N'} start=${it.start instanceof Date?it.start.toISOString().slice(5,16):String(it.start).slice(5,16)} end=${it.end instanceof Date?it.end.toISOString().slice(5,16):String(it.end).slice(5,16)}`;
         }),
         '',
-        '=== ALL .vis-item DOM positions ===',
-        ...(()=>{ const els=document.querySelectorAll('#timeline .vis-item'); return els.length?[...els].map((el,i)=>{ const id=(el.dataset.id||'?').slice(-6); const p=el.parentElement; return `[${i}] id=${id} top=${el.style.top} w=${el.style.width} vis=${window.getComputedStyle(el).visibility} parent=${p?.className?.split(' ').find(c=>c.startsWith('vis-'))||'?'}`; }):[''+(0)+' items in DOM']; })(),
+        '=== RENDERED BARS (top/left/width) ===',
+        ...(()=>{ const els=document.querySelectorAll('#timeline .ftl-track .vis-item'); return els.length?[...els].map((el,i)=>{ const id=(el.getAttribute('data-id')||'?').slice(-6); const cs=window.getComputedStyle(el); return `[${i}] id=${id} top=${el.style.top} left=${el.style.left} w=${el.style.width} vis=${cs.visibility} bg=${cs.backgroundColor}`; }):['(0 bars in DOM)']; })(),
         '',
-        '=== LABEL offsetHeights (first 6) ===',
-        ...(()=>{ const lbls=document.querySelectorAll('#timeline .vis-labelset .vis-label'); return [...lbls].slice(0,6).map((l,i)=>`[${i}] offsetH=${l.offsetHeight} inlineH=${l.style.height} important=${l.style.getPropertyPriority('height')}`); })(),
+        '=== LEFT ROWS (first 8) ===',
+        ...(()=>{ const rows=document.querySelectorAll('#timeline .ftl-left .ftl-lrow'); return [...rows].slice(0,8).map((r,i)=>`[${i}] gid=${(r.dataset.gid||'?').slice(-8)} H=${r.offsetHeight} top=${r.offsetTop}`); })(),
         '',
-        '=== FOREGROUND rows (top/height by index, first 8) ===',
-        ...(()=>{ const grps=document.querySelectorAll('#timeline .vis-foreground .vis-group'); return [...grps].slice(0,8).map((g,i)=>{ const cs=window.getComputedStyle(g); const nItems=g.querySelectorAll('.vis-item').length; return `[${i}] pos=${cs.position} top=${g.style.top||cs.top} H=${g.offsetHeight} items=${nItems}`; }); })(),
+        '=== WINDOW ===',
+        'win.start: '+(timeline?.win?.start?timeline.win.start.toISOString():'?'),
+        'win.end:   '+(timeline?.win?.end?timeline.win.end.toISOString():'?'),
       ];
       content.textContent=lines.join('\n');
       panel.style.display='flex';
@@ -1386,35 +1514,18 @@ button:active{transform:scale(.985)}
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
 
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
-      try{ timeline.setItems(itemsDS); }catch(_){}
       if(searchBox.value) renderFromCache(searchBox.value);
-      try{ timeline.redraw(); }catch(_){}
 
-      // Height-fix cascade: always runs regardless of window state.
-      // clear()+add() forces vis-timeline to treat all groups as NEW so it
-      // creates fresh label elements and measures offsetHeight (now 28 since CSS
-      // has applied). patchItemTops() is a direct DOM fallback — calculates
-      // correct top from group order if vis-timeline's internal table is still off.
-      [100,300,800].forEach(ms=>setTimeout(()=>{
-        try{
-          const saved=groupsDS.get();
-          groupsDS.clear();
-          groupsDS.add(saved);
-          timeline.setItems(itemsDS);
-          timeline.redraw();
-          patchItemTops();
-          syncCalHeader();
-        }catch(_){}
-      },ms));
-
+      // Window: restore the user's scroll/zoom if they changed it, else use the
+      // selected from→to range. The custom renderer draws bars within the window.
       if(keep&&keep.start&&keep.end){
-        suppressRangeEvents=true; timeline.setWindow(keep.start,keep.end,{animation:false});
-        try{ timeline.setOptions({min:keep.start,max:keep.end,zoomMax:Math.max(1000*60*60*6,keep.end.getTime()-keep.start.getTime())}); }catch(e){}
+        suppressRangeEvents=true; timeline.setWindow(keep.start,keep.end);
+        try{ timeline.setOptions({min:keep.start,max:keep.end}); }catch(e){}
         setTimeout(()=>{ suppressRangeEvents=false; },0);
       } else{
         applyRange(fromEl.value,toEl.value,false);
-        setTimeout(()=>{ if(lastLoadedItems.length>0) try{ timeline.fit({animation:false}); }catch(_){} },850);
       }
+      try{ timeline.setItems(itemsDS); timeline.redraw(); }catch(_){}
 
       updateStats(lastUnassigned.length);
       saveWorkspace(); saveResume();
@@ -1432,7 +1543,7 @@ button:active{transform:scale(.985)}
       lastLoadedItems=items.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
-      try{ timeline.setGroups(groupsDS); timeline.setItems(itemsDS); timeline.redraw(); patchItemTops(); }catch(_){}
+      try{ timeline.setItems(itemsDS); timeline.redraw(); }catch(_){}
       saveWorkspace(); saveResume();
       renderUnassignedDrawer();
       updateStats(lastUnassigned.length);
