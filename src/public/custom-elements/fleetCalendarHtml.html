@@ -163,20 +163,18 @@ button:active{transform:scale(.97)}
 #timeline.ftl-comfortable{--ftl-row:46px;--ftl-cat:34px;--ftl-bar:34px;--ftl-bar-font:12px}
 #timeline{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;background:#fff;position:relative}
 
-/* head: two-tier time axis (month band + day band). Left corner aligns w/ vehicle cols */
-.ftl-head{display:flex;height:50px;flex-shrink:0;background:linear-gradient(180deg,#fbfbfc,#f4f5f7);border-bottom:1px solid rgba(15,23,42,.12)}
+/* head: single-line time axis (day + date on one row, no month band) */
+.ftl-head{display:flex;height:38px;flex-shrink:0;background:linear-gradient(180deg,#fbfbfc,#f4f5f7);border-bottom:1px solid rgba(15,23,42,.12)}
 .ftl-head-corner{flex:0 0 var(--lw);min-width:var(--lw);max-width:var(--lw);border-right:2px solid rgba(15,23,42,.13);background:linear-gradient(180deg,#fbfbfc,#f4f5f7)}
 .ftl-axis{flex:1;position:relative;overflow:hidden}
-/* month band (top 20px) */
-.ftl-axis-month{position:absolute;top:0;height:20px;display:flex;align-items:center;padding-left:8px;border-left:1px solid rgba(15,23,42,.12);white-space:nowrap;pointer-events:none;font:500 10px/1.4 var(--f);letter-spacing:.04em;text-transform:uppercase;color:#7a5c2e;background:rgba(168,132,74,.07);overflow:hidden}
-/* day band (bottom) */
-.ftl-axis-tick{position:absolute;top:20px;bottom:0;display:flex;flex-direction:column;justify-content:center;padding-left:6px;border-left:1px solid rgba(15,23,42,.08);white-space:nowrap;pointer-events:none}
+.ftl-axis-month{display:none}
+.ftl-axis-tick{position:absolute;top:0;bottom:0;display:flex;align-items:center;gap:3px;padding-left:5px;border-left:1px solid rgba(15,23,42,.08);white-space:nowrap;pointer-events:none}
 .ftl-axis-tick.ftl-ax-weekend{background:rgba(15,23,42,.03)}
 .ftl-axis-tick.ftl-ax-today{background:rgba(168,132,74,.11)}
-.ftl-ax-dow{font:500 10px/1.3 var(--f);color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+.ftl-ax-dow{font:500 9px/1 var(--f);color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
 .ftl-axis-tick.ftl-ax-today .ftl-ax-dow{color:#b8944e}
-.ftl-ax-date{font:600 12px/1.3 var(--f);color:#334155;margin-top:3px}
-.ftl-axis-tick.ftl-ax-today .ftl-ax-date{color:#6c522e;font-weight:700}
+.ftl-ax-date{font:700 11.5px/1 var(--f);color:#334155}
+.ftl-axis-tick.ftl-ax-today .ftl-ax-date{color:#6c522e}
 
 /* scroll body: single vertical scroller moves left + track together */
 .ftl-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
@@ -192,6 +190,9 @@ button:active{transform:scale(.97)}
 .ftl-lrow.ftl-droptarget{background:rgba(168,132,74,.16)!important}
 .ftl-lrow.ftl-filler{pointer-events:none}
 .ftl-lrow.ftl-filler:hover{background:inherit}
+/* staging hold row */
+.ftl-lrow.ftl-staging-row{background:linear-gradient(180deg,rgba(245,158,11,.10),rgba(245,158,11,.05))!important;border-top:2px solid rgba(245,158,11,.28)!important;border-left:3px solid #f59e0b!important}
+.ftl-row.ftl-staging-row{background:rgba(245,158,11,.06)!important;border-top:2px solid rgba(245,158,11,.18)!important}
 
 /* right track: row stripes + gridlines + bars */
 .ftl-track{flex:1;position:relative;overflow:hidden;min-width:0}
@@ -868,6 +869,11 @@ button:active{transform:scale(.97)}
   }
 
   const HEAT_GROUP_ID      = '__heat__';
+  const STAGING_GROUP_ID   = 'staging';
+  const STAGING_KEY        = 'diamond.fleet.staging.v1';
+  let   stagingSet         = new Set();
+  try{ stagingSet=new Set(JSON.parse(localStorage.getItem(STAGING_KEY)||'[]')); }catch(_){}
+  function saveStagingSet(){ try{ localStorage.setItem(STAGING_KEY,JSON.stringify([...stagingSet])); }catch(_){} }
   const FLEET_SNAPSHOT_KEY = 'diamond.fleet.snapshot.v1';
   const WORKSPACE_KEY      = 'diamond.fleet.workspace.v1';
   const RESUME_WORKSPACE_KEY  = 'diamond.backroom.resume.v1';
@@ -970,7 +976,10 @@ button:active{transform:scale(.97)}
     // _knownGroupIds tracks ALL valid vehicle/group IDs — including collapsed ones.
     // We use _allGroups (not just styled) so items in collapsed categories keep their
     // correct group assignment; they become visible again when the category is expanded.
-    _knownGroupIds=new Set([..._allGroups.map(g=>String(g.id||'')),'unassigned']);
+    _knownGroupIds=new Set([..._allGroups.map(g=>String(g.id||'')),'unassigned',STAGING_GROUP_ID]);
+
+    // Always inject staging row at the bottom (client-side hold area)
+    styled.push({id:STAGING_GROUP_ID,content:'<div class="fleetGroupCell" style="align-items:center;padding:0 8px;gap:6px"><span style="font-size:11px">📋</span><span class="fleetCatCode" style="color:#92400e;letter-spacing:.02em">Staging</span></div>',className:'ftl-staging-row',order:styled.length,height:28,style:'height:28px'});
 
     // Diff-based update — avoids the full clear→add flash
     const existingIds=new Set(groupsDS.getIds());
@@ -1171,7 +1180,7 @@ button:active{transform:scale(.97)}
   function jumpToBookingsFromRange(){ const from=fromEl?.value||''; const to=toEl?.value||''; if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(to)){ setStatus('Select a valid range first.'); return; } postToWix({type:'openOnBookings',startDate:from,endDate:to}); }
 
   function openFleetContract(it){ if(!it||!safe(it.id)) return; postToWix({type:'openContract',bookingId:safe(it.id)}); }
-  function openFleetVehicleCard(it){ const fid=safe(it&&(it.group||it.resource||it.assignedFleetId)); if(!fid||fid==='unassigned'||fid===HEAT_GROUP_ID||fid.startsWith('cat_')){ setStatus('No assigned vehicle for vehicle card.'); return; } postToWix({type:'openVehicleCard',fleetVehicleId:fid,bookingId:safe(it&&it.id)}); }
+  function openFleetVehicleCard(it){ const fid=safe(it&&(it.group||it.resource||it.assignedFleetId)); if(!fid||fid==='unassigned'||fid===STAGING_GROUP_ID||fid===HEAT_GROUP_ID||fid.startsWith('cat_')){ setStatus('No assigned vehicle for vehicle card.'); return; } postToWix({type:'openVehicleCard',fleetVehicleId:fid,bookingId:safe(it&&it.id)}); }
   function openFleetDaily(it){ const date=toISODate(it&&(it.start||it.pickupDateTime)); if(!date){ setStatus('No date available.'); return; } postToWix({type:'openOnDaily',bookingId:safe(it&&it.id),date,viewMode:'full',tab:'bookings'}); }
   function openFleetBookings(it){ const startDate=toISODate(it&&(it.start||it.pickupDateTime)); const endDate=toISODate(it&&(it.end||it.dropoffDateTime))||startDate; if(!startDate){ setStatus('No date available.'); return; } postToWix({type:'openOnBookings',bookingId:safe(it&&it.id),startDate,endDate}); }
 
@@ -1396,7 +1405,7 @@ button:active{transform:scale(.97)}
     _computeConflicts(){
       const out=new Set();
       try{
-        const items=this._items().filter(it=>it.group&&it.group!=='unassigned'&&!String(it.group).startsWith('cat_')&&it.group!==HEAT_GROUP_ID);
+        const items=this._items().filter(it=>it.group&&it.group!=='unassigned'&&it.group!==STAGING_GROUP_ID&&!String(it.group).startsWith('cat_')&&it.group!==HEAT_GROUP_ID);
         // group by vehicle
         const byGroup=new Map();
         items.forEach(it=>{ const g=String(it.group); if(!byGroup.has(g)) byGroup.set(g,[]); byGroup.get(g).push(it); });
@@ -1423,7 +1432,7 @@ button:active{transform:scale(.97)}
         const items=this._items();
         groups.forEach(g=>{
           const gid=String(g.id);
-          if(gid.startsWith('cat_')||gid===HEAT_GROUP_ID||gid==='unassigned') return;
+          if(gid.startsWith('cat_')||gid===HEAT_GROUP_ID||gid==='unassigned'||gid===STAGING_GROUP_ID) return;
           const gItems=items.filter(it=>String(it.group)===gid);
           if(!gItems.length){ result[gid]={pct:0,conflict:false}; return; }
           // merge overlapping intervals clipped to window
@@ -1607,38 +1616,12 @@ button:active{transform:scale(.97)}
       this.axisEl.innerHTML='';
       const todayISO=toISODate(new Date());
       const step=days>21?7:(days>10?2:1);
-
-      // ── Top band: month spans (or ISO-week labels for very long ranges) ──
-      const visTicks=ticks.filter(tk=>tk.frac>=-0.02&&tk.frac<=1.02);
-      if(visTicks.length){
-        let segStart=0;
-        const keyOf=d=> days>120 ? d.getFullYear()+'-'+d.getMonth() : d.getFullYear()+'-'+d.getMonth();
-        for(let i=1;i<=visTicks.length;i++){
-          const prev=visTicks[i-1].date;
-          const cur=visTicks[i]?visTicks[i].date:null;
-          const boundary=!cur||keyOf(cur)!==keyOf(prev);
-          if(boundary){
-            const a=Math.max(0,visTicks[segStart].frac);
-            const b=Math.min(1,(visTicks[i]?visTicks[i].frac:1));
-            if(b>a){
-              const m=_mk('div','ftl-axis-month');
-              m.style.left=(a*100)+'%'; m.style.width=((b-a)*100)+'%';
-              const md=visTicks[segStart].date;
-              m.textContent=FMT.axisMonth(md);
-              this.axisEl.appendChild(m);
-            }
-            segStart=i;
-          }
-        }
-      }
-
-      // ── Bottom band: day ticks ──
       ticks.forEach((tk,i)=>{
         if(tk.frac<0||tk.frac>1) return; if(i%step!==0) return;
         const d=tk.date; const isToday=toISODate(d)===todayISO;
         const t=_mk('div','ftl-axis-tick'+(isToday?' ftl-ax-today':(tk.weekend?' ftl-ax-weekend':'')));
         t.style.left=(tk.frac*100)+'%';
-        t.innerHTML='<span class="ftl-ax-dow">'+FMT.DOW[d.getDay()]+'</span><span class="ftl-ax-date">'+FMT.axisDay(d)+'</span>';
+        t.innerHTML='<span class="ftl-ax-dow">'+FMT.DOW[d.getDay()]+'</span><span class="ftl-ax-date">'+d.getDate()+'/'+(d.getMonth()+1)+'</span>';
         this.axisEl.appendChild(t);
       });
     }
@@ -1680,6 +1663,7 @@ button:active{transform:scale(.97)}
           let tgt, ok=true;
           if(!gid||gid.startsWith('cat_')||gid===HEAT_GROUP_ID){ tgt='— invalid drop —'; ok=false; }
           else if(gid==='unassigned'){ tgt='Unassigned queue'; }
+          else if(gid===STAGING_GROUP_ID){ tgt='📋 Staging hold'; }
           else if(String(it&&it.group||'')===gid){ tgt=(this._labels[gid]||gid)+' (no change)'; ok=false; }
           else { tgt=this._labels[gid]||gid; }
           this._showDragTip(cust+'<br>→ <b>'+escHtml(tgt)+'</b>'+(ok?'':' ⛔'),e.clientX,e.clientY);
@@ -1787,6 +1771,16 @@ button:active{transform:scale(.97)}
       const rs=String(cur&&cur.rentalState||'');
       if(rs==='Active Rental'||rs==='Pre Check-In'){ setStatus('LOCKED: Active Rental / Pre Check-In cannot be moved'); this.redraw(); return; }
       if(String(cur&&cur.group||'')===gid){ this.redraw(); return; }
+      // Drop TO staging: unassign on backend, park locally in staging row
+      if(gid===STAGING_GROUP_ID){
+        stagingSet.add(String(id)); saveStagingSet();
+        try{ this.itemsDS.update({id,group:STAGING_GROUP_ID}); }catch(_){}
+        postToWix({type:'moveBooking',bookingId:id,newVehicleId:null});
+        setStatus('Moved to Staging — booking unassigned, held in staging row');
+        return;
+      }
+      // Moving OUT of staging: clear staging mark first
+      if(String(cur&&cur.group||'')===STAGING_GROUP_ID){ stagingSet.delete(String(id)); saveStagingSet(); }
       // conflict check — abort if dragged item overlaps an existing booking on the target vehicle
       if(gid!=='unassigned'&&cur&&cur.start&&cur.end){
         try{
@@ -2153,8 +2147,10 @@ button:active{transform:scale(.97)}
 
       // Exclude unconfirmed booking requests
       const confirmedItems=items.filter(e=>{ const rs=String(e.rentalState||'').toLowerCase(); const st=String(e.status||'').toLowerCase(); return !rs.includes('request')&&st!=='pending'&&st!=='request'; });
-      lastLoadedItems=confirmedItems.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; const grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
+      let _stagingDirty=false;
+      lastLoadedItems=confirmedItems.map(e=>{ const cls=getClass(e.status,e.rentalState); const rawGrp=e.group||e.resource||'unassigned'; let grp=(_knownGroupIds.size&&rawGrp&&rawGrp!==HEAT_GROUP_ID&&!_knownGroupIds.has(rawGrp))?'unassigned':rawGrp; const eId=String(e.id||''); if(stagingSet.has(eId)){ if(grp==='unassigned') grp=STAGING_GROUP_ID; else{ stagingSet.delete(eId); _stagingDirty=true; } } const isLocked=/Active Rental|Pre Check-In/i.test(String(e.rentalState||'')); const mapped={id:e.id,type:'range',group:grp||'unassigned',start:new Date(e.start),end:new Date(e.end),bookingNumber:e.bookingNumber||'',customerName:e.customerName||'—',pickuppoint:e.pickuppoint||'',dropoffpoint:e.dropoffpoint||'',pickupComment:e.pickupComment||'',dropoffComment:e.dropoffComment||'',bookedCategoryLabel:e.bookedCategoryLabel||'',bookedCategoryCode:e.bookedCategoryCode||'',assignedVehicleLabel:e.assignedVehicleLabel||'',assignedFleetId:e.assignedFleetId||'',status:e.status||'',rentalState:e.rentalState||'Booking',source:e.source||'',agent:e.agent||'',flightNumber:e.flightNumber||'',extras:e.extras||'',className:`bkItem ${cls}`}; mapped.style=itemInlineStyle(cls,isLocked,grp==='unassigned'); mapped.content=buildItemContent(mapped); return mapped; });
 
+      if(_stagingDirty) saveStagingSet();
       itemsDS.clear(); itemsDS.add(lastLoadedItems);
       if(searchBox.value) renderFromCache(searchBox.value);
 
