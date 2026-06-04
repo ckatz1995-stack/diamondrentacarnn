@@ -115,17 +115,32 @@ button:active{transform:scale(.985)}
 .col-h:last-child{border-right:none}
 .col-h:first-child{justify-content:center;color:#cbd5e1}
 .cal-tl-hdr{flex:1;display:flex;align-items:center;gap:5px;padding:0 8px 0 10px;overflow:hidden;min-width:0}
+.ftl-legend{display:flex;align-items:center;gap:9px;overflow:hidden;flex-shrink:1;min-width:0}
+.ftl-legend .lg{display:inline-flex;align-items:center;gap:4px;font:800 9.5px/1 system-ui;color:#64748b;white-space:nowrap}
+.ftl-legend .lg i{width:11px;height:11px;border-radius:3px;display:inline-block;box-shadow:0 1px 1px rgba(15,23,42,.15)}
+@media(max-width:900px){.ftl-legend{display:none}}
 
 /* ── timeline container (custom FleetTimeline) ───────────────────── */
+/* density vars — switched by the Compact/Comfortable toggle */
+:root{--ftl-row:30px;--ftl-cat:26px;--ftl-bar:24px;--ftl-bar-font:10px}
+#timeline.ftl-compact{--ftl-row:24px;--ftl-cat:22px;--ftl-bar:19px;--ftl-bar-font:9px}
+#timeline.ftl-comfortable{--ftl-row:38px;--ftl-cat:30px;--ftl-bar:30px;--ftl-bar-font:11px}
 #timeline{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;background:#fff;position:relative}
 
-/* head: time axis (left corner spacer aligns with vehicle columns) */
-.ftl-head{display:flex;height:30px;flex-shrink:0;background:#f8f8f8;border-bottom:1px solid #d0d0d0}
-.ftl-head-corner{flex:0 0 var(--lw);min-width:var(--lw);max-width:var(--lw);border-right:2px solid rgba(15,23,42,.13);background:#f8f8f8}
+/* head: two-tier time axis (month band + day band). Left corner aligns w/ vehicle cols */
+.ftl-head{display:flex;height:46px;flex-shrink:0;background:linear-gradient(180deg,#fbfbfc,#f4f5f7);border-bottom:1px solid #d0d0d0;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.ftl-head-corner{flex:0 0 var(--lw);min-width:var(--lw);max-width:var(--lw);border-right:2px solid rgba(15,23,42,.13);background:linear-gradient(180deg,#fbfbfc,#f4f5f7)}
 .ftl-axis{flex:1;position:relative;overflow:hidden}
-.ftl-axis-tick{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;padding-left:5px;border-left:1px solid rgba(15,23,42,.12);white-space:nowrap;pointer-events:none}
+/* month/week band (top) */
+.ftl-axis-month{position:absolute;top:0;height:18px;display:flex;align-items:center;padding-left:7px;border-left:1px solid rgba(15,23,42,.14);white-space:nowrap;pointer-events:none;font:900 9px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;color:#6c522e;background:rgba(168,132,74,.06);overflow:hidden}
+/* day band (bottom) */
+.ftl-axis-tick{position:absolute;top:18px;bottom:0;display:flex;flex-direction:column;justify-content:center;padding-left:5px;border-left:1px solid rgba(15,23,42,.10);white-space:nowrap;pointer-events:none}
+.ftl-axis-tick.ftl-ax-weekend{background:rgba(15,23,42,.035)}
+.ftl-axis-tick.ftl-ax-today{background:rgba(168,132,74,.13)}
 .ftl-ax-dow{font:900 8px/1 system-ui;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em}
-.ftl-ax-date{font:900 10px/1.15 system-ui;color:#334155}
+.ftl-axis-tick.ftl-ax-today .ftl-ax-dow{color:#A8844A}
+.ftl-ax-date{font:900 10px/1.15 system-ui;color:#334155;margin-top:2px}
+.ftl-axis-tick.ftl-ax-today .ftl-ax-date{color:#6c522e}
 
 /* scroll body: single vertical scroller moves left + track together */
 .ftl-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
@@ -133,28 +148,50 @@ button:active{transform:scale(.985)}
 
 /* left vehicle/category column */
 .ftl-left{flex:0 0 var(--lw);min-width:var(--lw);max-width:var(--lw);position:relative;border-right:2px solid rgba(15,23,42,.13);background:#fff}
-.ftl-lrow{display:flex;align-items:stretch;box-sizing:border-box;overflow:hidden;border-bottom:1px solid rgba(15,23,42,.06)}
+.ftl-lrow{display:flex;align-items:stretch;box-sizing:border-box;overflow:hidden;border-bottom:1px solid rgba(15,23,42,.06);transition:background .1s}
 .ftl-lrow.fleetRowEven{background:#ffffff}
-.ftl-lrow.fleetRowOdd{background:#f2f2f2}
-.ftl-lrow.fleetCatGroup{background:var(--surface2);border-top:1px solid var(--border2);border-left:3px solid var(--gold);cursor:pointer}
-.ftl-lrow.ftl-droptarget{background:rgba(168,132,74,.16)}
+.ftl-lrow.fleetRowOdd{background:#f7f8fa}
+.ftl-lrow:not(.fleetCatGroup):hover{background:rgba(168,132,74,.07)}
+.ftl-lrow.fleetCatGroup{background:linear-gradient(180deg,var(--surface2),#e0e7f1);border-top:1px solid var(--border2);border-left:3px solid var(--gold);cursor:pointer}
+.ftl-lrow.ftl-droptarget{background:rgba(168,132,74,.16)!important}
 
 /* right track: row stripes + gridlines + bars */
 .ftl-track{flex:1;position:relative;overflow:hidden;min-width:0}
 .ftl-row{box-sizing:border-box;border-bottom:1px solid rgba(15,23,42,.05)}
 .ftl-row.fleetRowEven{background:#ffffff}
-.ftl-row.fleetRowOdd{background:#fafafa}
-.ftl-row.fleetCatGroup{background:var(--surface2);border-top:1px solid var(--border2)}
+.ftl-row.fleetRowOdd{background:#fafbfc}
+.ftl-row.fleetCatGroup{background:linear-gradient(180deg,var(--surface2),#e0e7f1);border-top:1px solid var(--border2)}
 .ftl-row.ftl-droptarget{background:rgba(168,132,74,.14);outline:2px dashed rgba(168,132,74,.6);outline-offset:-2px}
 .ftl-grid{position:absolute;top:0;left:0;right:0;pointer-events:none;z-index:1}
-.ftl-gridline{position:absolute;top:0;bottom:0;width:1px;background:rgba(15,23,42,.06)}
-.ftl-gridline.ftl-weekend{background:rgba(15,23,42,.12)}
-.ftl-now{position:absolute;top:0;width:2px;background:rgba(168,132,74,.9);z-index:5;pointer-events:none}
+.ftl-gridline{position:absolute;top:0;bottom:0;width:1px;background:rgba(15,23,42,.05)}
+.ftl-gridline.ftl-weekend{background:rgba(15,23,42,.10)}
+/* full-height weekend + today column shading behind bars */
+.ftl-colshade{position:absolute;top:0;bottom:0;pointer-events:none}
+.ftl-colshade.ftl-weekend{background:rgba(15,23,42,.028)}
+.ftl-colshade.ftl-today{background:rgba(168,132,74,.07);box-shadow:inset 1px 0 0 rgba(168,132,74,.25),inset -1px 0 0 rgba(168,132,74,.25)}
+.ftl-now{position:absolute;top:0;width:2px;background:linear-gradient(180deg,#A8844A,#6C522E);z-index:5;pointer-events:none;box-shadow:0 0 4px rgba(168,132,74,.5)}
+.ftl-now::before{content:'';position:absolute;top:0;left:-3px;width:8px;height:8px;border-radius:50%;background:#A8844A;box-shadow:0 0 4px rgba(168,132,74,.6)}
 
 /* bars are .vis-item so existing contextmenu/hover/drag wiring keeps working */
-.ftl-track .vis-item{position:absolute;z-index:4;cursor:pointer;overflow:hidden;box-sizing:border-box}
-.ftl-track .vis-item.dragging{opacity:.9;z-index:50;box-shadow:0 8px 20px rgba(15,23,42,.35);cursor:grabbing}
-.ftl-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 12px/1.4 system-ui;color:#94a3b8;pointer-events:none;text-align:center}
+.ftl-track .vis-item{position:absolute;z-index:4;cursor:pointer;overflow:hidden;box-sizing:border-box;border-radius:5px;box-shadow:0 1px 2px rgba(15,23,42,.18),inset 0 1px 0 rgba(255,255,255,.22);transition:box-shadow .12s,transform .08s;will-change:transform}
+.ftl-track .vis-item:hover{box-shadow:0 3px 8px rgba(15,23,42,.28),inset 0 1px 0 rgba(255,255,255,.3);z-index:6}
+.ftl-track .vis-item.dragging{opacity:.92;z-index:50;box-shadow:0 10px 24px rgba(15,23,42,.4);cursor:grabbing;transform:scale(1.01)}
+/* inner content layout */
+.ftl-bar-in{display:flex;align-items:center;gap:5px;height:100%;width:100%;padding:0 7px;overflow:hidden;white-space:nowrap;pointer-events:none}
+.ftl-bar-lock{flex:0 0 auto;font-size:9px;opacity:.85}
+.ftl-bar-main{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;font:800 var(--ftl-bar-font)/1.2 system-ui}
+.ftl-bar-time{flex:0 0 auto;font:700 calc(var(--ftl-bar-font) - 1px)/1 ui-monospace,monospace;opacity:.78}
+.ftl-bar-bk{flex:0 0 auto;font:900 calc(var(--ftl-bar-font) - 1px)/1 ui-monospace,monospace;opacity:.7;padding:1px 4px;border-radius:3px;background:rgba(0,0,0,.12)}
+.ftl-empty{position:absolute;inset:0;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;font:900 13px/1.4 system-ui;color:#94a3b8;pointer-events:none;text-align:center}
+
+/* live drag tooltip */
+.ftl-dragtip{position:fixed;background:#0f172a;color:#fff;border-radius:8px;padding:7px 10px;font:800 11px/1.35 system-ui;box-shadow:0 12px 28px rgba(15,23,42,.32);z-index:1000003;pointer-events:none;display:none;white-space:nowrap}
+.ftl-dragtip.open{display:block}
+.ftl-dragtip b{color:#f2c879}
+
+/* loading shimmer */
+#timeline.ftl-loading .ftl-track::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(168,132,74,.07) 50%,transparent 70%);background-size:200% 100%;animation:ftlShimmer 1.1s linear infinite;pointer-events:none;z-index:8}
+@keyframes ftlShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* ── left panel — force width & style ───── */
 .vis-panel.vis-left{
@@ -196,21 +233,17 @@ button:active{transform:scale(.985)}
 }
 
 /* ── booking bar items ───────────────────── */
-.vis-item{
-  border-radius:3px!important;border-width:0!important;
-  font-size:10px!important;font-weight:700!important;padding:0!important;
-  box-shadow:none!important
-}
+.vis-item{border-width:0;font-weight:700;padding:0}
 .vis-item,.vis-item *{user-select:none!important}
-/* background is set via inline style on each item; these are fallback + override for selected */
-.vis-item.bkItem{display:block!important;min-height:10px!important}
-.vis-item.bkItem.bk{background:#ddb900!important;color:#000!important}
-.vis-item.bkItem.pre{background:#ffc000!important;color:#000!important}
-.vis-item.bkItem.run{background:#5cb85c!important;color:#fff!important}
-.vis-item.bkItem.in{background:#c0504d!important;color:#fff!important}
-.vis-item.bkItem.cnc{background:#808080!important;color:#fff!important;text-decoration:line-through!important;opacity:.82!important}
-.vis-item.bkItem.nr{background:#546e7a!important;color:#fff!important}
-.vis-item.vis-selected{box-shadow:0 0 0 2px rgba(168,132,74,.72)!important}
+/* background is set via inline style on each item; these are fallback by status class */
+.vis-item.bkItem{min-height:10px}
+.vis-item.bkItem.bk{background:#ddb900;color:#000}
+.vis-item.bkItem.pre{background:#ffc000;color:#000}
+.vis-item.bkItem.run{background:#5cb85c;color:#fff}
+.vis-item.bkItem.in{background:#c0504d;color:#fff}
+.vis-item.bkItem.cnc{background:#808080;color:#fff;text-decoration:line-through;opacity:.82}
+.vis-item.bkItem.nr{background:#546e7a;color:#fff}
+.ftl-track .vis-item.vis-selected{box-shadow:0 0 0 2px rgba(168,132,74,.85),0 3px 10px rgba(15,23,42,.3)!important;z-index:7}
 .vis-current-time{background:rgba(168,132,74,.9)!important;width:2px!important}
 .vis-time-axis .vis-text{font:900 9.5px/1 system-ui;color:#64748b}
 .vis-time-axis .vis-text.vis-major{font-weight:1000;color:#334155}
@@ -494,7 +527,15 @@ button:active{transform:scale(.985)}
         <div class="col-h">Mileage</div>
       </div>
       <div class="cal-tl-hdr">
+        <div class="ftl-legend" id="ftlLegend">
+          <span class="lg"><i style="background:#ddb900"></i>Booking</span>
+          <span class="lg"><i style="background:#ffc000"></i>Pre check-in</span>
+          <span class="lg"><i style="background:#5cb85c"></i>Active</span>
+          <span class="lg"><i style="background:#c0504d"></i>Closed</span>
+          <span class="lg"><i style="background:#808080"></i>Canceled</span>
+        </div>
         <div style="flex:1 1 0;min-width:6px"></div>
+        <button id="btnDensity" type="button" title="Toggle row density">≡ Density</button>
         <button id="btnZoomOut" type="button" style="padding:3px 7px;font-size:14px;font-weight:900">−</button>
         <button id="btnZoomIn" type="button" style="padding:3px 7px;font-size:14px;font-weight:900">+</button>
         <button id="btnFitTimeline" type="button">Fit</button>
@@ -627,6 +668,7 @@ button:active{transform:scale(.985)}
   const bClose       = document.getElementById('bClose');
 
   function setStatus(msg){ if(statusBar){ statusBar.textContent=msg||''; statusBar.title=msg||''; } }
+  function setLoading(on){ const tl=document.getElementById('timeline'); if(tl) tl.classList.toggle('ftl-loading',!!on); }
   function safe(v){ return (v==null?'':String(v)).trim(); }
   function escHtml(s){ return String(s??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
   function pad2(n){ return String(n).padStart(2,'0'); }
@@ -652,7 +694,7 @@ button:active{transform:scale(.985)}
   const CLS_FG={bk:'#000',pre:'#000',run:'#fff',in:'#fff',cnc:'#fff',nr:'#fff'};
   function itemInlineStyle(cls,isLocked,isUnassigned){
     const bg=CLS_BG[cls]||'#ddb900'; const fg=CLS_FG[cls]||'#000';
-    return `background:${bg};color:${fg};border-radius:3px;${isLocked?'outline:2px solid rgba(180,35,24,.55);':''}${isUnassigned?'outline:2px solid rgba(180,138,79,.55);':''}`;
+    return `background:${bg};color:${fg};${isLocked?'outline:2px solid rgba(180,35,24,.55);outline-offset:-2px;':''}${isUnassigned?'outline:2px solid rgba(180,138,79,.55);outline-offset:-2px;':''}`;
   }
   function buildItemContent(item){
     const cn=escHtml(item.customerName||'—');
@@ -1069,13 +1111,23 @@ button:active{transform:scale(.985)}
       this.min=null; this.max=null;
       const now=Date.now();
       this.win={start:new Date(now),end:new Date(now+14*864e5)};
-      this.ROW=28; this.CAT=24; this.BAR=26;
+      this.ROW=30; this.CAT=26; this.BAR=24;
       this._raf=null;
       this._lay={groups:[],top:{},h:{},total:0};
       this._build();
       this._subscribe();
       this._bindPointer();
+      this._readDensity();
       this.redraw();
+    }
+
+    // Read row/cat/bar heights from CSS vars so the density toggle just swaps a class.
+    _readDensity(){
+      try{
+        const cs=getComputedStyle(this.container);
+        const px=(v,d)=>{ const n=parseFloat(cs.getPropertyValue(v)); return isFinite(n)&&n>0?n:d; };
+        this.ROW=px('--ftl-row',30); this.CAT=px('--ftl-cat',26); this.BAR=px('--ftl-bar',24);
+      }catch(_){}
     }
 
     on(ev,fn){ (this.handlers[ev]||(this.handlers[ev]=[])).push(fn); return this; }
@@ -1095,7 +1147,12 @@ button:active{transform:scale(.985)}
       this.bodyEl.appendChild(this.leftEl); this.bodyEl.appendChild(this.trackEl);
       this.scrollEl.appendChild(this.bodyEl);
       this.container.appendChild(head); this.container.appendChild(this.scrollEl);
+      // live drag tooltip (appended to body so it floats above everything)
+      this.dragTip=_mk('div','ftl-dragtip');
+      document.body.appendChild(this.dragTip);
     }
+    _showDragTip(html,x,y){ if(!this.dragTip) return; this.dragTip.innerHTML=html; this.dragTip.style.left=Math.min(window.innerWidth-220,x+16)+'px'; this.dragTip.style.top=Math.min(window.innerHeight-60,y+16)+'px'; this.dragTip.classList.add('open'); }
+    _hideDragTip(){ this.dragTip&&this.dragTip.classList.remove('open'); }
 
     _subscribe(){
       const sched=()=>this._schedule();
@@ -1116,13 +1173,28 @@ button:active{transform:scale(.985)}
     _zoom(mult){ const c=(this.win.start.getTime()+this.win.end.getTime())/2; let span=(this.win.end-this.win.start)*mult; const minSpan=this.options.zoomMin||6*36e5; const maxSpan=this.options.zoomMax||90*864e5; span=Math.min(maxSpan,Math.max(minSpan,span)); this.win={start:new Date(c-span/2),end:new Date(c+span/2)}; this.redraw(); this._emit('rangechanged',this.getWindow()); }
     fit(){ const items=this._items(); let mn=Infinity,mx=-Infinity; items.forEach(it=>{ const s=+new Date(it.start),e=+new Date(it.end); if(s<mn)mn=s; if(e>mx)mx=e; }); if(!isFinite(mn)||!isFinite(mx)||mx<=mn){ this.redraw(); return; } const pad=Math.max(36e5,(mx-mn)*0.03); this.win={start:new Date(mn-pad),end:new Date(mx+pad)}; this.redraw(); this._emit('rangechanged',this.getWindow()); }
     setSelection(ids){ this.selection=new Set((ids||[]).map(String)); this.redraw(); const first=[...this.selection][0]; if(first){ const bar=this.trackEl.querySelector('.vis-item[data-id="'+String(first).replace(/"/g,'\\"')+'"]'); if(bar) try{ bar.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(_){} } }
-    redraw(){ this._render(); }
-    destroy(){ try{ this.container.innerHTML=''; }catch(_){} }
+    redraw(){ this._readDensity(); this._render(); }
+    destroy(){ try{ this.dragTip&&this.dragTip.remove(); this.container.innerHTML=''; }catch(_){} }
+    setDensity(mode){ this.container.classList.remove('ftl-compact','ftl-comfortable'); if(mode==='compact') this.container.classList.add('ftl-compact'); else if(mode==='comfortable') this.container.classList.add('ftl-comfortable'); this.redraw(); }
 
     // ── data helpers ──
     _groups(){ let gs=[]; try{ gs=this.groupsDS.get()||[]; }catch(_){ gs=[]; } return gs.filter(g=>g&&g.visible!==false&&String(g.id)!==HEAT_GROUP_ID).sort((a,b)=>(a.order??9999)-(b.order??9999)); }
     _items(){ try{ return this.itemsDS.get()||[]; }catch(_){ return []; } }
     _frac(t){ const s=+this.win.start,e=+this.win.end,span=Math.max(1,e-s); return ((+new Date(t))-s)/span; }
+
+    // Width-aware bar content: progressively reveal lock icon, customer, time, booking#.
+    _barContent(it,px){
+      const locked=/Active Rental|Pre Check-In/i.test(String(it.rentalState||''));
+      const lock=locked?'<span class="ftl-bar-lock">🔒</span>':'';
+      const name=escHtml(it.customerName||'—');
+      const bk=escHtml(it.bookingNumber||'');
+      const tspan=hhmm(it.start)+'→'+hhmm(it.end);
+      let parts=lock+'<span class="ftl-bar-main">'+name+'</span>';
+      if(px>=150 && bk) parts+='<span class="ftl-bar-time">'+escHtml(tspan)+'</span>';
+      if(px>=230 && bk) parts+='<span class="ftl-bar-bk">'+bk+'</span>';
+      else if(px<150){ /* tight: name only */ }
+      return '<div class="ftl-bar-in" title="'+escHtml(tooltipText(it))+'">'+parts+'</div>';
+    }
 
     // ── render ──
     _render(){
@@ -1135,6 +1207,7 @@ button:active{transform:scale(.985)}
       this._lay={groups,top,h,total};
 
       // LEFT column
+      this._labels={};
       const lf=document.createDocumentFragment();
       groups.forEach(g=>{
         const gid=String(g.id); const isCat=gid.startsWith('cat_');
@@ -1148,8 +1221,10 @@ button:active{transform:scale(.985)}
           const collapsed=_collapsedCats.has(gid);
           row.innerHTML='<div class="fleetCatCell"><span class="fleetCatToggle">'+(collapsed?'▶':'▼')+'</span><span class="fleetCatCode">'+escHtml(label)+'</span><span class="fleetCatMeta">'+escHtml(String(count))+' veh</span></div>';
           row.addEventListener('click',()=>{ if(_collapsedCats.has(gid)) _collapsedCats.delete(gid); else _collapsedCats.add(gid); applyGroupFilter(); });
+          this._labels[gid]=label;
         } else {
           row.innerHTML=String(g.content||gid);
+          this._labels[gid]=(gid==='unassigned')?'Unassigned': (g.plate||g.label||g.vehicleLabel||(row.textContent||'').replace(/\s+/g,' ').trim().slice(0,28)||gid);
         }
         lf.appendChild(row);
       });
@@ -1159,15 +1234,34 @@ button:active{transform:scale(.985)}
       const tf=document.createDocumentFragment();
       groups.forEach(g=>{ const gid=String(g.id); const isCat=gid.startsWith('cat_'); const bg=_mk('div','ftl-row '+(g.className||'')+(isCat?' fleetCatGroup':'')); bg.style.height=h[gid]+'px'; bg.dataset.gid=gid; tf.appendChild(bg); });
 
+      // TRACK: weekend + today full-height column shading (behind everything)
+      const days=Math.max(1,Math.round((this.win.end-this.win.start)/864e5));
+      const shade=_mk('div','ftl-grid'); shade.style.height=total+'px'; shade.style.zIndex='0';
+      const todayISO=toISODate(new Date());
+      if(days<=45){
+        const dayMs=864e5;
+        let d0=new Date(this.win.start); d0.setHours(0,0,0,0);
+        for(let t=+d0;t<=+this.win.end;t+=dayMs){
+          const dt=new Date(t); const dow=dt.getDay();
+          const isWk=(dow===0||dow===6); const isToday=toISODate(dt)===todayISO;
+          if(!isWk&&!isToday) continue;
+          const fL=this._frac(dt), fR=this._frac(new Date(t+dayMs));
+          const L=Math.max(0,fL), R=Math.min(1,fR); if(R<=L) continue;
+          const col=_mk('div','ftl-colshade'+(isToday?' ftl-today':(isWk?' ftl-weekend':'')));
+          col.style.left=(L*100)+'%'; col.style.width=((R-L)*100)+'%'; col.style.height=total+'px';
+          shade.appendChild(col);
+        }
+      }
+
       // TRACK: gridlines + now marker
       const grid=_mk('div','ftl-grid'); grid.style.height=total+'px';
       const ticks=this._ticks();
-      const days=Math.max(1,Math.round((this.win.end-this.win.start)/864e5));
       const drawEvery=days>60?7:1;
       ticks.forEach((tk,i)=>{ if(tk.frac<0||tk.frac>1) return; if(i%drawEvery!==0) return; const ln=_mk('div','ftl-gridline'+(tk.weekend?' ftl-weekend':'')); ln.style.left=(tk.frac*100)+'%'; grid.appendChild(ln); });
       const nf=this._frac(new Date()); if(nf>=0&&nf<=1){ const nl=_mk('div','ftl-now'); nl.style.left=(nf*100)+'%'; nl.style.height=total+'px'; grid.appendChild(nl); }
 
       // TRACK: bars
+      const trackW=Math.max(1,this.trackEl.clientWidth||this.container.clientWidth||900);
       const bf=document.createDocumentFragment();
       const known=new Set(groups.map(g=>String(g.id)));
       let shown=0;
@@ -1182,20 +1276,25 @@ button:active{transform:scale(.985)}
         if(it.style) bar.style.cssText=it.style;
         bar.style.position='absolute';
         bar.style.left=(L*100)+'%';
-        bar.style.width='max('+Math.max(0,(R-L)*100)+'%, 8px)';
+        const widthPct=Math.max(0,(R-L)*100);
+        bar.style.width='max('+widthPct+'%, 14px)';
         bar.style.top=(top[gid]+Math.max(0,Math.round((h[gid]-this.BAR)/2)))+'px';
         bar.style.height=this.BAR+'px';
+        // round the visible cap only on the side where the booking actually starts/ends in view
+        if(fS<0) { bar.style.borderTopLeftRadius='0'; bar.style.borderBottomLeftRadius='0'; }
+        if(fE>1) { bar.style.borderTopRightRadius='0'; bar.style.borderBottomRightRadius='0'; }
         if(this.selection.has(String(it.id))) bar.classList.add('vis-selected');
-        bar.innerHTML=String(it.content||'');
+        bar.innerHTML=this._barContent(it,Math.round((R-L)*trackW));
         bf.appendChild(bar); shown++;
       });
 
       this.trackEl.innerHTML='';
       this.trackEl.style.height=total+'px';
       this.trackEl.appendChild(tf);
+      this.trackEl.appendChild(shade);
       this.trackEl.appendChild(grid);
       this.trackEl.appendChild(bf);
-      if(!groups.length){ const em=_mk('div','ftl-empty'); em.textContent='No vehicles to display.'; this.trackEl.appendChild(em); }
+      if(!groups.length){ const em=_mk('div','ftl-empty'); em.innerHTML='<div style="font-size:30px;opacity:.4">🚗</div><div>No vehicles to display.</div><div style="font:700 11px/1.4 system-ui;color:#cbd5e1">Adjust the station filter or expand a category.</div>'; this.trackEl.appendChild(em); }
 
       this._renderAxis(ticks,days);
 
@@ -1210,8 +1309,43 @@ button:active{transform:scale(.985)}
     _renderAxis(ticks,days){
       this.axisEl.innerHTML='';
       const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const todayISO=toISODate(new Date());
       const step=days>21?7:(days>10?2:1);
-      ticks.forEach((tk,i)=>{ if(tk.frac<0||tk.frac>1) return; if(i%step!==0) return; const t=_mk('div','ftl-axis-tick'); t.style.left=(tk.frac*100)+'%'; const d=tk.date; t.innerHTML='<span class="ftl-ax-dow">'+DOW[d.getDay()]+'</span><span class="ftl-ax-date">'+d.getDate()+'/'+(d.getMonth()+1)+'</span>'; this.axisEl.appendChild(t); });
+
+      // ── Top band: month spans (or ISO-week labels for very long ranges) ──
+      const visTicks=ticks.filter(tk=>tk.frac>=-0.02&&tk.frac<=1.02);
+      if(visTicks.length){
+        let segStart=0;
+        const keyOf=d=> days>120 ? d.getFullYear()+'-'+d.getMonth() : d.getFullYear()+'-'+d.getMonth();
+        for(let i=1;i<=visTicks.length;i++){
+          const prev=visTicks[i-1].date;
+          const cur=visTicks[i]?visTicks[i].date:null;
+          const boundary=!cur||keyOf(cur)!==keyOf(prev);
+          if(boundary){
+            const a=Math.max(0,visTicks[segStart].frac);
+            const b=Math.min(1,(visTicks[i]?visTicks[i].frac:1));
+            if(b>a){
+              const m=_mk('div','ftl-axis-month');
+              m.style.left=(a*100)+'%'; m.style.width=((b-a)*100)+'%';
+              const md=visTicks[segStart].date;
+              m.textContent=MON[md.getMonth()]+' '+md.getFullYear();
+              this.axisEl.appendChild(m);
+            }
+            segStart=i;
+          }
+        }
+      }
+
+      // ── Bottom band: day ticks ──
+      ticks.forEach((tk,i)=>{
+        if(tk.frac<0||tk.frac>1) return; if(i%step!==0) return;
+        const d=tk.date; const isToday=toISODate(d)===todayISO;
+        const t=_mk('div','ftl-axis-tick'+(isToday?' ftl-ax-today':(tk.weekend?' ftl-ax-weekend':'')));
+        t.style.left=(tk.frac*100)+'%';
+        t.innerHTML='<span class="ftl-ax-dow">'+DOW[d.getDay()]+'</span><span class="ftl-ax-date">'+d.getDate()+'/'+(d.getMonth()+1)+'</span>';
+        this.axisEl.appendChild(t);
+      });
     }
 
     // ── pointer: click / dblclick / drag-to-reassign ──
@@ -1244,12 +1378,22 @@ button:active{transform:scale(.985)}
           const rect=this.trackEl.getBoundingClientRect();
           const y=e.clientY-rect.top;
           st.bar.style.top=(y-this.BAR/2)+'px';
-          this._markDrop(this._groupAtY(y));
+          const gid=this._groupAtY(y);
+          this._markDrop(gid);
+          const it=getItem(st.id);
+          const cust=it?escHtml(it.customerName||it.bookingNumber||'Booking'):'Booking';
+          let tgt, ok=true;
+          if(!gid||gid.startsWith('cat_')||gid===HEAT_GROUP_ID){ tgt='— invalid drop —'; ok=false; }
+          else if(gid==='unassigned'){ tgt='Unassigned queue'; }
+          else if(String(it&&it.group||'')===gid){ tgt=(this._labels[gid]||gid)+' (no change)'; ok=false; }
+          else { tgt=this._labels[gid]||gid; }
+          this._showDragTip(cust+'<br>→ <b>'+escHtml(tgt)+'</b>'+(ok?'':' ⛔'),e.clientX,e.clientY);
         }
       },{passive:false});
 
       window.addEventListener('pointerup',(e)=>{
         if(!st) return; const s=st; st=null;
+        this._hideDragTip();
         if(!s.moved){ this.selection=new Set([String(s.id)]); this._emit('select',{items:[s.id]}); this.redraw(); return; }
         s.bar.classList.remove('dragging'); this._clearDrop();
         const rect=this.trackEl.getBoundingClientRect();
@@ -1292,6 +1436,8 @@ button:active{transform:scale(.985)}
     setStatus('READY • waiting for data…');
     renderFleetModeButtons();
     syncCalHeader();
+    // restore saved density (default: normal)
+    try{ const d=localStorage.getItem(DENSITY_KEY)||'normal'; applyDensity(d); }catch(_){}
 
     if(window.ResizeObserver){
       const _tlRO=new ResizeObserver(()=>{ if(timeline) try{ timeline.redraw(); syncCalHeader(); }catch(_){} });
@@ -1316,12 +1462,16 @@ button:active{transform:scale(.985)}
   document.getElementById('range7d').addEventListener('click',()=>{ if(presetRange(7)){ userWindowDirty=false; postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); setStatus(`RANGE: ${fromEl.value} → ${toEl.value}`); } });
   document.getElementById('range14d').addEventListener('click',()=>{ if(presetRange(14)){ userWindowDirty=false; postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); setStatus(`RANGE: ${fromEl.value} → ${toEl.value}`); } });
   document.getElementById('range30d').addEventListener('click',()=>{ if(presetRange(30)){ userWindowDirty=false; postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); setStatus(`RANGE: ${fromEl.value} → ${toEl.value}`); } });
-  document.getElementById('btnRefresh').addEventListener('click',()=>{ saveWorkspace(); saveResume(); postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); });
+  document.getElementById('btnRefresh').addEventListener('click',()=>{ saveWorkspace(); saveResume(); setLoading(true); postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to}); });
   document.getElementById('btnToday').addEventListener('click',()=>{ try{ timeline.moveTo(new Date(),{animation:true}); }catch(_){} });
   document.getElementById('btnZoomOut').addEventListener('click',()=>{ try{ timeline&&timeline.zoomOut(0.35); }catch(_){} });
   document.getElementById('btnZoomIn').addEventListener('click',()=>{ try{ timeline&&timeline.zoomIn(0.35); }catch(_){} });
   document.getElementById('btnFitTimeline').addEventListener('click',()=>{ try{ timeline&&timeline.fit({animation:true}); }catch(_){} });
   document.getElementById('btnNowFocus').addEventListener('click',()=>{ try{ timeline&&timeline.moveTo(new Date(),{animation:true}); }catch(_){} });
+  const DENSITY_KEY='diamond.fleet.density.v1';
+  const DENSITY_CYCLE=['comfortable','normal','compact'];
+  function applyDensity(mode){ try{ timeline&&timeline.setDensity(mode); }catch(_){} try{ localStorage.setItem(DENSITY_KEY,mode); }catch(_){} const lbl={comfortable:'≡ Comfortable',normal:'≡ Normal',compact:'≡ Compact'}[mode]||'≡ Density'; const b=document.getElementById('btnDensity'); if(b) b.textContent=lbl; }
+  document.getElementById('btnDensity')?.addEventListener('click',()=>{ let cur='normal'; try{ cur=localStorage.getItem(DENSITY_KEY)||'normal'; }catch(_){} const next=DENSITY_CYCLE[(DENSITY_CYCLE.indexOf(cur)+1)%DENSITY_CYCLE.length]; applyDensity(next); });
   document.getElementById('btnUnassigned').addEventListener('click',openUnassigned);
   document.getElementById('btnAutoAssign').addEventListener('click',()=>postToWix({type:'autoAssignUnassigned',from:lastRange.from,to:lastRange.to}));
   document.getElementById('btnCopyFleetSummary')?.addEventListener('click',()=>copyTextWithFallback(buildFleetSummary(),'Fleet summary copied.','Copy failed.'));
@@ -1532,6 +1682,7 @@ button:active{transform:scale(.985)}
     if(data.type==='showError'){ setStatus(String(data.message||'Error')); return; }
 
     if(data.type==='loadData'){
+      setLoading(false);
       const groups=Array.isArray(data.groups)?data.groups:[];
       const items=Array.isArray(data.items)?data.items:[];
       lastUnassigned=Array.isArray(data.unassigned)?data.unassigned:[];
@@ -1611,6 +1762,7 @@ button:active{transform:scale(.985)}
       initTimeline();
       initColResize();
       postToWix({type:'calendarReady',from:lastRange.from,to:lastRange.to});
+      setLoading(true);
       postToWix({type:'requestReload',from:lastRange.from,to:lastRange.to});
       setStatus('READY • requesting data…');
     }catch(e){
