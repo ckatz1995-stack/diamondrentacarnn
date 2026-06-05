@@ -267,16 +267,44 @@ button:active{transform:scale(.97)}
 
 /* ── print ───────────────────────────────── */
 @media print{
+  @page{size:landscape;margin:12mm}
   .sb,.toolbar,.status-strip,.drawer,#bOverlay,#uOverlay,#diagPanel,
-  .ftl-cursor-line,.ftl-move-panel,
-  .shell-top,.cal-header{display:none!important}
+  .ftl-cursor-line,.ftl-move-panel,.hoverTip,#bulkBar,#notePopover,
+  .shell-top,.cal-header,#conflictBadge{display:none!important}
   .shell{display:block!important}
   .shell-main{display:block!important;overflow:visible!important}
   .cal-wrap{overflow:visible!important;height:auto!important}
   #timeline{overflow:visible!important;height:auto!important}
   .ftl-scroll{overflow:visible!important;height:auto!important}
   .ftl-track,.ftl-left{overflow:visible!important}
+  .print-only{display:block!important}
 }
+.print-only{display:none}
+/* ── bulk select bar ─────────────────────── */
+#bulkBar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e293b;color:#f8fafc;border-radius:var(--r-pill);padding:7px 12px;display:none;align-items:center;gap:8px;z-index:1000003;box-shadow:0 8px 28px rgba(15,23,42,.36);font:600 11.5px/1 var(--f);white-space:nowrap}
+#bulkBar.open{display:flex}
+#bulkCount{color:#94a3b8;font-size:11px;min-width:60px}
+.bulk-btn{background:rgba(255,255,255,.1);color:#f8fafc;border:1px solid rgba(255,255,255,.18);border-radius:var(--r);padding:5px 10px;font:600 11px/1 var(--f);cursor:pointer}
+.bulk-btn:hover{background:rgba(255,255,255,.2)}
+.bulk-btn.danger{color:#fca5a5;border-color:rgba(248,113,113,.28)}
+.bulk-btn.danger:hover{background:rgba(248,113,113,.15)}
+#bulkClear{background:transparent;border:none;color:#64748b;cursor:pointer;font:600 12px/1 var(--f);padding:2px 4px;line-height:1}
+/* ── vehicle note btn + popover ──────────── */
+.ftl-note-btn{background:transparent;border:none;cursor:pointer;padding:0 3px;opacity:.38;font-size:10px;line-height:1;flex-shrink:0;color:var(--sub);transition:opacity .12s}
+.ftl-note-btn:hover{opacity:.8}
+.ftl-note-btn.has-note{opacity:1;color:var(--gold)}
+#notePopover{position:fixed;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:0 12px 32px rgba(15,23,42,.2);z-index:1000005;width:260px;overflow:hidden;display:none}
+#notePopover.open{display:block}
+.note-head{padding:8px 12px;background:var(--gold-bg);border-bottom:1px solid var(--border);font:700 11px/1.2 var(--f);color:#6c522e;display:flex;align-items:center;justify-content:space-between}
+.note-head button{background:transparent;border:none;cursor:pointer;color:var(--sub);font-size:12px;padding:0 4px;line-height:1}
+#noteText{width:100%;border:none;resize:vertical;padding:10px 12px;font:500 11.5px/1.5 var(--f);color:var(--text);min-height:80px;max-height:200px;box-sizing:border-box;outline:none}
+.note-foot{padding:7px 12px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end}
+.note-foot .nb{padding:5px 10px;border-radius:var(--r);font:600 10.5px/1 var(--f);cursor:pointer;border:1px solid var(--border2);background:#fff;color:var(--text)}
+.note-foot .nb.pri{background:linear-gradient(135deg,var(--pri1),var(--pri2));color:#fff;border-color:transparent}
+/* ── maintenance block bars ──────────────── */
+.vis-item.bkItem.maint{background:repeating-linear-gradient(45deg,rgba(249,115,22,.85),rgba(249,115,22,.85) 5px,rgba(249,115,22,.38) 5px,rgba(249,115,22,.38) 10px);color:#7c2d12;cursor:not-allowed!important}
+.vis-item.bkItem.maint.ftl-conflict{outline-color:rgba(249,115,22,.9)}
+.ftl-block-ghost{position:absolute;background:rgba(249,115,22,.18);border:2px dashed rgba(249,115,22,.75);border-radius:4px;pointer-events:none;z-index:30;display:none}
 
 /* ── left panel — force width & style ───── */
 .vis-panel.vis-left{
@@ -612,6 +640,10 @@ button:active{transform:scale(.97)}
         <button id="btnApplyRange" class="btnPri" type="button">Apply</button>
         <button id="btnToday" type="button">Today</button>
         <div id="conflictBadge" title="Bookings with conflicts or tight turnaround">⚠ <span id="conflictCount">0</span> conflicts</div>
+        <button id="btnBlockMode" type="button" title="Maintenance block mode — drag empty space to block a vehicle">🔧</button>
+        <button id="btnPrint" type="button" title="Print fleet schedule">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="1" width="10" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="6" width="14" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="10" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="white"/><circle cx="12" cy="9.5" r="1" fill="currentColor"/></svg>
+        </button>
         <div style="flex:1 1 0;min-width:8px"></div>
         <!-- Timeline search (expandable icon → input) -->
         <div class="tl-srch" id="tlSrchWrap">
@@ -629,6 +661,11 @@ button:active{transform:scale(.97)}
       </div>
     </div>
 
+    <!-- Print header (hidden on screen, shown on print) -->
+    <div class="print-only" id="printHeader" style="padding:0 12px 6px">
+      <strong>Diamond Rent A Car — Fleet Schedule</strong>
+      <p id="printMeta" style="margin:2px 0 0;font:400 11px/1.4 var(--f)"></p>
+    </div>
     <!-- Timeline -->
     <div id="timeline"></div>
 
@@ -667,6 +704,26 @@ button:active{transform:scale(.97)}
   <button class="ctxItem" data-ctx="move" type="button">Move to vehicle…</button>
   <button class="ctxItem danger" data-ctx="unassign" type="button">Unassign</button>
   <button class="ctxItem danger" data-ctx="cancel" type="button">Cancel booking…</button>
+  <button class="ctxItem danger" data-ctx="remove-block" type="button">Remove maintenance block</button>
+</div>
+
+<!-- Bulk select action bar -->
+<div id="bulkBar">
+  <span id="bulkCount">0 selected</span>
+  <button class="bulk-btn" id="bulkMove" type="button">Move to…</button>
+  <button class="bulk-btn danger" id="bulkUnassign" type="button">Unassign all</button>
+  <button class="bulk-btn" id="bulkStage" type="button">Stage all</button>
+  <button id="bulkClear" type="button" title="Clear selection">✕</button>
+</div>
+
+<!-- Vehicle note popover -->
+<div id="notePopover">
+  <div class="note-head"><span id="noteLabel">Vehicle Note</span><button id="noteClose" type="button">✕</button></div>
+  <textarea id="noteText" placeholder="Add a note about this vehicle…"></textarea>
+  <div class="note-foot">
+    <button class="nb" id="noteClearBtn" type="button">Clear</button>
+    <button class="nb pri" id="noteSave" type="button">Save</button>
+  </div>
 </div>
 
 <!-- Hover tip -->
@@ -1152,6 +1209,10 @@ button:active{transform:scale(.97)}
   let selectedFleetId = '';
   let ctxItemId = '';
   const pendingOldGroup = new Map();
+  const _undoStack = []; // [{bookingId,oldGroup,newGroup}] — last 20 drag/drop moves
+  const vehicleNotes = new Map(); // vehicleId → note text
+  let _blockModeActive = false;
+  let _bulkMoveTarget = []; // ids pending bulk move
   const COL_WIDTHS_KEY = 'diamond.fleet.colWidths.v1';
   let _colWidths = {plate:130,model:130};
   let _knownGroupIds = new Set(['unassigned']); // updated by applyGroupFilter; used to fallback orphaned items
@@ -1288,8 +1349,147 @@ button:active{transform:scale(.97)}
   document.getElementById('bActCopy')?.addEventListener('click',()=>{ if(_bPanelItem) copyTextWithFallback(safe(_bPanelItem.bookingNumber||_bPanelItem.id||''),'Booking # copied.','Copy failed.'); });
   document.getElementById('bActCancel')?.addEventListener('click',()=>{ if(!_bPanelItem) return; if(confirm(`Cancel booking ${_bPanelItem.bookingNumber||_bPanelItem.id}?\n\nThis action will send a cancel request.`)){ postToWix({type:'cancelBooking',bookingId:safe(_bPanelItem.id)}); closeBookingPanel(); setStatus(`Cancel request sent: ${safe(_bPanelItem.bookingNumber||_bPanelItem.id)}`); } });
 
+  // ── Undo last move ────────────────────────────────────────
+  function undoLastMove(){
+    if(!_undoStack.length){ setStatus('Nothing to undo.'); return; }
+    const u=_undoStack.pop();
+    if(u.newGroup===STAGING_GROUP_ID){ stagingSet.delete(u.bookingId); }
+    if(u.oldGroup===STAGING_GROUP_ID){ stagingSet.add(u.bookingId); }
+    saveStagingSet();
+    try{ itemsDS.update({id:u.bookingId,group:u.oldGroup}); }catch(_){}
+    const newVehicleId=(u.oldGroup==='unassigned'||u.oldGroup===STAGING_GROUP_ID)?null:u.oldGroup;
+    postToWix({type:'moveBooking',bookingId:u.bookingId,newVehicleId});
+    setStatus(`Undo: restored to ${newVehicleId?u.oldGroup.slice(-8):'Unassigned'}`);
+  }
+
+  // ── Vehicle note popover ──────────────────────────────────
+  let _notePopoverGid='';
+  function openNotePopover(gid,e){
+    const pop=document.getElementById('notePopover');
+    const txt=document.getElementById('noteText');
+    const lbl=document.getElementById('noteLabel');
+    if(!pop||!txt) return;
+    _notePopoverGid=gid;
+    txt.value=vehicleNotes.get(gid)||'';
+    if(lbl) lbl.textContent=(timeline&&timeline._labels&&timeline._labels[gid])||'Vehicle Note';
+    pop.classList.add('open');
+    const rect=e.target.getBoundingClientRect();
+    pop.style.left=Math.min(rect.left,window.innerWidth-280)+'px';
+    pop.style.top=(rect.bottom+6)+'px';
+    setTimeout(()=>txt.focus(),40);
+  }
+  function closeNotePopover(){ document.getElementById('notePopover')?.classList.remove('open'); _notePopoverGid=''; }
+  document.getElementById('noteClose')?.addEventListener('click',closeNotePopover);
+  document.getElementById('noteClearBtn')?.addEventListener('click',()=>{ const t=document.getElementById('noteText'); if(t) t.value=''; });
+  document.getElementById('noteSave')?.addEventListener('click',()=>{
+    const txt=document.getElementById('noteText'); if(!_notePopoverGid||!txt) return;
+    const note=txt.value.trim();
+    if(note) vehicleNotes.set(_notePopoverGid,note); else vehicleNotes.delete(_notePopoverGid);
+    postToWix({type:'saveVehicleNote',fleetVehicleId:_notePopoverGid,note});
+    if(timeline) timeline.redraw();
+    closeNotePopover(); setStatus('Vehicle note saved.');
+  });
+
+  // ── Maintenance block mode ────────────────────────────────
+  let _blockGhost=null;
+  let _blockDraw=null; // {startMs, gid, x0, y0}
+  function setBlockMode(on){
+    _blockModeActive=on;
+    const btn=document.getElementById('btnBlockMode');
+    if(btn) btn.style.background=on?'linear-gradient(135deg,var(--pri1),var(--pri2))':'';
+    if(btn) btn.style.color=on?'#fff':'';
+    const tl=document.getElementById('timeline');
+    if(tl) tl.style.cursor=on?'crosshair':'';
+    setStatus(on?'Block mode ON — drag empty space to add a maintenance block. Click 🔧 again to exit.':'Block mode OFF');
+  }
+  document.getElementById('btnBlockMode')?.addEventListener('click',()=>setBlockMode(!_blockModeActive));
+
+  // block ghost element (lazy created inside timeline trackEl)
+  function getBlockGhost(trackEl){
+    if(!_blockGhost||!trackEl.contains(_blockGhost)){
+      _blockGhost=document.createElement('div');
+      _blockGhost.className='ftl-block-ghost';
+      trackEl.appendChild(_blockGhost);
+    }
+    return _blockGhost;
+  }
+  function hideBlockGhost(){ if(_blockGhost) _blockGhost.style.display='none'; }
+
+  function initBlockDraw(tl){
+    tl.trackEl.addEventListener('pointerdown',(e)=>{
+      if(!_blockModeActive) return;
+      const bar=e.target.closest('.vis-item'); if(bar) return; // let drag handle bars
+      const lay=tl._lay; if(!lay) return;
+      e.preventDefault(); e.stopPropagation();
+      const rect=tl.trackEl.getBoundingClientRect();
+      const x=e.clientX-rect.left, y=e.clientY-rect.top;
+      const win=tl.win; const span=+win.end-+win.start;
+      const ms=+win.start+Math.max(0,Math.min(1,x/Math.max(1,rect.width)))*span;
+      // find which group row the y falls in
+      let gid=''; let gy=0,gh=0;
+      for(const g of lay.groups){
+        const gidStr=String(g.id); if(gidStr.startsWith('cat_')||gidStr==='unassigned') continue;
+        const top=lay.top[gidStr],h=lay.h[gidStr];
+        if(y>=top&&y<top+h){ gid=gidStr; gy=top; gh=h; break; }
+      }
+      if(!gid) return;
+      _blockDraw={startMs:ms,gid,x0:x,gy,gh,rect};
+      tl.trackEl.setPointerCapture(e.pointerId);
+      const ghost=getBlockGhost(tl.trackEl);
+      ghost.style.cssText=`display:block;left:${x}px;top:${gy}px;width:2px;height:${gh}px`;
+    },true);
+
+    tl.trackEl.addEventListener('pointermove',(e)=>{
+      if(!_blockDraw) return;
+      const x=e.clientX-_blockDraw.rect.left;
+      const ghost=getBlockGhost(tl.trackEl);
+      const lx=Math.min(_blockDraw.x0,x), rw=Math.abs(x-_blockDraw.x0);
+      ghost.style.left=lx+'px'; ghost.style.width=Math.max(2,rw)+'px';
+    },{passive:true});
+
+    tl.trackEl.addEventListener('pointerup',(e)=>{
+      if(!_blockDraw) return;
+      const bd=_blockDraw; _blockDraw=null;
+      hideBlockGhost();
+      const x=e.clientX-bd.rect.left;
+      const win=tl.win; const span=+win.end-+win.start; const W=bd.rect.width;
+      const msEnd=+win.start+Math.max(0,Math.min(1,x/Math.max(1,W)))*span;
+      const msA=Math.min(bd.startMs,msEnd), msB=Math.max(bd.startMs,msEnd);
+      if(msB-msA<5*60000) return; // too short (< 5 min)
+      const start=new Date(msA), end=new Date(msB);
+      const blockId='maint_'+Date.now();
+      const note=prompt('Maintenance note (optional):','');
+      const item={id:blockId,group:bd.gid,start,end,className:'bkItem maint',maintenanceBlock:true,note:note||'',content:''};
+      try{ itemsDS.add(item); }catch(_){}
+      postToWix({type:'addMaintenanceBlock',fleetVehicleId:bd.gid,start:start.toISOString(),end:end.toISOString(),note:note||''});
+      setStatus('Maintenance block added.');
+    });
+  }
+
+  // ── Print ─────────────────────────────────────────────────
+  document.getElementById('btnPrint')?.addEventListener('click',()=>{
+    const meta=document.getElementById('printMeta');
+    if(meta) meta.textContent=`Range: ${fromEl?.value||'—'} → ${toEl?.value||'—'} · Printed: ${new Date().toLocaleDateString()}`;
+    window.print();
+  });
+
   function hideCtxMenu(){ if(fleetCtxMenu) fleetCtxMenu.classList.remove('open'); ctxItemId=''; }
-  function openCtxMenu(id,x,y){ if(!fleetCtxMenu) return; const it=itemsDS&&id?itemsDS.get(id):null; if(!it) return; ctxItemId=String(id); selectedFleetId=String(id); ctxHeadEl.textContent=`${safe(it.bookingNumber)||safe(it.id)||'Item'} • ${safe(it.customerName)||'—'}`; fleetCtxMenu.style.left=`${Math.max(8,x)}px`; fleetCtxMenu.style.top=`${Math.max(8,y)}px`; fleetCtxMenu.classList.add('open'); }
+  function openCtxMenu(id,x,y){
+    if(!fleetCtxMenu) return;
+    const it=itemsDS&&id?itemsDS.get(id):null; if(!it) return;
+    ctxItemId=String(id); selectedFleetId=String(id);
+    const isMaint=!!it.maintenanceBlock;
+    ctxHeadEl.textContent=isMaint?'🔧 Maintenance block':`${safe(it.bookingNumber)||safe(it.id)||'Item'} • ${safe(it.customerName)||'—'}`;
+    // toggle booking-specific vs maint-specific items
+    fleetCtxMenu.querySelectorAll('[data-ctx]').forEach(btn=>{
+      const a=btn.getAttribute('data-ctx');
+      const maintOnly=(a==='remove-block');
+      const bookingOnly=(a==='contract'||a==='copy'||a==='vehicle'||a==='move'||a==='unassign'||a==='cancel');
+      btn.style.display=(isMaint&&bookingOnly)||((!isMaint)&&maintOnly)?'none':'';
+    });
+    fleetCtxMenu.style.left=`${Math.max(8,x)}px`; fleetCtxMenu.style.top=`${Math.max(8,y)}px`;
+    fleetCtxMenu.classList.add('open');
+  }
 
   function updateStats(unassignedCount){
     if(uCountEl) uCountEl.textContent=String(unassignedCount||0);
@@ -1470,6 +1670,7 @@ button:active{transform:scale(.97)}
 
     // Width-aware bar content: progressively reveal lock icon, customer, time, booking#.
     _barContent(it,px){
+      if(it.maintenanceBlock) return '<div class="ftl-bar-in" title="Maintenance block"><span class="ftl-bar-main">🔧 '+(it.note?escHtml(String(it.note)):'Maintenance')+'</span></div>';
       const locked=/Active Rental|Pre Check-In/i.test(String(it.rentalState||''));
       const lock=locked?'<span class="ftl-bar-lock">🔒</span>':'';
       const name=escHtml(it.customerName||'—');
@@ -1589,6 +1790,14 @@ button:active{transform:scale(.97)}
         } else {
           row.innerHTML=String(g.content||gid);
           this._labels[gid]=(gid==='unassigned')?'Unassigned': (g.plate||g.label||g.vehicleLabel||(row.textContent||'').replace(/\s+/g,' ').trim().slice(0,28)||gid);
+          // vehicle note button
+          if(gid!=='unassigned'){
+            const nb=_mk('button','ftl-note-btn'+(vehicleNotes.has(gid)&&vehicleNotes.get(gid)?' has-note':''));
+            nb.type='button'; nb.title='Vehicle note'; nb.textContent='📝';
+            nb.setAttribute('data-note-gid',gid);
+            nb.addEventListener('click',e=>{ e.stopPropagation(); openNotePopover(gid,e); });
+            (row.querySelector('.fleetGroupCell')||row).appendChild(nb);
+          }
           // utilization strip
           const uinfo=util[gid];
           if(uinfo){
@@ -1867,6 +2076,7 @@ button:active{transform:scale(.97)}
       if(String(cur&&cur.group||'')===gid){ this.redraw(); return; }
       // Drop TO staging: unassign on backend, park locally in staging row
       if(gid===STAGING_GROUP_ID){
+        _undoStack.push({bookingId:String(id),oldGroup:String(cur&&cur.group||''),newGroup:STAGING_GROUP_ID}); if(_undoStack.length>20)_undoStack.shift();
         stagingSet.add(String(id)); saveStagingSet();
         try{ this.itemsDS.update({id,group:STAGING_GROUP_ID}); }catch(_){}
         postToWix({type:'moveBooking',bookingId:id,newVehicleId:null});
@@ -1884,6 +2094,7 @@ button:active{transform:scale(.97)}
           if(clash){ setStatus('CONFLICT: '+this._labels[gid]+' already has an overlapping booking — move blocked'); this.redraw(); return; }
         }catch(_){}
       }
+      _undoStack.push({bookingId:String(id),oldGroup:String(cur&&cur.group||''),newGroup:gid}); if(_undoStack.length>20)_undoStack.shift();
       pendingOldGroup.set(String(id),String(cur&&cur.group||''));
       try{ this.itemsDS.update({id,group:gid}); }catch(_){}
       const newVehicleId=(gid==='unassigned')?null:gid;
@@ -1904,6 +2115,7 @@ button:active{transform:scale(.97)}
     timeline.on('changed',()=>{ syncCalHeader(); });
     timeline.on('select',(props)=>{ try{ const id=props?.items?.[0]; selectedFleetId=id?String(id):''; if(id){ const it=itemsDS.get(id); if(it) openBookingPanel(it); }else closeBookingPanel(); }catch(_){} });
     timeline.on('doubleClick',(props)=>{ try{ const id=props?.item; if(!id) return; const it=itemsDS.get(id); if(it) openBookingPanel(it); }catch(_){} });
+    initBlockDraw(timeline);
 
     window._tlInitHeight=document.getElementById('timeline').offsetHeight;
     setStatus('READY • waiting for data…');
@@ -1991,8 +2203,67 @@ button:active{transform:scale(.97)}
     setStatus(_stationFilter?`STATION: ${_stationFilter} · filtered`:'STATION: All stations');
   });
 
-  document.addEventListener('click',(e)=>{ if(!fleetCtxMenu?.contains(e.target)) hideCtxMenu(); if(!e.target.closest('.ftl-move-panel')) closeMovePanel(); });
-  fleetCtxMenu?.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-ctx]'); if(!btn) return; const it=itemsDS&&ctxItemId?itemsDS.get(ctxItemId):null; const act=btn.getAttribute('data-ctx'); hideCtxMenu(); if(!it) return; if(act==='contract') return openFleetContract(it); if(act==='copy'){ copyTextWithFallback(safe(it.bookingNumber||it.id||''),'Booking # copied.','Copy failed.'); return; } if(act==='vehicle') return openFleetVehicleCard(it); if(act==='daily') return openFleetDaily(it); if(act==='bookings') return openFleetBookings(it); if(act==='auto'){ postToWix({type:'autoAssignSingle',bookingId:safe(it.id)}); return; } if(act==='move'){ openMovePanel(safe(it.id),fleetCtxMenu.getBoundingClientRect().right+4,fleetCtxMenu.getBoundingClientRect().top); return; } if(act==='unassign'){ postToWix({type:'moveBooking',bookingId:safe(it.id),newVehicleId:''}); return; } if(act==='cancel'){ if(confirm(`Cancel booking ${it.bookingNumber||it.id}?\n\nThis will send a cancel request.`)){ postToWix({type:'cancelBooking',bookingId:safe(it.id)}); setStatus(`Cancel request sent: ${safe(it.bookingNumber||it.id)}`); } return; } });
+  document.addEventListener('click',(e)=>{
+    if(!fleetCtxMenu?.contains(e.target)) hideCtxMenu();
+    if(!e.target.closest('.ftl-move-panel')) closeMovePanel();
+    const pop=document.getElementById('notePopover');
+    if(pop&&pop.classList.contains('open')&&!pop.contains(e.target)&&!e.target.closest('.ftl-note-btn')) closeNotePopover();
+  });
+
+  // ── Multi-select (Ctrl/Cmd+click on bars) ─────────────────
+  document.getElementById('timeline')?.addEventListener('click',(e)=>{
+    if(!e.ctrlKey&&!e.metaKey) return;
+    const bar=e.target.closest('.vis-item'); if(!bar||!timeline) return;
+    const id=bar.getAttribute('data-id'); if(!id) return;
+    e.stopImmediatePropagation();
+    if(timeline.selection.has(id)) timeline.selection.delete(id); else timeline.selection.add(id);
+    if(timeline.selection.size===1) selectedFleetId=[...timeline.selection][0]; else selectedFleetId='';
+    timeline.redraw(); updateBulkBar();
+  },true);
+
+  function updateBulkBar(){
+    const bar=document.getElementById('bulkBar'); const cnt=document.getElementById('bulkCount');
+    if(!bar||!cnt) return;
+    const n=timeline?timeline.selection.size:0;
+    cnt.textContent=n+' selected'; bar.classList.toggle('open',n>1);
+  }
+  document.getElementById('bulkUnassign')?.addEventListener('click',()=>{
+    if(!timeline||!itemsDS) return;
+    const ids=[...timeline.selection].filter(id=>{const it=itemsDS.get(id);return it&&!it.maintenanceBlock&&!/Active Rental|Pre Check-In/i.test(String(it.rentalState||''));});
+    if(!ids.length){setStatus('All selected are locked or maintenance blocks.');return;}
+    if(!confirm(`Unassign ${ids.length} booking(s)?`)) return;
+    ids.forEach(id=>{
+      const it=itemsDS.get(id); if(!it) return;
+      _undoStack.push({bookingId:id,oldGroup:String(it.group||''),newGroup:'unassigned'}); if(_undoStack.length>20)_undoStack.shift();
+      try{itemsDS.update({id,group:'unassigned'});}catch(_){}
+      postToWix({type:'moveBooking',bookingId:id,newVehicleId:null});
+    });
+    timeline.selection=new Set(); timeline.redraw(); updateBulkBar();
+    setStatus(`Unassigned ${ids.length} booking(s).`);
+  });
+  document.getElementById('bulkStage')?.addEventListener('click',()=>{
+    if(!timeline||!itemsDS) return;
+    const ids=[...timeline.selection].filter(id=>{const it=itemsDS.get(id);return it&&!it.maintenanceBlock&&!/Active Rental|Pre Check-In/i.test(String(it.rentalState||''));});
+    if(!ids.length){setStatus('All selected are locked.');return;}
+    ids.forEach(id=>{
+      const it=itemsDS.get(id); if(!it) return;
+      stagingSet.add(id); saveStagingSet();
+      _undoStack.push({bookingId:id,oldGroup:String(it.group||''),newGroup:STAGING_GROUP_ID}); if(_undoStack.length>20)_undoStack.shift();
+      try{itemsDS.update({id,group:STAGING_GROUP_ID});}catch(_){}
+      postToWix({type:'moveBooking',bookingId:id,newVehicleId:null});
+    });
+    timeline.selection=new Set(); timeline.redraw(); updateBulkBar();
+    setStatus(`Staged ${ids.length} booking(s).`);
+  });
+  document.getElementById('bulkMove')?.addEventListener('click',()=>{
+    if(!timeline||!itemsDS) return;
+    _bulkMoveTarget=[...timeline.selection].filter(id=>{const it=itemsDS.get(id);return it&&!it.maintenanceBlock&&!/Active Rental|Pre Check-In/i.test(String(it.rentalState||''));});
+    if(!_bulkMoveTarget.length) return;
+    const it=itemsDS.get(_bulkMoveTarget[0]); if(!it) return;
+    openMovePanel(String(it.id),window.innerWidth/2-120,window.innerHeight/2-100);
+  });
+  document.getElementById('bulkClear')?.addEventListener('click',()=>{ if(timeline){timeline.selection=new Set();timeline.redraw();} updateBulkBar(); });
+  fleetCtxMenu?.addEventListener('click',(e)=>{ const btn=e.target.closest('[data-ctx]'); if(!btn) return; const it=itemsDS&&ctxItemId?itemsDS.get(ctxItemId):null; const act=btn.getAttribute('data-ctx'); hideCtxMenu(); if(!it) return; if(act==='contract') return openFleetContract(it); if(act==='copy'){ copyTextWithFallback(safe(it.bookingNumber||it.id||''),'Booking # copied.','Copy failed.'); return; } if(act==='vehicle') return openFleetVehicleCard(it); if(act==='daily') return openFleetDaily(it); if(act==='bookings') return openFleetBookings(it); if(act==='auto'){ postToWix({type:'autoAssignSingle',bookingId:safe(it.id)}); return; } if(act==='move'){ openMovePanel(safe(it.id),fleetCtxMenu.getBoundingClientRect().right+4,fleetCtxMenu.getBoundingClientRect().top); return; } if(act==='unassign'){ postToWix({type:'moveBooking',bookingId:safe(it.id),newVehicleId:''}); return; } if(act==='cancel'){ if(confirm(`Cancel booking ${it.bookingNumber||it.id}?\n\nThis will send a cancel request.`)){ postToWix({type:'cancelBooking',bookingId:safe(it.id)}); setStatus(`Cancel request sent: ${safe(it.bookingNumber||it.id)}`); } return; } if(act==='remove-block'&&it.maintenanceBlock){ try{itemsDS.remove(safe(it.id));}catch(_){} postToWix({type:'removeMaintenanceBlock',blockId:safe(it.id)}); setStatus('Maintenance block removed.'); return; } });
 
   // ── Move-to-vehicle panel ──────────────────────────────────
   let _movePanelEl=null;
@@ -2030,11 +2301,21 @@ button:active{transform:scale(.97)}
       btn.addEventListener('click',()=>{
         const newGid=btn.getAttribute('data-move-gid');
         closeMovePanel();
-        if(!newGid||!itemId) return;
-        pendingOldGroup.set(String(itemId),String(it.group||''));
-        try{ itemsDS.update({id:itemId,group:newGid}); }catch(_){}
-        postToWix({type:'moveBooking',bookingId:itemId,newVehicleId:newGid==='unassigned'?null:newGid});
-        setStatus('Moving booking → '+(newGid==='unassigned'?'Unassigned':newGid.slice(-8))+' …');
+        if(!newGid) return;
+        // bulk move support — if _bulkMoveTarget has entries, apply to all
+        const targets=_bulkMoveTarget.length>0?_bulkMoveTarget:[itemId].filter(Boolean);
+        _bulkMoveTarget=[];
+        targets.forEach(tid=>{
+          const tit=itemsDS&&tid?itemsDS.get(tid):null; if(!tit) return;
+          if(/Active Rental|Pre Check-In/i.test(String(tit.rentalState||''))) return;
+          if(String(tit.group||'')===STAGING_GROUP_ID){ stagingSet.delete(String(tid)); saveStagingSet(); }
+          _undoStack.push({bookingId:String(tid),oldGroup:String(tit.group||''),newGroup:newGid}); if(_undoStack.length>20)_undoStack.shift();
+          pendingOldGroup.set(String(tid),String(tit.group||''));
+          try{ itemsDS.update({id:tid,group:newGid}); }catch(_){}
+          postToWix({type:'moveBooking',bookingId:tid,newVehicleId:newGid==='unassigned'?null:newGid});
+        });
+        if(timeline){ timeline.selection=new Set(); timeline.redraw(); } updateBulkBar();
+        setStatus('Moving '+targets.length+' booking(s) → '+(newGid==='unassigned'?'Unassigned':newGid.slice(-8))+' …');
       });
     });
   }
@@ -2042,19 +2323,61 @@ button:active{transform:scale(.97)}
   // ── Keyboard navigation ───────────────────────────────────
   document.addEventListener('keydown',(e)=>{
     const tag=(document.activeElement&&document.activeElement.tagName)||'';
+    // Ctrl+Z works everywhere except text inputs
+    if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.shiftKey){ undoLastMove(); e.preventDefault(); return; }
     if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)) return;
     if(!timeline) return;
+    // Ctrl+F or / → focus search
+    if(((e.ctrlKey||e.metaKey)&&(e.key==='f'||e.key==='F'))||e.key==='/'){
+      const sb=document.getElementById('searchBox');
+      if(sb){ sb.focus(); sb.select(); document.getElementById('tlSrchWrap')?.classList.add('open'); }
+      e.preventDefault(); return;
+    }
     const win=timeline.getWindow();
     const span=win.end-win.start;
-    if(e.key==='ArrowLeft'){ timeline.moveTo(new Date(win.start.getTime()+span*0.25)); e.preventDefault(); return; }
-    if(e.key==='ArrowRight'){ timeline.moveTo(new Date(win.start.getTime()+span*0.75)); e.preventDefault(); return; }
+    // Arrow keys pan the view (no modifier)
+    if(!e.ctrlKey&&!e.metaKey&&e.key==='ArrowLeft'){ timeline.moveTo(new Date(win.start.getTime()+span*0.25)); e.preventDefault(); return; }
+    if(!e.ctrlKey&&!e.metaKey&&e.key==='ArrowRight'){ timeline.moveTo(new Date(win.start.getTime()+span*0.75)); e.preventDefault(); return; }
+    // Tab — navigate between booking bars
+    if(e.key==='Tab'){
+      const vis=itemsDS?(itemsDS.get()||[]).filter(it=>!it.maintenanceBlock):[];
+      if(!vis.length){ e.preventDefault(); return; }
+      const sorted=[...vis].sort((a,b)=>+new Date(a.start)-+new Date(b.start));
+      const idx=sorted.findIndex(it=>String(it.id)===String(selectedFleetId));
+      const next=e.shiftKey?(idx<=0?sorted.length-1:idx-1):(idx>=sorted.length-1?0:idx+1);
+      const it=sorted[next]; selectedFleetId=String(it.id);
+      timeline.selection=new Set([String(it.id)]); timeline.redraw();
+      openBookingPanel(it); e.preventDefault(); return;
+    }
+    if(e.key==='Enter'){ const it=selectedFleetId&&itemsDS?itemsDS.get(selectedFleetId):null; if(it) openBookingPanel(it); e.preventDefault(); return; }
     if(e.key==='+'||e.key==='='){ timeline.zoomIn(0.3); e.preventDefault(); return; }
     if(e.key==='-'){ timeline.zoomOut(0.3); e.preventDefault(); return; }
     if(e.key==='t'||e.key==='T'){ timeline.moveTo(new Date()); e.preventDefault(); return; }
     if(e.key==='f'||e.key==='F'){ timeline.fit(); e.preventDefault(); return; }
+    // U — unassign selected, S — stage selected (no modifier)
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==='u'||e.key==='U')){
+      const it=selectedFleetId&&itemsDS?itemsDS.get(selectedFleetId):null;
+      if(it&&!/Active Rental|Pre Check-In/i.test(String(it.rentalState||''))){
+        _undoStack.push({bookingId:String(it.id),oldGroup:String(it.group||''),newGroup:'unassigned'}); if(_undoStack.length>20)_undoStack.shift();
+        try{itemsDS.update({id:it.id,group:'unassigned'});}catch(_){}
+        postToWix({type:'moveBooking',bookingId:safe(it.id),newVehicleId:null});
+        setStatus(`Unassigned: ${safe(it.bookingNumber||it.id)}`);
+      } e.preventDefault(); return;
+    }
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==='s'||e.key==='S')){
+      const it=selectedFleetId&&itemsDS?itemsDS.get(selectedFleetId):null;
+      if(it&&!/Active Rental|Pre Check-In/i.test(String(it.rentalState||''))){
+        stagingSet.add(String(it.id)); saveStagingSet();
+        _undoStack.push({bookingId:String(it.id),oldGroup:String(it.group||''),newGroup:STAGING_GROUP_ID}); if(_undoStack.length>20)_undoStack.shift();
+        try{itemsDS.update({id:it.id,group:STAGING_GROUP_ID});}catch(_){}
+        postToWix({type:'moveBooking',bookingId:safe(it.id),newVehicleId:null});
+        setStatus(`Staged: ${safe(it.bookingNumber||it.id)}`);
+      } e.preventDefault(); return;
+    }
     if(e.key==='Escape'){
       timeline.selection=new Set(); timeline.redraw();
-      selectedFleetId=''; hideCtxMenu(); hideHoverTip(); closeMovePanel();
+      selectedFleetId=''; hideCtxMenu(); hideHoverTip(); closeMovePanel(); closeBookingPanel(); closeNotePopover();
+      updateBulkBar(); setBlockMode(false);
       e.preventDefault(); return;
     }
   });
@@ -2312,6 +2635,34 @@ button:active{transform:scale(.97)}
         const it=itemsDS.get(data.bookingId);
         if(it){ const center=new Date((new Date(it.start).getTime()+new Date(it.end).getTime())/2); timeline.moveTo(center,{animation:true}); }
       }catch(e){}
+      return;
+    }
+
+    if(data.type==='vehicleNotes'){
+      try{
+        const notes=data.notes||{};
+        Object.entries(notes).forEach(([vid,note])=>{ if(note) vehicleNotes.set(String(vid),String(note)); else vehicleNotes.delete(String(vid)); });
+        if(timeline) timeline.redraw();
+      }catch(_){}
+      return;
+    }
+
+    if(data.type==='maintenanceBlocks'){
+      try{
+        const blocks=Array.isArray(data.blocks)?data.blocks:[];
+        // remove existing maint blocks then re-add from server
+        const existing=(itemsDS.get()||[]).filter(it=>it.maintenanceBlock).map(it=>it.id);
+        if(existing.length) try{itemsDS.remove(existing);}catch(_){}
+        const toAdd=blocks.map(b=>({
+          id:String(b.id||'maint_'+Math.random()),
+          group:String(b.fleetVehicleId||b.vehicleId||''),
+          start:new Date(b.start),end:new Date(b.end),
+          className:'bkItem maint',maintenanceBlock:true,
+          note:String(b.note||''),content:''
+        })).filter(b=>b.group);
+        if(toAdd.length) try{itemsDS.add(toAdd);}catch(_){}
+        if(timeline) timeline.redraw();
+      }catch(_){}
       return;
     }
   });
