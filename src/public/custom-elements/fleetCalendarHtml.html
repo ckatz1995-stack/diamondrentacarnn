@@ -304,8 +304,6 @@ button:active{transform:scale(.97)}
 /* ── maintenance block bars ──────────────── */
 .vis-item.bkItem.maint{background:repeating-linear-gradient(45deg,rgba(249,115,22,.85),rgba(249,115,22,.85) 5px,rgba(249,115,22,.38) 5px,rgba(249,115,22,.38) 10px);color:#7c2d12;cursor:not-allowed!important}
 .vis-item.bkItem.maint.ftl-conflict{outline-color:rgba(249,115,22,.9)}
-.ftl-block-ghost{position:absolute;background:rgba(249,115,22,.18);border:2px dashed rgba(249,115,22,.75);border-radius:4px;pointer-events:none;z-index:30;display:none}
-
 /* ── left panel — force width & style ───── */
 .vis-panel.vis-left{
   width:var(--lw)!important;max-width:var(--lw)!important;
@@ -640,7 +638,6 @@ button:active{transform:scale(.97)}
         <button id="btnApplyRange" class="btnPri" type="button">Apply</button>
         <button id="btnToday" type="button">Today</button>
         <div id="conflictBadge" title="Bookings with conflicts or tight turnaround">⚠ <span id="conflictCount">0</span> conflicts</div>
-        <button id="btnBlockMode" type="button" title="Maintenance block mode — drag empty space to block a vehicle">🔧</button>
         <button id="btnPrint" type="button" title="Print fleet schedule">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="1" width="10" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="6" width="14" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="10" width="8" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="white"/><circle cx="12" cy="9.5" r="1" fill="currentColor"/></svg>
         </button>
@@ -1211,7 +1208,6 @@ button:active{transform:scale(.97)}
   const pendingOldGroup = new Map();
   const _undoStack = []; // [{bookingId,oldGroup,newGroup}] — last 20 drag/drop moves
   const vehicleNotes = new Map(); // vehicleId → note text
-  let _blockModeActive = false;
   let _bulkMoveTarget = []; // ids pending bulk move
   const COL_WIDTHS_KEY = 'diamond.fleet.colWidths.v1';
   let _colWidths = {plate:130,model:130};
@@ -1389,82 +1385,6 @@ button:active{transform:scale(.97)}
     if(timeline) timeline.redraw();
     closeNotePopover(); setStatus('Vehicle note saved.');
   });
-
-  // ── Maintenance block mode ────────────────────────────────
-  let _blockGhost=null;
-  let _blockDraw=null; // {startMs, gid, x0, y0}
-  function setBlockMode(on){
-    _blockModeActive=on;
-    const btn=document.getElementById('btnBlockMode');
-    if(btn) btn.style.background=on?'linear-gradient(135deg,var(--pri1),var(--pri2))':'';
-    if(btn) btn.style.color=on?'#fff':'';
-    const tl=document.getElementById('timeline');
-    if(tl) tl.style.cursor=on?'crosshair':'';
-    setStatus(on?'Block mode ON — drag empty space to add a maintenance block. Click 🔧 again to exit.':'Block mode OFF');
-  }
-  document.getElementById('btnBlockMode')?.addEventListener('click',()=>setBlockMode(!_blockModeActive));
-
-  // block ghost element (lazy created inside timeline trackEl)
-  function getBlockGhost(trackEl){
-    if(!_blockGhost||!trackEl.contains(_blockGhost)){
-      _blockGhost=document.createElement('div');
-      _blockGhost.className='ftl-block-ghost';
-      trackEl.appendChild(_blockGhost);
-    }
-    return _blockGhost;
-  }
-  function hideBlockGhost(){ if(_blockGhost) _blockGhost.style.display='none'; }
-
-  function initBlockDraw(tl){
-    tl.trackEl.addEventListener('pointerdown',(e)=>{
-      if(!_blockModeActive) return;
-      const bar=e.target.closest('.vis-item'); if(bar) return; // let drag handle bars
-      const lay=tl._lay; if(!lay) return;
-      e.preventDefault(); e.stopPropagation();
-      const rect=tl.trackEl.getBoundingClientRect();
-      const x=e.clientX-rect.left, y=e.clientY-rect.top;
-      const win=tl.win; const span=+win.end-+win.start;
-      const ms=+win.start+Math.max(0,Math.min(1,x/Math.max(1,rect.width)))*span;
-      // find which group row the y falls in
-      let gid=''; let gy=0,gh=0;
-      for(const g of lay.groups){
-        const gidStr=String(g.id); if(gidStr.startsWith('cat_')||gidStr==='unassigned') continue;
-        const top=lay.top[gidStr],h=lay.h[gidStr];
-        if(y>=top&&y<top+h){ gid=gidStr; gy=top; gh=h; break; }
-      }
-      if(!gid) return;
-      _blockDraw={startMs:ms,gid,x0:x,gy,gh,rect};
-      tl.trackEl.setPointerCapture(e.pointerId);
-      const ghost=getBlockGhost(tl.trackEl);
-      ghost.style.cssText=`display:block;left:${x}px;top:${gy}px;width:2px;height:${gh}px`;
-    },true);
-
-    tl.trackEl.addEventListener('pointermove',(e)=>{
-      if(!_blockDraw) return;
-      const x=e.clientX-_blockDraw.rect.left;
-      const ghost=getBlockGhost(tl.trackEl);
-      const lx=Math.min(_blockDraw.x0,x), rw=Math.abs(x-_blockDraw.x0);
-      ghost.style.left=lx+'px'; ghost.style.width=Math.max(2,rw)+'px';
-    },{passive:true});
-
-    tl.trackEl.addEventListener('pointerup',(e)=>{
-      if(!_blockDraw) return;
-      const bd=_blockDraw; _blockDraw=null;
-      hideBlockGhost();
-      const x=e.clientX-bd.rect.left;
-      const win=tl.win; const span=+win.end-+win.start; const W=bd.rect.width;
-      const msEnd=+win.start+Math.max(0,Math.min(1,x/Math.max(1,W)))*span;
-      const msA=Math.min(bd.startMs,msEnd), msB=Math.max(bd.startMs,msEnd);
-      if(msB-msA<5*60000) return; // too short (< 5 min)
-      const start=new Date(msA), end=new Date(msB);
-      const blockId='maint_'+Date.now();
-      const note=prompt('Maintenance note (optional):','');
-      const item={id:blockId,group:bd.gid,start,end,className:'bkItem maint',maintenanceBlock:true,note:note||'',content:''};
-      try{ itemsDS.add(item); }catch(_){}
-      postToWix({type:'addMaintenanceBlock',fleetVehicleId:bd.gid,start:start.toISOString(),end:end.toISOString(),note:note||''});
-      setStatus('Maintenance block added.');
-    });
-  }
 
   // ── Print ─────────────────────────────────────────────────
   document.getElementById('btnPrint')?.addEventListener('click',()=>{
@@ -2115,7 +2035,6 @@ button:active{transform:scale(.97)}
     timeline.on('changed',()=>{ syncCalHeader(); });
     timeline.on('select',(props)=>{ try{ const id=props?.items?.[0]; selectedFleetId=id?String(id):''; if(id){ const it=itemsDS.get(id); if(it) openBookingPanel(it); }else closeBookingPanel(); }catch(_){} });
     timeline.on('doubleClick',(props)=>{ try{ const id=props?.item; if(!id) return; const it=itemsDS.get(id); if(it) openBookingPanel(it); }catch(_){} });
-    initBlockDraw(timeline);
 
     window._tlInitHeight=document.getElementById('timeline').offsetHeight;
     setStatus('READY • waiting for data…');
