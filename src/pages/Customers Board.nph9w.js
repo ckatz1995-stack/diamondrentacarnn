@@ -1,9 +1,3 @@
-// SETUP IN WIX STUDIO:
-// 1. Create a new page with URL /myroom-customers
-// 2. Add an HTML iframe element, set source: custom-elements/customersHtml.html
-// 3. Set the iframe element ID to #customersHtml
-// 4. After Wix assigns a page ID, rename this file to: Customers Board.<wix-page-id>.js
-
 import wixLocation from 'wix-location';
 import { searchCustomers, getCustomerCard, updateCustomerCard, getCustomerBookings, getStaffTickets, replyToTicketStaff, setTicketStatus, createMemberNotification } from 'backend/customerCards.jsw';
 import { buildUserContext, logoutBackroom, requireBackroomAccess } from 'public/backroomAuth';
@@ -35,8 +29,9 @@ $w.onReady(async function () {
     const msg = normalizeBridgeMessage(event && event.data);
     if (!msg || typeof msg !== 'object' || !msg.type) return;
 
-    if (msg.type === 'requestUserContext') {
+    if (msg.type === 'customersReady' || msg.type === 'requestUserContext') {
       post(buildUserContext(authState));
+      if (msg.type === 'customersReady') await loadInitialCustomers();
       return;
     }
 
@@ -158,7 +153,18 @@ $w.onReady(async function () {
 
   post(buildUserContext(authState));
   post({ type: 'resume' });
+  await loadInitialCustomers();
 });
+
+async function loadInitialCustomers() {
+  try {
+    const res = await searchCustomers({ authToken: authState.sessionToken, q: '', limit: 40, skip: 0 });
+    post({ type: 'customersResult', ...res });
+  } catch (err) {
+    logErr('loadInitialCustomers', err);
+    post({ type: 'customersResult', ok: false, items: [], total: 0 });
+  }
+}
 
 function post(payload) {
   const html = getHtml();
