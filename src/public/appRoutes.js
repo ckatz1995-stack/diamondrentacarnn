@@ -3,6 +3,7 @@ export const APP_ROUTES = {
   home: '/myroom-home',
   daily: '/myroom-daily',
   fleet: '/myroom-fleetchart',
+  fleetboard: '/myroom-fleet',
   bookings: '/myroom-bookingboard',
   contract: '/myroom-contract',
   vehiclecard: '/myroom-vehiclecard',

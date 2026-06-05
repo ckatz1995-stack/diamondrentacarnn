@@ -45,7 +45,7 @@ $w.onReady(async function () {
       const route = String(msg.route || '');
       if (route === 'home') return wixLocation.to(ROUTES.home);
       if (route === 'daily') return wixLocation.to(ROUTES.daily);
-      if (route === 'fleet') return wixLocation.to(ROUTES.vehiclecard);
+      if (route === 'fleet') return wixLocation.to(ROUTES.fleetboard);
       if (route === 'bookings') return wixLocation.to(ROUTES.bookings);
       if (route === 'customers') return wixLocation.to(ROUTES.customers);
       if (route === 'settings') return wixLocation.to(ROUTES.settings);
