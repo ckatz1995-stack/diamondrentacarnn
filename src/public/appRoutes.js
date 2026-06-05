@@ -5,7 +5,7 @@ export const APP_ROUTES = {
   fleet: '/myroom-fleetchart',
   bookings: '/myroom-bookingboard',
   contract: '/myroom-contract',
-  vehiclecard: '/myroom-fleet',
+  vehiclecard: '/myroom-vehiclecard',
   customers: '/myroom-customers',
   settings: '/account-settings',
   pricing: '/account-settings'

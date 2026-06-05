@@ -5,7 +5,7 @@ import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolve
 import { APP_ROUTES as ROUTES } from 'public/appRoutes';
 import { collapseHtmlSiblings } from 'public/pageVisibility';
 
-const HTML_IDS = ['#vehicleCardHtml'];
+const HTML_IDS = ['#vehiclecard'];
 const MIN_HEIGHT = 860;
 const MAX_HEIGHT = 5000;
 let authState = null;
@@ -119,7 +119,7 @@ $w.onReady(async function () {
       if (!bookingId) return;
       const params = new URLSearchParams();
       params.set('bookingId', bookingId);
-      params.set('from', 'fleet');
+      params.set('from', 'vehiclecard');
       wixLocation.to(`${ROUTES.contract}?${params.toString()}`);
       return;
     }
