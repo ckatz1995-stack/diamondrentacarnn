@@ -1,17 +1,17 @@
 import wixLocation from 'wix-location';
-import { getFleetBoard, getVehicleCardData, saveVehicleCardData } from 'backend/vehicleCard.jsw';
+import { getVehicleCardData, saveVehicleCardData, addMaintenanceJob } from 'backend/vehicleCard.jsw';
 import { buildUserContext, logoutBackroom, requireBackroomAccess, getSessionToken } from 'public/backroomAuth';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 import { APP_ROUTES as ROUTES } from 'public/appRoutes';
 import { collapseHtmlSiblings } from 'public/pageVisibility';
 
-const HTML_IDS = ['#fleetHtml'];
+const HTML_IDS = ['#vehicleCardHtml'];
 const MIN_HEIGHT = 860;
 const MAX_HEIGHT = 5000;
 let authState = null;
 
 function logSuppressed(context, error) {
-  console.warn(`[Myroom Fleet] ${context}`, error?.message || error || 'unknown error');
+  console.warn(`[Myroom VehicleCard] ${context}`, error?.message || error || 'unknown error');
 }
 
 $w.onReady(async function () {
@@ -35,14 +35,14 @@ $w.onReady(async function () {
       return;
     }
 
-    if (msg.type === 'requestFleetBoard') {
-      await loadFleetBoard();
+    if (msg.type === 'requestVehicleFromUrl') {
+      await loadVehicleFromUrl();
       return;
     }
 
     if (msg.type === 'menuAction') {
       const action = String(msg.action || '');
-      if (action === 'reload') { await loadFleetBoard(); return; }
+      if (action === 'reload') { await loadVehicleFromUrl(); return; }
       if (action === 'logout') { await logoutBackroom(); wixLocation.to(ROUTES.home); return; }
     }
 
@@ -67,18 +67,7 @@ $w.onReady(async function () {
     if (msg.type === 'openVehicleCard') {
       const fleetVehicleId = String(msg.fleetVehicleId || msg.vehicleId || '').trim();
       if (!fleetVehicleId) return;
-      post({ type: 'vcLoading', fleetVehicleId });
-      try {
-        const res = await getVehicleCardData({ sessionToken: resolveAuthToken(), fleetVehicleId });
-        if (res?.success === false) {
-          post({ type: 'vehicleCardData', success: false, message: res.message || 'Error loading vehicle' });
-          return;
-        }
-        post({ type: 'vehicleCardData', success: true, fleet: res.fleet, category: res.category, summary: res.summary, rentals: res.rentals });
-      } catch (error) {
-        logSuppressed('getVehicleCardData failed', error);
-        post({ type: 'vehicleCardData', success: false, message: error?.message || String(error) });
-      }
+      await loadVehicle(fleetVehicleId);
       return;
     }
 
@@ -100,6 +89,31 @@ $w.onReady(async function () {
       return;
     }
 
+    if (msg.type === 'addMaintenanceJob') {
+      const fleetVehicleId = String(msg.fleetVehicleId || '').trim();
+      if (!fleetVehicleId) return;
+      try {
+        const res = await addMaintenanceJob({
+          sessionToken: resolveAuthToken(),
+          fleetVehicleId,
+          start: msg.start,
+          end: msg.end,
+          works: Array.isArray(msg.works) ? msg.works : [],
+          notes: String(msg.notes || ''),
+          durationDays: Number(msg.durationDays || 0),
+        });
+        if (res?.success === false) {
+          post({ type: 'maintenanceJobSaved', success: false, message: res.message || 'Could not create job' });
+          return;
+        }
+        post({ type: 'maintenanceJobSaved', success: true, job: res.job, fleet: res.fleet });
+      } catch (error) {
+        logSuppressed('addMaintenanceJob failed', error);
+        post({ type: 'maintenanceJobSaved', success: false, message: error?.message || String(error) });
+      }
+      return;
+    }
+
     if (msg.type === 'openContract') {
       const bookingId = String(msg.bookingId || '').trim();
       if (!bookingId) return;
@@ -113,11 +127,41 @@ $w.onReady(async function () {
 
   post({ type: 'resume' });
   post(buildUserContext(authState, { siteBase: deriveSiteBase() }));
-  await loadFleetBoard();
+  await loadVehicleFromUrl();
 });
 
 function resolveAuthToken() {
   return String((authState && authState.sessionToken) || getSessionToken() || '').trim();
+}
+
+async function loadVehicleFromUrl() {
+  const fleetVehicleId = String((wixLocation.query && wixLocation.query.fleetVehicleId) || '').trim();
+  if (!fleetVehicleId) {
+    post({ type: 'vehicleCardData', success: false, message: 'No vehicle selected. Open a vehicle from the fleet board.' });
+    return;
+  }
+  await loadVehicle(fleetVehicleId);
+}
+
+async function loadVehicle(fleetVehicleId) {
+  post({ type: 'vcLoading', fleetVehicleId });
+  try {
+    const res = await getVehicleCardData({ sessionToken: resolveAuthToken(), fleetVehicleId });
+    if (res?.success === false) {
+      post({ type: 'vehicleCardData', success: false, message: res.message || 'Error loading vehicle' });
+      return;
+    }
+    post({ type: 'vehicleCardData', success: true, fleet: res.fleet, category: res.category, summary: res.summary, rentals: res.rentals });
+  } catch (error) {
+    logSuppressed('getVehicleCardData failed', error);
+    post({ type: 'vehicleCardData', success: false, message: error?.message || String(error) });
+  }
+}
+
+function post(payload) {
+  const html = getHtmlComponent();
+  if (!html) return;
+  if (!postMessageSafe(html, payload, 'vehicleCard')) logSuppressed('postMessage failed');
 }
 
 function getHtmlIds() {
@@ -129,30 +173,6 @@ function getHtmlIds() {
 function getHtmlComponent() {
   try { return resolveHtmlComponent($w, getHtmlIds()); } catch (error) { logSuppressed('HtmlComponent lookup failed', error); }
   return null;
-}
-
-async function loadFleetBoard() {
-  try {
-    const res = await getFleetBoard({ sessionToken: resolveAuthToken() });
-    if (res?.success === false) {
-      post({ type: 'loadFleetBoard', vehicles: [], summary: {}, debug: { message: res.message || 'Fleet board load failed' } });
-      return;
-    }
-    post({
-      type: 'loadFleetBoard',
-      vehicles: Array.isArray(res?.vehicles) ? res.vehicles : [],
-      summary: res?.summary || {}
-    });
-  } catch (error) {
-    logSuppressed('loadFleetBoard failed', error);
-    post({ type: 'loadFleetBoard', vehicles: [], summary: {}, debug: { error: error?.message || String(error) } });
-  }
-}
-
-function post(payload) {
-  const html = getHtmlComponent();
-  if (!html) return;
-  if (!postMessageSafe(html, payload, 'fleet')) logSuppressed('postMessage failed');
 }
 
 function hideOtherComponents(keepIds) {

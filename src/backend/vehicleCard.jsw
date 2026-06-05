@@ -281,6 +281,50 @@ export async function saveVehicleCardData({ sessionToken, fleetVehicleId, patch 
   return { success: true, fleet: normalizeFleet(updated) };
 }
 
+export async function addMaintenanceJob({ sessionToken, fleetVehicleId, start, end, works, notes, durationDays } = {}) {
+  await requireStaffAccess({ sessionToken, area: 'fleet', action: 'Edit' });
+  const targetId = txt(fleetVehicleId);
+  if (!targetId) throw new Error('MISSING_FLEET_VEHICLE_ID');
+
+  const current = await findFleetRecordByAnyId(targetId);
+  if (!current) throw new Error('FLEET_VEHICLE_NOT_FOUND');
+
+  const startIso = iso(start);
+  const endIso = iso(end);
+  if (!startIso || !endIso) throw new Error('INVALID_DATES');
+
+  const worksArr = Array.isArray(works) ? works.map(txt).filter(Boolean) : [];
+  const job = {
+    fleetVehicleId: targetId,
+    start: startIso,
+    end: endIso,
+    works: worksArr,
+    notes: txt(notes),
+    durationDays: Number(durationDays) || 0,
+    createdAt: new Date().toISOString(),
+  };
+
+  let savedJob = { ...job, _id: 'maint_' + Date.now() };
+  try {
+    const inserted = await wixData.insert('MaintenanceJobs', {
+      ...job,
+      works: JSON.stringify(worksArr),
+    }, { suppressAuth: true });
+    savedJob = { ...job, _id: txt(inserted._id) };
+  } catch (_) {}
+
+  const targetCollection = COLLECTION_CANDIDATES.fleet.includes(txt(current._collectionName))
+    ? txt(current._collectionName)
+    : COLLECTIONS.fleet;
+  const updated = await wixData.update(targetCollection, {
+    ...current,
+    operationalStatus: 'maintenance',
+    legacyUpdatedAt: new Date().toISOString(),
+  }, { suppressAuth: true });
+
+  return { success: true, job: savedJob, fleet: normalizeFleet(updated) };
+}
+
 export async function getFleetBoard({ sessionToken } = {}) {
   await requireStaffAccess({ sessionToken, area: 'fleet', action: 'View' });
 

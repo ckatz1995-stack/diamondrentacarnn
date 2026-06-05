@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+:root{
+  --bg:#F0F4FA;--surface:#fff;--surface2:#E8EEF7;--surface3:#f8fafc;
+  --border:rgba(15,23,42,.08);--border2:rgba(15,23,42,.15);
+  --text:#0F172A;--sub:#475569;--muted:#94A3B8;
+  --gold:#A8844A;--gold2:#6C522E;--gold-bg:rgba(180,138,79,.10);--gold-border:rgba(168,132,74,.22);
+  --pri1:#C8A96E;--pri2:#8B6535;
+  --ok:#166534;--warn:#92400E;--danger:#991B1B;
+  --r:10px;--r-lg:14px;--r-pill:999px;
+  --f:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  --sb-w:200px;--sb-cw:44px;
+  --shadow:0 2px 12px rgba(15,23,42,.06);--shadow-lg:0 8px 28px rgba(15,23,42,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);font-family:var(--f);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
+
+/* ── Shell ── */
+.shell{display:flex;height:100vh;overflow:hidden}
+.shell-main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.shell-top{display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex:0 0 auto;min-height:58px;z-index:20}
+.shell-content{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 24px;background:var(--bg)}
+.shell-content::-webkit-scrollbar{width:5px}
+.shell-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+
+/* ── Sidebar ── */
+.sb{width:var(--sb-w);min-width:var(--sb-w);background:linear-gradient(180deg,#2a1f0e 0%,#3d2b12 55%,#4f3a22 100%);display:flex;flex-direction:column;gap:1px;padding:10px 6px 16px;overflow-y:auto;overflow-x:hidden;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06);transition:width .2s,min-width .2s}
+.sb.collapsed{width:var(--sb-cw);min-width:var(--sb-cw);padding:10px 4px 16px}
+.sb-brand{display:flex;align-items:center;gap:8px;padding:8px 4px 12px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:4px;overflow:hidden}
+.sb-logo{width:34px;height:34px;min-width:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;font:900 17px/1 var(--f);flex-shrink:0}
+.sb-brand-text{display:flex;flex-direction:column;gap:2px;overflow:hidden;white-space:nowrap;transition:opacity .15s}
+.sb.collapsed .sb-brand-text{opacity:0;pointer-events:none;width:0}
+.sb-brand-title{font:900 12px/1 var(--f);color:#fff}
+.sb-brand-sub{font:800 9px/1 var(--f);color:rgba(255,255,255,.45)}
+.sb-toggle{display:flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;border:1px solid rgba(255,255,255,.15);border-radius:5px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);cursor:pointer;font-size:9px;font-weight:900;flex-shrink:0}
+.sb-toggle:hover{background:rgba(255,255,255,.16)}
+.sb.collapsed .sb-toggle{margin:0 auto}
+.sb-section{font:900 9px/1 var(--f);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:10px 6px 4px;pointer-events:none;white-space:nowrap;overflow:hidden;transition:opacity .15s}
+.sb.collapsed .sb-section{opacity:0;height:14px;padding:10px 0 4px}
+.sb-item{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;color:rgba(255,255,255,.62);border-radius:8px;padding:8px 6px;font:800 11px/1.2 var(--f);cursor:pointer;text-align:left;transition:background .12s,color .12s;box-shadow:none!important;white-space:nowrap;overflow:hidden}
+.sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+.sb-item.active{background:linear-gradient(135deg,rgba(168,132,74,.22),rgba(168,132,74,.10));color:var(--gold);border:1px solid rgba(168,132,74,.22)}
+.sb-item svg{flex:0 0 17px;width:17px;height:17px;opacity:.75}
+.sb-item.active svg{opacity:1}
+.sb-item-label{flex:1;overflow:hidden;text-overflow:ellipsis;transition:opacity .15s}
+.sb.collapsed .sb-item-label{opacity:0;width:0;flex:0 0 0}
+.sb.collapsed .sb-item{justify-content:center;padding:8px 0}
+
+/* ── Top bar ── */
+.page-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.page-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--gold-bg);border:1px solid var(--gold-border);flex:0 0 28px;color:var(--gold)}
+.page-name{display:flex;align-items:center;gap:9px;font:900 15px/1.2 var(--f);color:var(--text)}
+.page-sub{font:700 11px/1 var(--f);color:var(--muted);padding-left:37px}
+.top-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.btn{appearance:none;border:1px solid var(--border2);background:rgba(0,0,0,.04);color:var(--sub);border-radius:var(--r);padding:7px 12px;font:700 11px/1 var(--f);cursor:pointer;transition:background .12s,box-shadow .12s}
+.btn:hover{background:rgba(0,0,0,.08)}
+.btnPri{background:linear-gradient(135deg,var(--pri1),var(--pri2));color:#fff;border:none;box-shadow:0 2px 8px rgba(139,101,53,.22)}
+.btnPri:hover{box-shadow:0 4px 14px rgba(139,101,53,.32)}
+.btnSm{padding:5px 10px;font:700 10.5px/1 var(--f)}
+.userWrap{position:relative;display:inline-flex;align-items:center}
+.userBtn{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border2);background:rgba(15,23,42,.04);border-radius:var(--r-pill);cursor:pointer;font:800 12px/1 var(--f);color:var(--text);transition:background .15s}
+.userBtn:hover{background:rgba(15,23,42,.08)}
+.userBadge{width:27px;height:27px;border-radius:var(--r-pill);display:grid;place-items:center;background:var(--gold-bg);color:var(--gold);font:900 12px/1 var(--f);border:1px solid var(--gold-border)}
+.userMenu{position:absolute;right:0;top:calc(100% + 6px);min-width:200px;background:var(--surface);border:1px solid var(--border2);border-radius:14px;box-shadow:var(--shadow-lg);display:none;z-index:9999;overflow:hidden}
+.userMenu.open{display:block}
+.userMenuHead{padding:12px 14px;background:var(--gold-bg);border-bottom:1px solid var(--gold-border);font:700 11px/1.4 var(--f);color:var(--gold2)}
+.userMenuItem{padding:10px 14px;font:700 12px/1.2 var(--f);color:var(--text);background:transparent;border:0;border-bottom:1px solid var(--border);text-align:left;cursor:pointer;width:100%;transition:background .12s}
+.userMenuItem:last-child{border-bottom:none}
+.userMenuItem:hover{background:rgba(15,23,42,.05)}
+.userMenuItem.danger{color:#B91C1C}
+
+/* ── Vehicle hero ── */
+.vc-hero{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.vc-hero-left{flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px}
+.vc-plate{display:inline-flex;align-items:center;padding:5px 12px;background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;font:900 16px/1 var(--f);color:var(--gold2);letter-spacing:.08em;flex-shrink:0;align-self:flex-start}
+.vc-model{font:900 22px/1.2 var(--f);color:var(--text);letter-spacing:-.02em}
+.vc-cat{font:700 11px/1 var(--f);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.vc-hero-badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.vc-hero-right{display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:var(--r-pill);font:800 11px/1 var(--f);border:1px solid transparent}
+.st-available{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22);color:#065F46}
+.st-out{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold2)}
+.st-notready{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.22);color:#B45309}
+.st-hold{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#B91C1C}
+.st-maintenance{background:rgba(100,116,139,.12);border-color:rgba(100,116,139,.25);color:#475569}
+
+/* ── Metrics row ── */
+.vc-metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:16px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 14px;box-shadow:var(--shadow)}
+.metric-lbl{font:700 9.5px/1 var(--f);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px}
+.metric-val{font:900 20px/1 var(--f);color:var(--text);letter-spacing:-.01em}
+.metric-sub{font:600 9px/1 var(--f);color:var(--muted);margin-top:3px}
+
+/* ── Tabs ── */
+.vc-tabs{display:flex;gap:2px;margin-bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:4px;box-shadow:var(--shadow);align-self:flex-start;overflow:hidden}
+.vc-tab{appearance:none;border:none;background:transparent;padding:7px 16px;font:700 12px/1 var(--f);color:var(--sub);cursor:pointer;border-radius:10px;transition:background .12s,color .12s;white-space:nowrap}
+.vc-tab:hover{background:rgba(0,0,0,.05)}
+.vc-tab.active{background:linear-gradient(135deg,var(--pri1),var(--pri2));color:#fff;box-shadow:0 2px 6px rgba(139,101,53,.22)}
+
+/* ── Section cards ── */
+.section-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px}
+.section-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface3)}
+.section-title{font:700 12px/1 var(--f);color:var(--text);display:flex;align-items:center;gap:6px}
+.section-body{padding:14px 16px}
+
+/* ── Details grid ── */
+.details-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.detail-field{border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;background:var(--surface3)}
+.detail-label{font:600 9.5px/1 var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.detail-value{font:700 12px/1.4 var(--f);color:var(--text)}
+
+/* ── Maintenance jobs ── */
+.maint-empty{text-align:center;padding:32px 20px;color:var(--muted);font:600 12px/1.5 var(--f)}
+.maint-empty svg{display:block;margin:0 auto 10px;opacity:.3}
+.maint-active-banner{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(100,116,139,.08);border:1px solid rgba(100,116,139,.22);border-radius:var(--r);margin-bottom:12px;font:600 12px/1.4 var(--f);color:#475569}
+.maint-banner-icon{font-size:18px;flex-shrink:0}
+.maint-banner-text{flex:1;min-width:0}
+.maint-banner-title{font:700 12px/1 var(--f);margin-bottom:3px}
+.maint-job{border:1px solid var(--border2);border-radius:var(--r-lg);overflow:hidden;margin-bottom:10px}
+.maint-job-head{padding:10px 14px;background:var(--surface3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.maint-job-title{font:700 12px/1 var(--f);color:var(--text);display:flex;align-items:center;gap:7px}
+.maint-job-status{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--r-pill);font:700 9.5px/1 var(--f)}
+.js-active{background:rgba(239,68,68,.09);border:1px solid rgba(239,68,68,.2);color:#B91C1C}
+.js-scheduled{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold2)}
+.js-done{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.18);color:#065F46}
+.maint-job-body{padding:10px 14px}
+.maint-job-meta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px;font:600 11px/1.4 var(--f);color:var(--sub)}
+.maint-job-meta span{display:inline-flex;align-items:center;gap:4px}
+.works-list{display:flex;gap:6px;flex-wrap:wrap}
+.work-tag{display:inline-flex;align-items:center;padding:3px 8px;background:rgba(100,116,139,.09);border:1px solid rgba(100,116,139,.2);border-radius:var(--r-pill);font:600 10px/1 var(--f);color:#475569;gap:4px}
+.maint-job-notes{font:500 11px/1.5 var(--f);color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+
+/* ── History table ── */
+.hist-table{width:100%;border-collapse:collapse;font:600 11px/1.4 var(--f)}
+.hist-table th{padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;font:700 9.5px/1 var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface3);position:sticky;top:0}
+.hist-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+.hist-table tbody tr:last-child td{border-bottom:none}
+.hist-table tbody tr:hover td{background:rgba(0,0,0,.02)}
+.h-badge{display:inline-flex;padding:2px 7px;border-radius:var(--r-pill);font:700 9.5px/1 var(--f);border:1px solid transparent}
+
+/* ── Edit form ── */
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.edit-field label{display:block;font:600 10px/1 var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px}
+.edit-field input,.edit-field select,.edit-field textarea{width:100%;border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;font:600 11px/1.4 var(--f);color:var(--text);background:var(--surface);outline:none;transition:border-color .12s}
+.edit-field input:focus,.edit-field select:focus,.edit-field textarea:focus{border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(168,132,74,.1)}
+.edit-field.span2{grid-column:1/-1}
+.edit-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.toggle-row{display:flex;align-items:center;gap:8px;font:600 11px/1 var(--f);color:var(--sub)}
+.toggle-row input[type=checkbox]{accent-color:var(--gold);width:15px;height:15px}
+
+/* ── Maintenance modal ── */
+#maintOverlay{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(3px)}
+#maintOverlay.open{display:flex}
+#maintModal{background:var(--surface);border-radius:20px;border:1px solid rgba(15,23,42,.1);box-shadow:0 32px 72px rgba(15,23,42,.26);width:min(560px,calc(100vw - 24px));max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-head{padding:14px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#fffaf2,#f7f0e5);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-head-title{font:800 14px/1.3 var(--f);color:var(--text)}
+.modal-head button{background:transparent;border:1px solid var(--border2);border-radius:var(--r-pill);padding:4px 10px;font:700 11px/1 var(--f);color:var(--sub);cursor:pointer}
+.modal-head button:hover{background:rgba(0,0,0,.05)}
+.modal-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
+.modal-body::-webkit-scrollbar{width:4px}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.mf-label{font:700 10.5px/1 var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;display:block}
+.mf-input{width:100%;border:1px solid var(--border2);border-radius:var(--r);padding:8px 11px;font:600 12px/1.4 var(--f);color:var(--text);background:var(--surface);outline:none;transition:border-color .12s}
+.mf-input:focus{border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(168,132,74,.1)}
+.mf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mf-row.three{grid-template-columns:1fr 1fr 1fr}
+/* Duration display */
+#endDateDisplay{font:600 11px/1.4 var(--f);color:var(--sub);padding:6px 0 0;min-height:18px}
+#endDateDisplay.has-end{color:var(--gold2)}
+/* Works preset chips */
+.works-preset{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.wp-chip{appearance:none;border:1px solid var(--border2);background:var(--surface3);border-radius:var(--r-pill);padding:5px 11px;font:600 10.5px/1 var(--f);color:var(--sub);cursor:pointer;transition:all .12s;white-space:nowrap}
+.wp-chip:hover{border-color:var(--gold-border);background:var(--gold-bg)}
+.wp-chip.selected{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold2);font-weight:800}
+.works-custom-row{display:flex;gap:6px;margin-bottom:8px}
+.works-custom-row input{flex:1;border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;font:600 11px/1 var(--f);color:var(--text);background:var(--surface);outline:none}
+.works-custom-row input:focus{border-color:var(--gold-border)}
+.works-custom-row button{border:1px solid var(--gold-border);background:var(--gold-bg);border-radius:var(--r);padding:7px 12px;font:700 11px/1 var(--f);color:var(--gold2);cursor:pointer;white-space:nowrap}
+.works-custom-row button:hover{background:rgba(168,132,74,.2)}
+.selected-works{display:flex;gap:6px;flex-wrap:wrap}
+.sw-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(100,116,139,.09);border:1px solid rgba(100,116,139,.2);border-radius:var(--r-pill);font:700 10.5px/1 var(--f);color:#475569}
+.sw-tag button{background:transparent;border:none;cursor:pointer;color:var(--muted);font-size:11px;line-height:1;padding:0 2px;transition:color .1s}
+.sw-tag button:hover{color:#B91C1C}
+.no-works{font:500 11px/1 var(--f);color:var(--muted);padding:4px 0}
+.modal-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:var(--surface3)}
+
+/* ── Loading / error states ── */
+.state-center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:12px;color:var(--muted)}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.state-icon{font-size:36px;opacity:.3}
+.state-msg{font:600 13px/1.5 var(--f);color:var(--sub);text-align:center}
+
+/* ── Fuel bar ── */
+.fuel-bar{display:flex;gap:2px;align-items:center}
+.fuel-seg{width:12px;height:12px;border-radius:2px;background:var(--border2)}
+.fuel-seg.on-red{background:#EF4444}
+.fuel-seg.on-amber{background:#F59E0B}
+.fuel-seg.on-green{background:#10B981}
+
+/* ── Misc ── */
+.notice{padding:10px 14px;border-radius:var(--r);font:600 11px/1.4 var(--f);margin-bottom:10px;display:none}
+.notice.ok{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);color:#065F46;display:block}
+.notice.err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);color:#B91C1C;display:block}
+@media(max-width:720px){.mf-row{grid-template-columns:1fr}.edit-grid{grid-template-columns:1fr}.vc-metrics{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- Sidebar -->
+<nav class="sb" id="sb">
+  <div class="sb-brand">
+    <div class="sb-logo">D</div>
+    <div class="sb-brand-text">
+      <div class="sb-brand-title">Diamond</div>
+      <div class="sb-brand-sub">Rent A Car</div>
+    </div>
+    <button class="sb-toggle" id="sbToggle" type="button">◀</button>
+  </div>
+  <div class="sb-section">Navigation</div>
+  <button class="sb-item" data-route="home" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="sb-item-label">Home</span>
+  </button>
+  <button class="sb-item" data-route="bookings" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="sb-item-label">Bookings</span>
+  </button>
+  <button class="sb-item" data-route="daily" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span class="sb-item-label">Daily View</span>
+  </button>
+  <button class="sb-item" data-route="fleetCal" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+    <span class="sb-item-label">Fleet Calendar</span>
+  </button>
+  <button class="sb-item active" data-route="fleet" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    <span class="sb-item-label">Vehicle Card</span>
+  </button>
+  <button class="sb-item" data-route="customers" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    <span class="sb-item-label">Customers</span>
+  </button>
+  <div class="sb-section">Admin</div>
+  <button class="sb-item" data-route="settings" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <span class="sb-item-label">Settings</span>
+  </button>
+</nav>
+
+<!-- Main -->
+<div class="shell-main">
+  <!-- Top bar -->
+  <header class="shell-top">
+    <div class="page-name">
+      <div class="page-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      </div>
+      Vehicle Card
+    </div>
+    <div class="top-right">
+      <div class="userWrap">
+        <button class="userBtn" id="userBtn" type="button">
+          <div class="userBadge" id="userBadge">?</div>
+          <span id="userName">—</span>
+        </button>
+        <div class="userMenu" id="userMenu">
+          <div class="userMenuHead" id="userMenuHead">Account</div>
+          <button class="userMenuItem danger" data-menu-action="logout">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="shell-content" id="shellContent">
+
+    <!-- Loading state -->
+    <div id="stateLoading" class="state-center">
+      <div class="spinner"></div>
+      <div class="state-msg">Loading vehicle…</div>
+    </div>
+
+    <!-- Error state -->
+    <div id="stateError" class="state-center" style="display:none">
+      <div class="state-icon">🚗</div>
+      <div class="state-msg" id="stateErrorMsg">Could not load vehicle data.</div>
+      <button class="btn btnPri" id="btnRetry" style="margin-top:8px">Retry</button>
+    </div>
+
+    <!-- Vehicle card (shown after data loads) -->
+    <div id="vcMain" style="display:none">
+
+      <!-- Hero -->
+      <div class="vc-hero">
+        <div class="vc-hero-left">
+          <div class="vc-plate" id="vcPlate">—</div>
+          <div class="vc-model" id="vcModel">—</div>
+          <div class="vc-cat" id="vcCat">—</div>
+          <div class="vc-hero-badges">
+            <span class="status-badge" id="vcStatusBadge">—</span>
+            <span class="status-badge st-maintenance" id="vcMaintBadge" style="display:none">🔧 In Maintenance</span>
+          </div>
+        </div>
+        <div class="vc-hero-right">
+          <button class="btn btnPri" id="btnNewMaintenance" type="button">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            New Maintenance Job
+          </button>
+          <button class="btn btnSm" id="btnEditVehicle" type="button">Edit Vehicle</button>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="vc-metrics" id="vcMetrics"></div>
+
+      <!-- Tabs -->
+      <div class="vc-tabs" id="vcTabs">
+        <button class="vc-tab active" data-tab="details">Details</button>
+        <button class="vc-tab" data-tab="maintenance">Maintenance</button>
+        <button class="vc-tab" data-tab="history">Rental History</button>
+      </div>
+
+      <!-- Tab: Details -->
+      <div id="tabDetails">
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">Vehicle Information</span>
+          </div>
+          <div class="section-body">
+            <div class="details-grid" id="detailsGrid"></div>
+          </div>
+        </div>
+        <!-- Edit form (shown when editing) -->
+        <div class="section-card" id="editCard" style="display:none">
+          <div class="section-head"><span class="section-title">Edit Vehicle</span></div>
+          <div class="section-body">
+            <div id="editNotice"></div>
+            <div class="edit-grid">
+              <div class="edit-field"><label>Plate</label><input id="efPlate" type="text"></div>
+              <div class="edit-field"><label>Model</label><input id="efModel" type="text"></div>
+              <div class="edit-field"><label>Mileage (km)</label><input id="efMileage" type="number" min="0"></div>
+              <div class="edit-field"><label>Fuel Level (0–100)</label><input id="efFuel" type="number" min="0" max="100"></div>
+              <div class="edit-field"><label>Station Code</label><input id="efStation" type="text"></div>
+              <div class="edit-field"><label>Operational Status</label>
+                <select id="efOpStatus">
+                  <option value="active">Active</option>
+                  <option value="service">Service</option>
+                  <option value="maintenance">Maintenance</option>
+                  <option value="blocked">Blocked</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div class="edit-field span2">
+                <div class="toggle-row" style="margin-bottom:8px"><input type="checkbox" id="efReady"><label for="efReady">Ready to Go</label></div>
+                <div class="toggle-row"><input type="checkbox" id="efHold"><label for="efHold">Hard Hold</label></div>
+              </div>
+              <div class="edit-field span2"><label>Notes</label><textarea id="efNotes" rows="3"></textarea></div>
+            </div>
+            <div class="edit-actions">
+              <button class="btn" id="btnCancelEdit" type="button">Cancel</button>
+              <button class="btn btnPri" id="btnSaveEdit" type="button">
+                <span id="editSaveLbl">Save Changes</span>
+                <span id="editSaveSpin" style="display:none">Saving…</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Maintenance -->
+      <div id="tabMaintenance" style="display:none">
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">🔧 Maintenance Jobs</span>
+            <button class="btn btnPri btnSm" id="btnNewMaintenance2" type="button">+ New Job</button>
+          </div>
+          <div class="section-body" id="maintBody">
+            <div class="maint-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+              No maintenance jobs recorded for this vehicle.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Rental History -->
+      <div id="tabHistory" style="display:none">
+        <div class="section-card">
+          <div class="section-head"><span class="section-title">Rental History</span><span id="histCount" style="font:600 10.5px/1 var(--f);color:var(--muted)"></span></div>
+          <div class="section-body" style="padding:0;overflow-x:auto">
+            <div id="histBody"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /vcMain -->
+  </div>
+</div>
+</div>
+
+<!-- ═══ Maintenance Job Modal ═══════════════════════════════ -->
+<div id="maintOverlay">
+  <div id="maintModal">
+    <div class="modal-head">
+      <span class="modal-head-title">🔧 New Maintenance Job</span>
+      <button id="btnMaintClose" type="button">✕ Close</button>
+    </div>
+    <div class="modal-body">
+      <div id="maintNotice"></div>
+
+      <div>
+        <label class="mf-label">Vehicle</label>
+        <div id="maintVehicleLabel" style="font:700 13px/1.3 var(--f);color:var(--text);padding:6px 0"></div>
+      </div>
+
+      <div class="mf-row">
+        <div>
+          <label class="mf-label" for="maintStart">Start Date &amp; Time</label>
+          <input class="mf-input" id="maintStart" type="datetime-local">
+        </div>
+        <div>
+          <label class="mf-label" for="maintDuration">Duration</label>
+          <select class="mf-input" id="maintDuration">
+            <option value="1">1 day</option>
+            <option value="2">2 days</option>
+            <option value="3">3 days</option>
+            <option value="7" selected>1 week</option>
+            <option value="14">2 weeks</option>
+            <option value="custom">Custom end date</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="customEndGroup" style="display:none">
+        <label class="mf-label" for="maintEndCustom">End Date &amp; Time</label>
+        <input class="mf-input" id="maintEndCustom" type="datetime-local">
+      </div>
+      <div id="endDateDisplay"></div>
+
+      <div>
+        <label class="mf-label">Works / Tasks</label>
+        <div class="works-preset" id="worksPreset"></div>
+        <div class="works-custom-row">
+          <input id="customWorkInput" type="text" placeholder="Type a custom task and press Enter or +…">
+          <button id="btnAddCustomWork" type="button">+ Add</button>
+        </div>
+        <div id="selectedWorksWrap">
+          <div id="selectedWorks" class="selected-works"></div>
+          <div id="noWorksNote" class="no-works">No works added yet — select from the chips above or type a custom task.</div>
+        </div>
+      </div>
+
+      <div>
+        <label class="mf-label" for="maintNotes">Notes (optional)</label>
+        <textarea class="mf-input" id="maintNotes" rows="3" placeholder="Additional notes, parts needed, instructions for the mechanic…" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="btnMaintCancel" type="button">Cancel</button>
+      <button class="btn btnPri" id="btnMaintSave" type="button">Create Job</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── State ──────────────────────────────────────────────────
+const state = {
+  fleetVehicleId: '',
+  fleet: null,
+  category: null,
+  summary: null,
+  rentals: [],
+  maintJobs: [],
+  editMode: false,
+  saving: false,
+  activeTab: 'details',
+  userCtx: null,
+};
+
+// ── Preset works vocabulary ────────────────────────────────
+const PRESET_WORKS = [
+  'Oil Change','Tyre Change','Tyre Rotation','Service A','Service B',
+  'Air Filter','Fuel Filter','Brake Check','Brake Replacement',
+  'Full Inspection','Body Repair','Windshield','Battery','AC Service',
+  'Deep Clean','Transmission','Suspension','Electrical Check',
+];
+let selectedWorks = new Set();
+
+// ── Helpers ────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s||''); return d.innerHTML; }
+function fmt(iso){ if(!iso) return '—'; try{ const d=new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(_){ return String(iso); } }
+function fmtDate(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }catch(_){ return String(iso); } }
+function fuelBar(level){
+  const pct = Math.max(0,Math.min(100,Number(level)||0));
+  const segs = 10; const filled = Math.round(pct/100*segs);
+  const cls = pct<20?'on-red':pct<50?'on-amber':'on-green';
+  return '<div class="fuel-bar">'+Array.from({length:segs},(_,i)=>`<div class="fuel-seg${i<filled?' '+cls:''}"></div>`).join('')+'</div>';
+}
+function vehicleStatus(f){
+  const st = String(f.operationalStatus||f.status||'').toLowerCase();
+  if(f.hardHold) return 'hold';
+  if(/service|maintenance|blocked|repair|inactive/.test(st)) return 'maintenance';
+  if(f.activeRental) return 'out';
+  if(!f.readyToGo) return 'notready';
+  return 'available';
+}
+const STATUS_LABELS = {available:'Available',out:'Out',notready:'Not Ready',hold:'Hard Hold',maintenance:'Maintenance'};
+
+function showTab(tab){
+  state.activeTab = tab;
+  ['details','maintenance','history'].forEach(t=>{
+    $('tab'+t[0].toUpperCase()+t.slice(1)).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('.vc-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+}
+
+// ── Render ─────────────────────────────────────────────────
+function render(){
+  const f = state.fleet;
+  if(!f){ showState('error','No vehicle data.'); return; }
+  showState('main');
+
+  const st = vehicleStatus(f);
+  $('vcPlate').textContent = f.plate||'—';
+  $('vcModel').textContent = f.model||'—';
+  $('vcCat').textContent = [f.categoryLabel||f.categoryCode, f.fuelType].filter(Boolean).join(' · ') || '—';
+  const sb = $('vcStatusBadge');
+  sb.textContent = STATUS_LABELS[st]||st;
+  sb.className = 'status-badge st-'+st;
+  $('vcMaintBadge').style.display = st==='maintenance'?'inline-flex':'none';
+
+  // Metrics
+  $('vcMetrics').innerHTML = [
+    {lbl:'Mileage',val:(f.mileage!=null?f.mileage.toLocaleString():'—'),sub:'km'},
+    {lbl:'Fuel',val:f.fuelLevel!=null?f.fuelLevel+'%':'—',sub:fuelBar(f.fuelLevel)},
+    {lbl:'Station',val:f.currentStationLabel||f.currentStationCode||'—',sub:''},
+    {lbl:'Status',val:STATUS_LABELS[st]||st,sub:f.operationalStatus||''},
+    {lbl:'Ready',val:f.readyToGo?'Yes':'No',sub:''},
+    {lbl:'Rentals',val:Array.isArray(state.rentals)?state.rentals.length:0,sub:'total'},
+  ].map(m=>`<div class="metric"><div class="metric-lbl">${esc(m.lbl)}</div><div class="metric-val">${esc(m.val)}</div>${m.sub?`<div class="metric-sub">${m.sub}</div>`:''}</div>`).join('');
+
+  // Details grid
+  $('detailsGrid').innerHTML = [
+    ['Plate', f.plate],
+    ['Model', f.model],
+    ['Category', f.categoryLabel||f.categoryCode],
+    ['Fuel Type', f.fuelType],
+    ['Mileage', f.mileage!=null?f.mileage.toLocaleString()+' km':'—'],
+    ['Fuel Level', f.fuelLevel!=null?f.fuelLevel+'%':'—'],
+    ['Station', f.currentStationLabel||f.currentStationCode],
+    ['Operational Status', f.operationalStatus||'active'],
+    ['Ownership', f.ownershipState],
+    ['Pool Type', f.poolType],
+    ['Ready to Go', f.readyToGo?'Yes':'No'],
+    ['Hard Hold', f.hardHold?'Yes':'No'],
+  ].filter(([,v])=>v!=null&&v!=='').map(([k,v])=>`<div class="detail-field"><div class="detail-label">${esc(k)}</div><div class="detail-value">${esc(v)}</div></div>`).join('')
+   + (f.notes?`<div class="detail-field" style="grid-column:1/-1"><div class="detail-label">Notes</div><div class="detail-value">${esc(f.notes)}</div></div>`:'');
+
+  renderMaintJobs();
+  renderHistory();
+}
+
+function renderMaintJobs(){
+  const body = $('maintBody'); if(!body) return;
+  const jobs = state.maintJobs;
+  if(!jobs.length){
+    body.innerHTML='<div class="maint-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>No maintenance jobs recorded for this vehicle.</div>';
+    return;
+  }
+  const now = Date.now();
+  body.innerHTML = jobs.map(job=>{
+    const s = +new Date(job.start), e = +new Date(job.end);
+    const status = now>=s&&now<=e?'active':now<s?'scheduled':'done';
+    const statusLabel = {active:'Active',scheduled:'Scheduled',done:'Completed'}[status];
+    const statusCls = {active:'js-active',scheduled:'js-scheduled',done:'js-done'}[status];
+    const worksHtml = job.works&&job.works.length
+      ? '<div class="works-list">'+job.works.map(w=>`<span class="work-tag">🔩 ${esc(w)}</span>`).join('')+'</div>'
+      : '<span style="font:500 11px/1 var(--f);color:var(--muted)">No tasks specified</span>';
+    return `<div class="maint-job">
+      <div class="maint-job-head">
+        <div class="maint-job-title">🔧 Maintenance Job <span class="maint-job-status ${statusCls}">${statusLabel}</span></div>
+      </div>
+      <div class="maint-job-body">
+        <div class="maint-job-meta">
+          <span>📅 ${fmtDate(job.start)} → ${fmtDate(job.end)}</span>
+          <span>⏱ ${job.durationDays} day${job.durationDays!==1?'s':''}</span>
+        </div>
+        ${worksHtml}
+        ${job.notes?`<div class="maint-job-notes">${esc(job.notes)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory(){
+  const body = $('histBody'); const countEl = $('histCount'); if(!body) return;
+  const rentals = state.rentals||[];
+  countEl.textContent = rentals.length ? rentals.length+' record'+(rentals.length!==1?'s':'') : '';
+  if(!rentals.length){ body.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font:600 12px/1 var(--f)">No rental history.</div>'; return; }
+  const rows = rentals.slice(0,50).map(r=>{
+    const stCls = String(r.rentalState||r.state||'').toLowerCase().includes('open')||String(r.rentalState||'').toLowerCase().includes('active')?'st-out':String(r.rentalState||r.state||'').toLowerCase().includes('book')?'st-notready':'st-available';
+    return `<tr>
+      <td><b>${esc(r.bookingNumber||r.rentalId||r._id||'—')}</b></td>
+      <td>${esc(r.customerName||r.customer||'—')}</td>
+      <td>${fmtDate(r.pickupDateTime||r.start)}–${fmtDate(r.dropoffDateTime||r.end)}</td>
+      <td><span class="h-badge ${stCls}">${esc(r.rentalState||r.state||'—')}</span></td>
+      <td>${r.gross!=null?'€'+Number(r.gross).toFixed(2):'—'}</td>
+    </tr>`;
+  }).join('');
+  body.innerHTML=`<table class="hist-table"><thead><tr><th>Booking</th><th>Customer</th><th>Period</th><th>State</th><th>Gross</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function showState(which, msg=''){
+  $('stateLoading').style.display  = which==='loading'?'flex':'none';
+  $('stateError').style.display    = which==='error'?'flex':'none';
+  $('vcMain').style.display        = which==='main'?'block':'none';
+  if(which==='error'&&msg) $('stateErrorMsg').textContent=msg;
+}
+
+// ── Edit form ──────────────────────────────────────────────
+function openEditForm(){
+  const f = state.fleet; if(!f) return;
+  state.editMode = true;
+  $('editCard').style.display='block';
+  $('efPlate').value = f.plate||'';
+  $('efModel').value = f.model||'';
+  $('efMileage').value = f.mileage!=null?f.mileage:'';
+  $('efFuel').value = f.fuelLevel!=null?f.fuelLevel:'';
+  $('efStation').value = f.currentStationCode||'';
+  $('efOpStatus').value = (f.operationalStatus||'active').toLowerCase();
+  $('efReady').checked = !!f.readyToGo;
+  $('efHold').checked  = !!f.hardHold;
+  $('efNotes').value   = f.notes||'';
+  $('editCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeEditForm(){ state.editMode=false; $('editCard').style.display='none'; $('editNotice').innerHTML=''; }
+
+function saveEdit(){
+  if(state.saving) return;
+  state.saving=true;
+  $('editSaveLbl').style.display='none'; $('editSaveSpin').style.display='inline';
+  $('btnSaveEdit').disabled=true;
+  const patch={
+    plate:$('efPlate').value.trim(),
+    model:$('efModel').value.trim(),
+    operationalStatus:$('efOpStatus').value,
+    readyToGo:$('efReady').checked,
+    hardHold:$('efHold').checked,
+    notes:$('efNotes').value.trim(),
+  };
+  const mileage=Number($('efMileage').value); if($('efMileage').value!==''&&!isNaN(mileage)) patch.mileage=mileage;
+  const fuel=Number($('efFuel').value); if($('efFuel').value!==''&&!isNaN(fuel)) patch.fuelLevel=Math.max(0,Math.min(100,fuel));
+  if($('efStation').value.trim()) patch.currentStationCode=$('efStation').value.trim();
+  postToWix({type:'saveVehicleCard',fleetVehicleId:state.fleetVehicleId,patch});
+}
+
+// ── Maintenance modal ──────────────────────────────────────
+function openMaintModal(){
+  selectedWorks = new Set();
+  $('maintStart').value = localDatetimeValue(new Date());
+  $('maintDuration').value = '7';
+  $('maintEndCustom').value = '';
+  $('customEndGroup').style.display='none';
+  $('maintNotes').value = '';
+  $('maintNotice').innerHTML='';
+  $('btnMaintSave').disabled=false;
+  $('btnMaintSave').textContent='Create Job';
+  if(state.fleet) $('maintVehicleLabel').textContent=(state.fleet.plate||'')+(state.fleet.model?' — '+state.fleet.model:'');
+  renderWorksPreset();
+  renderSelectedWorks();
+  updateEndDisplay();
+  $('maintOverlay').classList.add('open');
+}
+function closeMaintModal(){ $('maintOverlay').classList.remove('open'); }
+
+function localDatetimeValue(d){
+  const pad = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function updateEndDisplay(){
+  const startVal = $('maintStart').value; const dur = $('maintDuration').value;
+  const disp = $('endDateDisplay');
+  if(!startVal){ disp.textContent=''; disp.className=''; return; }
+  if(dur==='custom'){
+    const endVal = $('maintEndCustom').value;
+    if(endVal){ disp.textContent='Ends: '+fmtDate(endVal); disp.className='has-end'; }
+    else { disp.textContent='Select an end date'; disp.className=''; }
+    return;
+  }
+  const days=parseInt(dur,10); const s=new Date(startVal); const e=new Date(s.getTime()+days*864e5);
+  disp.textContent='Ends: '+fmtDate(e.toISOString())+' ('+days+' day'+(days!==1?'s':'')+')';
+  disp.className='has-end';
+}
+
+function renderWorksPreset(){
+  const container = $('worksPreset'); if(!container) return;
+  container.innerHTML = PRESET_WORKS.map(w=>
+    `<button class="wp-chip${selectedWorks.has(w)?' selected':''}" data-work="${esc(w)}" type="button">${esc(w)}</button>`
+  ).join('');
+  container.querySelectorAll('.wp-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const w=btn.dataset.work;
+      if(selectedWorks.has(w)) selectedWorks.delete(w); else selectedWorks.add(w);
+      renderWorksPreset(); renderSelectedWorks();
+    });
+  });
+}
+
+function renderSelectedWorks(){
+  const container = $('selectedWorks'); const noNote = $('noWorksNote'); if(!container) return;
+  const arr=[...selectedWorks];
+  container.innerHTML = arr.map(w=>`<span class="sw-tag">${esc(w)} <button data-rm="${esc(w)}" type="button" title="Remove">✕</button></span>`).join('');
+  container.querySelectorAll('[data-rm]').forEach(btn=>{
+    btn.addEventListener('click',()=>{ selectedWorks.delete(btn.dataset.rm); renderWorksPreset(); renderSelectedWorks(); });
+  });
+  noNote.style.display = arr.length?'none':'block';
+}
+
+function addCustomWork(){
+  const inp=$('customWorkInput'); const v=(inp.value||'').trim(); if(!v) return;
+  selectedWorks.add(v); inp.value='';
+  renderWorksPreset(); renderSelectedWorks();
+}
+
+function saveMaintJob(){
+  const startVal=$('maintStart').value;
+  if(!startVal){ showMaintNotice('Please set a start date.','err'); return; }
+  if(!selectedWorks.size){ showMaintNotice('Add at least one work/task.','err'); return; }
+  const start=new Date(startVal);
+  let end;
+  if($('maintDuration').value==='custom'){
+    const ev=$('maintEndCustom').value; if(!ev){ showMaintNotice('Please set an end date.','err'); return; }
+    end=new Date(ev);
+  } else {
+    end=new Date(start.getTime()+parseInt($('maintDuration').value,10)*864e5);
+  }
+  if(end<=start){ showMaintNotice('End date must be after start date.','err'); return; }
+  const works=[...selectedWorks];
+  const notes=($('maintNotes').value||'').trim();
+  const durationDays=Math.ceil((end-start)/864e5);
+  $('btnMaintSave').disabled=true; $('btnMaintSave').textContent='Creating…';
+  postToWix({
+    type:'addMaintenanceJob',
+    fleetVehicleId:state.fleetVehicleId,
+    start:start.toISOString(),
+    end:end.toISOString(),
+    works,notes,durationDays,
+  });
+}
+
+function showMaintNotice(msg,type){
+  const n=$('maintNotice'); if(!n) return;
+  n.className='notice '+(type||'err');
+  n.textContent=msg;
+  setTimeout(()=>{ n.className='notice'; n.textContent=''; },4000);
+}
+
+// ── Wix communication ──────────────────────────────────────
+function postToWix(payload){
+  try{ window.parent.postMessage(payload,'*'); }catch(_){}
+}
+
+window.addEventListener('message',(evt)=>{
+  let data=evt.data;
+  if(typeof data==='string'){ try{ data=JSON.parse(data); }catch(_){ return; } }
+  if(!data||!data.type) return;
+
+  if(data.type==='resume'){ postToWix({type:'requestUserContext'}); postToWix({type:'requestVehicleFromUrl'}); return; }
+
+  if(data.type==='userContext'){
+    state.userCtx=data;
+    const name=String(data.userName||data.name||data.email||'—');
+    $('userName').textContent=name.split(' ')[0]||name;
+    $('userBadge').textContent=(name[0]||'U').toUpperCase();
+    $('userMenuHead').textContent=name;
+    return;
+  }
+
+  if(data.type==='vcLoading'){ showState('loading'); return; }
+
+  if(data.type==='vehicleCardData'){
+    if(!data.success){ showState('error',data.message||'Failed to load vehicle.'); return; }
+    state.fleet=data.fleet||null;
+    state.category=data.category||null;
+    state.summary=data.summary||null;
+    state.rentals=Array.isArray(data.rentals)?data.rentals:[];
+    state.fleetVehicleId=data.fleet?.fleetVehicleId||state.fleetVehicleId||'';
+    closeEditForm();
+    render();
+    return;
+  }
+
+  if(data.type==='vehicleCardSaved'){
+    state.saving=false;
+    $('editSaveLbl').style.display='inline'; $('editSaveSpin').style.display='none';
+    $('btnSaveEdit').disabled=false;
+    if(!data.success){ $('editNotice').innerHTML=`<div class="notice err">${esc(data.message||'Save failed.')}</div>`; return; }
+    if(data.fleet) state.fleet=data.fleet;
+    $('editNotice').innerHTML=`<div class="notice ok">Saved successfully.</div>`;
+    render(); closeEditForm();
+    return;
+  }
+
+  if(data.type==='maintenanceJobSaved'){
+    $('btnMaintSave').disabled=false; $('btnMaintSave').textContent='Create Job';
+    if(!data.success){ showMaintNotice(data.message||'Could not create job.','err'); return; }
+    if(data.job){ state.maintJobs.unshift(data.job); }
+    if(data.fleet) state.fleet=data.fleet;
+    closeMaintModal(); renderMaintJobs(); render();
+    showTab('maintenance');
+    return;
+  }
+
+  if(data.type==='maintenanceJobs'){
+    state.maintJobs=Array.isArray(data.jobs)?data.jobs:[];
+    renderMaintJobs();
+    return;
+  }
+});
+
+// ── Event wiring ───────────────────────────────────────────
+$('sbToggle').addEventListener('click',()=>{
+  const sb=document.getElementById('sb');
+  sb.classList.toggle('collapsed');
+  $('sbToggle').textContent=sb.classList.contains('collapsed')?'▶':'◀';
+});
+
+document.querySelectorAll('.sb-item[data-route]').forEach(btn=>{
+  btn.addEventListener('click',()=>postToWix({type:'navigate',route:btn.dataset.route}));
+});
+
+$('userBtn').addEventListener('click',()=>$('userMenu').classList.toggle('open'));
+document.addEventListener('click',(e)=>{ if(!e.target.closest('.userWrap')) $('userMenu')?.classList.remove('open'); });
+document.querySelectorAll('[data-menu-action]').forEach(btn=>{
+  btn.addEventListener('click',()=>{ $('userMenu').classList.remove('open'); postToWix({type:'menuAction',action:btn.dataset.menuAction}); });
+});
+
+$('vcTabs').addEventListener('click',(e)=>{
+  const t=e.target.closest('.vc-tab'); if(!t) return;
+  showTab(t.dataset.tab);
+});
+
+$('btnEditVehicle').addEventListener('click',()=>{ showTab('details'); openEditForm(); });
+$('btnCancelEdit').addEventListener('click',closeEditForm);
+$('btnSaveEdit').addEventListener('click',saveEdit);
+$('btnRetry').addEventListener('click',()=>{ showState('loading'); postToWix({type:'requestVehicleFromUrl'}); });
+
+$('btnNewMaintenance').addEventListener('click',openMaintModal);
+$('btnNewMaintenance2').addEventListener('click',openMaintModal);
+$('btnMaintClose').addEventListener('click',closeMaintModal);
+$('btnMaintCancel').addEventListener('click',closeMaintModal);
+$('maintOverlay').addEventListener('click',(e)=>{ if(e.target===$('maintOverlay')) closeMaintModal(); });
+$('btnMaintSave').addEventListener('click',saveMaintJob);
+
+$('maintStart').addEventListener('change',updateEndDisplay);
+$('maintDuration').addEventListener('change',()=>{
+  const isCustom=$('maintDuration').value==='custom';
+  $('customEndGroup').style.display=isCustom?'block':'none';
+  updateEndDisplay();
+});
+$('maintEndCustom').addEventListener('change',updateEndDisplay);
+
+$('btnAddCustomWork').addEventListener('click',addCustomWork);
+$('customWorkInput').addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); addCustomWork(); } });
+
+// ── Init ───────────────────────────────────────────────────
+(function init(){
+  showState('loading');
+  postToWix({type:'calendarReady'});
+})();
+</script>
+</body>
+</html>
