@@ -151,6 +151,7 @@ export async function setBookingBoardStatus({ authToken, bookingId, newStatus } 
 
     if (targetStatus === "Confirmed") {
       const booking = await wixData.get("BookingsNew", id, { suppressAuth: true });
+      if (!booking) return { success: false, message: "Booking not found" };
       if (safeText(booking?.status).toLowerCase() === "confirmed") {
         return { success: true, noOp: true, message: "Booking already confirmed" };
       }
@@ -169,6 +170,7 @@ export async function setBookingBoardStatus({ authToken, bookingId, newStatus } 
     }
 
     const booking = await wixData.get("BookingsNew", id, { suppressAuth: true });
+    if (!booking) return { success: false, message: "Booking not found" };
     booking.status = targetStatus;
     booking.statusChangedAt = new Date();
     if (targetStatus === "Canceled") booking.canceledAt = new Date();

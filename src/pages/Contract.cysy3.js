@@ -417,14 +417,28 @@ function navigateToDaily(msg) {
   wixLocation.to(`${ROUTES.daily}?${params.toString()}`);
 }
 
+function resolveRouteBase(key) {
+  if (key === "fleet")        return ROUTES.fleetboard;
+  if (key === "fleetboard")   return ROUTES.fleetboard;
+  if (key === "fleetCal")     return ROUTES.fleet;
+  if (key === "vehiclecard")  return ROUTES.vehiclecard;
+  if (key === "home")         return ROUTES.home;
+  if (key === "daily")        return ROUTES.daily;
+  if (key === "bookings")     return ROUTES.bookings;
+  if (key === "contract")     return ROUTES.contract;
+  if (key === "customers")    return ROUTES.customers;
+  if (key === "settings")     return ROUTES.settings;
+  return ROUTES.daily;
+}
+
 function buildReturnRoute(route) {
   const key = String(route || "").trim() || returnTab || "daily";
-  const base = ROUTES[key] || ROUTES.daily;
+  const base = resolveRouteBase(key);
   const params = new URLSearchParams();
 
   if (key === "daily" && returnDate) params.set("date", returnDate);
 
-  if (key === "bookings" || key === "fleet") {
+  if (key === "bookings" || key === "fleet" || key === "fleetboard" || key === "fleetCal") {
     if (bookingId) params.set("bookingId", bookingId);
     if (returnStartDate) params.set("startDate", returnStartDate);
     if (returnEndDate) params.set("endDate", returnEndDate);

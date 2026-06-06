@@ -57,7 +57,7 @@ $w.onReady(async function () {
       return;
     }
 
-    if (msg.type === 'homeReady' || msg.type === 'requestAuthState' || msg.type === 'requestUserContext') {
+    if (msg.type === 'homeReady' || msg.type === 'requestUserContext') {
       await refreshAuthState();
       return;
     }

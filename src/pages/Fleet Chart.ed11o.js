@@ -153,7 +153,7 @@ $w.onReady(async function () {
       if (!bookingId) return;
       const params = new URLSearchParams();
       params.set('bookingId', bookingId);
-      params.set('from', 'fleet');
+      params.set('from', 'fleetCal');
       if (lastRange.from) params.set('startDate', lastRange.from);
       if (lastRange.to) params.set('endDate', lastRange.to);
       wixLocation.to(`${ROUTES.contract}?${params.toString()}`);
@@ -215,7 +215,7 @@ $w.onReady(async function () {
       if (!fleetVehicleId) return;
       const params = new URLSearchParams();
       params.set('fleetVehicleId', fleetVehicleId);
-      params.set('from', 'fleet');
+      params.set('from', 'fleetCal');
       if (msg.bookingId) params.set('bookingId', String(msg.bookingId));
       if (lastRange.from) params.set('startDate', lastRange.from);
       if (lastRange.to) params.set('endDate', lastRange.to);

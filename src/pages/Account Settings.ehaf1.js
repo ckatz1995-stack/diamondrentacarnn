@@ -33,6 +33,7 @@ import {
 import { logoutBackroom, requireBackroomAccess } from 'public/backroomAuth';
 import { getBridgeTelemetrySnapshot, isTrustedBridgeOrigin, resetBridgeTelemetry } from 'public/bridgeUtils';
 import { APP_ROUTES as ROUTES } from 'public/appRoutes';
+import { collapseHtmlSiblings } from 'public/pageVisibility';
 
 const COMP = '#pricingAdminHtml';
 let authState = null;
@@ -237,6 +238,9 @@ $w.onReady(async function () {
   if (!authState?.ok) return;
   currentUser = authState.email || currentUser;
 
+  collapseHtmlSiblings($w, [COMP]);
+  try { $w(COMP).expand(); $w(COMP).show(); } catch (_) {}
+
   try {
     $w(COMP).onMessage(async (event) => {
       const origin = String(event?.origin || '').trim();
@@ -264,7 +268,14 @@ $w.onReady(async function () {
 
       if (msg.type === 'navigate') {
         const route = String(msg.route || '');
-        if (route && ROUTES[route]) { wixLocation.to(ROUTES[route]); }
+        if (route === 'home')      return wixLocation.to(ROUTES.home);
+        if (route === 'daily')     return wixLocation.to(ROUTES.daily);
+        if (route === 'fleet')     return wixLocation.to(ROUTES.fleetboard);
+        if (route === 'fleetCal')  return wixLocation.to(ROUTES.fleet);
+        if (route === 'bookings')  return wixLocation.to(ROUTES.bookings);
+        if (route === 'contract')  return wixLocation.to(ROUTES.contract);
+        if (route === 'customers') return wixLocation.to(ROUTES.customers);
+        if (route === 'settings')  return wixLocation.to(ROUTES.settings);
         return;
       }
 
