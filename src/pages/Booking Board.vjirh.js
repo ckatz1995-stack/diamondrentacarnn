@@ -68,7 +68,7 @@ $w.onReady(async function () {
       return;
     }
 
-    if (msg.type === "bookingsReady" || msg.type === "requestBookingsReload" || msg.type === "requestBoardData") {
+    if (msg.type === "bookingsReady" || msg.type === "requestBoardData") {
       await loadBoard(true, msg);
       return;
     }

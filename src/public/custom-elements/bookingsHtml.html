@@ -838,7 +838,7 @@ button:active{transform:scale(.97)}
       if (win) { try { win.opener = null; } catch(_){} return true; }
     } catch(_) {}
     if (fallbackMsg && typeof fallbackMsg === 'object') {
-      postToWix({ type:'toast', message:'Το νέο tab μπλοκαρίστηκε. Άνοιξέ το ξανά από το ίδιο κουμπί.' });
+      setStatus('Το νέο tab μπλοκαρίστηκε. Άνοιξέ το ξανά από το ίδιο κουμπί.');
     }
     return false;
   }

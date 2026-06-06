@@ -703,6 +703,7 @@ button:active{transform:scale(.97)}
       <div class="drawer-tools">
         <span style="font:500 10.5px/1 var(--f);color:var(--sub)" id="drawerMeta">—</span>
         <button type="button" id="btnDrawerRefresh" style="padding:3px 7px;font-size:10px">Refresh</button>
+        <button type="button" id="btnAutoAssignAll" style="padding:3px 7px;font-size:10px" title="Auto-assign all unassigned bookings in current range">Auto-assign all</button>
         <button type="button" id="btnToggleDrawer" style="padding:3px 7px;font-size:10px">▲ Expand</button>
       </div>
     </div>
@@ -1501,7 +1502,6 @@ button:active{transform:scale(.97)}
   function updateStats(unassignedCount){
     if(uCountEl) uCountEl.textContent=String(unassignedCount||0);
     if(drawerBadge){ drawerBadge.textContent=String(unassignedCount||0); drawerBadge.classList.toggle('has-items',unassignedCount>0); drawerBadge.classList.toggle('many-items',unassignedCount>5); }
-    postToWix({type:'unassignedCount',count:unassignedCount||0,from:lastRange.from,to:lastRange.to});
   }
 
   function renderUnassignedDrawer(){
@@ -2174,6 +2174,10 @@ button:active{transform:scale(.97)}
   document.getElementById('btnJumpBookingsRange')?.addEventListener('click',()=>jumpToBookingsFromRange());
   if(btnToggleDrawer) btnToggleDrawer.addEventListener('click',()=>toggleDrawer());
   if(btnDrawerRefresh) btnDrawerRefresh.addEventListener('click',()=>renderUnassignedDrawer());
+  document.getElementById('btnAutoAssignAll')?.addEventListener('click',()=>{
+    if(!confirm('Auto-assign all unassigned bookings in the current date range?')) return;
+    postToWix({type:'autoAssignUnassigned',from:lastRange.from,to:lastRange.to});
+  });
 
   searchBox.addEventListener('input',()=>{ const filtered=renderFromCache(searchBox.value); saveWorkspace(); saveResume(); setStatus(searchBox.value?`SEARCH: ${filtered.length} match(es)`:`OK • items=${filtered.length}`); });
   document.getElementById('btnTlSearch')?.addEventListener('click',()=>{
