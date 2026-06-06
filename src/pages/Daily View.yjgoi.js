@@ -62,7 +62,7 @@ $w.onReady(async function () {
       if (h) { try { html.height = h; } catch (error) { logSuppressed('resizeShell height set failed', error); } }
       return;
     }
-    if (msg.type === 'dailyReady' || msg.type === 'requestDailyReload' || msg.type === 'requestDailyData') {
+    if (msg.type === 'requestDailyData') {
       requestedDate = normalizeDateParam(msg.date) || requestedDate || todayYMD();
       await loadDailyOps({ requestedDate, startISO: msg.startISO, endISO: msg.endISO });
       return;

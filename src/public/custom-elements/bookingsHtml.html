@@ -644,7 +644,6 @@ button:active{transform:scale(.97)}
   let selectedId = '';
   let boardMode = 'all';
   let boardFocus = 'all';
-  let paused = false;
   let pendingStatusFor = '';
   let activeRange = defaultRange();
   let siteBase = '';
@@ -1324,7 +1323,7 @@ button:active{transform:scale(.97)}
   document.getElementById('saveBoardView')?.addEventListener('click', ()=> saveCurrentWorkspaceView());
   document.getElementById('jumpFleetRange').onclick = ()=> openFleetForCurrentRange();
   document.getElementById('jumpPickupDaily').onclick = ()=> openPickupDailyFromCurrent();
-  document.getElementById('refresh').onclick = ()=>{ if (!paused) requestBoardData(); };
+  document.getElementById('refresh').onclick = ()=> requestBoardData();
   document.getElementById('applyDates').onclick = ()=> requestBoardData();
   document.getElementById('todayRange').onclick = ()=>{ activeRange = todayRange(); applyRangeToInputs(); requestBoardData(); };
   document.getElementById('last7').onclick = ()=>{ activeRange = rangeForDays(7); applyRangeToInputs(); requestBoardData(); };
@@ -1370,8 +1369,7 @@ button:active{transform:scale(.97)}
     const d = evt.data || {};
     if (!d.type) return;
     if (d.type === 'userContext') { siteBase = safe(d.siteBase || ''); applyUserContext(d); return; }
-    if (d.type === 'resume') { paused = false; render(); return; }
-    if (d.type === 'pause') { paused = true; return; }
+    if (d.type === 'resume') { render(); return; }
     if (d.type === 'loadBookings') { allItems = Array.isArray(d.items) ? d.items : []; if (d.filters) { activeRange = { startDate: d.filters.startDate || activeRange.startDate, endDate: d.filters.endDate || activeRange.endDate }; applyRangeToInputs(); } saveWorkspace(); renderPills(); render(); return; }
     if (d.type === 'focusBooking') { focusRow(String(d.bookingId || '')); return; }
     if (d.type === 'toast') { setStatus(String(d.message || 'OK')); return; }
