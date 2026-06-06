@@ -1,6 +1,7 @@
 
 import wixLocation from 'wix-location';
 import { getFleetCalendarData, moveBookingVehicleOnly, confirmAndAutoAssign, saveVehicleNote, removeMaintenanceBlock } from 'backend/fleetCalendar';
+import { addMaintenanceJob } from 'backend/vehicleCard.jsw';
 import { setBookingBoardStatus } from 'backend/bookingsBoard';
 import { savePreference, getPreference } from 'backend/staffPreferences';
 import { buildUserContext, logoutBackroom, requireBackroomAccess } from 'public/backroomAuth';
@@ -181,6 +182,31 @@ $w.onReady(async function () {
       if (!blockId) return;
       const result = await removeMaintenanceBlock({ authToken: authState.sessionToken, blockId });
       if (!result?.success) post({ type: 'toast', message: `Remove failed: ${result?.message || 'error'}` });
+      return;
+    }
+
+    if (msg.type === 'addMaintenanceBlock') {
+      const fleetVehicleId = String(msg.fleetVehicleId || '').trim();
+      if (!fleetVehicleId) return;
+      try {
+        const res = await addMaintenanceJob({
+          sessionToken: authState.sessionToken,
+          fleetVehicleId,
+          start: msg.start,
+          end: msg.end,
+          works: Array.isArray(msg.works) ? msg.works : [],
+          notes: String(msg.notes || ''),
+          durationDays: Number(msg.durationDays || 0),
+        });
+        if (!res?.success) {
+          post({ type: 'toast', message: `Block failed: ${res?.message || 'error'}` });
+          return;
+        }
+        post({ type: 'toast', message: 'Maintenance block added' });
+        await loadCalendar(lastRange, false);
+      } catch (error) {
+        post({ type: 'toast', message: `Block failed: ${error?.message || String(error)}` });
+      }
       return;
     }
 

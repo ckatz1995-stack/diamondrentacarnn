@@ -185,21 +185,28 @@ export async function setBookingBoardStatus({ authToken, bookingId, newStatus } 
 export async function getHomepageKpis({ authToken } = {}) {
   await requireStaffAccess({ sessionToken: authToken, area: "bookings", action: "View" });
   try {
-    const todayStart = startOfDay(new Date());
+    const now = new Date();
+    const todayStart = startOfDay(now);
     const tomorrowStart = addDays(todayStart, 1);
-    const [pendingRes, pickupRes, dropoffRes] = await Promise.all([
+    const [pendingRes, pickupRes, dropoffRes, activeRes, overdueRes, fleetRes] = await Promise.all([
       wixData.query("BookingsNew").eq("status", "Pending").limit(1).find({ suppressAuth: true }),
       wixData.query("BookingsNew").ge("pickupDateTime", todayStart).lt("pickupDateTime", tomorrowStart).ne("status", "Canceled").limit(1).find({ suppressAuth: true }),
       wixData.query("BookingsNew").ge("dropoffDateTime", todayStart).lt("dropoffDateTime", tomorrowStart).ne("status", "Canceled").limit(1).find({ suppressAuth: true }),
+      wixData.query("BookingsNew").eq("rentalState", "Active Rental").limit(1).find({ suppressAuth: true }),
+      wixData.query("BookingsNew").lt("dropoffDateTime", now).ne("status", "Canceled").ne("rentalState", "Closed Rental").limit(1).find({ suppressAuth: true }),
+      wixData.query("FleetNew").eq("active", true).limit(1).find({ suppressAuth: true }),
     ]);
     return {
       success: true,
       pending: pendingRes.totalCount || 0,
       todayPickups: pickupRes.totalCount || 0,
       todayDropoffs: dropoffRes.totalCount || 0,
+      activeRentals: activeRes.totalCount || 0,
+      overdueReturns: overdueRes.totalCount || 0,
+      totalFleet: fleetRes.totalCount || 0,
     };
   } catch (error) {
-    return { success: false, pending: 0, todayPickups: 0, todayDropoffs: 0 };
+    return { success: false, pending: 0, todayPickups: 0, todayDropoffs: 0, activeRentals: 0, overdueReturns: 0, totalFleet: 0 };
   }
 }
 

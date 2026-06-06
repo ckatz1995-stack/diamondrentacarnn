@@ -91,7 +91,15 @@ async function loadKpis() {
   if (!sessionToken) return;
   try {
     const res = await getHomepageKpis({ authToken: sessionToken });
-    post({ type: 'kpiData', pending: res.pending || 0, todayPickups: res.todayPickups || 0, todayDropoffs: res.todayDropoffs || 0 });
+    post({
+      type: 'kpiData',
+      pending: res.pending || 0,
+      todayPickups: res.todayPickups || 0,
+      todayDropoffs: res.todayDropoffs || 0,
+      activeRentals: res.activeRentals || 0,
+      overdueReturns: res.overdueReturns || 0,
+      totalFleet: res.totalFleet || 0,
+    });
   } catch (error) {
     logSuppressed('loadKpis failed', error);
   }

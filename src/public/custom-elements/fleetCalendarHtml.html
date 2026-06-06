@@ -317,6 +317,15 @@ button:active{transform:scale(.97)}
 .note-foot{padding:7px 12px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end}
 .note-foot .nb{padding:5px 10px;border-radius:var(--r);font:600 10.5px/1 var(--f);cursor:pointer;border:1px solid var(--border2);background:#fff;color:var(--text)}
 .note-foot .nb.pri{background:linear-gradient(135deg,var(--pri1),var(--pri2));color:#fff;border-color:transparent}
+/* ── maintenance block creation modal ────── */
+.ftl-block-btn{background:transparent;border:none;cursor:pointer;padding:0 3px;opacity:.38;font-size:10px;line-height:1;flex-shrink:0;color:var(--sub);transition:opacity .12s}
+.ftl-block-btn:hover{opacity:.8}
+#blockModal{position:fixed;background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:0 12px 32px rgba(15,23,42,.2);z-index:1000005;width:300px;overflow:hidden;display:none}
+#blockModal.open{display:block}
+#blockModal input,#blockModal textarea{width:100%;padding:5px 7px;border:1px solid var(--border2);border-radius:6px;font:500 11.5px/1.4 var(--f);color:var(--text);background:#fff;outline:none;box-sizing:border-box}
+#blockModal textarea{resize:vertical;min-height:52px;max-height:120px;line-height:1.5}
+.bm-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bm-label{font:600 10px/1.4 var(--f);color:var(--sub);display:block;margin-bottom:3px}
 /* ── maintenance block bars ──────────────── */
 .vis-item.bkItem.maint{background:repeating-linear-gradient(45deg,rgba(249,115,22,.85),rgba(249,115,22,.85) 5px,rgba(249,115,22,.38) 5px,rgba(249,115,22,.38) 10px);color:#7c2d12;cursor:not-allowed!important}
 .vis-item.bkItem.maint.ftl-conflict{outline-color:rgba(249,115,22,.9)}
@@ -736,6 +745,26 @@ button:active{transform:scale(.97)}
   <div class="note-foot">
     <button class="nb" id="noteClearBtn" type="button">Clear</button>
     <button class="nb pri" id="noteSave" type="button">Save</button>
+  </div>
+</div>
+
+<!-- Maintenance block creation modal -->
+<div id="blockModal">
+  <div class="note-head" style="background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.18);color:#7c2d12">
+    <span id="blockModalLabel">🔧 Add Maintenance Block</span>
+    <button id="blockModalClose" type="button">✕</button>
+  </div>
+  <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+    <div class="bm-row">
+      <div><label class="bm-label">Start</label><input type="date" id="blockStart"/></div>
+      <div><label class="bm-label">End</label><input type="date" id="blockEnd"/></div>
+    </div>
+    <div><label class="bm-label">Works (optional, comma-separated)</label><input type="text" id="blockWorks" placeholder="e.g. Oil change, Tires…"/></div>
+    <div><label class="bm-label">Notes (optional)</label><textarea id="blockNotes" placeholder="Add notes…"></textarea></div>
+  </div>
+  <div class="note-foot">
+    <button class="nb" id="blockModalCancel" type="button">Cancel</button>
+    <button class="nb pri" id="blockModalSave" type="button" style="background:linear-gradient(135deg,#ea580c,#c2410c)">Save Block</button>
   </div>
 </div>
 
@@ -1402,6 +1431,48 @@ button:active{transform:scale(.97)}
     closeNotePopover(); setStatus('Vehicle note saved.');
   });
 
+  // ── Maintenance block modal ───────────────────────────────
+  let _blockModalGid='';
+  function openBlockModal(gid,e){
+    const modal=document.getElementById('blockModal');
+    const lbl=document.getElementById('blockModalLabel');
+    if(!modal) return;
+    _blockModalGid=gid;
+    const label=(timeline&&timeline._labels&&timeline._labels[gid])||'Vehicle';
+    if(lbl) lbl.textContent='🔧 '+label;
+    const startEl=document.getElementById('blockStart');
+    const endEl=document.getElementById('blockEnd');
+    const worksEl=document.getElementById('blockWorks');
+    const notesEl=document.getElementById('blockNotes');
+    const today=new Date().toISOString().slice(0,10);
+    if(startEl) startEl.value=today;
+    if(endEl){ const d=new Date(); d.setDate(d.getDate()+1); endEl.value=d.toISOString().slice(0,10); }
+    if(worksEl) worksEl.value='';
+    if(notesEl) notesEl.value='';
+    const rect=e.target.getBoundingClientRect();
+    modal.style.left=Math.min(rect.left,window.innerWidth-320)+'px';
+    modal.style.top=Math.min(rect.bottom+6,window.innerHeight-300)+'px';
+    modal.classList.add('open');
+    if(startEl) setTimeout(()=>startEl.focus(),40);
+  }
+  function closeBlockModal(){ document.getElementById('blockModal')?.classList.remove('open'); _blockModalGid=''; }
+  document.getElementById('blockModalClose')?.addEventListener('click',closeBlockModal);
+  document.getElementById('blockModalCancel')?.addEventListener('click',closeBlockModal);
+  document.getElementById('blockModalSave')?.addEventListener('click',()=>{
+    const startEl=document.getElementById('blockStart');
+    const endEl=document.getElementById('blockEnd');
+    const worksEl=document.getElementById('blockWorks');
+    const notesEl=document.getElementById('blockNotes');
+    if(!_blockModalGid||!startEl||!endEl) return;
+    const s=startEl.value.trim(); const e2=endEl.value.trim();
+    if(!s||!e2){ alert('Please set start and end dates.'); return; }
+    if(s>e2){ alert('End date must be after start.'); return; }
+    const worksArr=worksEl&&worksEl.value.trim()?worksEl.value.trim().split(',').map(x=>x.trim()).filter(Boolean):[];
+    const durationDays=Math.max(1,Math.round((new Date(e2).getTime()-new Date(s).getTime())/864e5));
+    postToWix({type:'addMaintenanceBlock',fleetVehicleId:_blockModalGid,start:s,end:e2,works:worksArr,notes:notesEl?notesEl.value.trim():'',durationDays});
+    closeBlockModal(); setStatus('Adding maintenance block…');
+  });
+
   // ── Print ─────────────────────────────────────────────────
   document.getElementById('btnPrint')?.addEventListener('click',()=>{
     const meta=document.getElementById('printMeta');
@@ -1733,6 +1804,11 @@ button:active{transform:scale(.97)}
             nb.setAttribute('data-note-gid',gid);
             nb.addEventListener('click',e=>{ e.stopPropagation(); openNotePopover(gid,e); });
             (row.querySelector('.fleetGroupCell')||row).appendChild(nb);
+            // maintenance block button
+            const bb=_mk('button','ftl-block-btn');
+            bb.type='button'; bb.title='Add maintenance block'; bb.textContent='🔧';
+            bb.addEventListener('click',e=>{ e.stopPropagation(); openBlockModal(gid,e); });
+            (row.querySelector('.fleetGroupCell')||row).appendChild(bb);
           }
           // utilization strip
           const uinfo=util[gid];
@@ -2143,6 +2219,8 @@ button:active{transform:scale(.97)}
     if(!e.target.closest('.ftl-move-panel')) closeMovePanel();
     const pop=document.getElementById('notePopover');
     if(pop&&pop.classList.contains('open')&&!pop.contains(e.target)&&!e.target.closest('.ftl-note-btn')) closeNotePopover();
+    const bModal=document.getElementById('blockModal');
+    if(bModal&&bModal.classList.contains('open')&&!bModal.contains(e.target)&&!e.target.closest('.ftl-block-btn')) closeBlockModal();
   });
 
   // ── Multi-select (Ctrl/Cmd+click on bars) ─────────────────
