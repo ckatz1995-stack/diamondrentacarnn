@@ -35,7 +35,7 @@ $w.onReady(async function () {
       return;
     }
 
-    if (msg.type === 'requestVehicleFromUrl') {
+    if (msg.type === 'calendarReady' || msg.type === 'requestVehicleFromUrl') {
       await loadVehicleFromUrl();
       return;
     }
