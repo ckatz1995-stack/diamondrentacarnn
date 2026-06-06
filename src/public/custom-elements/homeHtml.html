@@ -337,6 +337,21 @@ html{scrollbar-color:rgba(154,110,30,.35) rgba(130,100,55,.08)}
               <div class="patternValue" id="kpiDropoffs">—</div>
               <div class="patternMeta">Today's dropoffs</div>
             </div>
+            <div class="patternCard" id="kpiActiveCard" style="cursor:pointer" title="View active rentals">
+              <div class="patternKick">Ενεργές ενοικιάσεις</div>
+              <div class="patternValue" id="kpiActiveRentals">—</div>
+              <div class="patternMeta">Active rentals</div>
+            </div>
+            <div class="patternCard" id="kpiOverdueCard" style="cursor:pointer" title="View overdue returns">
+              <div class="patternKick">Εκπρόθεσμες επιστροφές</div>
+              <div class="patternValue" id="kpiOverdueReturns">—</div>
+              <div class="patternMeta">Overdue returns</div>
+            </div>
+            <div class="patternCard" id="kpiFleetCard" style="cursor:pointer" title="View fleet board">
+              <div class="patternKick">Σύνολο οχημάτων</div>
+              <div class="patternValue" id="kpiTotalFleet">—</div>
+              <div class="patternMeta">Total active fleet</div>
+            </div>
           </div>
         </div>
 
@@ -476,7 +491,7 @@ function wire(){ document.querySelectorAll('.sb-item[data-route]').forEach(btn=>
 const TRUSTED_PARENT_SUFFIXES=['wix.com','wixsite.com','parastorage.com','wixstatic.com'];function isTrustedParentOrigin(origin){const raw=String(origin||'').trim().toLowerCase();if(!raw)return true;try{const host=new URL(raw).hostname.toLowerCase();if(!host) return false; if(TRUSTED_PARENT_SUFFIXES.some(s=>host===s||host.endsWith('.'+s))) return true; try{ const ref=document.referrer; if(ref){ const rh=new URL(ref).hostname.toLowerCase(); if(rh&&host===rh) return true; } }catch(_){} return false;}catch(_){return false;}}
 window.addEventListener('message',(event)=>{ if(event.origin&&!isTrustedParentOrigin(event.origin))return; const data=event&&event.data; if(!data||!data.type) return; if(data.type==='authState') applyAuthState(data); if(data.type==='userContext') setUserContext(data); if(data.type==='kpiData') applyKpiData(data); });
 postToWix({ type:'homeReady' }); postToWix({ type:'requestKpiData' }); reportHeight(); }
-function applyKpiData(d){ const p=document.getElementById('kpiPending'); const pu=document.getElementById('kpiPickups'); const dr=document.getElementById('kpiDropoffs'); if(p) p.textContent=typeof d.pending==='number'?String(d.pending):'—'; if(pu) pu.textContent=typeof d.todayPickups==='number'?String(d.todayPickups):'—'; if(dr) dr.textContent=typeof d.todayDropoffs==='number'?String(d.todayDropoffs):'—'; const pendingCard=document.getElementById('kpiPendingCard'); if(pendingCard) pendingCard.classList.toggle('kpi-alert', typeof d.pending==='number' && d.pending>0); }
+function applyKpiData(d){ const p=document.getElementById('kpiPending'); const pu=document.getElementById('kpiPickups'); const dr=document.getElementById('kpiDropoffs'); const ar=document.getElementById('kpiActiveRentals'); const od=document.getElementById('kpiOverdueReturns'); const tf=document.getElementById('kpiTotalFleet'); if(p) p.textContent=typeof d.pending==='number'?String(d.pending):'—'; if(pu) pu.textContent=typeof d.todayPickups==='number'?String(d.todayPickups):'—'; if(dr) dr.textContent=typeof d.todayDropoffs==='number'?String(d.todayDropoffs):'—'; if(ar) ar.textContent=typeof d.activeRentals==='number'?String(d.activeRentals):'—'; if(od) od.textContent=typeof d.overdueReturns==='number'?String(d.overdueReturns):'—'; if(tf) tf.textContent=typeof d.totalFleet==='number'?String(d.totalFleet):'—'; const pendingCard=document.getElementById('kpiPendingCard'); if(pendingCard) pendingCard.classList.toggle('kpi-alert', typeof d.pending==='number' && d.pending>0); const overdueCard=document.getElementById('kpiOverdueCard'); if(overdueCard) overdueCard.classList.toggle('kpi-alert', typeof d.overdueReturns==='number' && d.overdueReturns>0); const activeCard=document.getElementById('kpiActiveCard'); if(activeCard&&!activeCard._wired){ activeCard._wired=true; activeCard.addEventListener('click',()=>postToWix({type:'navigate',route:'bookings'})); } const od2=document.getElementById('kpiOverdueCard'); if(od2&&!od2._wired){ od2._wired=true; od2.addEventListener('click',()=>postToWix({type:'navigate',route:'bookings'})); } const fleetCard=document.getElementById('kpiFleetCard'); if(fleetCard&&!fleetCard._wired){ fleetCard._wired=true; fleetCard.addEventListener('click',()=>postToWix({type:'navigate',route:'fleet'})); } }
 wire();
 
 // Sidebar collapse/expand

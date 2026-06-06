@@ -1,5 +1,5 @@
 import wixLocation from 'wix-location';
-import { getFleetBoard } from 'backend/vehicleCard.jsw';
+import { getFleetBoard, saveVehicleCardData } from 'backend/vehicleCard.jsw';
 import { buildUserContext, logoutBackroom, requireBackroomAccess, getSessionToken } from 'public/backroomAuth';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 import { APP_ROUTES as ROUTES } from 'public/appRoutes';
@@ -61,6 +61,21 @@ $w.onReady(async function () {
     if (msg.type === 'resizeShell') {
       const h = clampHeight(Number(msg.height || 0));
       if (h) { try { html.height = h; } catch (error) { logSuppressed('resizeShell height set failed', error); } }
+      return;
+    }
+
+    if (msg.type === 'saveVehicleCard') {
+      const fleetVehicleId = String(msg.fleetVehicleId || '').trim();
+      const patch = msg.patch && typeof msg.patch === 'object' ? msg.patch : {};
+      if (!fleetVehicleId) { post({ type: 'vehicleCardSaved', success: false, message: 'Missing vehicle ID' }); return; }
+      try {
+        const res = await saveVehicleCardData({ sessionToken: resolveAuthToken(), fleetVehicleId, patch });
+        if (!res?.success) { post({ type: 'vehicleCardSaved', success: false, message: res?.message || 'Save failed' }); return; }
+        post({ type: 'vehicleCardSaved', success: true, fleet: res.fleet });
+        await loadFleetBoard();
+      } catch (error) {
+        post({ type: 'vehicleCardSaved', success: false, message: error?.message || String(error) });
+      }
       return;
     }
 

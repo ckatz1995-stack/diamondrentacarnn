@@ -282,6 +282,13 @@ button:active{transform:scale(.97)}
     .rb-btn:hover{background:rgba(0,0,0,.07);transform:translateY(-1px);box-shadow:var(--shadow)}
     .rb-btn.primary{background:linear-gradient(135deg,var(--gold),#C8952E);color:#1a1208;border-color:transparent;box-shadow:0 2px 6px rgba(154,110,30,.22)}
     .rb-btn.primary:hover{box-shadow:0 4px 12px rgba(154,110,30,.34)}
+    .rb-btn.ok{background:rgba(16,185,129,.12);color:#065F46;border-color:rgba(16,185,129,.3)}
+    .rb-btn.ok:hover{background:rgba(16,185,129,.22)}
+    .rb-btn.warn{background:rgba(245,158,11,.10);color:#92400E;border-color:rgba(245,158,11,.32)}
+    .rb-btn.warn:hover{background:rgba(245,158,11,.2)}
+    .rb-btn.crit{background:rgba(239,68,68,.08);color:#991B1B;border-color:rgba(239,68,68,.28)}
+    .rb-btn.crit:hover{background:rgba(239,68,68,.15)}
+    .rb-card-req-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
     .rb-empty{padding:32px 16px;text-align:center;font:800 11.5px/1.6 system-ui;color:var(--muted)}
 
     /* ── Health dot ── */
@@ -1021,6 +1028,11 @@ button:active{transform:scale(.97)}
         <button class="rb-btn" onclick="window._rbAct('bookings','${eid}')">Bookings</button>
         <button class="rb-btn" onclick="window._rbAct('fleet','${eid}')">Fleet</button>
       </div>
+      ${pending?`<div class="rb-card-req-actions">
+        <button class="rb-btn ok" onclick="window._rbRequestAct('accept','${eid}')">&#10003; Accept</button>
+        <button class="rb-btn warn" onclick="window._rbRequestAct('hold','${eid}')">&#8987; Hold</button>
+        <button class="rb-btn crit" onclick="window._rbRequestAct('decline','${eid}')">&#10005; Decline</button>
+      </div>`:''}
     </div>`;
   }
 
@@ -1031,8 +1043,17 @@ button:active{transform:scale(.97)}
     else if(action==='fleet')    postToWix({type:'openOnFleet',bookingId:id});
   };
 
+  window._rbRequestAct = function(action, id){
+    const labels={'accept':'Αποδοχή','hold':'Hold','decline':'Απόρριψη'};
+    const label=labels[action]||action;
+    if(!confirm(`${label} για κράτηση ${id}?`)) return;
+    const actor=state&&state.user&&state.user.name?String(state.user.name):'';
+    postToWix({type:'dailyRequestAction',bookingId:id,action,actorName:actor,note:'',nextFollowUpAt:'',targetOwner:''});
+    setStatus('Αποστολή ενέργειας…');
+  };
+
   window._rbToggle = function(id, event){
-    if(event&&event.target.closest('.rb-card-actions,.rb-btn')) return;
+    if(event&&event.target.closest('.rb-card-actions,.rb-card-req-actions,.rb-btn')) return;
     const card = document.getElementById('rbc-'+id);
     if(!card) return;
     const expanded = card.classList.toggle('expanded');
@@ -1482,6 +1503,22 @@ button:active{transform:scale(.97)}
         const r=btn.getAttribute('data-route');
         if(Object.prototype.hasOwnProperty.call(can,r)&&!can[r]) btn.style.display='none';
       });
+      return;
+    }
+
+    if(d.type==='focusBooking'){
+      const id=String(d.bookingId||'').trim();
+      const tab=String(d.preferredTab||'').trim()||null;
+      if(tab&&typeof window._rbSetFilter==='function') window._rbSetFilter(tab);
+      if(id) setTimeout(()=>{ if(typeof window._rbScrollToCard==='function') window._rbScrollToCard(id); },200);
+      return;
+    }
+
+    if(d.type==='dailyActionResult'){
+      const ok=!!d.success;
+      const msg=String(d.message||'').trim()||(ok?'Done':'Action failed');
+      setStatus((ok?'✓ ':'⚠ ')+msg);
+      setTimeout(()=>{ if(els.status) els.status.textContent=''; },4000);
       return;
     }
   });
