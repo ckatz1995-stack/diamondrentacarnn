@@ -94,7 +94,7 @@ $w.onReady(async function () {
       if (!bookingId) return;
       const params = new URLSearchParams();
       params.set('bookingId', bookingId);
-      params.set('from', 'fleet');
+      params.set('from', 'fleetboard');
       wixLocation.to(`${ROUTES.contract}?${params.toString()}`);
       return;
     }
