@@ -418,15 +418,16 @@ function navigateToDaily(msg) {
 }
 
 function resolveRouteBase(key) {
-  if (key === "fleet")     return ROUTES.fleetboard;
-  if (key === "fleetboard") return ROUTES.fleetboard;
-  if (key === "fleetCal")  return ROUTES.fleet;
-  if (key === "home")      return ROUTES.home;
-  if (key === "daily")     return ROUTES.daily;
-  if (key === "bookings")  return ROUTES.bookings;
-  if (key === "contract")  return ROUTES.contract;
-  if (key === "customers") return ROUTES.customers;
-  if (key === "settings")  return ROUTES.settings;
+  if (key === "fleet")        return ROUTES.fleetboard;
+  if (key === "fleetboard")   return ROUTES.fleetboard;
+  if (key === "fleetCal")     return ROUTES.fleet;
+  if (key === "vehiclecard")  return ROUTES.vehiclecard;
+  if (key === "home")         return ROUTES.home;
+  if (key === "daily")        return ROUTES.daily;
+  if (key === "bookings")     return ROUTES.bookings;
+  if (key === "contract")     return ROUTES.contract;
+  if (key === "customers")    return ROUTES.customers;
+  if (key === "settings")     return ROUTES.settings;
   return ROUTES.daily;
 }
 
