@@ -43,7 +43,7 @@ html{scrollbar-color:rgba(142,109,61,.42) rgba(15,23,42,.06)}
 .sb-item-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:opacity .15s}
 .sb.sb-collapsed .sb-item-label{opacity:0;width:0;flex:0 0 0}
 .sb.sb-collapsed .sb-item{justify-content:center;padding:8px 0}
-.shell-top{height:54px;min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.shell-top{height:54px;min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;z-index:20}
 .top-page-title{font:700 15px/1.3 var(--f);color:var(--text);letter-spacing:-.02em}
 .top-page-sub{font:400 11.5px/1.4 var(--f);color:var(--sub);margin-top:1px}
 .shell-top-right{display:flex;align-items:center;gap:12px;flex:0 0 auto}
@@ -376,7 +376,7 @@ button:active{transform:scale(.97)}
     .ps-footer{border-top:1px solid #E2E8F0;padding-top:10px;font:700 9px/1 system-ui;color:#94A3B8;text-align:center}
   </style>
 </head>
-<body>
+<body style="background:#F0F4FA">
 <div class="shell">
 <nav class="sb" id="sidebar">
   <div class="sb-brand">
