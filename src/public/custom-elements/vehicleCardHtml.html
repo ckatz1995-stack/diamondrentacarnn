@@ -3,52 +3,11 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="./backroom-theme.css"/>
 <style>
-:root{
-  --bg:#F0F4FA;--surface:#fff;--surface2:#E8EEF7;--surface3:#f8fafc;
-  --border:rgba(15,23,42,.08);--border2:rgba(15,23,42,.15);
-  --text:#0F172A;--sub:#475569;--muted:#94A3B8;
-  --gold:#A8844A;--gold2:#6C522E;--gold-bg:rgba(180,138,79,.10);--gold-border:rgba(168,132,74,.22);
-  --pri1:#C8A96E;--pri2:#8B6535;
-  --ok:#166534;--warn:#92400E;--danger:#991B1B;
-  --r:10px;--r-lg:14px;--r-pill:999px;
-  --f:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  --sb-w:200px;--sb-cw:44px;
-  --shadow:0 2px 12px rgba(15,23,42,.06);--shadow-lg:0 8px 28px rgba(15,23,42,.14);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);font-family:var(--f);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
-
-/* ── Shell ── */
-.shell{display:flex;height:100vh;overflow:hidden}
-.shell-main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
-.shell-top{display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex:0 0 auto;min-height:58px;z-index:20}
-.shell-content{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 24px;background:var(--bg)}
-.shell-content::-webkit-scrollbar{width:5px}
-.shell-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
-
-/* ── Sidebar ── */
-.sb{width:var(--sb-w);min-width:var(--sb-w);background:linear-gradient(180deg,#2a1f0e 0%,#3d2b12 55%,#4f3a22 100%);display:flex;flex-direction:column;gap:1px;padding:10px 6px 16px;overflow-y:auto;overflow-x:hidden;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06);transition:width .2s,min-width .2s}
-.sb.collapsed{width:var(--sb-cw);min-width:var(--sb-cw);padding:10px 4px 16px}
-.sb-brand{display:flex;align-items:center;gap:8px;padding:8px 4px 12px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:4px;overflow:hidden}
-.sb-logo{width:34px;height:34px;min-width:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;font:900 17px/1 var(--f);flex-shrink:0}
-.sb-brand-text{display:flex;flex-direction:column;gap:2px;overflow:hidden;white-space:nowrap;transition:opacity .15s}
-.sb.collapsed .sb-brand-text{opacity:0;pointer-events:none;width:0}
-.sb-brand-title{font:900 12px/1 var(--f);color:#fff}
-.sb-brand-sub{font:800 9px/1 var(--f);color:rgba(255,255,255,.45)}
-.sb-toggle{display:flex;align-items:center;justify-content:center;width:20px;height:20px;min-width:20px;border:1px solid rgba(255,255,255,.15);border-radius:5px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);cursor:pointer;font-size:9px;font-weight:900;flex-shrink:0}
-.sb-toggle:hover{background:rgba(255,255,255,.16)}
-.sb.collapsed .sb-toggle{margin:0 auto}
-.sb-section{font:900 9px/1 var(--f);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:10px 6px 4px;pointer-events:none;white-space:nowrap;overflow:hidden;transition:opacity .15s}
-.sb.collapsed .sb-section{opacity:0;height:14px;padding:10px 0 4px}
-.sb-item{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;color:rgba(255,255,255,.62);border-radius:8px;padding:8px 6px;font:800 11px/1.2 var(--f);cursor:pointer;text-align:left;transition:background .12s,color .12s;box-shadow:none!important;white-space:nowrap;overflow:hidden}
-.sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
-.sb-item.active{background:linear-gradient(135deg,rgba(168,132,74,.22),rgba(168,132,74,.10));color:var(--gold);border:1px solid rgba(168,132,74,.22)}
-.sb-item svg{flex:0 0 17px;width:17px;height:17px;opacity:.75}
-.sb-item.active svg{opacity:1}
-.sb-item-label{flex:1;overflow:hidden;text-overflow:ellipsis;transition:opacity .15s}
-.sb.collapsed .sb-item-label{opacity:0;width:0;flex:0 0 0}
-.sb.collapsed .sb-item{justify-content:center;padding:8px 0}
 
 /* ── Top bar ── */
 .page-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}

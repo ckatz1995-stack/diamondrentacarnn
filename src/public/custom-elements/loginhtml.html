@@ -3,31 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="./backroom-theme.css"/>
   <style>
     :root{
-      --gold:#A8844A;
-      --gold2:#6C522E;
-      --bg:#F0F4FA;
-      --surface:#FFFFFF;
-      --surface2:#E8EEF7;
-      --border:rgba(15,23,42,0.10);
-      --border2:rgba(15,23,42,0.14);
-      --gold-bg:rgba(168,132,74,0.08);
-      --gold-border:rgba(168,132,74,0.30);
-      --r:14px;
-      --r-lg:18px;
-      --r-pill:999px;
-      --shadow:0 4px 16px rgba(15,23,42,0.08);
-      --shadow-lg:0 12px 32px rgba(15,23,42,0.12);
-      --text:#0f172a;
-      --sub:#475569;
-      --ok:#166534;
+      --err:var(--danger);
       --warn:#9a3412;
-      --err:#b91c1c;
-      --danger:#B91C1C;
     }
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--text);background:var(--bg)}
+    html,body{min-height:100%;overflow:auto}
 
     .shell{max-width:1280px;margin:0 auto;padding:18px 16px 24px}
     .topbar{border-radius:var(--r-lg);overflow:hidden;background:linear-gradient(135deg,#2a1f0e 0%,#4f3a22 46%,#6c522e 100%);box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.06)}
