@@ -320,7 +320,29 @@ export async function getFleetCalendarData({ authToken, from, to } = {}) {
   const { items, unassigned } = buildItems(bookings, fleetById, vehicleCategoryMap);
   const heat = buildHeatmap({ from: f, to: t, fleet, items });
 
-  return { groups, items, unassigned, heat };
+  const vehicleNotes = {};
+  for (const v of (fleet || [])) {
+    const note = _safeText(v?.notes || '');
+    if (note) vehicleNotes[String(v._id || '')] = note;
+  }
+
+  let maintenanceBlocks = [];
+  try {
+    const maintRes = await wixData.query('MaintenanceJobs')
+      .lt('start', iso(t))
+      .gt('end', iso(f))
+      .limit(200)
+      .find({ suppressAuth: true });
+    maintenanceBlocks = (maintRes.items || []).map(b => ({
+      id: String(b._id || ''),
+      fleetVehicleId: _safeText(b.fleetVehicleId),
+      start: _safeText(b.start),
+      end: _safeText(b.end),
+      note: _safeText(b.notes || b.note),
+    })).filter(b => b.fleetVehicleId && b.start && b.end);
+  } catch (_) {}
+
+  return { groups, items, unassigned, heat, vehicleNotes, maintenanceBlocks };
 }
 
 /**
@@ -478,6 +500,33 @@ export async function acknowledgeUnassignedInRange({ authToken, from, to } = {})
   }
 
   return { success: true, total: unassignedBookings.length, updated };
+}
+
+export async function saveVehicleNote({ authToken, fleetVehicleId, note } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: "fleet", action: "Edit" });
+  const id = _safeText(fleetVehicleId);
+  if (!id) return { success: false, message: "Missing vehicle ID" };
+  try {
+    const v = await wixData.get(COLLECTIONS.Fleet, id, { suppressAuth: true });
+    if (!v) return { success: false, message: "Vehicle not found" };
+    v.notes = _safeText(note);
+    await wixData.update(COLLECTIONS.Fleet, v, { suppressAuth: true });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error?.message || String(error) };
+  }
+}
+
+export async function removeMaintenanceBlock({ authToken, blockId } = {}) {
+  await requireStaffAccess({ sessionToken: authToken, area: "fleet", action: "Edit" });
+  const id = _safeText(blockId);
+  if (!id) return { success: false, message: "Missing block ID" };
+  try {
+    await wixData.remove('MaintenanceJobs', id, { suppressAuth: true });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error?.message || String(error) };
+  }
 }
 
 /**

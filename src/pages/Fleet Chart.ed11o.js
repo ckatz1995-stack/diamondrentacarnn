@@ -1,6 +1,7 @@
 
 import wixLocation from 'wix-location';
-import { getFleetCalendarData, moveBookingVehicleOnly, confirmAndAutoAssign } from 'backend/fleetCalendar';
+import { getFleetCalendarData, moveBookingVehicleOnly, confirmAndAutoAssign, saveVehicleNote, removeMaintenanceBlock } from 'backend/fleetCalendar';
+import { setBookingBoardStatus } from 'backend/bookingsBoard';
 import { savePreference, getPreference } from 'backend/staffPreferences';
 import { buildUserContext, logoutBackroom, requireBackroomAccess } from 'public/backroomAuth';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
@@ -158,6 +159,31 @@ $w.onReady(async function () {
       return;
     }
 
+    if (msg.type === 'cancelBooking') {
+      const bookingId = String(msg.bookingId || '').trim();
+      if (!bookingId) return;
+      const result = await setBookingBoardStatus({ authToken: authState.sessionToken, bookingId, newStatus: 'Canceled' });
+      post({ type: 'toast', message: result?.success ? 'Booking cancelled' : `Cancel failed: ${result?.message || 'error'}` });
+      if (result?.success) await loadCalendar(lastRange, false);
+      return;
+    }
+
+    if (msg.type === 'saveVehicleNote') {
+      const fleetVehicleId = String(msg.fleetVehicleId || '').trim();
+      const note = String(msg.note || '').trim();
+      if (!fleetVehicleId) return;
+      saveVehicleNote({ authToken: authState.sessionToken, fleetVehicleId, note }).catch(() => {});
+      return;
+    }
+
+    if (msg.type === 'removeMaintenanceBlock') {
+      const blockId = String(msg.blockId || '').trim();
+      if (!blockId) return;
+      const result = await removeMaintenanceBlock({ authToken: authState.sessionToken, blockId });
+      if (!result?.success) post({ type: 'toast', message: `Remove failed: ${result?.message || 'error'}` });
+      return;
+    }
+
     if (msg.type === 'openVehicleCard') {
       const fleetVehicleId = String(msg.fleetVehicleId || msg.vehicleId || '').trim();
       if (!fleetVehicleId) return;
@@ -207,6 +233,12 @@ async function loadCalendar(range = {}, full = true) {
       items: Array.isArray(res?.items) ? res.items : [],
       unassigned: Array.isArray(res?.unassigned) ? res.unassigned : []
     });
+    if (res?.vehicleNotes && typeof res.vehicleNotes === 'object' && Object.keys(res.vehicleNotes).length) {
+      post({ type: 'vehicleNotes', notes: res.vehicleNotes });
+    }
+    if (Array.isArray(res?.maintenanceBlocks) && res.maintenanceBlocks.length) {
+      post({ type: 'maintenanceBlocks', blocks: res.maintenanceBlocks });
+    }
     const bookingId = String(pendingFocusBookingId || '').trim();
     if (bookingId) {
       setTimeout(() => post({ type: 'focusBooking', bookingId }), 180);
