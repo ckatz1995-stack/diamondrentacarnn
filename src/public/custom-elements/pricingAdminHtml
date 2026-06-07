@@ -3045,26 +3045,41 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
         { title:'Overbooking mode', value: settings.allowOverbooking ? 'ON' : 'OFF', note:'Καλό είναι να μένει OFF εκτός αν το θες συνειδητά.', warn: !!settings.allowOverbooking },
         { title:'Triggered emails', value: !emailsEnabled ? 'Disabled' : (hasMissingEmailTriggers ? 'Missing IDs' : 'Ready'), note:'Άφησέ το Disabled αν δεν χρησιμοποιείς Wix Triggered Emails ακόμη.', warn: hasMissingEmailTriggers },
         { title:'Vehicles page mode', value: settings.vehiclesPageDisplayMode === 'models' ? `Μοντέλα · ${settings.vehiclesPageModelsSource === 'vehicles' ? 'Vehicles' : 'Fleet'}` : 'Κατηγορίες', note:'Ελέγχει αν η σελίδα Vehicles δείχνει κατηγορίες ή grouped μοντέλα.', warn: false },
-        { title:'Pending recovery requests', value: pendingRecovery, note:'Αιτήματα πρόσβασης από το Myroom login panel.', warn: pendingRecovery > 0 }
+        { title:'Pending recovery requests', value: pendingRecovery, note:'Αιτήματα πρόσβασης από το Myroom login panel.', warn: pendingRecovery > 0 },
+        { title:'Tax ID (ΑΦΜ)', value: settings.companyTaxId ? 'Set' : 'Missing', note:'Απαιτείται για παραστατικά και συμβάσεις ενοικίασης.', warn: !settings.companyTaxId },
+        { title:'Payment methods', value: [settings.acceptCash && 'Cash', settings.acceptCreditCard && 'Card', settings.acceptBankTransfer && 'Transfer'].filter(Boolean).join(' · ') || 'None configured', note:'Τουλάχιστον ένας τρόπος πληρωμής πρέπει να ορίζεται.', warn: !settings.acceptCash && !settings.acceptCreditCard && !settings.acceptDebitCard && !settings.acceptBankTransfer },
+        { title:'Cancellation policy', value: settings.cancellationPolicy || 'Not set', note:'Πολιτική ακύρωσης που εμφανίζεται στον πελάτη.', warn: !settings.cancellationPolicy },
+        { title:'Company phone', value: settings.companyPhone ? 'Set' : 'Missing', note:'Εμφανίζεται στο front site και στη σύμβαση.', warn: !settings.companyPhone }
       ];
-      els.healthList.innerHTML = rows.map((row) => `<div class="health-item ${row.warn ? 'warn' : ''}"><div><b>${esc(row.title)}</b><span>${esc(row.note)}</span></div><strong>${esc(row.value)}</strong></div>`).join('');
+      els.healthList.innerHTML = rows.map((row) => `<div class="health-item ${row.warn ? 'warn' : ''}"><div><b>${esc(row.title)}</b><span>${esc(row.note)}</span></div><strong>${esc(String(row.value))}</strong></div>`).join('');
     }
 
     function renderKpis(){
       const settings = businessSettings();
       const currency = settings.currency || 'EUR';
       const categories = vehicleCategoryRows();
+      const fleet = fleetVehicleRows();
       const insurance = insuranceRows();
       const extras = extraRows();
+      const fees = feeRows();
       const activeCategories = categories.filter(item => item.active !== false).length;
+      const activeFleet = fleet.filter(item => item.active !== false).length;
       const activeInsurance = insurance.filter(item => item.active !== false).length;
       const activeExtras = extras.filter(item => item.active !== false).length;
+      const activeFees = fees.filter(item => item.active !== false).length;
+      const minDays = settings.minRentalDays || 1;
+      const maxDays = settings.maxRentalDays || '—';
+      const minAge = settings.minDriverAge || 18;
       els.kpis.innerHTML = [
-        { big: activeCategories, small:'Ενεργές κατηγορίες οχημάτων' },
-        { big: activeInsurance, small:'Ενεργά insurance plans' },
-        { big: activeExtras, small:'Ενεργά extras' },
+        { big: activeFleet, small:'Ενεργά οχήματα στόλου' },
+        { big: activeCategories, small:'Κατηγορίες οχημάτων' },
+        { big: activeInsurance, small:'Insurance plans' },
+        { big: activeExtras, small:'Extra services' },
+        { big: activeFees, small:'Fee rules' },
+        { big: `${minDays}–${maxDays}d`, small:'Rental day range' },
+        { big: `${minAge}+`, small:'Min driver age' },
         { big: money(settings.defaultDeposit || 0, currency), small:'Default deposit' }
-      ].map(k => `<div class="kpi"><b>${esc(k.big)}</b><span>${esc(k.small)}</span></div>`).join('');
+      ].map(k => `<div class="kpi"><b>${esc(String(k.big))}</b><span>${esc(k.small)}</span></div>`).join('');
       els.snapCurrency.textContent = settings.currency || 'EUR';
       els.snapVat.textContent = `${Number(settings.vatRate || 0)}%`;
       els.snapNight.textContent = `${settings.nightStartHour ?? '—'}:00 → ${settings.nightEndHour ?? '—'}:00`;
