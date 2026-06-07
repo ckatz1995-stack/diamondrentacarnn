@@ -739,6 +739,34 @@ button:active{transform:scale(.97)}
                 </div>
               </div>
 
+              <div class="settings-group business-pane" id="group-paymentDeposit" data-group-anchor="paymentDeposit" data-business-pane="paymentDeposit">
+                <div class="settings-group-head">
+                  <div>
+                    <h3>3. Payment &amp; deposit</h3>
+                    <p>Αποδεκτοί τρόποι πληρωμής, ρύθμιση εγγύησης και deposit πολιτική για κρατήσεις.</p>
+                  </div>
+                  <div class="settings-group-badge">Payment</div>
+                </div>
+                <div class="settings-grid">
+                  <div class="field col-12"><label class="field-sub-header">Εγγύηση / Deposit</label></div>
+                  <div class="field col-4"><label>Deposit type</label><select id="bsDepositType"><option value="fixed">Fixed amount</option><option value="percentage">Percentage of total</option></select></div>
+                  <div class="field col-4"><label>Deposit percentage (%)</label><input id="bsDepositPercentage" type="number" min="0" max="100" step="1" placeholder="20" /></div>
+                  <div class="field col-4"><label>Deposit refund note</label><input id="bsDepositRefundNote" placeholder="Refundable within 5 business days after return" /></div>
+                  <div class="field col-12 switch"><input id="bsRequireDepositOnBooking" type="checkbox" /><label for="bsRequireDepositOnBooking">Require deposit at time of booking</label></div>
+                  <div class="field col-12"><label class="field-sub-header">Αποδεκτοί τρόποι πληρωμής</label></div>
+                  <div class="field col-3 switch"><input id="bsAcceptCash" type="checkbox" /><label for="bsAcceptCash">Cash</label></div>
+                  <div class="field col-3 switch"><input id="bsAcceptCreditCard" type="checkbox" /><label for="bsAcceptCreditCard">Credit card</label></div>
+                  <div class="field col-3 switch"><input id="bsAcceptDebitCard" type="checkbox" /><label for="bsAcceptDebitCard">Debit card</label></div>
+                  <div class="field col-3 switch"><input id="bsAcceptBankTransfer" type="checkbox" /><label for="bsAcceptBankTransfer">Bank transfer</label></div>
+                  <div class="field col-12"><label class="field-sub-header">Accepted cards</label></div>
+                  <div class="field col-3 switch"><input id="bsAcceptVisa" type="checkbox" /><label for="bsAcceptVisa">Visa</label></div>
+                  <div class="field col-3 switch"><input id="bsAcceptMastercard" type="checkbox" /><label for="bsAcceptMastercard">Mastercard</label></div>
+                  <div class="field col-3 switch"><input id="bsAcceptAmex" type="checkbox" /><label for="bsAcceptAmex">American Express</label></div>
+                  <div class="field col-3 switch"><input id="bsAcceptMaestro" type="checkbox" /><label for="bsAcceptMaestro">Maestro</label></div>
+                  <div class="field col-12"><label>Payment terms note (shown at checkout)</label><textarea id="bsPaymentTermsNote" placeholder="Η εγγύηση επιστρέφεται μετά την παράδοση του οχήματος σε καλή κατάσταση."></textarea></div>
+                </div>
+              </div>
+
               <div class="settings-group business-pane" id="group-locations" data-group-anchor="locations" data-business-pane="locations">
                 <div class="settings-group-head">
                   <div>
@@ -785,6 +813,35 @@ button:active{transform:scale(.97)}
                     <div class="right"><span class="badge" id="pickupLocationsCount">0 items</span></div>
                   </div>
                   <div id="pickupLocationsTableWrap"></div>
+                </div>
+              </div>
+
+              <div class="settings-group business-pane" id="group-invoicingContract" data-group-anchor="invoicingContract" data-business-pane="invoicingContract">
+                <div class="settings-group-head">
+                  <div>
+                    <h3>2. Invoicing &amp; contract</h3>
+                    <p>Φορολογικά στοιχεία εταιρίας, ρυθμίσεις τιμολογίου και παράμετροι της εκτυπωμένης σύμβασης.</p>
+                  </div>
+                  <div class="settings-group-badge">Invoicing</div>
+                </div>
+                <div class="settings-grid">
+                  <div class="field col-12"><label class="field-sub-header">Στοιχεία εταιρίας</label></div>
+                  <div class="field col-4"><label>Νομική επωνυμία</label><input id="bsCompanyLegalName" placeholder="DIAMOND RENT A CAR ΙΚΕ" /></div>
+                  <div class="field col-4"><label>ΑΦΜ / Tax ID</label><input id="bsCompanyTaxId" placeholder="123456789" /></div>
+                  <div class="field col-4"><label>ΔΟΥ / Tax authority</label><input id="bsCompanyTaxAuthority" placeholder="ΔΟΥ Θεσσαλονίκης" /></div>
+                  <div class="field col-4"><label>ΓΕΜΗ / Reg. number</label><input id="bsCompanyRegNumber" placeholder="000000000" /></div>
+                  <div class="field col-4"><label>ΙΒΑΝ</label><input id="bsCompanyIban" placeholder="GR00 0000 0000 0000 0000 0000 000" /></div>
+                  <div class="field col-4"><label>Τράπεζα</label><input id="bsCompanyBankName" placeholder="Τράπεζα Πειραιώς" /></div>
+                  <div class="field col-12"><label class="field-sub-header">Τιμολόγιο / Απόδειξη</label></div>
+                  <div class="field col-4"><label>Invoice prefix</label><input id="bsInvoicePrefix" placeholder="INV-" /></div>
+                  <div class="field col-4"><label>Receipt prefix</label><input id="bsReceiptPrefix" placeholder="REC-" /></div>
+                  <div class="field col-4"><label>Invoice footer note</label><input id="bsInvoiceFooterNote" placeholder="Ευχαριστούμε για την εμπιστοσύνη σας." /></div>
+                  <div class="field col-12"><label class="field-sub-header">Σύμβαση ενοικίασης</label></div>
+                  <div class="field col-6"><label>Contract header text</label><textarea id="bsContractHeaderText" data-editor="modal" placeholder="Σύμβαση ενοικίασης αυτοκινήτου — DIAMOND RENT A CAR"></textarea></div>
+                  <div class="field col-6"><label>Contract footer text</label><textarea id="bsContractFooterText" data-editor="modal" placeholder="Με την υπογραφή της παρούσας ο αντισυμβαλλόμενος αποδέχεται πλήρως τους ανωτέρω όρους."></textarea></div>
+                  <div class="field col-4 switch"><input id="bsContractRequireSignature" type="checkbox" /><label for="bsContractRequireSignature">Require customer signature</label></div>
+                  <div class="field col-4 switch"><input id="bsContractRequireInitials" type="checkbox" /><label for="bsContractRequireInitials">Require initials per clause</label></div>
+                  <div class="field col-4 switch"><input id="bsContractAutoGenerate" type="checkbox" /><label for="bsContractAutoGenerate">Auto-generate contract on confirm</label></div>
                 </div>
               </div>
 
@@ -896,6 +953,34 @@ button:active{transform:scale(.97)}
                   <div class="field col-6"><label>Insurance details intro</label><textarea id="bsInsuranceDetailsIntro" data-editor="modal" placeholder="Σύντομη εισαγωγή για τα διαθέσιμα πακέτα."></textarea></div>
                   <div class="field col-6"><label>Insurance terms content</label><textarea id="bsInsuranceTermsBody" data-editor="modal" placeholder="Αναλυτικοί όροι, βασικές εξαιρέσεις, διαδικασία επιβεβαίωσης."></textarea></div>
                   <div class="field col-6"><label>Insurance details content</label><textarea id="bsInsuranceDetailsBody" data-editor="modal" placeholder="Πώς διαβάζουμε τις καλύψεις και πότε επιβεβαιώνονται."></textarea></div>
+                </div>
+              </div>
+
+              <div class="settings-group business-pane" id="group-seoPages" data-group-anchor="seoPages" data-business-pane="seoPages">
+                <div class="settings-group-head">
+                  <div>
+                    <h3>6. SEO &amp; pages</h3>
+                    <p>Τίτλοι, meta descriptions και analytics IDs για κάθε public σελίδα. Αφήνοντας κενό χρησιμοποιείται το default Wix SEO.</p>
+                  </div>
+                  <div class="settings-group-badge">SEO</div>
+                </div>
+                <div class="settings-grid">
+                  <div class="field col-12"><label class="field-sub-header">Site-wide</label></div>
+                  <div class="field col-4"><label>OG site name</label><input id="bsOgSiteName" placeholder="Diamond Rent A Car" /></div>
+                  <div class="field col-4"><label>OG image URL</label><input id="bsOgImageUrl" placeholder="https://static.wixstatic.com/..." /></div>
+                  <div class="field col-4"><div class="info-card">Social sharing (Open Graph) — used when site links are shared on social media.</div></div>
+                  <div class="field col-4"><label>Google Analytics ID</label><input id="bsGoogleAnalyticsId" placeholder="G-XXXXXXXXXX" /></div>
+                  <div class="field col-4"><label>Google Tag Manager ID</label><input id="bsGoogleTagManagerId" placeholder="GTM-XXXXXXX" /></div>
+                  <div class="field col-4"><div class="info-card">Leave blank if using the Wix native Google Analytics integration.</div></div>
+                  <div class="field col-12"><label class="field-sub-header">Home page</label></div>
+                  <div class="field col-6"><label>Title</label><input id="bsHomePageTitle" placeholder="Car rental in Thessaloniki — Diamond Rent A Car" /></div>
+                  <div class="field col-6"><label>Meta description</label><input id="bsHomePageDescription" placeholder="Rent a car in Thessaloniki with Diamond Rent A Car. Easy booking, competitive prices." /></div>
+                  <div class="field col-12"><label class="field-sub-header">Vehicles page</label></div>
+                  <div class="field col-6"><label>Title</label><input id="bsVehiclesPageTitle" placeholder="Our vehicle fleet — Diamond Rent A Car" /></div>
+                  <div class="field col-6"><label>Meta description</label><input id="bsVehiclesPageDescription" placeholder="Browse our full range of vehicles available for rental." /></div>
+                  <div class="field col-12"><label class="field-sub-header">Booking page</label></div>
+                  <div class="field col-6"><label>Title</label><input id="bsBookingPageTitle" placeholder="Book your car — Diamond Rent A Car" /></div>
+                  <div class="field col-6"><label>Meta description</label><input id="bsBookingPageDescription" placeholder="Complete your booking online. Fast, secure and transparent." /></div>
                 </div>
               </div>
             </div>
@@ -1370,8 +1455,11 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       { key:'insuranceTexts', area:'front', label:'5. Insurance & legal', shortLabel:'Insurance & legal', helper:'Insurance terms intro, details content and legal helper text.' },
       { key:'operations', area:'operations', label:'1. Hours & operational defaults', shortLabel:'Operations', helper:'Booking defaults, operating hours, night window and deposit rules.' },
       { key:'bookingPolicies', area:'operations', label:'2. Booking rules & policies', shortLabel:'Booking policies', helper:'Min/max rental days, advance booking window, cancellation policy, fuel policy and driver age requirements.' },
+      { key:'paymentDeposit', area:'operations', label:'3. Payment & deposit', shortLabel:'Payment', helper:'Accepted payment methods, deposit type and amount, card types and payment terms.' },
       { key:'locations', area:'company', label:'1. Stations / Locations', shortLabel:'Stations / Locations', helper:'Pickup and dropoff locations, ordering, fees and activation state.' },
-      { key:'automation', area:'communications', label:'1. Triggered emails', shortLabel:'Triggered emails', helper:'Automation enablement and Wix trigger ids for booking confirmations and cancellations.' }
+      { key:'invoicingContract', area:'company', label:'2. Invoicing & contract', shortLabel:'Invoicing', helper:'Company tax details, invoice/receipt prefixes and rental contract template settings.' },
+      { key:'automation', area:'communications', label:'1. Triggered emails', shortLabel:'Triggered emails', helper:'Automation enablement and Wix trigger ids for booking confirmations and cancellations.' },
+      { key:'seoPages', area:'front', label:'6. SEO & pages', shortLabel:'SEO', helper:'Per-page titles, meta descriptions, OG image, Google Analytics and Tag Manager IDs.' }
     ];
     const initialBusinessPane = BUSINESS_PANES.find((pane) => pane.key === state.activeBusinessPane);
     if(initialBusinessPane && state.activeBusinessArea !== initialBusinessPane.area){
@@ -3125,6 +3213,86 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       const bsNoExtrasLabel = document.getElementById('bsNoExtrasLabel');
       if (bsNoExtrasLabel) bsNoExtrasLabel.value = s.noExtrasLabel || '';
 
+      // Payment & deposit
+      const bsDepositType = document.getElementById('bsDepositType');
+      if (bsDepositType) bsDepositType.value = s.depositType || 'fixed';
+      const bsDepositPercentage = document.getElementById('bsDepositPercentage');
+      if (bsDepositPercentage) bsDepositPercentage.value = s.depositPercentage != null ? s.depositPercentage : 20;
+      const bsDepositRefundNote = document.getElementById('bsDepositRefundNote');
+      if (bsDepositRefundNote) bsDepositRefundNote.value = s.depositRefundNote || '';
+      const bsRequireDepositOnBooking = document.getElementById('bsRequireDepositOnBooking');
+      if (bsRequireDepositOnBooking) bsRequireDepositOnBooking.checked = !!s.requireDepositOnBooking;
+      const bsAcceptCash = document.getElementById('bsAcceptCash');
+      if (bsAcceptCash) bsAcceptCash.checked = s.acceptCash !== false;
+      const bsAcceptCreditCard = document.getElementById('bsAcceptCreditCard');
+      if (bsAcceptCreditCard) bsAcceptCreditCard.checked = s.acceptCreditCard !== false;
+      const bsAcceptDebitCard = document.getElementById('bsAcceptDebitCard');
+      if (bsAcceptDebitCard) bsAcceptDebitCard.checked = s.acceptDebitCard !== false;
+      const bsAcceptBankTransfer = document.getElementById('bsAcceptBankTransfer');
+      if (bsAcceptBankTransfer) bsAcceptBankTransfer.checked = !!s.acceptBankTransfer;
+      const bsAcceptVisa = document.getElementById('bsAcceptVisa');
+      if (bsAcceptVisa) bsAcceptVisa.checked = s.acceptVisa !== false;
+      const bsAcceptMastercard = document.getElementById('bsAcceptMastercard');
+      if (bsAcceptMastercard) bsAcceptMastercard.checked = s.acceptMastercard !== false;
+      const bsAcceptAmex = document.getElementById('bsAcceptAmex');
+      if (bsAcceptAmex) bsAcceptAmex.checked = !!s.acceptAmex;
+      const bsAcceptMaestro = document.getElementById('bsAcceptMaestro');
+      if (bsAcceptMaestro) bsAcceptMaestro.checked = !!s.acceptMaestro;
+      const bsPaymentTermsNote = document.getElementById('bsPaymentTermsNote');
+      if (bsPaymentTermsNote) bsPaymentTermsNote.value = s.paymentTermsNote || '';
+
+      // Invoicing & contract
+      const bsCompanyLegalName = document.getElementById('bsCompanyLegalName');
+      if (bsCompanyLegalName) bsCompanyLegalName.value = s.companyLegalName || '';
+      const bsCompanyTaxId = document.getElementById('bsCompanyTaxId');
+      if (bsCompanyTaxId) bsCompanyTaxId.value = s.companyTaxId || '';
+      const bsCompanyTaxAuthority = document.getElementById('bsCompanyTaxAuthority');
+      if (bsCompanyTaxAuthority) bsCompanyTaxAuthority.value = s.companyTaxAuthority || '';
+      const bsCompanyRegNumber = document.getElementById('bsCompanyRegNumber');
+      if (bsCompanyRegNumber) bsCompanyRegNumber.value = s.companyRegNumber || '';
+      const bsCompanyIban = document.getElementById('bsCompanyIban');
+      if (bsCompanyIban) bsCompanyIban.value = s.companyIban || '';
+      const bsCompanyBankName = document.getElementById('bsCompanyBankName');
+      if (bsCompanyBankName) bsCompanyBankName.value = s.companyBankName || '';
+      const bsInvoicePrefix = document.getElementById('bsInvoicePrefix');
+      if (bsInvoicePrefix) bsInvoicePrefix.value = s.invoicePrefix || '';
+      const bsReceiptPrefix = document.getElementById('bsReceiptPrefix');
+      if (bsReceiptPrefix) bsReceiptPrefix.value = s.receiptPrefix || '';
+      const bsInvoiceFooterNote = document.getElementById('bsInvoiceFooterNote');
+      if (bsInvoiceFooterNote) bsInvoiceFooterNote.value = s.invoiceFooterNote || '';
+      const bsContractHeaderText = document.getElementById('bsContractHeaderText');
+      if (bsContractHeaderText) bsContractHeaderText.value = s.contractHeaderText || '';
+      const bsContractFooterText = document.getElementById('bsContractFooterText');
+      if (bsContractFooterText) bsContractFooterText.value = s.contractFooterText || '';
+      const bsContractRequireSignature = document.getElementById('bsContractRequireSignature');
+      if (bsContractRequireSignature) bsContractRequireSignature.checked = s.contractRequireSignature !== false;
+      const bsContractRequireInitials = document.getElementById('bsContractRequireInitials');
+      if (bsContractRequireInitials) bsContractRequireInitials.checked = !!s.contractRequireInitials;
+      const bsContractAutoGenerate = document.getElementById('bsContractAutoGenerate');
+      if (bsContractAutoGenerate) bsContractAutoGenerate.checked = !!s.contractAutoGenerate;
+
+      // SEO & pages
+      const bsOgSiteName = document.getElementById('bsOgSiteName');
+      if (bsOgSiteName) bsOgSiteName.value = s.ogSiteName || '';
+      const bsOgImageUrl = document.getElementById('bsOgImageUrl');
+      if (bsOgImageUrl) bsOgImageUrl.value = s.ogImageUrl || '';
+      const bsGoogleAnalyticsId = document.getElementById('bsGoogleAnalyticsId');
+      if (bsGoogleAnalyticsId) bsGoogleAnalyticsId.value = s.googleAnalyticsId || '';
+      const bsGoogleTagManagerId = document.getElementById('bsGoogleTagManagerId');
+      if (bsGoogleTagManagerId) bsGoogleTagManagerId.value = s.googleTagManagerId || '';
+      const bsHomePageTitle = document.getElementById('bsHomePageTitle');
+      if (bsHomePageTitle) bsHomePageTitle.value = s.homePageTitle || '';
+      const bsHomePageDescription = document.getElementById('bsHomePageDescription');
+      if (bsHomePageDescription) bsHomePageDescription.value = s.homePageDescription || '';
+      const bsVehiclesPageTitle = document.getElementById('bsVehiclesPageTitle');
+      if (bsVehiclesPageTitle) bsVehiclesPageTitle.value = s.vehiclesPageTitle || '';
+      const bsVehiclesPageDescription = document.getElementById('bsVehiclesPageDescription');
+      if (bsVehiclesPageDescription) bsVehiclesPageDescription.value = s.vehiclesPageDescription || '';
+      const bsBookingPageTitle = document.getElementById('bsBookingPageTitle');
+      if (bsBookingPageTitle) bsBookingPageTitle.value = s.bookingPageTitle || '';
+      const bsBookingPageDescription = document.getElementById('bsBookingPageDescription');
+      if (bsBookingPageDescription) bsBookingPageDescription.value = s.bookingPageDescription || '';
+
       document.querySelectorAll('textarea[data-editor="modal"]').forEach(syncRichPreview);
       renderVehicleCatalogPreview();
       if(state.activeSection === 'business') renderBusinessPaneNav();
@@ -3198,7 +3366,50 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
         ageFeeLabel: document.getElementById('bsAgeFeeLabel')?.value.trim() || '',
         nightFeeLabel: document.getElementById('bsNightFeeLabel')?.value.trim() || '',
         grandTotalLabel: document.getElementById('bsGrandTotalLabel')?.value.trim() || '',
-        noExtrasLabel: document.getElementById('bsNoExtrasLabel')?.value.trim() || ''
+        noExtrasLabel: document.getElementById('bsNoExtrasLabel')?.value.trim() || '',
+
+        // Payment & deposit
+        depositType: document.getElementById('bsDepositType')?.value || 'fixed',
+        depositPercentage: Number(document.getElementById('bsDepositPercentage')?.value || 20),
+        depositRefundNote: document.getElementById('bsDepositRefundNote')?.value.trim() || '',
+        requireDepositOnBooking: !!document.getElementById('bsRequireDepositOnBooking')?.checked,
+        acceptCash: !!document.getElementById('bsAcceptCash')?.checked,
+        acceptCreditCard: !!document.getElementById('bsAcceptCreditCard')?.checked,
+        acceptDebitCard: !!document.getElementById('bsAcceptDebitCard')?.checked,
+        acceptBankTransfer: !!document.getElementById('bsAcceptBankTransfer')?.checked,
+        acceptVisa: !!document.getElementById('bsAcceptVisa')?.checked,
+        acceptMastercard: !!document.getElementById('bsAcceptMastercard')?.checked,
+        acceptAmex: !!document.getElementById('bsAcceptAmex')?.checked,
+        acceptMaestro: !!document.getElementById('bsAcceptMaestro')?.checked,
+        paymentTermsNote: document.getElementById('bsPaymentTermsNote')?.value.trim() || '',
+
+        // Invoicing & contract
+        companyLegalName: document.getElementById('bsCompanyLegalName')?.value.trim() || '',
+        companyTaxId: document.getElementById('bsCompanyTaxId')?.value.trim() || '',
+        companyTaxAuthority: document.getElementById('bsCompanyTaxAuthority')?.value.trim() || '',
+        companyRegNumber: document.getElementById('bsCompanyRegNumber')?.value.trim() || '',
+        companyIban: document.getElementById('bsCompanyIban')?.value.trim() || '',
+        companyBankName: document.getElementById('bsCompanyBankName')?.value.trim() || '',
+        invoicePrefix: document.getElementById('bsInvoicePrefix')?.value.trim() || '',
+        receiptPrefix: document.getElementById('bsReceiptPrefix')?.value.trim() || '',
+        invoiceFooterNote: document.getElementById('bsInvoiceFooterNote')?.value.trim() || '',
+        contractHeaderText: document.getElementById('bsContractHeaderText')?.value.trim() || '',
+        contractFooterText: document.getElementById('bsContractFooterText')?.value.trim() || '',
+        contractRequireSignature: !!document.getElementById('bsContractRequireSignature')?.checked,
+        contractRequireInitials: !!document.getElementById('bsContractRequireInitials')?.checked,
+        contractAutoGenerate: !!document.getElementById('bsContractAutoGenerate')?.checked,
+
+        // SEO & pages
+        ogSiteName: document.getElementById('bsOgSiteName')?.value.trim() || '',
+        ogImageUrl: document.getElementById('bsOgImageUrl')?.value.trim() || '',
+        googleAnalyticsId: document.getElementById('bsGoogleAnalyticsId')?.value.trim() || '',
+        googleTagManagerId: document.getElementById('bsGoogleTagManagerId')?.value.trim() || '',
+        homePageTitle: document.getElementById('bsHomePageTitle')?.value.trim() || '',
+        homePageDescription: document.getElementById('bsHomePageDescription')?.value.trim() || '',
+        vehiclesPageTitle: document.getElementById('bsVehiclesPageTitle')?.value.trim() || '',
+        vehiclesPageDescription: document.getElementById('bsVehiclesPageDescription')?.value.trim() || '',
+        bookingPageTitle: document.getElementById('bsBookingPageTitle')?.value.trim() || '',
+        bookingPageDescription: document.getElementById('bsBookingPageDescription')?.value.trim() || ''
       };
       stationSettings[stationKey] = { ...(stationSettings[stationKey] || {}), ...scopedValues };
       return {
