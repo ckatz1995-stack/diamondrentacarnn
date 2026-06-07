@@ -390,13 +390,14 @@ const biz = () => state.snapshot?.businessSettings || {};
 const cur = () => biz().currency || 'EUR';
 
 // ── COMMUNICATION ─────────────────────────────────────────────────────────
+// Controller reads msg.payload for CRUD actions, msg.height for resize, msg.route for navigate
 function post(type, payload={}) {
-  window.parent.postMessage({ type, ...payload }, '*');
+  window.parent.postMessage({ type, payload }, '*');
 }
 
 function requestResize() {
   const h = Math.min(7800, Math.max(1200, document.body.scrollHeight + 40));
-  post('resize', { height: h });
+  window.parent.postMessage({ type: 'resize', height: h }, '*');
 }
 
 window.addEventListener('message', e => {
@@ -1545,8 +1546,8 @@ function bindSecurityButtons() {
   el('inviteBtn')?.addEventListener('click', () => {
     const email = el('pwEmail')?.value?.trim();
     if (!email) return showToast('Enter a staff email','error');
-    post('staffInviteResult',{email}); // trigger via parent
-    showToast(`Invite sent to ${email}`,'info');
+    if (!confirm(`Send invite to ${email}?`)) return;
+    post('inviteStaffUser', { email, fullName: '', roleKey: '' });
   });
 }
 
