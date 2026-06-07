@@ -138,9 +138,33 @@ tr:hover td{background:rgba(0,0,0,.02)}
 .badge.active{background:var(--good-bg);color:var(--good)}
 .badge.inactive{background:var(--surface);color:var(--muted)}
 .badge.warn{background:#FEF3C7;color:#92400E}
+.badge.perday{background:#EFF6FF;color:#1d4ed8}
+.badge.perbooking{background:#F5F3FF;color:#6d28d9}
+.badge.agerage{background:#FFFBEB;color:#92400E}
+.badge.nightfee{background:#E0F2FE;color:#0369a1}
+.badge.maintenance{background:#FFFBEB;color:#92400E}
+.badge.reserved{background:#EFF6FF;color:#1d4ed8}
 .tbl-search{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .tbl-search input{max-width:280px;padding:7px 11px;font-size:13px}
 .tbl-empty{padding:32px;text-align:center;color:var(--muted);font-size:13px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:10px;text-align:center}
+.empty-state .es-icon{font-size:36px;line-height:1;opacity:.5}
+.empty-state .es-msg{font:600 14px var(--f);color:var(--sub)}
+.empty-state .es-hint{font:400 12px var(--f);color:var(--muted)}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.status-dot.green{background:#16a34a}.status-dot.amber{background:#d97706}.status-dot.red{background:#dc2626}.status-dot.blue{background:#2563EB}
+.section-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.section-toolbar input{flex:1;min-width:180px;max-width:320px;padding:7px 11px;font-size:13px}
+.section-banner{padding:9px 14px;border-radius:var(--r);background:rgba(37,99,235,.05);border-left:3px solid #2563EB;color:#1d4ed8;font-size:12px;margin-bottom:10px}
+.kpi.green{border-left:3px solid #16a34a}
+.kpi.blue{border-left:3px solid #2563EB}
+.kpi.gold{border-left:3px solid #C09840}
+.kpi.purple{border-left:3px solid #8B5CF6}
+.kpi .kpi-icon{font-size:17px;float:right;opacity:.35}
+.panel.green-top{border-top:3px solid #16a34a}
+.panel.blue-top{border-top:3px solid #2563EB}
+.panel.gold-top{border-top:3px solid #C09840}
+.panel.purple-top{border-top:3px solid #8B5CF6}
 
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;padding:20px;overflow-y:auto}
@@ -227,6 +251,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
   <button class="ftab" data-s="insurance">Insurance</button>
   <button class="ftab" data-s="extras">Extras</button>
   <button class="ftab" data-s="fees">Fees</button>
+  <button class="ftab" data-s="pickupLocations">Pickup locations</button>
   <button class="ftab" data-s="roles">Roles</button>
   <button class="ftab" data-s="users">Users</button>
   <button class="ftab" data-s="security">Security</button>
@@ -263,7 +288,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
     </div>
     <div class="tbl-search"><input id="catSearch" placeholder="Search categories…" /></div>
     <div class="tbl-wrap"><table id="catTable"><thead><tr>
-      <th>Code</th><th>Title</th><th>Price/day</th><th>Seats</th><th>Status</th><th>Actions</th>
+      <th>Code</th><th>Title</th><th>Price/day</th><th>Seats</th><th>Transmission</th><th>Public</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="catBody"></tbody></table></div>
   </section>
 
@@ -274,7 +299,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
     </div>
     <div class="tbl-search"><input id="vehSearch" placeholder="Search vehicles…" /></div>
     <div class="tbl-wrap"><table id="vehTable"><thead><tr>
-      <th>Plate</th><th>Model</th><th>Category</th><th>Status</th><th>Actions</th>
+      <th>Plate</th><th>Model</th><th>Category</th><th>Status</th><th>Active</th><th>Actions</th>
     </tr></thead><tbody id="vehBody"></tbody></table></div>
   </section>
 
@@ -306,7 +331,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <button class="btn primary" id="addInsBtn">+ Add plan</button>
     </div>
     <div class="tbl-wrap"><table id="insTable"><thead><tr>
-      <th>Key</th><th>Title</th><th>Price/day</th><th>Sort</th><th>Status</th><th>Actions</th>
+      <th>Key</th><th>Title</th><th>Price/day</th><th>Sort</th><th>Public</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="insBody"></tbody></table></div>
   </section>
 
@@ -326,7 +351,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <button class="btn primary" id="addFeeBtn">+ Add fee</button>
     </div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>Key</th><th>Title</th><th>Amount</th><th>Billing</th><th>Rule type</th><th>Status</th><th>Actions</th>
+      <th>Key</th><th>Title</th><th>Amount</th><th>Billing</th><th>Type</th><th>Group</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="feesBody"></tbody></table></div>
   </section>
 
@@ -336,7 +361,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <button class="btn primary" id="addRoleBtn">+ Add role</button>
     </div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>Key</th><th>Label</th><th>Status</th><th>Actions</th>
+      <th>Key</th><th>Label</th><th>Permissions</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="rolesBody"></tbody></table></div>
   </section>
 
@@ -379,10 +404,21 @@ tr:hover td{background:rgba(0,0,0,.02)}
     </div>
   </section>
 
+  <section id="s-pickupLocations" class="section">
+    <div class="section-head">
+      <h2>Pickup locations</h2>
+      <button class="btn primary" id="addLocationBtn">+ Add location</button>
+    </div>
+    <div class="section-banner">Manage all pickup and dropoff locations shown to customers in the booking flow. Each location can have a custom fee and display labels.</div>
+    <div class="tbl-wrap"><table id="locTable"><thead><tr>
+      <th>Label</th><th>Address</th><th>Station</th><th>Type</th><th>Fee</th><th>Status</th><th>Actions</th>
+    </tr></thead><tbody id="locBody"></tbody></table></div>
+  </section>
+
   <section id="s-audit" class="section">
     <div class="section-head"><h2>Change history</h2></div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Summary</th>
+      <th>Time</th><th>Actor</th><th>Action</th><th>Entity ID</th><th>Entity</th><th>Summary</th>
     </tr></thead><tbody id="auditBody"></tbody></table></div>
   </section>
 </div>
@@ -503,13 +539,13 @@ function showToast(msg, tone='info') {
 const GROUPS = [
   { key:'settingsHome', label:'Overview', subs:[] },
   { key:'business',     label:'Business', subs:[] },
-  { key:'operations',   label:'Operations', subs:['fleetCategories','fleetVehicles'] },
+  { key:'operations',   label:'Operations', subs:['fleetCategories','fleetVehicles','pickupLocations'] },
   { key:'pricing',      label:'Pricing rules', subs:['dynamicPricing','insurance','extras','fees'] },
   { key:'team',         label:'Team & access', subs:['roles','users','security','audit'] }
 ];
 
 const SUB_LABELS = {
-  fleetCategories:'Fleet categories', fleetVehicles:'Fleet vehicles',
+  fleetCategories:'Fleet categories', fleetVehicles:'Fleet vehicles', pickupLocations:'Pickup locations',
   dynamicPricing:'Dynamic pricing', insurance:'Insurance', extras:'Extras', fees:'Fees',
   roles:'Roles', users:'Users', security:'Security', audit:'Change history'
 };
@@ -523,6 +559,7 @@ const AREAS = [
 
 const PANES = [
   { key:'frontBrand',     area:'brand',      label:'Brand identity',  short:'Identity' },
+  { key:'stations',       area:'brand',      label:'Station profiles',short:'Stations' },
   { key:'vehicleCatalog', area:'operations', label:'Catalog display', short:'Catalog' },
   { key:'operations',     area:'operations', label:'Pricing & ops',   short:'Pricing & ops' },
   { key:'automation',     area:'operations', label:'Email triggers',  short:'Email triggers' },
@@ -649,6 +686,7 @@ function renderAll() {
   renderBizPane();
   renderFleetCats();
   renderFleetVehs();
+  renderPickupLocations();
   renderSeasons();
   renderRules();
   renderInsurance();
@@ -693,26 +731,27 @@ function renderOverview() {
 
   const kpis = el('ovKpis');
   if (kpis) kpis.innerHTML = [
-    { b: activeVehs,  s:'Active fleet' },
-    { b: activeCats,  s:'Vehicle categories' },
-    { b: ins.filter(x=>x.active!==false).length, s:'Insurance plans' },
-    { b: exts.filter(x=>x.active!==false).length, s:'Extra services' },
-    { b: fees.filter(x=>x.active!==false).length, s:'Fee rules' },
-    { b: seas.filter(x=>x.active!==false).length, s:'Pricing seasons' },
-    { b: rules.filter(x=>x.active!==false).length, s:'Rate rules' },
-    { b: locs.filter(x=>x.active!==false).length, s:'Pickup locations' },
-    { b: b.minRentalDays&&b.maxRentalDays ? `${b.minRentalDays}–${b.maxRentalDays}d` : '—', s:'Rental day range' },
-    { b: b.minDriverAge ? b.minDriverAge+'+' : '—', s:'Min driver age' },
-    { b: money(b.defaultDeposit||0, b.currency), s:'Default deposit' },
-    { b: (state.access?.users||[]).filter(u=>u.active!==false).length, s:'Staff users' }
-  ].map(k=>`<div class="kpi"><b>${esc(String(k.b))}</b><span>${esc(k.s)}</span></div>`).join('');
+    { b: activeVehs, s:'Active fleet', icon:'🚗', color:'green' },
+    { b: activeCats, s:'Vehicle categories', icon:'📂', color:'green' },
+    { b: ins.filter(x=>x.active!==false).length, s:'Insurance plans', icon:'🛡', color:'blue' },
+    { b: exts.filter(x=>x.active!==false).length, s:'Extra services', icon:'✚', color:'blue' },
+    { b: fees.filter(x=>x.active!==false).length, s:'Fee rules', icon:'⚡', color:'blue' },
+    { b: seas.filter(x=>x.active!==false).length, s:'Pricing seasons', icon:'📅', color:'blue' },
+    { b: rules.filter(x=>x.active!==false).length, s:'Rate rules', icon:'💲', color:'gold' },
+    { b: locs.filter(x=>x.active!==false).length, s:'Pickup locations', icon:'📍', color:'gold' },
+    { b: b.currency||'EUR', s:'Currency', icon:'💶', color:'gold' },
+    { b: b.vatRate ? b.vatRate+'%' : '—', s:'VAT rate', icon:'%', color:'gold' },
+    { b: money(b.defaultDeposit||0, b.currency), s:'Default deposit', icon:'🏦', color:'gold' },
+    { b: (state.access?.users||[]).filter(u=>u.active!==false).length, s:'Staff users', icon:'👥', color:'purple' }
+  ].map(k=>`<div class="kpi ${k.color}"><span class="kpi-icon">${k.icon}</span><b>${esc(String(k.b))}</b><span>${esc(k.s)}</span></div>`).join('');
 
   const cmds = el('ovCmds');
   if (cmds) cmds.innerHTML = [
-    { icon:'🏢', title:'Business settings', desc:'Brand, operations, policies, integrations', links:['Brand','Operations','Policies','Integrations'], area:'front', panes:['frontBrand','operations','mileagePolicy','integrations'] },
-    { icon:'🚗', title:'Fleet & operations', desc:'Vehicle categories and individual fleet vehicles', links:['Fleet categories','Fleet vehicles'], sects:['fleetCategories','fleetVehicles'] },
+    { icon:'🏢', title:'Business settings', desc:'Brand, operations, policies, integrations', links:['Brand','Operations','Content','Tools'], area:'front', panes:['frontBrand','operations','rentalTerms','backupRestore'] },
+    { icon:'🚗', title:'Fleet & operations', desc:'Vehicle categories, fleet vehicles, pickup locations', links:['Fleet categories','Fleet vehicles','Pickup locations'], sects:['fleetCategories','fleetVehicles','pickupLocations'] },
     { icon:'💰', title:'Pricing rules', desc:'Seasons, rate rules, insurance and extra services', links:['Pricing seasons','Rate rules','Insurance','Extras'], sects:['dynamicPricing','dynamicPricing','insurance','extras'] },
-    { icon:'👥', title:'Team & access', desc:'Roles, staff users, security and audit log', links:['Roles','Users','Security','Audit'], sects:['roles','users','security','audit'] }
+    { icon:'👥', title:'Team & access', desc:'Roles, staff users, security and audit log', links:['Roles','Users','Security','Audit'], sects:['roles','users','security','audit'] },
+    { icon:'🛠', title:'Tools & data', desc:'Seed default data, reset pricing, export/import snapshots', links:['Seed defaults','Reset pricing','Backup & restore'], sects:['_seed','_reset','business'], panes:[null,null,'backupRestore'] }
   ].map((c,i) => `<div class="cmd-card" data-cmd="${i}">
     <div class="cmd-icon">${c.icon}</div>
     <h4>${c.title}</h4>
@@ -721,10 +760,11 @@ function renderOverview() {
   </div>`).join('');
 
   const CMDS_DATA = [
-    { sects:['business','business','business','business'], panes:['frontBrand','operations','mileagePolicy','integrations'] },
-    { sects:['fleetCategories','fleetVehicles'] },
+    { sects:['business','business','business','business'], panes:['frontBrand','operations','rentalTerms','backupRestore'] },
+    { sects:['fleetCategories','fleetVehicles','pickupLocations'] },
     { sects:['dynamicPricing','dynamicPricing','insurance','extras'] },
-    { sects:['roles','users','security','audit'] }
+    { sects:['roles','users','security','audit'] },
+    { sects:['_seed','_reset','business'], panes:[null,null,'backupRestore'] }
   ];
 
   cmds.querySelectorAll('.cmd-card').forEach(card => {
@@ -734,6 +774,8 @@ function renderOverview() {
       const cd = CMDS_DATA[ci];
       const sec = cd.sects[li] || cd.sects[0];
       const pane = cd.panes?.[li];
+      if (sec === '_seed') { if(confirm('Seed default pricing data? This will add missing defaults.')) post('seedPricingDefaults',{}); return; }
+      if (sec === '_reset') { if(confirm('Reset all pricing to defaults? This overwrites current pricing data.')) post('resetPricingDefaults',{target:'all'}); return; }
       if (sec === 'business') { state.bizPane = pane||'frontBrand'; state.bizArea = PANES.find(p=>p.key===state.bizPane)?.area||'brand'; goto('business'); renderBizPane(); }
       else goto(sec);
     });
@@ -893,28 +935,20 @@ function buildPaneFields(key, s) {
         <div id="importResult" style="margin-top:8px;font-size:13px"></div>
       `)}`;
 
+    case 'stations': {
+      const profiles = (state.snapshot?.stationProfiles)||[];
+      return sc('🏠', 'Station profiles', 'Rental stations / hub locations', `
+        ${profiles.length ? profiles.map(p=>`
+          <div style="padding:10px 0;border-bottom:1px solid var(--line)">
+            <strong>${esc(p.label||p.key||'—')}</strong>
+            <code style="font-size:11px;color:var(--muted);margin-left:8px">${esc(p.key||'—')}</code>
+            ${p.description?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(p.description)}</div>`:''}
+          </div>`).join('') : '<div class="fhint">No stations defined. Stations are added via the Pickup Locations section.</div>'}
+      `);
+    }
+
     default: return `<div class="coming-soon"><div>🔒</div><div><b>Coming soon</b><span>This section is planned but not yet connected to the CMS. It will be available in a future update.</span></div></div>`;
   }
-}
-
-function renderLocationsPane() {
-  const locs = (state.snapshot?.pickupLocations||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
-  const rows = locs.map(l=>`<tr>
-    <td>${esc(l.label||l.displayTitle||'—')}</td>
-    <td>${esc(l.address||'—')}</td>
-    <td>${esc(l.stationKey||'default')}</td>
-    <td>${esc(l.locationType||'both')}</td>
-    <td>${l.extraFee>0?money(l.extraFee,cur()):'—'}</td>
-    <td><span class="badge ${l.active!==false?'active':'inactive'}">${l.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns"><button class="btn sm" onclick="editLocation('${esc(l._id||l.key||'')}')">Edit</button>
-    <button class="btn sm danger" onclick="deleteLocation('${esc(l._id||l.key||'')}','${esc(l.label||'')}')">Delete</button></td>
-  </tr>`).join('') || '<tr><td colspan="7" class="tbl-empty">No locations yet</td></tr>';
-  return `<div class="panel-head" style="margin-bottom:10px">
-    <h4>Pickup & dropoff locations</h4>
-    <button class="btn primary sm" onclick="openAddLocation()">+ Add location</button>
-  </div>
-  <div class="tbl-wrap"><table><thead><tr><th>Label</th><th>Address</th><th>Station</th><th>Type</th><th>Fee</th><th>Status</th><th>Actions</th></tr></thead>
-  <tbody>${rows}</tbody></table></div>`;
 }
 
 function bindPaneEvents(key) {
@@ -1031,11 +1065,13 @@ function renderFleetCats() {
     <td>${esc(r.title||r.displayTitle||'—')}</td>
     <td>${money(r.price,cur())}</td>
     <td>${r.seats||'—'}</td>
+    <td>${esc(r.transmission||'—')}</td>
+    <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
     <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-cat="${esc(r._id||'')}">Edit</button>
       <button class="btn sm danger" data-del-cat="${esc(r._id||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="6" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
+    </td></tr>`).join('') : '<tr><td colspan="8" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
 }
 
 function renderFleetVehs() {
@@ -1045,16 +1081,36 @@ function renderFleetVehs() {
   const filtered = q ? rows.filter(r=>`${r.plate}${r.model}`.toLowerCase().includes(q)) : rows;
   el('vehBody').innerHTML = filtered.length ? filtered.map(r=>{
     const cat = cats.find(c=>c._id===r.vehicleCategoryId||c.category===r.category);
+    const statusClass = r.status==='available'?'active':r.status==='maintenance'?'maintenance':r.status==='reserved'?'reserved':'inactive';
     return `<tr>
       <td><code>${esc(r.plate||'—')}</code></td>
       <td>${esc(r.model||r.displayTitle||'—')}</td>
       <td>${esc(cat?.title||r.category||'—')}</td>
-      <td><span class="badge ${r.status==='available'?'active':r.status==='maintenance'?'warn':'inactive'}">${esc(r.status||'unknown')}</span></td>
+      <td><span class="badge ${statusClass}">${esc(r.status||'unknown')}</span></td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
       <td class="btns">
         <button class="btn sm" data-edit-veh="${esc(r._id||'')}">Edit</button>
         <button class="btn sm danger" data-del-veh="${esc(r._id||'')}" data-label="${esc(r.plate||'')}">Delete</button>
       </td></tr>`;
-  }).join('') : '<tr><td colspan="5" class="tbl-empty">No vehicles yet.</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="tbl-empty">No vehicles yet.</td></tr>';
+}
+
+function renderPickupLocations() {
+  const body = el('locBody'); if (!body) return;
+  const locs = (state.snapshot?.pickupLocations||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const typeLabels = { both:'Pickup & dropoff', pickup:'Pickup only', dropoff:'Dropoff only' };
+  body.innerHTML = locs.length ? locs.map(l=>`<tr>
+    <td><strong>${esc(l.label||'—')}</strong></td>
+    <td style="font-size:12px;color:var(--muted)">${esc(l.address||'—')}</td>
+    <td><code>${esc(l.stationKey||'default')}</code></td>
+    <td>${esc(typeLabels[l.locationType]||l.locationType||'both')}</td>
+    <td>${l.extraFee>0?money(l.extraFee,cur()):'—'}</td>
+    <td><span class="badge ${l.active!==false?'active':'inactive'}">${l.active!==false?'Active':'Inactive'}</span></td>
+    <td class="btns">
+      <button class="btn sm" data-edit-loc="${esc(l._id||l.key||'')}">Edit</button>
+      <button class="btn sm danger" data-del-loc="${esc(l._id||l.key||'')}" data-key="${esc(l.key||'')}" data-label="${esc(l.label||'')}">Delete</button>
+    </td></tr>`).join('')
+  : `<tr><td colspan="7" class="tbl-empty">No pickup locations yet. Add your first location to enable the booking flow.</td></tr>`;
 }
 
 function renderSeasons() {
@@ -1095,14 +1151,15 @@ function renderInsurance() {
   const rows = (state.snapshot?.insurancePlans||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   el('insBody').innerHTML = rows.length ? rows.map(r=>`<tr>
     <td><code>${esc(r.key||'—')}</code></td>
-    <td>${esc(r.title||'—')}</td>
+    <td>${esc(r.title||'—')}${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,60))}${r.description.length>60?'…':''}</div>`:''}</td>
     <td>${money(r.pricePerDay,cur())}</td>
     <td>${r.sortOrder||0}</td>
+    <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
     <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-ins="${esc(r._id||'')}">Edit</button>
       <button class="btn sm danger" data-del-ins="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="6" class="tbl-empty">No insurance plans yet.</td></tr>';
+    </td></tr>`).join('') : '<tr><td colspan="7" class="tbl-empty">No insurance plans yet.</td></tr>';
 }
 
 function renderExtras() {
@@ -1111,7 +1168,7 @@ function renderExtras() {
     <td><code>${esc(r.key||'—')}</code></td>
     <td>${esc(r.title||'—')}</td>
     <td>${money(r.price,cur())}</td>
-    <td>${esc(r.billingMode||'perDay')}</td>
+    <td><span class="badge ${r.billingMode==='perDay'?'perday':'perbooking'}">${r.billingMode==='perDay'?'Per day':'Per booking'}</span></td>
     <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-extra="${esc(r._id||'')}">Edit</button>
@@ -1121,17 +1178,21 @@ function renderExtras() {
 
 function renderFees() {
   const rows = (state.snapshot?.feeRules||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
-  el('feesBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td><code>${esc(r.key||'—')}</code></td>
-    <td>${esc(r.title||'—')}</td>
-    <td>${money(r.amount,cur())}</td>
-    <td>${esc(r.billingMode||'perBooking')}</td>
-    <td>${esc(r.ruleType||'manual')}</td>
-    <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns">
-      <button class="btn sm" data-edit-fee="${esc(r._id||'')}">Edit</button>
-      <button class="btn sm danger" data-del-fee="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="7" class="tbl-empty">No fee rules yet.</td></tr>';
+  el('feesBody').innerHTML = rows.length ? rows.map(r=>{
+    const rtClass = r.ruleType==='ageRange'?'agerage':r.ruleType==='nightPickup'||r.ruleType==='nightDropoff'?'nightfee':'inactive';
+    return `<tr>
+      <td><code>${esc(r.key||'—')}</code></td>
+      <td>${esc(r.title||'—')}</td>
+      <td>${money(r.amount,cur())}</td>
+      <td><span class="badge ${r.billingMode==='perDay'?'perday':'perbooking'}">${r.billingMode==='perDay'?'Per day':'Per booking'}</span></td>
+      <td><span class="badge ${rtClass}">${esc(r.ruleType||'manual')}</span></td>
+      <td>${esc(r.audienceGroup||'—')}</td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
+      <td class="btns">
+        <button class="btn sm" data-edit-fee="${esc(r._id||'')}">Edit</button>
+        <button class="btn sm danger" data-del-fee="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
+      </td></tr>`;
+  }).join('') : '<tr><td colspan="8" class="tbl-empty">No fee rules yet.</td></tr>';
 }
 
 function renderRoles() {
@@ -1139,10 +1200,11 @@ function renderRoles() {
   el('rolesBody').innerHTML = rows.length ? rows.map(r=>`<tr>
     <td><code>${esc(r.key||'—')}</code></td>
     <td>${esc(r.label||'—')}</td>
+    <td style="font-size:12px;color:var(--muted)">${Object.keys(r.permissions||{}).length} modules, ${(r.specialPermissions||[]).length} specials</td>
     <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-role="${esc(r._id||'')}">Edit</button>
-    </td></tr>`).join('') : '<tr><td colspan="4" class="tbl-empty">No roles yet.</td></tr>';
+    </td></tr>`).join('') : '<tr><td colspan="5" class="tbl-empty">No roles yet.</td></tr>';
 }
 
 function renderUsers() {
@@ -1187,13 +1249,18 @@ function renderSessions() {
 
 function renderAudit() {
   const rows = (state.access?.auditRows||[]).slice().reverse().slice(0,100);
-  el('auditBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td style="white-space:nowrap">${fmtDT(r.createdAt)}</td>
-    <td>${esc(r.actorEmail||'—')}</td>
-    <td><code>${esc(r.action||'—')}</code></td>
-    <td>${esc(r.entityType||'—')}</td>
-    <td>${esc(r.summary||'—')}</td>
-  </tr>`).join('') : '<tr><td colspan="5" class="tbl-empty">No audit log entries.</td></tr>';
+  el('auditBody').innerHTML = rows.length ? rows.map(r=>{
+    const actionShort = (r.action||'—').replace(/([A-Z])/g,' $1').trim();
+    const entityId = r.entityId ? `<code style="font-size:10px;color:var(--muted)">${esc(String(r.entityId).slice(0,12))}…</code>` : '—';
+    return `<tr>
+      <td style="white-space:nowrap;font-size:12px">${fmtDT(r.createdAt)}</td>
+      <td style="font-size:12px">${esc(r.actorEmail||'—')}</td>
+      <td><code style="font-size:11px">${esc(actionShort)}</code></td>
+      <td>${entityId}</td>
+      <td style="font-size:12px">${esc(r.entityType||'—')}</td>
+      <td style="font-size:12px">${esc(r.summary||'—')}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="6" class="tbl-empty">No audit log entries.</td></tr>';
 }
 
 // ── MODAL ─────────────────────────────────────────────────────────────────
@@ -1235,13 +1302,15 @@ function mr3(...f) { return `<div class="field-row cols-3">${f.join('')}</div>`;
 function bindCrudButtons() {
   const app = el('app');
   app.addEventListener('click', e => {
-    const btn = e.target.closest('[data-edit-cat],[data-del-cat],[data-edit-veh],[data-del-veh],[data-edit-season],[data-del-season],[data-edit-rule],[data-del-rule],[data-edit-ins],[data-del-ins],[data-edit-extra],[data-del-extra],[data-edit-fee],[data-del-fee],[data-edit-role],[data-edit-user],[data-deact-user],[data-react-user],[data-revoke-session]');
+    const btn = e.target.closest('[data-edit-cat],[data-del-cat],[data-edit-veh],[data-del-veh],[data-edit-loc],[data-del-loc],[data-edit-season],[data-del-season],[data-edit-rule],[data-del-rule],[data-edit-ins],[data-del-ins],[data-edit-extra],[data-del-extra],[data-edit-fee],[data-del-fee],[data-edit-role],[data-edit-user],[data-deact-user],[data-react-user],[data-revoke-session]');
     if (!btn) return;
     const d = btn.dataset;
     if (d.editCat !== undefined) openCatModal(d.editCat);
     else if (d.delCat !== undefined) { if(confirm(`Delete category "${d.label}"?`)) post('deleteVehicleCategory',{itemId:d.delCat,categoryCode:d.label}); }
     else if (d.editVeh !== undefined) openVehModal(d.editVeh);
     else if (d.delVeh !== undefined) { if(confirm(`Delete vehicle "${d.label}"?`)) post('deleteFleetVehicle',{itemId:d.delVeh,plate:d.label}); }
+    else if (d.editLoc !== undefined) openEditLocation(d.editLoc);
+    else if (d.delLoc !== undefined) { if(confirm('Delete location "'+d.label+'"?')) post('deletePickupLocation',{itemId:d.delLoc,itemKey:d.key}); }
     else if (d.editSeason !== undefined) openSeasonModal(d.editSeason);
     else if (d.delSeason !== undefined) { if(confirm(`Delete season "${d.label}"?`)) post('deletePricingSeason',{itemId:d.delSeason,itemKey:d.key}); }
     else if (d.editRule !== undefined) openRuleModal(d.editRule);
@@ -1326,6 +1395,7 @@ function openRuleModal(id='') {
     + mchk('active',item.active!==false,'Active');
   openModal(id?'Edit rate rule':'Add rate rule', body, () => {
     if (mn('minDays')<1) return showToast('Min days must be at least 1','error');
+    if (mn('maxDays')>0 && mn('maxDays')<mn('minDays')) return showToast('Max days must be ≥ min days','error');
     post('upsertCategoryRateRule',{ _id:id||undefined, categoryCode:mv('categoryCode'), seasonKey:mv('seasonKey'),
       minDays:mn('minDays',1), maxDays:mn('maxDays'), pricePerDay:mn('pricePerDay'), label:mv('label'), active:mc('active') });
     closeModal();
@@ -1367,8 +1437,8 @@ function openExtraModal(id='') {
 function openFeeModal(id='') {
   const item = id ? (state.snapshot?.feeRules||[]).find(x=>x._id===id)||{} : {};
   const body = mr2(mfld('Key (slug) *',minp('key',item.key,'text','late_return')),mfld('Title *',minp('title',item.title,'text','Late return fee')))
-    + mr3(mfld('Amount €',minp('amount',item.amount,'number','0')),mfld('Billing mode',msel('billingMode',[['perBooking','Per booking'],['perDay','Per day']],item.billingMode||'perBooking')),mfld('Rule type',msel('ruleType',[['manual','Manual'],['automatic','Automatic'],['location','Location-based']],item.ruleType||'manual')))
-    + mfld('Audience group',minp('audienceGroup',item.audienceGroup,'text','all'))
+    + mr3(mfld('Amount €',minp('amount',item.amount,'number','0')),mfld('Billing mode',msel('billingMode',[['perBooking','Per booking'],['perDay','Per day']],item.billingMode||'perBooking')),mfld('Rule type',msel('ruleType',[['manual','Manual (applied manually)'],['ageRange','Age range (e.g. 19–22, 70+)'],['nightPickup','Night pickup'],['nightDropoff','Night dropoff']],item.ruleType||'manual')))
+    + mfld('Audience group',minp('audienceGroup',item.audienceGroup,'text','19-22 or 70+'),'<span style="font-size:11px;color:var(--muted)">For age range rules: enter the age bracket e.g. <code>19-22</code> or <code>70+</code></span>')
     + mfld('Description',mta('description',item.description))
     + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
   openModal(id?'Edit fee rule':'Add fee rule', body, () => {
@@ -1428,42 +1498,63 @@ function openUserModal(id='') {
   });
 }
 
+function _locationFieldLabelsBody(item) {
+  item = item || {};
+  return '<div class="field-sub">Display labels</div>'
+    + mr2(mfld('Pickup info label',minp('pickupInfoLabel',item.pickupInfoLabel||'','text','e.g. Pickup at airport')),mfld('Pickup info placeholder',minp('pickupInfoPlaceholder',item.pickupInfoPlaceholder||'','text','e.g. Terminal 2')))
+    + mr2(mfld('Dropoff info label',minp('dropoffInfoLabel',item.dropoffInfoLabel||'','text','e.g. Dropoff location')),mfld('Dropoff info placeholder',minp('dropoffInfoPlaceholder',item.dropoffInfoPlaceholder||'','text','e.g. Hotel name')))
+    + '<div class="field-sub">Origin field</div>'
+    + mchk('showOriginField',!!(item.showOriginField),'Show origin field (e.g. flight number, hotel name)')
+    + mr2(mfld('Origin field label',minp('originFieldLabel',item.originFieldLabel||'','text','e.g. Flight number')),mfld('Origin field placeholder',minp('originFieldPlaceholder',item.originFieldPlaceholder||'','text','e.g. A3 123')));
+}
+
+function _locationPayload(extra) {
+  extra = extra || {};
+  const base = { label:mv('label'), key:slug(mv('key')||mv('label')), address:mv('address'),
+    stationKey:mv('stationKey','default'), locationType:mv('locationType','both'), extraFee:mn('extraFee'),
+    mapUrl:mv('mapUrl'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible'),
+    pickupInfoLabel:mv('pickupInfoLabel'), pickupInfoPlaceholder:mv('pickupInfoPlaceholder'),
+    dropoffInfoLabel:mv('dropoffInfoLabel'), dropoffInfoPlaceholder:mv('dropoffInfoPlaceholder'),
+    showOriginField:mc('showOriginField'), originFieldLabel:mv('originFieldLabel'), originFieldPlaceholder:mv('originFieldPlaceholder') };
+  return Object.assign({}, extra, base);
+}
+
 function openAddLocation() {
   const body = mr2(mfld('Label *',minp('label','','text','Thessaloniki Airport')),mfld('Key (slug)',minp('key','','text','thessaloniki_airport')))
     + mfld('Address *',minp('address'))
     + mr3(mfld('Station key',minp('stationKey','default')),mfld('Location type',msel('locationType',[['both','Pickup & dropoff'],['pickup','Pickup only'],['dropoff','Dropoff only']],'both')),mfld('Extra fee €',minp('extraFee','','number','0')))
     + mfld('Google Maps URL',minp('mapUrl','','url','https://maps.google.com/...'))
-    + mr2(mfld('Sort order',minp('sortOrder','','number','0')),mfld('',mchk('active',true,'Active')+mchk('publicVisible',true,'Public visible')));
+    + mr2(mfld('Sort order',minp('sortOrder','','number','0')),mfld('',mchk('active',true,'Active')+mchk('publicVisible',true,'Public visible')))
+    + _locationFieldLabelsBody();
   openModal('Add pickup location', body, () => {
     if (!mv('label')||!mv('address')) return showToast('Label and address required','error');
-    post('upsertPickupLocation',{ label:mv('label'), key:slug(mv('key')||mv('label')), address:mv('address'),
-      stationKey:mv('stationKey','default'), locationType:mv('locationType','both'), extraFee:mn('extraFee'),
-      mapUrl:mv('mapUrl'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
-    closeModal(); renderBizPane();
+    post('upsertPickupLocation', _locationPayload());
+    closeModal(); renderPickupLocations();
   });
 }
 
-function editLocation(id) {
-  const item = (state.snapshot?.pickupLocations||[]).find(x=>x._id===id||x.key===id)||{};
+function openEditLocation(id) {
+  const item = (state.snapshot?.pickupLocations||[]).find(function(x){return x._id===id||x.key===id;})||{};
   const body = mr2(mfld('Label *',minp('label',item.label)),mfld('Key',minp('key',item.key)))
     + mfld('Address *',minp('address',item.address))
     + mr3(mfld('Station key',minp('stationKey',item.stationKey||'default')),mfld('Location type',msel('locationType',[['both','Pickup & dropoff'],['pickup','Pickup only'],['dropoff','Dropoff only']],item.locationType||'both')),mfld('Extra fee €',minp('extraFee',item.extraFee,'number','0')))
     + mfld('Google Maps URL',minp('mapUrl',item.mapUrl,'url'))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')))
+    + _locationFieldLabelsBody(item);
   openModal('Edit pickup location', body, () => {
-    post('upsertPickupLocation',{ _id:item._id, label:mv('label'), key:mv('key'), address:mv('address'),
-      stationKey:mv('stationKey','default'), locationType:mv('locationType','both'), extraFee:mn('extraFee'),
-      mapUrl:mv('mapUrl'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
-    closeModal(); renderBizPane();
+    post('upsertPickupLocation', _locationPayload({_id:item._id}));
+    closeModal(); renderPickupLocations();
   }, () => {
-    if (confirm(`Delete location "${item.label}"?`)) { post('deletePickupLocation',{itemId:item._id,itemKey:item.key}); closeModal(); renderBizPane(); }
+    if (confirm('Delete location "'+item.label+'"?')) { post('deletePickupLocation',{itemId:item._id,itemKey:item.key}); closeModal(); renderPickupLocations(); }
   });
 }
 
+function editLocation(id) { return openEditLocation(id); }
+
 function deleteLocation(id, label) {
-  if (!confirm(`Delete location "${label}"?`)) return;
+  if (!confirm('Delete location "'+label+'"?')) return;
   post('deletePickupLocation',{itemId:id,itemKey:id});
-  renderBizPane();
+  renderPickupLocations();
 }
 
 // ── SECURITY BUTTONS ──────────────────────────────────────────────────────
@@ -1510,6 +1601,7 @@ function bindAddButtons() {
   el('addInsBtn')?.addEventListener('click', ()=>openInsModal());
   el('addExtraBtn')?.addEventListener('click', ()=>openExtraModal());
   el('addFeeBtn')?.addEventListener('click', ()=>openFeeModal());
+  el('addLocationBtn')?.addEventListener('click', ()=>openAddLocation());
   el('addRoleBtn')?.addEventListener('click', ()=>openRoleModal());
   el('addUserBtn')?.addEventListener('click', ()=>openUserModal());
 }
