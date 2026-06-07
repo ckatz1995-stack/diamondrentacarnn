@@ -253,11 +253,6 @@ $w.onReady(async function () {
         return;
       }
 
-      if (msg.type === 'requestBridgeTelemetry') {
-        sendBridgeTelemetrySnapshot();
-        return;
-      }
-
       if (msg.type === 'resize') {
         const height = Math.min(Math.max(Number(msg.height || 0), 1200), 7800);
         if (height) {

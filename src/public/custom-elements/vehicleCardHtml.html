@@ -637,16 +637,20 @@ function renderHistory(){
   if(!rentals.length){ body.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font:600 12px/1 var(--f)">No rental history.</div>'; return; }
   const rows = rentals.slice(0,50).map(r=>{
     const stCls = String(r.rentalState||r.state||'').toLowerCase().includes('open')||String(r.rentalState||'').toLowerCase().includes('active')?'st-out':String(r.rentalState||r.state||'').toLowerCase().includes('book')?'st-notready':'st-available';
+    const bId = esc(r.bookingId||'');
+    const actionBtn = bId ? `<button class="btn btnSm" onclick="openVcContract('${bId}')" type="button" style="font-size:10px;padding:3px 8px">Contract</button>` : '—';
     return `<tr>
       <td><b>${esc(r.bookingNumber||r.rentalId||r._id||'—')}</b></td>
       <td>${esc(r.customerName||r.customer||'—')}</td>
       <td>${fmtDate(r.pickupDateTime||r.start)}–${fmtDate(r.dropoffDateTime||r.end)}</td>
       <td><span class="h-badge ${stCls}">${esc(r.rentalState||r.state||'—')}</span></td>
       <td>${r.gross!=null?'€'+Number(r.gross).toFixed(2):'—'}</td>
+      <td>${actionBtn}</td>
     </tr>`;
   }).join('');
-  body.innerHTML=`<table class="hist-table"><thead><tr><th>Booking</th><th>Customer</th><th>Period</th><th>State</th><th>Gross</th></tr></thead><tbody>${rows}</tbody></table>`;
+  body.innerHTML=`<table class="hist-table"><thead><tr><th>Booking</th><th>Customer</th><th>Period</th><th>State</th><th>Gross</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 }
+window.openVcContract = function(bookingId){ if(bookingId) postToWix({type:'openContract',bookingId}); };
 
 function showState(which, msg=''){
   $('stateLoading').style.display  = which==='loading'?'flex':'none';
