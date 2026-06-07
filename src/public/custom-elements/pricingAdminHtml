@@ -1245,6 +1245,7 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
     const BOOKINGS_WORKSPACE_KEY = 'diamond.bookings.workspace.v1';
     const HANDOFF_QUEUE_KEY = 'diamond.backroom.handoffQueue.v1';
     const SAVED_VIEWS_KEY = 'diamond.backroom.savedViews.v1';
+    const SETTINGS_SNAPSHOT_KEY = 'diamond.settings.snapshot.v1';
     try { localStorage.removeItem(SETTINGS_SNAPSHOT_KEY); localStorage.removeItem(SAVED_VIEWS_KEY); localStorage.removeItem(PINNED_WORKSPACES_KEY); } catch(_){}
     function loadTableLayouts(){
       try{ return JSON.parse(localStorage.getItem(TABLE_LAYOUT_STORAGE_KEY) || '{}') || {}; }
@@ -1486,9 +1487,26 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
     function esc(value){ return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
     function clone(v){ return JSON.parse(JSON.stringify(v || null)); }
     function normalizeMessage(raw){ if(!raw) return null; if(typeof raw === 'string'){ try{ return JSON.parse(raw); }catch(_){ return null; } } return raw; }
-    function post(type, extra){ try{ window.parent.postMessage(JSON.stringify({ type, ...extra }), '*'); }catch(_){ try{ window.parent.postMessage({ type, ...extra }, '*'); }catch(__){} } }
-    function showToast(message, tone){ els.toast.textContent = message || ''; els.toast.style.background = tone === 'error' ? '#7f1d1d' : (tone === 'success' ? '#065f46' : '#0f172a'); els.toast.classList.add('show'); clearTimeout(showToast._t); showToast._t = setTimeout(() => els.toast.classList.remove('show'), 3600); }
-    function requestResize(){ const h = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, 1200); post('resize', { height: h }); }
+    function post(type, extra) {
+      try {
+        window.parent.postMessage(JSON.stringify({ type, ...extra }), '*');
+      } catch (_) {
+        try { window.parent.postMessage({ type, ...extra }, '*'); } catch (__) {}
+      }
+    }
+
+    function showToast(message, tone) {
+      els.toast.textContent = message || '';
+      els.toast.style.background = tone === 'error' ? '#7f1d1d' : (tone === 'success' ? '#065f46' : '#0f172a');
+      els.toast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => els.toast.classList.remove('show'), 3600);
+    }
+
+    function requestResize() {
+      const h = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, 1200);
+      post('resize', { height: h });
+    }
 
     function tableLayoutFor(key){
       if(!state.tableLayouts) state.tableLayouts = {};
@@ -1946,7 +1964,13 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       }
       return label || '—';
     }
-    function setBusy(flag){ state.busy = !!flag; Array.from(document.querySelectorAll('button')).forEach(btn => { if(btn.dataset.allowBusy === '1') return; btn.disabled = !!flag; }); }
+    function setBusy(flag) {
+      state.busy = !!flag;
+      document.querySelectorAll('button').forEach(btn => {
+        if (btn.dataset.allowBusy === '1') return;
+        btn.disabled = !!flag;
+      });
+    }
 
     function isAdmin(){ return !!(currentStaff().isAdmin || currentStaff().roleKey === 'admin'); }
     function navAllowed(route){
@@ -2231,7 +2255,15 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
         }
       }
     }
-    function renderSections(){ els.sections.forEach(sec => sec.classList.toggle('active', sec.dataset.section === state.activeSection)); if(state.activeSection === 'settingsHome') renderSettingsHome(); if(state.activeSection === 'business') renderBusinessPaneNav(); enhanceBusinessTextEditors(); bindBusinessJumps(); }
+    function renderSections() {
+      els.sections.forEach(sec => {
+        sec.classList.toggle('active', sec.dataset.section === state.activeSection);
+      });
+      if (state.activeSection === 'settingsHome') renderSettingsHome();
+      if (state.activeSection === 'business') renderBusinessPaneNav();
+      enhanceBusinessTextEditors();
+      bindBusinessJumps();
+    }
 
 
 
@@ -2808,10 +2840,11 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       els.inspectorSub.textContent = sub;
       els.inspectorBody.innerHTML = body;
       els.inspectorActions.innerHTML = actions;
-      if(document.getElementById('inspectorIssueResetBtn')){
+      if (document.getElementById('inspectorIssueResetBtn')) {
         document.getElementById('inspectorIssueResetBtn').addEventListener('click', () => {
           const email = String(item?.entityId || '').trim();
-          if(!email) return;
+          if (!email) return;
+          if (!confirm(`Issue a temporary password reset for ${email}?`)) return;
           state.securityEmail = email.toLowerCase();
           closeInspector();
           setBusy(true);
@@ -3345,6 +3378,7 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
           <td><div class="row-actions"><button class="link" data-session-revoke="${esc(item._id || '')}">Revoke</button></div></td>
         </tr>`).join('')}</tbody></table></div>`;
       els.sessionsWrap.querySelectorAll('[data-session-revoke]').forEach((btn) => btn.addEventListener('click', () => {
+        if (!confirm('Revoke this session? The user will be logged out immediately.')) return;
         setBusy(true);
         post('revokeStaffSessions', { payload: { itemId: btn.dataset.sessionRevoke } });
       }));
@@ -3414,10 +3448,14 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
         post('inviteStaffUser', { payload: { email: item.email, fullName: item.fullName, roleKey: item.roleKey, notes: item.notes, active: item.active !== false } });
       }));
       els.usersWrap.querySelectorAll('[data-user-deactivate]').forEach(btn => btn.addEventListener('click', () => {
-        setBusy(true); post('deactivateStaffUser', { payload: { itemId: btn.dataset.userDeactivate } });
+        if (!confirm('Deactivate this staff user? They will no longer be able to log in.')) return;
+        setBusy(true);
+        post('deactivateStaffUser', { payload: { itemId: btn.dataset.userDeactivate } });
       }));
       els.usersWrap.querySelectorAll('[data-user-reactivate]').forEach(btn => btn.addEventListener('click', () => {
-        setBusy(true); post('reactivateStaffUser', { payload: { itemId: btn.dataset.userReactivate } });
+        if (!confirm('Reactivate this staff user?')) return;
+        setBusy(true);
+        post('reactivateStaffUser', { payload: { itemId: btn.dataset.userReactivate } });
       }));
       enhanceTable(els.usersWrap, 'users');
     }
@@ -3451,7 +3489,8 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       }));
       els.auditWrap.querySelectorAll('[data-audit-reset]').forEach((btn) => btn.addEventListener('click', () => {
         const email = String(btn.dataset.auditReset || '').trim();
-        if(!email) return;
+        if (!email) return;
+        if (!confirm(`Issue a temporary password reset for ${email}?`)) return;
         state.securityEmail = email.toLowerCase();
         setBusy(true);
         post('resetStaffPassword', { payload: { email } });
@@ -3715,29 +3754,111 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       return obj;
     }
 
-    function renderAll(){ pruneLegacyStationToolbar(); renderBackroomHeader(); renderTabs(); renderSections(); renderAccessGate(); renderKpis(); renderHealth(); setBusinessForm(); renderStationWorkspace(); renderStationProfilesTable(); renderVehicleCategoriesTable(); renderFleetVehiclesTable(); renderPickupLocationsTable(); renderDynamicPricingSection(); renderInsuranceTable(); renderExtrasTable(); renderFeesTable(); renderRolesTable(); renderUsersTable(); renderAuditTable(); requestResize(); }
+    function renderAll() {
+      pruneLegacyStationToolbar();
+      renderBackroomHeader();
+      renderTabs();
+      renderSections();
+      renderAccessGate();
+      renderKpis();
+      renderHealth();
+      setBusinessForm();
+      renderStationWorkspace();
+      renderStationProfilesTable();
+      renderVehicleCategoriesTable();
+      renderFleetVehiclesTable();
+      renderPickupLocationsTable();
+      renderDynamicPricingSection();
+      renderInsuranceTable();
+      renderExtrasTable();
+      renderFeesTable();
+      renderRolesTable();
+      renderUsersTable();
+      renderAuditTable();
+      requestResize();
+    }
 
     const TRUSTED_PARENT_SUFFIXES = ['wix.com','wixsite.com','parastorage.com','wixstatic.com'];
     function isTrustedParentOrigin(origin){ const raw=String(origin||'').trim().toLowerCase(); if(!raw) return true; try{ const host=new URL(raw).hostname.toLowerCase(); if(!host) return false; if(TRUSTED_PARENT_SUFFIXES.some(s=>host===s||host.endsWith('.'+s))) return true; try{ const ref=document.referrer; if(ref){ const rh=new URL(ref).hostname.toLowerCase(); if(rh&&host===rh) return true; } }catch(_){} return false; }catch(_){ return false; } }
-    function handleMessage(event){
+    function handleMessage(event) {
       if (event.origin && !isTrustedParentOrigin(event.origin)) return;
       const data = normalizeMessage(event.data);
-      if(!data || !data.type) return;
-      if(data.type === 'adminSnapshot'){
-        state.snapshot = clone(data.snapshot) || { businessSettings:{}, vehicleCategories:[], fleetVehicles:[], pickupLocations:[], pricingSeasons:[], categoryRateRules:[], insurancePlans:[], extraServices:[], feeRules:[] };
-        state.accessSnapshot = clone(data.accessSnapshot) || { accessState:'authRequired', currentStaff:null, roles:[], users:[], auditRows:[], sessionRows:[], bootstrapHelp:null, meta:{} };
+      if (!data || !data.type) return;
+
+      if (data.type === 'adminSnapshot') {
+        state.snapshot = clone(data.snapshot) || {
+          businessSettings: {}, vehicleCategories: [], fleetVehicles: [],
+          pickupLocations: [], pricingSeasons: [], categoryRateRules: [],
+          insurancePlans: [], extraServices: [], feeRules: []
+        };
+        state.accessSnapshot = clone(data.accessSnapshot) || {
+          accessState: 'authRequired', currentStaff: null, roles: [], users: [],
+          auditRows: [], sessionRows: [], bootstrapHelp: null, meta: {}
+        };
         renderAll();
         writeSettingsSnapshot();
         setBusy(false);
         return;
       }
-      if(data.type === 'toast'){ showToast(data.message || '', data.tone || 'info'); return; }
-      if(data.type === 'seedPricingResult'){ const r = data.result || {}; const parts = ['business','insurance','extras','fees'].filter(k => r[k] && Number(r[k].total || 0) > 0).map(k => `${k}: +${Number(r[k].inserted || 0)} / ↻${Number(r[k].updated || 0)}`); showToast(parts.length ? `Seed defaults ολοκληρώθηκε · ${parts.join(' · ')}` : 'Seed defaults ολοκληρώθηκε.', 'success'); return; }
-      if(data.type === 'resetPricingResult'){ const r = data.result || {}; const parts = ['business','insurance','extras','fees'].filter(k => r[k] && Number(r[k].total || 0) > 0).map(k => `${k}: +${Number(r[k].inserted || 0)} / ↻${Number(r[k].updated || 0)}`); showToast(parts.length ? `Reset defaults ολοκληρώθηκε · ${parts.join(' · ')}` : 'Reset defaults ολοκληρώθηκε.', 'success'); return; }
-      if(data.type === 'staffPasswordResult'){ const result = data.result || {}; const when = result.changedAt ? ` at ${new Date(result.changedAt).toLocaleString('el-GR')}` : ''; state.securityResult = result.mode === 'reset' ? `Temporary password reset issued for ${result.email || 'selected user'}${when}. Share credentials out-of-band.` : `Password updated for ${result.email || 'selected user'}${when}.`; renderSecuritySection(); showToast(result.mode === 'reset' ? 'Temporary password reset completed.' : 'Password updated.', 'success'); return; }
-      if(data.type === 'staffInviteResult'){ const result = data.result || {}; state.securityEmail = String(result.email || '').toLowerCase(); state.activeSection = 'security'; state.securityResult = result.onboardingMessage || `Temporary password for ${result.email}: ${result.tempPassword}`; renderTabs(); renderSections(); renderSecuritySection(); requestResize(); showToast(result.mode === 'invite' ? 'Staff onboarding έτοιμο.' : 'Εκδόθηκε νέο onboarding access.', 'success'); return; }
-      if(data.type === 'sessionActionResult'){ const result = data.result || {}; state.securityResult = `Revoked sessions: ${Number(result.revoked || 0)}`; renderSecuritySection(); return; }
-      if(data.type === 'busy'){ setBusy(!!data.flag); return; }
+
+      if (data.type === 'toast') {
+        showToast(data.message || '', data.tone || 'info');
+        return;
+      }
+
+      if (data.type === 'seedPricingResult') {
+        const r = data.result || {};
+        const parts = ['business', 'insurance', 'extras', 'fees']
+          .filter(k => r[k] && Number(r[k].total || 0) > 0)
+          .map(k => `${k}: +${Number(r[k].inserted || 0)} / ↻${Number(r[k].updated || 0)}`);
+        showToast(parts.length ? `Seed defaults ολοκληρώθηκε · ${parts.join(' · ')}` : 'Seed defaults ολοκληρώθηκε.', 'success');
+        return;
+      }
+
+      if (data.type === 'resetPricingResult') {
+        const r = data.result || {};
+        const parts = ['business', 'insurance', 'extras', 'fees']
+          .filter(k => r[k] && Number(r[k].total || 0) > 0)
+          .map(k => `${k}: +${Number(r[k].inserted || 0)} / ↻${Number(r[k].updated || 0)}`);
+        showToast(parts.length ? `Reset defaults ολοκληρώθηκε · ${parts.join(' · ')}` : 'Reset defaults ολοκληρώθηκε.', 'success');
+        return;
+      }
+
+      if (data.type === 'staffPasswordResult') {
+        const result = data.result || {};
+        const when = result.changedAt ? ` at ${new Date(result.changedAt).toLocaleString('el-GR')}` : '';
+        state.securityResult = result.mode === 'reset'
+          ? `Temporary password reset issued for ${result.email || 'selected user'}${when}. Share credentials out-of-band.`
+          : `Password updated for ${result.email || 'selected user'}${when}.`;
+        renderSecuritySection();
+        showToast(result.mode === 'reset' ? 'Temporary password reset completed.' : 'Password updated.', 'success');
+        return;
+      }
+
+      if (data.type === 'staffInviteResult') {
+        const result = data.result || {};
+        state.securityEmail = String(result.email || '').toLowerCase();
+        state.activeSection = 'security';
+        state.securityResult = result.onboardingMessage || `Temporary password for ${result.email}: ${result.tempPassword}`;
+        renderTabs();
+        renderSections();
+        renderSecuritySection();
+        requestResize();
+        showToast(result.mode === 'invite' ? 'Staff onboarding έτοιμο.' : 'Εκδόθηκε νέο onboarding access.', 'success');
+        return;
+      }
+
+      if (data.type === 'sessionActionResult') {
+        const result = data.result || {};
+        state.securityResult = `Revoked sessions: ${Number(result.revoked || 0)}`;
+        renderSecuritySection();
+        return;
+      }
+
+      if (data.type === 'busy') {
+        setBusy(!!data.flag);
+        return;
+      }
     }
 
     function openStationModal(mode = 'create', existing = null){
@@ -3823,11 +3944,41 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       document.querySelectorAll('[data-add-kind]').forEach(btn => btn.addEventListener('click', () => openEditor(btn.dataset.addKind, null)));
       document.querySelectorAll('[data-seed-target]').forEach(btn => btn.addEventListener('click', () => { setBusy(true); post('seedPricingDefaults', { payload: { target: btn.dataset.seedTarget || 'all' } }); }));
       document.querySelectorAll('[data-reset-target]').forEach(btn => btn.addEventListener('click', () => { setBusy(true); post('resetPricingDefaults', { payload: { target: btn.dataset.resetTarget || 'all' } }); }));
-      if (els.searchVehicleCategories) els.searchVehicleCategories.addEventListener('input', (e) => { state.filters.vehicleCategories = e.target.value; renderVehicleCategoriesTable(); requestResize(); });
-      if (els.searchFleetVehicles) els.searchFleetVehicles.addEventListener('input', (e) => { state.filters.fleetVehicles = e.target.value; renderFleetVehiclesTable(); requestResize(); });
-      if (els.searchStationProfiles) els.searchStationProfiles.addEventListener('input', (e) => { state.filters.stationProfiles = e.target.value; renderStationProfilesTable(); requestResize(); });
-      if (els.searchPickupLocations) els.searchPickupLocations.addEventListener('input', (e) => { state.filters.pickupLocations = e.target.value; renderPickupLocationsTable(); requestResize(); });
-      if (els.locationStationScope) els.locationStationScope.addEventListener('change', (e) => { state.locationStationScope = String(e.target.value || 'all'); renderPickupLocationsTable(); requestResize(); });
+      if (els.searchVehicleCategories) {
+        els.searchVehicleCategories.addEventListener('input', (e) => {
+          state.filters.vehicleCategories = e.target.value;
+          renderVehicleCategoriesTable();
+          requestResize();
+        });
+      }
+      if (els.searchFleetVehicles) {
+        els.searchFleetVehicles.addEventListener('input', (e) => {
+          state.filters.fleetVehicles = e.target.value;
+          renderFleetVehiclesTable();
+          requestResize();
+        });
+      }
+      if (els.searchStationProfiles) {
+        els.searchStationProfiles.addEventListener('input', (e) => {
+          state.filters.stationProfiles = e.target.value;
+          renderStationProfilesTable();
+          requestResize();
+        });
+      }
+      if (els.searchPickupLocations) {
+        els.searchPickupLocations.addEventListener('input', (e) => {
+          state.filters.pickupLocations = e.target.value;
+          renderPickupLocationsTable();
+          requestResize();
+        });
+      }
+      if (els.locationStationScope) {
+        els.locationStationScope.addEventListener('change', (e) => {
+          state.locationStationScope = String(e.target.value || 'all');
+          renderPickupLocationsTable();
+          requestResize();
+        });
+      }
       if (els.stationsLocationsTabs) els.stationsLocationsTabs.addEventListener('click', (e) => {
         const btn = e.target?.closest?.('[data-locations-workspace-tab]');
         if (!btn) return;
@@ -3850,6 +4001,7 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
           return;
         }
         if (btn.dataset.stationAction === 'delete') {
+          if (!confirm(`Delete station "${key}"? This cannot be undone.`)) return;
           deleteStationProfileLocal(key);
           renderStationProfilesTable();
         }
@@ -3874,33 +4026,174 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       if (els.deleteStationProfileModalBtn) els.deleteStationProfileModalBtn.addEventListener('click', () => {
         const key = String(state.stationModal?.originalKey || '');
         if (!key) return;
+        if (!confirm(`Delete station "${key}"? This cannot be undone.`)) return;
         deleteStationProfileLocal(key);
         closeStationModal();
       });
-      if (els.searchPricingSeasons) els.searchPricingSeasons.addEventListener('input', (e) => { state.filters.pricingSeasons = e.target.value; renderPricingSeasonsTable(); requestResize(); });
-      if (els.searchCategoryRateRules) els.searchCategoryRateRules.addEventListener('input', (e) => { state.filters.categoryRateRules = e.target.value; renderCategoryRateRulesTable(); requestResize(); });
-      if (els.filterRateRuleCategory) els.filterRateRuleCategory.addEventListener('change', (e) => { state.filters.rateRuleCategory = e.target.value; renderCategoryRateRulesTable(); requestResize(); });
-      if (els.filterRateRuleSeason) els.filterRateRuleSeason.addEventListener('change', (e) => { state.filters.rateRuleSeason = e.target.value; renderCategoryRateRulesTable(); requestResize(); });
-      if (els.simCategoryCode) els.simCategoryCode.addEventListener('change', () => { const vehicle = vehicleCategoryByCode(els.simCategoryCode.value || ''); if (vehicle?.price) els.simBasePrice.value = String(vehicle.price); renderPricingSimulator(); requestResize(); });
+      if (els.searchPricingSeasons) {
+        els.searchPricingSeasons.addEventListener('input', (e) => {
+          state.filters.pricingSeasons = e.target.value;
+          renderPricingSeasonsTable();
+          requestResize();
+        });
+      }
+      if (els.searchCategoryRateRules) {
+        els.searchCategoryRateRules.addEventListener('input', (e) => {
+          state.filters.categoryRateRules = e.target.value;
+          renderCategoryRateRulesTable();
+          requestResize();
+        });
+      }
+      if (els.filterRateRuleCategory) {
+        els.filterRateRuleCategory.addEventListener('change', (e) => {
+          state.filters.rateRuleCategory = e.target.value;
+          renderCategoryRateRulesTable();
+          requestResize();
+        });
+      }
+      if (els.filterRateRuleSeason) {
+        els.filterRateRuleSeason.addEventListener('change', (e) => {
+          state.filters.rateRuleSeason = e.target.value;
+          renderCategoryRateRulesTable();
+          requestResize();
+        });
+      }
+      if (els.simCategoryCode) {
+        els.simCategoryCode.addEventListener('change', () => {
+          const vehicle = vehicleCategoryByCode(els.simCategoryCode.value || '');
+          if (vehicle?.price) els.simBasePrice.value = String(vehicle.price);
+          renderPricingSimulator();
+          requestResize();
+        });
+      }
       if (els.simPickupDate) els.simPickupDate.addEventListener('change', () => { renderPricingSimulator(); requestResize(); });
       if (els.simDays) els.simDays.addEventListener('input', () => { renderPricingSimulator(); requestResize(); });
       if (els.simBasePrice) els.simBasePrice.addEventListener('input', () => { renderPricingSimulator(); requestResize(); });
-      els.searchInsurance.addEventListener('input', (e) => { state.filters.insurance = e.target.value; renderInsuranceTable(); requestResize(); });
-      els.searchExtras.addEventListener('input', (e) => { state.filters.extras = e.target.value; renderExtrasTable(); requestResize(); });
-      els.searchFees.addEventListener('input', (e) => { state.filters.fees = e.target.value; renderFeesTable(); requestResize(); });
-      if (els.searchSessions) els.searchSessions.addEventListener('input', (e) => { state.filters.sessions = e.target.value; renderSecuritySection(); requestResize(); });
-      if (els.openSecurityFromUsersBtn) els.openSecurityFromUsersBtn.addEventListener('click', () => { state.activeSection = 'security'; renderTabs(); renderSections(); renderSecuritySection(); requestResize(); });
-      if (els.securityUserSelect) els.securityUserSelect.addEventListener('change', (e) => { state.securityEmail = String(e.target.value || '').toLowerCase(); state.securityResult = ''; renderSecuritySection(); requestResize(); });
-      if (els.refreshSecurityBtn) els.refreshSecurityBtn.addEventListener('click', () => { setBusy(true); post('refreshStaffAccess', {}); });
-      if (els.setPasswordBtn) els.setPasswordBtn.addEventListener('click', () => { const email = String(els.securityUserSelect.value || '').trim(); const pw = String(els.securityPassword.value || ''); const confirm = String(els.securityPasswordConfirm.value || ''); if(!email){ showToast('Επίλεξε staff user.', 'error'); return; } if(pw.length < 8){ showToast('Το password πρέπει να έχει τουλάχιστον 8 χαρακτήρες.', 'error'); return; } if(pw !== confirm){ showToast('Τα passwords δεν ταιριάζουν.', 'error'); return; } setBusy(true); post('setStaffPassword', { payload: { email, newPassword: pw, mustChangePassword: !!els.securityMustChange.checked } }); els.securityPassword.value=''; els.securityPasswordConfirm.value=''; });
-      if (els.resetPasswordBtn) els.resetPasswordBtn.addEventListener('click', () => { const email = String(els.securityUserSelect.value || '').trim(); if(!email){ showToast('Επίλεξε staff user.', 'error'); return; } setBusy(true); post('resetStaffPassword', { payload: { email } }); });
-      if (els.revokeUserSessionsBtn) els.revokeUserSessionsBtn.addEventListener('click', () => { const email = String(els.securityUserSelect.value || '').trim(); if(!email){ showToast('Επίλεξε staff user.', 'error'); return; } setBusy(true); post('revokeStaffSessions', { payload: { email } }); });
-      els.searchRoles.addEventListener('input', (e) => { state.filters.roles = e.target.value; renderRolesTable(); requestResize(); });
-      els.searchUsers.addEventListener('input', (e) => { state.filters.users = e.target.value; renderUsersTable(); requestResize(); });
-      if (els.searchAudit) els.searchAudit.addEventListener('input', (e) => { state.filters.audit = e.target.value; renderAuditTable(); requestResize(); });
-      if (els.filterAuditType) els.filterAuditType.addEventListener('change', (e) => { state.filters.auditType = e.target.value; renderAuditTable(); requestResize(); });
-      els.filterRuleType.addEventListener('change', (e) => { state.filters.ruleType = e.target.value; renderFeesTable(); requestResize(); });
-      els.refreshAuditBtn.addEventListener('click', () => { setBusy(true); post('refreshStaffAccess', {}); });
+
+      if (els.searchInsurance) {
+        els.searchInsurance.addEventListener('input', (e) => {
+          state.filters.insurance = e.target.value;
+          renderInsuranceTable();
+          requestResize();
+        });
+      }
+      if (els.searchExtras) {
+        els.searchExtras.addEventListener('input', (e) => {
+          state.filters.extras = e.target.value;
+          renderExtrasTable();
+          requestResize();
+        });
+      }
+      if (els.searchFees) {
+        els.searchFees.addEventListener('input', (e) => {
+          state.filters.fees = e.target.value;
+          renderFeesTable();
+          requestResize();
+        });
+      }
+      if (els.searchSessions) {
+        els.searchSessions.addEventListener('input', (e) => {
+          state.filters.sessions = e.target.value;
+          renderSecuritySection();
+          requestResize();
+        });
+      }
+      if (els.openSecurityFromUsersBtn) {
+        els.openSecurityFromUsersBtn.addEventListener('click', () => {
+          state.activeSection = 'security';
+          renderTabs();
+          renderSections();
+          renderSecuritySection();
+          requestResize();
+        });
+      }
+      if (els.securityUserSelect) {
+        els.securityUserSelect.addEventListener('change', (e) => {
+          state.securityEmail = String(e.target.value || '').toLowerCase();
+          state.securityResult = '';
+          renderSecuritySection();
+          requestResize();
+        });
+      }
+      if (els.refreshSecurityBtn) {
+        els.refreshSecurityBtn.addEventListener('click', () => {
+          setBusy(true);
+          post('refreshStaffAccess', {});
+        });
+      }
+      if (els.setPasswordBtn) {
+        els.setPasswordBtn.addEventListener('click', () => {
+          const email = String(els.securityUserSelect.value || '').trim();
+          const pw = String(els.securityPassword.value || '');
+          const pwConfirm = String(els.securityPasswordConfirm.value || '');
+          if (!email) { showToast('Επίλεξε staff user.', 'error'); return; }
+          if (pw.length < 8) { showToast('Το password πρέπει να έχει τουλάχιστον 8 χαρακτήρες.', 'error'); return; }
+          if (pw !== pwConfirm) { showToast('Τα passwords δεν ταιριάζουν.', 'error'); return; }
+          setBusy(true);
+          post('setStaffPassword', { payload: { email, newPassword: pw, mustChangePassword: !!els.securityMustChange.checked } });
+          els.securityPassword.value = '';
+          els.securityPasswordConfirm.value = '';
+        });
+      }
+      if (els.resetPasswordBtn) {
+        els.resetPasswordBtn.addEventListener('click', () => {
+          const email = String(els.securityUserSelect.value || '').trim();
+          if (!email) { showToast('Επίλεξε staff user.', 'error'); return; }
+          if (!confirm(`Issue a temporary password reset for ${email}?`)) return;
+          setBusy(true);
+          post('resetStaffPassword', { payload: { email } });
+        });
+      }
+      if (els.revokeUserSessionsBtn) {
+        els.revokeUserSessionsBtn.addEventListener('click', () => {
+          const email = String(els.securityUserSelect.value || '').trim();
+          if (!email) { showToast('Επίλεξε staff user.', 'error'); return; }
+          if (!confirm(`Revoke all sessions for ${email}? They will be logged out immediately.`)) return;
+          setBusy(true);
+          post('revokeStaffSessions', { payload: { email } });
+        });
+      }
+      if (els.searchRoles) {
+        els.searchRoles.addEventListener('input', (e) => {
+          state.filters.roles = e.target.value;
+          renderRolesTable();
+          requestResize();
+        });
+      }
+      if (els.searchUsers) {
+        els.searchUsers.addEventListener('input', (e) => {
+          state.filters.users = e.target.value;
+          renderUsersTable();
+          requestResize();
+        });
+      }
+      if (els.searchAudit) {
+        els.searchAudit.addEventListener('input', (e) => {
+          state.filters.audit = e.target.value;
+          renderAuditTable();
+          requestResize();
+        });
+      }
+      if (els.filterAuditType) {
+        els.filterAuditType.addEventListener('change', (e) => {
+          state.filters.auditType = e.target.value;
+          renderAuditTable();
+          requestResize();
+        });
+      }
+      if (els.filterRuleType) {
+        els.filterRuleType.addEventListener('change', (e) => {
+          state.filters.ruleType = e.target.value;
+          renderFeesTable();
+          requestResize();
+        });
+      }
+      if (els.refreshAuditBtn) {
+        els.refreshAuditBtn.addEventListener('click', () => {
+          setBusy(true);
+          post('refreshStaffAccess', {});
+        });
+      }
       // sidebar collapse
       const sidebar=document.getElementById('sidebar');
       const sbToggle=document.getElementById('sbToggle');
@@ -3966,23 +4259,87 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       els.editorOverlay.addEventListener('click', (e) => { if(e.target === els.editorOverlay) closeEditor(); });
       els.saveEditorBtn.addEventListener('click', () => {
         const payload = editorPayload();
-        if(state.editor.kind === 'user'){ if(!payload.email || !payload.roleKey){ showToast('Συμπλήρωσε email και role.', 'error'); return; } }
-        else if(state.editor.kind === 'vehicleCategory'){ if(!payload.title || !payload.category){ showToast('Συμπλήρωσε τίτλο και category code.', 'error'); return; } }
-        else if(state.editor.kind === 'fleetVehicle'){ if(!payload.plate || !payload.model || !payload.category){ showToast('Συμπλήρωσε πινακίδα, μοντέλο και category.', 'error'); return; } }
-        else if(state.editor.kind === 'pickupLocation'){ if(!payload.key || !payload.label || !payload.address || !payload.stationKey || !payload.stationLabel){ showToast('Συμπλήρωσε station, key, label και address.', 'error'); return; } }
-        else if(state.editor.kind === 'pricingSeason'){ if(!payload.key || !payload.label || !payload.startDate || !payload.endDate){ showToast('Συμπλήρωσε key, label και season dates.', 'error'); return; } }
-        else if(state.editor.kind === 'categoryRateRule'){ if(!payload.key || !payload.label || !payload.categoryCode){ showToast('Συμπλήρωσε key, label και κατηγορία.', 'error'); return; } if(Number(payload.minDays || 0) < 1 || Number(payload.maxDays || 0) < 0){ showToast('Το day range δεν είναι έγκυρο.', 'error'); return; } if(Number(payload.maxDays || 0) > 0 && Number(payload.maxDays || 0) < Number(payload.minDays || 1)){ showToast('Το max days πρέπει να είναι >= από το min days ή 0 για infinity.', 'error'); return; } }
-        else if(!payload.key || !payload.label){ showToast('Συμπλήρωσε τουλάχιστον key και label.', 'error'); return; }
+        const isNew = !state.editor.item?._id;
+        const kind = state.editor.kind;
+
+        // Field-level validation
+        let validationError = '';
+        if (kind === 'user') {
+          if (!payload.email) validationError = 'Email είναι υποχρεωτικό.';
+          else if (!payload.roleKey) validationError = 'Role είναι υποχρεωτικό.';
+          else if (isNew && staffUsers().some(u => u.email === payload.email)) {
+            validationError = `Ο χρήστης ${payload.email} υπάρχει ήδη.`;
+          }
+        } else if (kind === 'vehicleCategory') {
+          if (!payload.title) validationError = 'Τίτλος εμφάνισης είναι υποχρεωτικός.';
+          else if (!payload.category) validationError = 'Category code είναι υποχρεωτικό.';
+          else if (isNew && vehicleCategoryRows().some(r => r.category === payload.category)) {
+            validationError = `Category code "${payload.category}" χρησιμοποιείται ήδη.`;
+          }
+        } else if (kind === 'fleetVehicle') {
+          if (!payload.plate) validationError = 'Πινακίδα είναι υποχρεωτική.';
+          else if (!payload.model) validationError = 'Μοντέλο είναι υποχρεωτικό.';
+          else if (!payload.category) validationError = 'Category είναι υποχρεωτικό.';
+          else if (isNew && fleetVehicleRows().some(r => r.plate === payload.plate)) {
+            validationError = `Πινακίδα "${payload.plate}" υπάρχει ήδη στον στόλο.`;
+          }
+        } else if (kind === 'pickupLocation') {
+          if (!payload.key) validationError = 'Key είναι υποχρεωτικό.';
+          else if (!payload.label) validationError = 'Label είναι υποχρεωτικό.';
+          else if (!payload.address) validationError = 'Address είναι υποχρεωτικό.';
+          else if (!payload.stationKey) validationError = 'Station είναι υποχρεωτικό.';
+          else if (isNew && pickupLocationRows().some(r => r.key === payload.key)) {
+            validationError = `Location key "${payload.key}" χρησιμοποιείται ήδη.`;
+          }
+        } else if (kind === 'pricingSeason') {
+          if (!payload.key) validationError = 'Key είναι υποχρεωτικό.';
+          else if (!payload.label) validationError = 'Label είναι υποχρεωτικό.';
+          else if (!payload.startDate) validationError = 'Start date είναι υποχρεωτικό.';
+          else if (!payload.endDate) validationError = 'End date είναι υποχρεωτικό.';
+          else if (payload.startDate && payload.endDate && payload.startDate > payload.endDate) {
+            validationError = 'Start date πρέπει να είναι πριν το end date.';
+          } else if (isNew && pricingSeasonsRows().some(r => r.key === payload.key)) {
+            validationError = `Season key "${payload.key}" χρησιμοποιείται ήδη.`;
+          }
+        } else if (kind === 'categoryRateRule') {
+          if (!payload.key) validationError = 'Key είναι υποχρεωτικό.';
+          else if (!payload.label) validationError = 'Label είναι υποχρεωτικό.';
+          else if (!payload.categoryCode) validationError = 'Vehicle category είναι υποχρεωτική.';
+          else if (Number(payload.minDays || 0) < 1) validationError = 'Min days πρέπει να είναι >= 1.';
+          else if (Number(payload.maxDays || 0) > 0 && Number(payload.maxDays) < Number(payload.minDays)) {
+            validationError = 'Max days πρέπει να είναι >= min days ή 0 για infinity.';
+          } else if (isNew && categoryRateRuleRows().some(r => r.key === payload.key)) {
+            validationError = `Rate rule key "${payload.key}" χρησιμοποιείται ήδη.`;
+          }
+        } else if (['insurance', 'extra', 'fee', 'role'].includes(kind)) {
+          if (!payload.key) validationError = 'Key είναι υποχρεωτικό.';
+          else if (!payload.label) validationError = 'Label είναι υποχρεωτικό.';
+          else if (isNew) {
+            const existingRows = kind === 'insurance' ? insuranceRows()
+              : kind === 'extra' ? extraRows()
+              : kind === 'fee' ? feeRows()
+              : roleRows();
+            if (existingRows.some(r => r.key === payload.key)) {
+              validationError = `Key "${payload.key}" χρησιμοποιείται ήδη.`;
+            }
+          }
+        }
+
+        if (validationError) {
+          showToast(validationError, 'error');
+          return;
+        }
+
         setBusy(true);
-        if(state.editor.kind === 'vehicleCategory') post('upsertVehicleCategory', { payload });
-        else if(state.editor.kind === 'fleetVehicle') post('upsertFleetVehicle', { payload });
-        else if(state.editor.kind === 'pickupLocation') post('upsertPickupLocation', { payload });
-        else if(state.editor.kind === 'pricingSeason') post('upsertPricingSeason', { payload });
-        else if(state.editor.kind === 'categoryRateRule') post('upsertCategoryRateRule', { payload });
-        else if(state.editor.kind === 'insurance') post('upsertInsurancePlan', { payload });
-        else if(state.editor.kind === 'extra') post('upsertExtraService', { payload });
-        else if(state.editor.kind === 'role') post('upsertStaffRole', { payload });
-        else if(state.editor.kind === 'user') post('upsertStaffUser', { payload });
+        if (kind === 'vehicleCategory') post('upsertVehicleCategory', { payload });
+        else if (kind === 'fleetVehicle') post('upsertFleetVehicle', { payload });
+        else if (kind === 'pickupLocation') post('upsertPickupLocation', { payload });
+        else if (kind === 'pricingSeason') post('upsertPricingSeason', { payload });
+        else if (kind === 'categoryRateRule') post('upsertCategoryRateRule', { payload });
+        else if (kind === 'insurance') post('upsertInsurancePlan', { payload });
+        else if (kind === 'extra') post('upsertExtraService', { payload });
+        else if (kind === 'role') post('upsertStaffRole', { payload });
+        else if (kind === 'user') post('upsertStaffUser', { payload });
         else post('upsertFeeRule', { payload });
         closeEditor();
       });
@@ -3991,39 +4348,50 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       if (els.inspectorOverlay) els.inspectorOverlay.addEventListener('click', (e) => { if(e.target === els.inspectorOverlay) closeInspector(); });
       els.deleteEditorBtn.addEventListener('click', () => {
         const item = state.editor.item || {};
-        if(!item._id) return;
-        if(state.editor.kind === 'vehicleCategory'){
+        if (!item._id) return;
+        const kindLabels = {
+          vehicleCategory: 'vehicle category', fleetVehicle: 'fleet vehicle',
+          pickupLocation: 'pickup location', pricingSeason: 'pricing season',
+          categoryRateRule: 'rate rule', insurance: 'insurance plan',
+          extra: 'extra service', fee: 'fee rule'
+        };
+        const label = item.label || item.plate || item.key || 'this item';
+        const kindLabel = kindLabels[state.editor.kind] || 'item';
+        if (!confirm(`Delete ${kindLabel} "${label}"? This cannot be undone.`)) return;
+
+        if (state.editor.kind === 'vehicleCategory') {
           setBusy(true);
           post('deleteVehicleCategory', { payload: { itemId: item._id, categoryCode: item.category } });
           closeEditor();
           return;
         }
-        if(state.editor.kind === 'fleetVehicle'){
+        if (state.editor.kind === 'fleetVehicle') {
           setBusy(true);
           post('deleteFleetVehicle', { payload: { itemId: item._id, plate: item.plate } });
           closeEditor();
           return;
         }
-        if(state.editor.kind === 'pickupLocation'){
+        if (state.editor.kind === 'pickupLocation') {
           setBusy(true);
           post('deletePickupLocation', { payload: { itemId: item._id, itemKey: item.key } });
           closeEditor();
           return;
         }
-        if(state.editor.kind === 'pricingSeason'){
+        if (state.editor.kind === 'pricingSeason') {
           setBusy(true);
           post('deletePricingSeason', { payload: { itemId: item._id, itemKey: item.key } });
           closeEditor();
           return;
         }
-        if(state.editor.kind === 'categoryRateRule'){
+        if (state.editor.kind === 'categoryRateRule') {
           setBusy(true);
           post('deleteCategoryRateRule', { payload: { itemId: item._id, itemKey: item.key } });
           closeEditor();
           return;
         }
-        if(!['insurance','extra','fee'].includes(state.editor.kind)) return;
-        const collectionName = state.editor.kind === 'insurance' ? 'InsurancePlans' : state.editor.kind === 'extra' ? 'ExtraServices' : 'FeeRules';
+        if (!['insurance', 'extra', 'fee'].includes(state.editor.kind)) return;
+        const collectionName = state.editor.kind === 'insurance' ? 'InsurancePlans'
+          : state.editor.kind === 'extra' ? 'ExtraServices' : 'FeeRules';
         setBusy(true);
         post('deletePricingItem', { payload: { collectionName, itemId: item._id, itemKey: item.key } });
         closeEditor();
