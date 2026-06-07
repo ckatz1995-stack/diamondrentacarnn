@@ -453,6 +453,87 @@ button:active{transform:scale(.97)}
     .modal,.overlay{backdrop-filter:blur(4px)}
     .field-sub-header{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:6px 0 2px;margin-top:4px;width:100%}
     .field-section-divider{grid-column:1/-1;border:none;border-top:1px solid rgba(180,138,79,.12);margin:6px 0 2px}
+
+    /* ── VISUAL POLISH ───────────────────────────────────────────── */
+
+    /* KPI grid — auto-fill for 8 chips */
+    #kpis{grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
+    .kpi{padding:11px 12px;min-height:0;border-radius:14px;transition:border-color .15s,box-shadow .15s}
+    .kpi:hover{border-color:#d9c8ad;box-shadow:0 6px 16px rgba(15,23,42,.07)}
+    .kpi b{font-size:19px;color:#6c522e;font-weight:900}
+
+    /* Settings group head — warm inset header */
+    .settings-group-head{background:linear-gradient(180deg,#fffdf9 0%,#f9f5ee 100%);margin:-16px -16px 16px;padding:14px 16px;border-bottom:1px solid #ede3d4;border-radius:16px 16px 0 0}
+
+    /* Settings group badge */
+    .settings-group-badge{background:linear-gradient(180deg,#fffaf2 0%,#f5ede0 100%);border-color:#e3ceaa;color:#7c5e2e;font-size:10px}
+
+    /* Command cards — colored top accent + glow */
+    .settings-command-card{border-top:3px solid rgba(180,138,79,.48);box-shadow:0 10px 24px rgba(15,23,42,.05)}
+    .settings-command-card:hover{box-shadow:0 18px 38px rgba(15,23,42,.09);border-top-color:rgba(180,138,79,.7)}
+
+    /* Health items — left warning strip */
+    .health-item{border-radius:14px;align-items:center}
+    .health-item b{font-size:13px;font-weight:800}
+    .health-item strong{font-size:13px;font-weight:800;white-space:nowrap;min-width:60px;text-align:right}
+    .health-item.warn{border-left:3px solid #f59e0b;background:linear-gradient(180deg,#fffbf2 0%,#fff7e6 100%)}
+    .health-item.warn b{color:#92400e}
+    .health-item.warn strong{color:#a16207}
+
+    /* Summary chips */
+    .summary-chip{border-radius:14px;box-shadow:0 4px 12px rgba(15,23,42,.04)}
+    .summary-chip .value{color:#6c522e;font-size:15px}
+
+    /* Switch fields — card background */
+    .field.switch{background:linear-gradient(180deg,#fdfaf5,#f7f2e9);border:1px solid #e9dfd1;border-radius:12px;padding:11px 14px}
+    .field.switch label{text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;color:var(--text)}
+    .field.switch input{accent-color:#a8844a}
+
+    /* Table body */
+    td{font-size:13px;vertical-align:middle}
+    th{font-size:11px;font-weight:800}
+    tbody tr:hover td{background:#fdf9f3}
+
+    /* Overview primary card gradient text */
+    .overview-primary h3{background:linear-gradient(135deg,#3d2c14,#8e6d3d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .overview-primary{background:linear-gradient(160deg,#fefbf5 0%,#f5ede0 60%,#ede0cc 100%);border-color:#d4c0a0}
+
+    /* Section slide-in animation */
+    .section.active{animation:sectionIn .2s cubic-bezier(.4,0,.2,1) both}
+    @keyframes sectionIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Business pane fade-in */
+    .business-pane.active{animation:paneIn .18s ease both}
+    @keyframes paneIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Toast */
+    .toast{border-radius:16px;font-weight:700;font-size:13px;letter-spacing:-.01em;box-shadow:0 22px 40px rgba(15,23,42,.22)}
+
+    /* Button refinements */
+    .btn{letter-spacing:-.01em}
+    .btn.primary{background:linear-gradient(135deg,#a8844a,#7c5e2e);border-color:#7c5e2e}
+    .btn.primary:hover{background:linear-gradient(135deg,#b8945a,#8e6d3d)}
+
+    /* Info card */
+    .info-card{border-radius:12px;font-weight:500}
+
+    /* Viewer stack */
+    .viewer-card{border-radius:16px}
+
+    /* Modal head */
+    .modal-head{background:linear-gradient(180deg,#fffcf6 0%,#faf6ee 100%)}
+
+    /* Business subtab active — stronger shadow */
+    .business-subtab.active{box-shadow:0 10px 22px rgba(142,109,61,.2)}
+
+    /* Tab active */
+    .tab.active{box-shadow:0 8px 18px rgba(142,109,61,.2)}
+
+    /* Settings stack spacing */
+    .settings-stack{gap:20px}
+
+    /* Row link hover */
+    .row-actions .link:hover{text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body style="background:#f2ede3">
