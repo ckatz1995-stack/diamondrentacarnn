@@ -451,6 +451,8 @@ button:active{transform:scale(.97)}
     .field input:focus,.field textarea:focus,.field select:focus,.table-col-search input:focus,.text-editor-textarea:focus{outline:none;border-color:rgba(180,138,79,.34);box-shadow:0 0 0 4px rgba(180,138,79,.12),0 12px 28px rgba(108,82,46,.08)}
     .empty{padding:18px 16px;border:1px dashed rgba(180,138,79,.22);border-radius:16px;background:linear-gradient(180deg,#fffdfa 0%,#f7f1e6 100%);font-weight:800;color:#6c522e}
     .modal,.overlay{backdrop-filter:blur(4px)}
+    .field-sub-header{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:6px 0 2px;margin-top:4px;width:100%}
+    .field-section-divider{grid-column:1/-1;border:none;border-top:1px solid rgba(180,138,79,.12);margin:6px 0 2px}
 </style>
 </head>
 <body style="background:#f2ede3">
@@ -708,6 +710,35 @@ button:active{transform:scale(.97)}
                   <strong>Οι κατηγορίες και τα πραγματικά οχήματα μεταφέρθηκαν στο Operations area του Settings για ενιαία διαχείριση στόλου.</strong>
                 </div></div>
 
+              <div class="settings-group business-pane" id="group-bookingPolicies" data-group-anchor="bookingPolicies" data-business-pane="bookingPolicies">
+                <div class="settings-group-head">
+                  <div>
+                    <h3>2. Booking rules &amp; policies</h3>
+                    <p>Ελάχιστες και μέγιστες ημέρες, παράθυρο κράτησης, πολιτική ακύρωσης, καύσιμα και απαιτήσεις οδηγού.</p>
+                  </div>
+                  <div class="settings-group-badge">Booking rules</div>
+                </div>
+                <div class="settings-grid">
+                  <div class="field col-12"><label class="field-sub-header">Διάρκεια ενοικίασης</label></div>
+                  <div class="field col-3"><label>Min rental days</label><input id="bsMinRentalDays" type="number" min="1" step="1" placeholder="1" /></div>
+                  <div class="field col-3"><label>Max rental days</label><input id="bsMaxRentalDays" type="number" min="1" step="1" placeholder="90" /></div>
+                  <div class="field col-3"><label>Min advance booking (hours)</label><input id="bsAdvanceBookingMinHours" type="number" min="0" step="1" placeholder="2" /></div>
+                  <div class="field col-3"><label>Max advance booking (days)</label><input id="bsMaxAdvanceBookingDays" type="number" min="1" step="1" placeholder="365" /></div>
+                  <div class="field col-12"><label class="field-sub-header">Πολιτική ακύρωσης &amp; καυσίμων</label></div>
+                  <div class="field col-4"><label>Free cancellation window (hours)</label><input id="bsCancellationWindowHours" type="number" min="0" step="1" placeholder="24" /></div>
+                  <div class="field col-4"><label>Cancellation policy</label><select id="bsCancellationPolicy"><option value="flexible">Flexible — refund up to 24h before</option><option value="moderate">Moderate — refund up to 5 days before</option><option value="strict">Strict — 50% refund up to 7 days before</option><option value="non-refundable">Non-refundable</option></select></div>
+                  <div class="field col-4"><label>Fuel policy</label><select id="bsFuelPolicy"><option value="full-to-full">Full to full</option><option value="pre-purchase">Pre-purchase (full tank included)</option><option value="same-to-same">Same level to same level</option><option value="free-tank">Free tank</option></select></div>
+                  <div class="field col-12"><label class="field-sub-header">Απαιτήσεις οδηγού</label></div>
+                  <div class="field col-3"><label>Min driver age</label><input id="bsMinDriverAge" type="number" min="16" max="99" step="1" placeholder="18" /></div>
+                  <div class="field col-3"><label>Young driver threshold (age ≤)</label><input id="bsYoungDriverThreshold" type="number" min="16" max="99" step="1" placeholder="25" /></div>
+                  <div class="field col-3"><label>Senior driver threshold (age ≥)</label><input id="bsSeniorDriverThreshold" type="number" min="50" max="99" step="1" placeholder="70" /></div>
+                  <div class="field col-3"><label>Min years holding license</label><input id="bsLicenseMinYears" type="number" min="0" step="1" placeholder="1" /></div>
+                  <div class="field col-4 switch"><input id="bsRequireDriverLicense" type="checkbox" /><label for="bsRequireDriverLicense">Require driver license copy</label></div>
+                  <div class="field col-4 switch"><input id="bsAllowInternationalRenters" type="checkbox" /><label for="bsAllowInternationalRenters">Allow international renters</label></div>
+                  <div class="field col-4 switch"><input id="bsRequireCreditCard" type="checkbox" /><label for="bsRequireCreditCard">Require credit card for deposit</label></div>
+                </div>
+              </div>
+
               <div class="settings-group business-pane" id="group-locations" data-group-anchor="locations" data-business-pane="locations">
                 <div class="settings-group-head">
                   <div>
@@ -803,6 +834,32 @@ button:active{transform:scale(.97)}
                   <div class="field col-4 switch"><input id="bsEnableTriggeredEmails" type="checkbox" /><label for="bsEnableTriggeredEmails">Enable triggered emails</label></div>
                   <div class="field col-4"><label>Triggered email · confirmed</label><input id="bsBookingConfirmedTriggerId" placeholder="Wix trigger id για booking confirmation" /></div>
                   <div class="field col-4"><label>Triggered email · canceled</label><input id="bsBookingCanceledTriggerId" placeholder="Wix trigger id για booking cancellation" /></div>
+                </div>
+              </div>
+
+              <div class="settings-group business-pane" id="group-uiLabels" data-group-anchor="uiLabels" data-business-pane="uiLabels">
+                <div class="settings-group-head">
+                  <div>
+                    <h3>3. UI Labels &amp; Checkout text</h3>
+                    <p>Customize the labels shown to customers during the booking flow and price breakdown. Leave blank to use built-in defaults.</p>
+                  </div>
+                  <div class="settings-group-badge">UI Labels</div>
+                </div>
+                <div class="settings-grid">
+                  <div class="field col-12"><label class="field-sub-header">Booking flow</label></div>
+                  <div class="field col-4"><label>Daily rate label</label><input id="bsDailyRateLabel" placeholder="Daily rate" /></div>
+                  <div class="field col-4"><label>Days label</label><input id="bsDaysLabel" placeholder="Days" /></div>
+                  <div class="field col-4"><label>Booking summary label</label><input id="bsBookingSummaryLabel" placeholder="Booking summary" /></div>
+                  <div class="field col-12"><label class="field-sub-header">Price breakdown</label></div>
+                  <div class="field col-4"><label>Base charge label</label><input id="bsBaseChargeLabel" placeholder="Base charge" /></div>
+                  <div class="field col-4"><label>Insurance label</label><input id="bsInsuranceLabel" placeholder="Insurance" /></div>
+                  <div class="field col-4"><label>Extras label</label><input id="bsExtrasLabel" placeholder="Extras" /></div>
+                  <div class="field col-4"><label>Location fee label</label><input id="bsLocationFeeLabel" placeholder="Location fee" /></div>
+                  <div class="field col-4"><label>Age fee label</label><input id="bsAgeFeeLabel" placeholder="Age fee" /></div>
+                  <div class="field col-4"><label>Night fee label</label><input id="bsNightFeeLabel" placeholder="Night fee" /></div>
+                  <div class="field col-4"><label>Grand total label</label><input id="bsGrandTotalLabel" placeholder="Grand total" /></div>
+                  <div class="field col-4"><label>No extras selected label</label><input id="bsNoExtrasLabel" placeholder="No extras selected" /></div>
+                  <div class="field col-4"><div class="info-card">Leave a label blank to use the built-in default text.</div></div>
                 </div>
               </div>
 
@@ -1299,19 +1356,22 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
 
 
     const BUSINESS_AREAS = [
-      { key:'front', label:'Front' },
-      { key:'company', label:'Company' },
-      { key:'communications', label:'Communications' }
+      { key:'front', label:'Front & content' },
+      { key:'operations', label:'Operations & policy' },
+      { key:'company', label:'Company & stations' },
+      { key:'communications', label:'Notifications' }
     ];
 
     const BUSINESS_PANES = [
-      { key:'frontBrand', area:'front', label:'1. Ταυτότητα εταιρίας & front brand', shortLabel:'Front brand', helper:'Brand, company identity, footer and front-facing contact info.' },
-      { key:'operations', area:'front', label:'2. Operations', shortLabel:'Operations', helper:'Booking rules, operating hours, deposits and out-of-hours behavior.' },
-      { key:'vehicleCatalog', area:'front', label:'3. Vehicle catalog', shortLabel:'Vehicle catalog', helper:'Vehicles page mode and a visual preview of what the customer sees on the vehicles page.' },
-      { key:'rentalTerms', area:'front', label:'4. Rental terms', shortLabel:'Rental terms', helper:'Public rental terms page content and large legal copy.' },
-      { key:'insuranceTexts', area:'front', label:'5. Insurance & legal', shortLabel:'Insurance & legal', helper:'Insurance texts, intros and legal helper content.' },
+      { key:'frontBrand', area:'front', label:'1. Brand identity', shortLabel:'Brand', helper:'Company name, tagline, contact info and front-facing brand content.' },
+      { key:'vehicleCatalog', area:'front', label:'2. Vehicle catalog', shortLabel:'Catalog', helper:'Vehicles page display mode and a live preview of the public catalog.' },
+      { key:'uiLabels', area:'front', label:'3. UI labels & checkout text', shortLabel:'UI Labels', helper:'Customize labels shown to customers during the booking flow and checkout price breakdown.' },
+      { key:'rentalTerms', area:'front', label:'4. Rental terms', shortLabel:'Rental terms', helper:'Public rental terms page content, requirements and legal copy.' },
+      { key:'insuranceTexts', area:'front', label:'5. Insurance & legal', shortLabel:'Insurance & legal', helper:'Insurance terms intro, details content and legal helper text.' },
+      { key:'operations', area:'operations', label:'1. Hours & operational defaults', shortLabel:'Operations', helper:'Booking defaults, operating hours, night window and deposit rules.' },
+      { key:'bookingPolicies', area:'operations', label:'2. Booking rules & policies', shortLabel:'Booking policies', helper:'Min/max rental days, advance booking window, cancellation policy, fuel policy and driver age requirements.' },
       { key:'locations', area:'company', label:'1. Stations / Locations', shortLabel:'Stations / Locations', helper:'Pickup and dropoff locations, ordering, fees and activation state.' },
-      { key:'automation', area:'communications', label:'1. Triggered emails', shortLabel:'Triggered emails', helper:'Automation enablement and trigger ids.' }
+      { key:'automation', area:'communications', label:'1. Triggered emails', shortLabel:'Triggered emails', helper:'Automation enablement and Wix trigger ids for booking confirmations and cancellations.' }
     ];
     const initialBusinessPane = BUSINESS_PANES.find((pane) => pane.key === state.activeBusinessPane);
     if(initialBusinessPane && state.activeBusinessArea !== initialBusinessPane.area){
@@ -3010,6 +3070,61 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       document.getElementById('bsRentalPoliciesBody').value = s.rentalPoliciesBody || '';
       document.getElementById('bsRentalPrivacyBody').value = s.rentalPrivacyBody || '';
       document.getElementById('bsActive').checked = s.active !== false;
+
+      // Booking policies
+      const bsMinRentalDays = document.getElementById('bsMinRentalDays');
+      if (bsMinRentalDays) bsMinRentalDays.value = s.minRentalDays != null ? s.minRentalDays : 1;
+      const bsMaxRentalDays = document.getElementById('bsMaxRentalDays');
+      if (bsMaxRentalDays) bsMaxRentalDays.value = s.maxRentalDays != null ? s.maxRentalDays : 90;
+      const bsAdvanceBookingMinHours = document.getElementById('bsAdvanceBookingMinHours');
+      if (bsAdvanceBookingMinHours) bsAdvanceBookingMinHours.value = s.advanceBookingMinHours != null ? s.advanceBookingMinHours : 2;
+      const bsMaxAdvanceBookingDays = document.getElementById('bsMaxAdvanceBookingDays');
+      if (bsMaxAdvanceBookingDays) bsMaxAdvanceBookingDays.value = s.maxAdvanceBookingDays != null ? s.maxAdvanceBookingDays : 365;
+      const bsCancellationWindowHours = document.getElementById('bsCancellationWindowHours');
+      if (bsCancellationWindowHours) bsCancellationWindowHours.value = s.cancellationWindowHours != null ? s.cancellationWindowHours : 24;
+      const bsCancellationPolicy = document.getElementById('bsCancellationPolicy');
+      if (bsCancellationPolicy) bsCancellationPolicy.value = s.cancellationPolicy || 'flexible';
+      const bsFuelPolicy = document.getElementById('bsFuelPolicy');
+      if (bsFuelPolicy) bsFuelPolicy.value = s.fuelPolicy || 'full-to-full';
+      const bsMinDriverAge = document.getElementById('bsMinDriverAge');
+      if (bsMinDriverAge) bsMinDriverAge.value = s.minDriverAge != null ? s.minDriverAge : 18;
+      const bsYoungDriverThreshold = document.getElementById('bsYoungDriverThreshold');
+      if (bsYoungDriverThreshold) bsYoungDriverThreshold.value = s.youngDriverThreshold != null ? s.youngDriverThreshold : 25;
+      const bsSeniorDriverThreshold = document.getElementById('bsSeniorDriverThreshold');
+      if (bsSeniorDriverThreshold) bsSeniorDriverThreshold.value = s.seniorDriverThreshold != null ? s.seniorDriverThreshold : 70;
+      const bsLicenseMinYears = document.getElementById('bsLicenseMinYears');
+      if (bsLicenseMinYears) bsLicenseMinYears.value = s.licenseMinYears != null ? s.licenseMinYears : 1;
+      const bsRequireDriverLicense = document.getElementById('bsRequireDriverLicense');
+      if (bsRequireDriverLicense) bsRequireDriverLicense.checked = s.requireDriverLicense !== false;
+      const bsAllowInternationalRenters = document.getElementById('bsAllowInternationalRenters');
+      if (bsAllowInternationalRenters) bsAllowInternationalRenters.checked = s.allowInternationalRenters !== false;
+      const bsRequireCreditCard = document.getElementById('bsRequireCreditCard');
+      if (bsRequireCreditCard) bsRequireCreditCard.checked = s.requireCreditCard !== false;
+
+      // UI labels
+      const bsDailyRateLabel = document.getElementById('bsDailyRateLabel');
+      if (bsDailyRateLabel) bsDailyRateLabel.value = s.dailyRateLabel || '';
+      const bsDaysLabel = document.getElementById('bsDaysLabel');
+      if (bsDaysLabel) bsDaysLabel.value = s.daysLabel || '';
+      const bsBookingSummaryLabel = document.getElementById('bsBookingSummaryLabel');
+      if (bsBookingSummaryLabel) bsBookingSummaryLabel.value = s.bookingSummaryLabel || '';
+      const bsBaseChargeLabel = document.getElementById('bsBaseChargeLabel');
+      if (bsBaseChargeLabel) bsBaseChargeLabel.value = s.baseChargeLabel || '';
+      const bsInsuranceLabel = document.getElementById('bsInsuranceLabel');
+      if (bsInsuranceLabel) bsInsuranceLabel.value = s.insuranceLabel || '';
+      const bsExtrasLabel = document.getElementById('bsExtrasLabel');
+      if (bsExtrasLabel) bsExtrasLabel.value = s.extrasLabel || '';
+      const bsLocationFeeLabel = document.getElementById('bsLocationFeeLabel');
+      if (bsLocationFeeLabel) bsLocationFeeLabel.value = s.locationFeeLabel || '';
+      const bsAgeFeeLabel = document.getElementById('bsAgeFeeLabel');
+      if (bsAgeFeeLabel) bsAgeFeeLabel.value = s.ageFeeLabel || '';
+      const bsNightFeeLabel = document.getElementById('bsNightFeeLabel');
+      if (bsNightFeeLabel) bsNightFeeLabel.value = s.nightFeeLabel || '';
+      const bsGrandTotalLabel = document.getElementById('bsGrandTotalLabel');
+      if (bsGrandTotalLabel) bsGrandTotalLabel.value = s.grandTotalLabel || '';
+      const bsNoExtrasLabel = document.getElementById('bsNoExtrasLabel');
+      if (bsNoExtrasLabel) bsNoExtrasLabel.value = s.noExtrasLabel || '';
+
       document.querySelectorAll('textarea[data-editor="modal"]').forEach(syncRichPreview);
       renderVehicleCatalogPreview();
       if(state.activeSection === 'business') renderBusinessPaneNav();
@@ -3054,7 +3169,36 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
         rentalPoliciesBody: document.getElementById('bsRentalPoliciesBody').value.trim(),
         rentalPrivacyBody: document.getElementById('bsRentalPrivacyBody').value.trim(),
         stationProfiles: effectiveStationProfiles(),
-        active: !!document.getElementById('bsActive').checked
+        active: !!document.getElementById('bsActive').checked,
+
+        // Booking policies
+        minRentalDays: Number(document.getElementById('bsMinRentalDays')?.value || 1),
+        maxRentalDays: Number(document.getElementById('bsMaxRentalDays')?.value || 90),
+        advanceBookingMinHours: Number(document.getElementById('bsAdvanceBookingMinHours')?.value || 2),
+        maxAdvanceBookingDays: Number(document.getElementById('bsMaxAdvanceBookingDays')?.value || 365),
+        cancellationWindowHours: Number(document.getElementById('bsCancellationWindowHours')?.value || 24),
+        cancellationPolicy: document.getElementById('bsCancellationPolicy')?.value || 'flexible',
+        fuelPolicy: document.getElementById('bsFuelPolicy')?.value || 'full-to-full',
+        minDriverAge: Number(document.getElementById('bsMinDriverAge')?.value || 18),
+        youngDriverThreshold: Number(document.getElementById('bsYoungDriverThreshold')?.value || 25),
+        seniorDriverThreshold: Number(document.getElementById('bsSeniorDriverThreshold')?.value || 70),
+        licenseMinYears: Number(document.getElementById('bsLicenseMinYears')?.value || 1),
+        requireDriverLicense: !!document.getElementById('bsRequireDriverLicense')?.checked,
+        allowInternationalRenters: !!document.getElementById('bsAllowInternationalRenters')?.checked,
+        requireCreditCard: !!document.getElementById('bsRequireCreditCard')?.checked,
+
+        // UI labels
+        dailyRateLabel: document.getElementById('bsDailyRateLabel')?.value.trim() || '',
+        daysLabel: document.getElementById('bsDaysLabel')?.value.trim() || '',
+        bookingSummaryLabel: document.getElementById('bsBookingSummaryLabel')?.value.trim() || '',
+        baseChargeLabel: document.getElementById('bsBaseChargeLabel')?.value.trim() || '',
+        insuranceLabel: document.getElementById('bsInsuranceLabel')?.value.trim() || '',
+        extrasLabel: document.getElementById('bsExtrasLabel')?.value.trim() || '',
+        locationFeeLabel: document.getElementById('bsLocationFeeLabel')?.value.trim() || '',
+        ageFeeLabel: document.getElementById('bsAgeFeeLabel')?.value.trim() || '',
+        nightFeeLabel: document.getElementById('bsNightFeeLabel')?.value.trim() || '',
+        grandTotalLabel: document.getElementById('bsGrandTotalLabel')?.value.trim() || '',
+        noExtrasLabel: document.getElementById('bsNoExtrasLabel')?.value.trim() || ''
       };
       stationSettings[stationKey] = { ...(stationSettings[stationKey] || {}), ...scopedValues };
       return {
