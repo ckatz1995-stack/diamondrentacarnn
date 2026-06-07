@@ -360,6 +360,7 @@ $w.onReady(async function () {
         'resetStaffPassword',
         'revokeStaffSessions',
         'refreshStaffAccess',
+        'importSnapshot',
         'resetBridgeTelemetry',
         'logoutBackroom'
       ].includes(msg.type)) {
