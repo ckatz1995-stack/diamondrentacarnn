@@ -299,18 +299,18 @@ h1{margin:6px 0 10px;font-size:28px;line-height:1.1;letter-spacing:-.025em}
 .quick-actions .btn{padding:9px 13px}
 
 /* ── COMMAND DECK ────────────────────────────────────────────────── */
-.settings-command-deck{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0 0 20px}
+.settings-command-deck{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:0 0 20px}
 .settings-command-card{position:relative;overflow:hidden;border:1px solid var(--line);border-top:none;border-radius:var(--r-xl);background:linear-gradient(145deg,#fff 0%,#FAF6EF 100%);padding:0 18px 18px;box-shadow:var(--sh);transition:transform .14s,box-shadow .14s,border-color .14s}
 .settings-command-card::before{content:"";display:block;height:4px;margin:0 -18px 18px;border-radius:var(--r-xl) var(--r-xl) 0 0}
 .settings-command-card:nth-child(1)::before{background:linear-gradient(90deg,#B8924E,#E8C070,#B8924E)}
 .settings-command-card:nth-child(2)::before{background:linear-gradient(90deg,#2563EB,#60A5FA,#2563EB)}
-.settings-command-card:nth-child(3)::before{background:linear-gradient(90deg,#0D9488,#34D399,#0D9488)}
+.settings-command-card:nth-child(3)::before{background:linear-gradient(90deg,#0D9488,#34D399,#0D9488)}.settings-command-card:nth-child(4)::before{background:linear-gradient(90deg,#7C3AED,#A78BFA,#7C3AED)}
 .settings-command-card::after{content:"";position:absolute;right:-24px;top:-24px;width:110px;height:110px;border-radius:999px;background:radial-gradient(circle,rgba(184,146,78,.08),rgba(184,146,78,0));pointer-events:none}
 .settings-command-card:hover{transform:translateY(-3px);box-shadow:var(--sh-lg)}
 .settings-command-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;margin-bottom:14px;box-shadow:var(--sh-xs)}
 .settings-command-card:nth-child(1) .settings-command-icon{background:linear-gradient(135deg,#FDF0D5,#F5DFA0);color:#8A6A28}
 .settings-command-card:nth-child(2) .settings-command-icon{background:linear-gradient(135deg,#EFF6FF,#BFDBFE);color:#1E40AF}
-.settings-command-card:nth-child(3) .settings-command-icon{background:linear-gradient(135deg,#F0FDFA,#99F6E4);color:#0F766E}
+.settings-command-card:nth-child(3) .settings-command-icon{background:linear-gradient(135deg,#F0FDFA,#99F6E4);color:#0F766E}.settings-command-card:nth-child(4) .settings-command-icon{background:linear-gradient(135deg,#F5F3FF,#DDD6FE);color:#5B21B6}
 .settings-command-kicker{font:900 10.5px/1.4 var(--f);letter-spacing:.09em;text-transform:uppercase;color:var(--gold2);margin-bottom:8px}
 .settings-command-title{font-size:16px;font-weight:900;letter-spacing:-.025em;color:var(--text);margin:0 0 8px;line-height:1.25}
 .settings-command-copy{font-size:12.5px;line-height:1.55;color:var(--sub);margin:0 0 12px}
@@ -648,6 +648,8 @@ tbody tr:hover td{color:var(--text)}
             <div class="ov-stat"><span id="ovStatVat">—</span><label>VAT</label></div>
             <div class="ov-stat"><span id="ovStatNight">—</span><label>Night window</label></div>
             <div class="ov-stat"><span id="ovStatDeposit">—</span><label>Deposit</label></div>
+            <div class="ov-stat"><span id="ovStatFleet">—</span><label>Fleet categories</label></div>
+            <div class="ov-stat"><span id="ovStatStations">—</span><label>Stations</label></div>
           </div>
         </div>
                 <div class="settings-command-deck">
@@ -703,6 +705,24 @@ tbody tr:hover td{color:var(--text)}
               <button class="btn" data-home-go="business" data-focus-group="locations">Stations</button>
               <button class="btn" data-settings-section="security">Security</button>
               <button class="btn" data-settings-section="users">Users</button>
+            </div>
+          </div>
+          <div class="settings-command-card">
+            <div class="settings-command-icon">📋</div>
+            <div class="settings-command-kicker">Rental policies</div>
+            <h3 class="settings-command-title">Mileage, damage excess, additional drivers &amp; corporate</h3>
+            <p class="settings-command-copy">Πολιτικές km, CDW/SCDW, late return fees, one-way rentals, additional driver rules, B2B accounts και GDPR compliance.</p>
+            <div class="settings-command-pills">
+              <span class="pill">Mileage &amp; km</span>
+              <span class="pill">CDW / SCDW</span>
+              <span class="pill">Corporate B2B</span>
+              <span class="pill">Privacy</span>
+            </div>
+            <div class="settings-command-actions">
+              <button class="btn" data-home-go="business" data-focus-group="mileagePolicy">Mileage</button>
+              <button class="btn" data-home-go="business" data-focus-group="damageExcess">Damage excess</button>
+              <button class="btn" data-home-go="business" data-focus-group="corporateB2B">Corporate</button>
+              <button class="btn" data-home-go="business" data-focus-group="privacyGdpr">Privacy</button>
             </div>
           </div>
         </div>
@@ -1261,6 +1281,43 @@ tbody tr:hover td{color:var(--text)}
                   <div class="field col-12"><label>Marketing consent text (shown at checkout)</label><textarea id="bsMarketingConsentText" placeholder="I agree to receive promotional emails and special offers from Diamond Rent A Car."></textarea></div>
                 </div>
               </div>
+
+              <div class="settings-group business-pane" id="group-emailTemplates" data-group-anchor="emailTemplates" data-business-pane="emailTemplates">
+                <div class="settings-group-head">
+                  <div>
+                    <h3>2. Email content &amp; sender identity</h3>
+                    <p>Sender name/email shown to customers, per-trigger subject lines, preheader text and notification timing for all triggered emails.</p>
+                  </div>
+                  <div class="settings-group-badge">Email content</div>
+                </div>
+                <div class="settings-grid">
+                  <div class="field col-12"><label class="field-sub-header">Sender identity</label></div>
+                  <div class="field col-4"><label>From name</label><input id="bsEmailFromName" placeholder="Diamond Rent A Car" /></div>
+                  <div class="field col-4"><label>Reply-to email</label><input id="bsEmailReplyTo" placeholder="info@diamondrentacar.gr" /></div>
+                  <div class="field col-4"><div class="info-card">Wix controls the actual sending domain. These values are used as display labels in email templates and CMS content.</div></div>
+
+                  <div class="field col-12"><label class="field-sub-header">Booking confirmed email</label></div>
+                  <div class="field col-6"><label>Subject line</label><input id="bsEmailConfirmedSubject" placeholder="Your booking is confirmed — Diamond Rent A Car" /></div>
+                  <div class="field col-6"><label>Preheader text</label><input id="bsEmailConfirmedPreheader" placeholder="Here are your booking details and pickup instructions." /></div>
+                  <div class="field col-12"><label>Booking confirmed body note</label><textarea id="bsEmailConfirmedBodyNote" placeholder="Thank you for booking with us. Please bring a valid driver's license and the credit card used for the deposit." /></div>
+
+                  <div class="field col-12"><label class="field-sub-header">Booking cancelled email</label></div>
+                  <div class="field col-6"><label>Subject line</label><input id="bsEmailCancelledSubject" placeholder="Your booking has been cancelled — Diamond Rent A Car" /></div>
+                  <div class="field col-6"><label>Preheader text</label><input id="bsEmailCancelledPreheader" placeholder="We have cancelled your reservation as requested." /></div>
+                  <div class="field col-12"><label>Cancellation body note</label><textarea id="bsEmailCancelledBodyNote" placeholder="Your booking has been cancelled. If you have any questions, please contact us." /></div>
+
+                  <div class="field col-12"><label class="field-sub-header">Return reminder email</label></div>
+                  <div class="field col-3 switch"><input id="bsEmailReturnReminderEnabled" type="checkbox" /><label for="bsEmailReturnReminderEnabled">Enable return reminder</label></div>
+                  <div class="field col-3"><label>Hours before return</label><input id="bsEmailReturnReminderHours" type="number" min="1" step="1" placeholder="24" /></div>
+                  <div class="field col-6"><label>Return reminder subject</label><input id="bsEmailReturnReminderSubject" placeholder="Your rental ends tomorrow — Diamond Rent A Car" /></div>
+
+                  <div class="field col-12"><label class="field-sub-header">Review request email</label></div>
+                  <div class="field col-3 switch"><input id="bsEmailReviewRequestEnabled" type="checkbox" /><label for="bsEmailReviewRequestEnabled">Enable review request</label></div>
+                  <div class="field col-3"><label>Days after return</label><input id="bsEmailReviewRequestDays" type="number" min="1" step="1" placeholder="2" /></div>
+                  <div class="field col-6"><label>Review request subject</label><input id="bsEmailReviewRequestSubject" placeholder="How was your rental? Leave us a review!" /></div>
+                  <div class="field col-12"><label>Review request body note</label><textarea id="bsEmailReviewRequestBodyNote" placeholder="We hope you enjoyed your rental experience. Your feedback helps us improve." /></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1504,6 +1561,7 @@ tbody tr:hover td{color:var(--text)}
             <button class="btn" id="openSecurityFromUsersBtn">Security console</button><button class="btn primary" data-add-kind="user">Νέος staff user</button>
           </div>
         </div>
+        <div id="usersStatsBand" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
         <div class="toolbar">
           <div class="left"><input id="searchUsers" placeholder="Αναζήτηση χρήστη" /></div>
           <div class="right"><span class="badge" id="usersCount">0 users</span></div>
@@ -1738,6 +1796,7 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       { key:'locations', area:'company', label:'1. Stations / Locations', shortLabel:'Stations / Locations', helper:'Pickup and dropoff locations, ordering, fees and activation state.' },
       { key:'invoicingContract', area:'company', label:'2. Invoicing & contract', shortLabel:'Invoicing', helper:'Company tax details, invoice/receipt prefixes and rental contract template settings.' },
       { key:'automation', area:'communications', label:'1. Triggered emails', shortLabel:'Triggered emails', helper:'Automation enablement and Wix trigger ids for booking confirmations and cancellations.' },
+      { key:'emailTemplates', area:'communications', label:'2. Email content', shortLabel:'Email content', helper:'Sender identity, per-trigger subject lines, preheader text and notification timing.' },
       { key:'seoPages', area:'front', label:'6. SEO & pages', shortLabel:'SEO', helper:'Per-page titles, meta descriptions, OG image, Google Analytics and Tag Manager IDs.' },
       { key:'socialContact', area:'front', label:'7. Social & contact links', shortLabel:'Social', helper:'Facebook, Instagram, WhatsApp, Google Maps and other online presence links shown on the front site.' },
       { key:'additionalDriver', area:'operations', label:'4. Additional driver policy', shortLabel:'Add. driver', helper:'Additional driver allowance, fees and minimum age/license requirements.' },
@@ -1797,6 +1856,9 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       ovStatVat: document.getElementById('ovStatVat'),
       ovStatNight: document.getElementById('ovStatNight'),
       ovStatDeposit: document.getElementById('ovStatDeposit'),
+      ovStatFleet: document.getElementById('ovStatFleet'),
+      ovStatStations: document.getElementById('ovStatStations'),
+      usersStatsBand: document.getElementById('usersStatsBand'),
       saveBusinessBtn: document.getElementById('saveBusinessBtn'),
       businessStationSelect: document.getElementById('businessStationSelect'),
       businessStationMeta: document.getElementById('businessStationMeta'),
@@ -2586,6 +2648,7 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
           { key:'front', label:'Front', section:'business', businessArea:'front' },
           { key:'company', label:'Company', section:'business', businessArea:'company' },
           { key:'communications', label:'Communications', section:'business', businessArea:'communications' },
+          { key:'policies', label:'Policies', section:'business', businessArea:'policies' },
           { key:'operations', label:'Operations', section:'fleetCategories' },
           { key:'pricing', label:'Pricing rules', section:'dynamicPricing' },
           { key:'team', label:'Team & access', section:(tabs.find(tab => ['roles','users','security','audit'].includes(tab.key)) || tabs.find(tab => tab.group === 'Team & access') || tabs[0] || {}).key || 'settingsHome' }
@@ -3377,6 +3440,8 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       if(els.ovStatVat) els.ovStatVat.textContent = `${Number(settings.vatRate || 0)}%`;
       if(els.ovStatNight) els.ovStatNight.textContent = settings.nightStartHour != null ? `${settings.nightStartHour}h` : '—';
       if(els.ovStatDeposit) els.ovStatDeposit.textContent = money(settings.defaultDeposit || 0, currency);
+      if(els.ovStatFleet) els.ovStatFleet.textContent = vehicleCategoryRows().length || '—';
+      if(els.ovStatStations) els.ovStatStations.textContent = effectiveStationProfiles().length || '—';
     }
 
 
@@ -3663,7 +3728,15 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       const elPBod = document.getElementById('bsPrivacyPolicyBody'); if(elPBod) elPBod.value = s.privacyPolicyBody || '';
       const elMktC = document.getElementById('bsMarketingConsentText'); if(elMktC) elMktC.value = s.marketingConsentText || '';
 
-      document.querySelectorAll('textarea[data-editor="modal"]').forEach(syncRichPreview);
+      // Email content & sender identity
+      const emailTextFields = {bsEmailFromName:'emailFromName',bsEmailReplyTo:'emailReplyTo',bsEmailConfirmedSubject:'emailConfirmedSubject',bsEmailConfirmedPreheader:'emailConfirmedPreheader',bsEmailConfirmedBodyNote:'emailConfirmedBodyNote',bsEmailCancelledSubject:'emailCancelledSubject',bsEmailCancelledPreheader:'emailCancelledPreheader',bsEmailCancelledBodyNote:'emailCancelledBodyNote',bsEmailReturnReminderSubject:'emailReturnReminderSubject',bsEmailReviewRequestSubject:'emailReviewRequestSubject',bsEmailReviewRequestBodyNote:'emailReviewRequestBodyNote'};
+      Object.entries(emailTextFields).forEach(([id, key]) => { const el = document.getElementById(id); if(el) el.value = s[key] || ''; });
+      const elRRen = document.getElementById('bsEmailReturnReminderEnabled'); if(elRRen) elRRen.checked = !!s.emailReturnReminderEnabled;
+      const elRRhrs = document.getElementById('bsEmailReturnReminderHours'); if(elRRhrs) elRRhrs.value = s.emailReturnReminderHours ?? 24;
+      const elRevEn = document.getElementById('bsEmailReviewRequestEnabled'); if(elRevEn) elRevEn.checked = !!s.emailReviewRequestEnabled;
+      const elRevDays = document.getElementById('bsEmailReviewRequestDays'); if(elRevDays) elRevDays.value = s.emailReviewRequestDays ?? 2;
+
+      document.querySelectorAll('textarea[data-editor=modal]').forEach(syncRichPreview);
       renderVehicleCatalogPreview();
       if(state.activeSection === 'business') renderBusinessPaneNav();
     }
@@ -3851,7 +3924,24 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
         privacyPolicyTitle: document.getElementById('bsPrivacyPolicyTitle')?.value.trim() || '',
         cookiePolicyNote: document.getElementById('bsCookiePolicyNote')?.value.trim() || '',
         privacyPolicyBody: document.getElementById('bsPrivacyPolicyBody')?.value.trim() || '',
-        marketingConsentText: document.getElementById('bsMarketingConsentText')?.value.trim() || ''
+        marketingConsentText: document.getElementById('bsMarketingConsentText')?.value.trim() || '',
+
+        // Email content & sender identity
+        emailFromName: document.getElementById('bsEmailFromName')?.value.trim() || '',
+        emailReplyTo: document.getElementById('bsEmailReplyTo')?.value.trim() || '',
+        emailConfirmedSubject: document.getElementById('bsEmailConfirmedSubject')?.value.trim() || '',
+        emailConfirmedPreheader: document.getElementById('bsEmailConfirmedPreheader')?.value.trim() || '',
+        emailConfirmedBodyNote: document.getElementById('bsEmailConfirmedBodyNote')?.value.trim() || '',
+        emailCancelledSubject: document.getElementById('bsEmailCancelledSubject')?.value.trim() || '',
+        emailCancelledPreheader: document.getElementById('bsEmailCancelledPreheader')?.value.trim() || '',
+        emailCancelledBodyNote: document.getElementById('bsEmailCancelledBodyNote')?.value.trim() || '',
+        emailReturnReminderEnabled: !!document.getElementById('bsEmailReturnReminderEnabled')?.checked,
+        emailReturnReminderHours: Number(document.getElementById('bsEmailReturnReminderHours')?.value ?? 24),
+        emailReturnReminderSubject: document.getElementById('bsEmailReturnReminderSubject')?.value.trim() || '',
+        emailReviewRequestEnabled: !!document.getElementById('bsEmailReviewRequestEnabled')?.checked,
+        emailReviewRequestDays: Number(document.getElementById('bsEmailReviewRequestDays')?.value ?? 2),
+        emailReviewRequestSubject: document.getElementById('bsEmailReviewRequestSubject')?.value.trim() || '',
+        emailReviewRequestBodyNote: document.getElementById('bsEmailReviewRequestBodyNote')?.value.trim() || ''
       };
       stationSettings[stationKey] = { ...(stationSettings[stationKey] || {}), ...scopedValues };
       return {
@@ -4217,6 +4307,18 @@ const WORKSPACE_HISTORY_KEY = 'diamond.backroom.history.v1';
       const q = String(state.filters.users || '').toLowerCase();
       const rows = staffUsers().filter((item) => !q || [item.email, item.fullName, item.roleKey, item.notes].some(v => String(v || '').toLowerCase().includes(q)));
       els.usersCount.textContent = `${rows.length} users`;
+      if(els.usersStatsBand){
+        const total = staffUsers().length;
+        const active = staffUsers().filter(u => u.active !== false).length;
+        const withCred = staffUsers().filter(u => u.hasCredential).length;
+        els.usersStatsBand.innerHTML = [
+          { label:'Total staff', val: total, cls:'good' },
+          { label:'Active', val: active, cls:'good' },
+          { label:'Inactive', val: total - active, cls: total - active ? 'private' : 'off' },
+          { label:'With credentials', val: withCred, cls: withCred ? 'good' : 'off' },
+          { label:'No credential', val: total - withCred, cls: total - withCred ? 'warn' : 'off' }
+        ].map(s => `<span class='badge ${s.cls}'>${s.label}: ${s.val}</span>`).join('');
+      }
       if(!rows.length){ els.usersWrap.innerHTML = '<div class="empty">Δεν βρέθηκαν staff users.</div>'; return; }
       const roleMap = new Map(roleRows().map(item => [String(item.key), item.label]));
       els.usersWrap.innerHTML = `<div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Credential</th><th>Sessions</th><th>Actions</th></tr></thead><tbody>${rows.map(item => `
