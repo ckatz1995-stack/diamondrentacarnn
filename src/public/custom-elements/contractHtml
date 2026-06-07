@@ -2537,6 +2537,7 @@
       window.parent.postMessage(msg, '*');
     }
   }
+  window._openBookingContract = function(bookingId){ if(bookingId) post({type:'openBookingContract', bookingId}); };
 
   function toast(message){
     const el = byId('toast');
@@ -4853,6 +4854,7 @@ function renderLookups(){
           <td>${escapeHtml(item.statusLabel || '—')}</td>
           <td>${escapeHtml(item.source || '—')}</td>
           <td>${escapeHtml(money(item.total || 0))}</td>
+          <td>${item.bookingId ? `<button type="button" onclick="window._openBookingContract('${escapeHtml(item.bookingId)}')" style="font-size:10px;padding:2px 7px;cursor:pointer;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text)">Contract</button>` : '—'}</td>
         </tr>`).join('');
     }
     const lines = [
@@ -5023,6 +5025,7 @@ function renderLookups(){
           <td>${escapeHtml(item.statusLabel || '—')}</td>
           <td>${escapeHtml(item.source || '—')}</td>
           <td>${escapeHtml(money(item.total || 0))}</td>
+          <td>${item.bookingId ? `<button type="button" onclick="window._openBookingContract('${escapeHtml(item.bookingId)}')" style="font-size:10px;padding:2px 7px;cursor:pointer;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text)">Contract</button>` : '—'}</td>
         </tr>`).join('');
     }
     const lines = [
