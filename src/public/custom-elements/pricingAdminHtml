@@ -175,6 +175,43 @@ tr:hover td{background:rgba(0,0,0,.02)}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--surface);color:var(--sub);font:600 11px var(--f)}
 .chip.linked{border-color:rgba(21,128,61,.25);background:var(--good-bg);color:var(--good)}
 .monospace{font-family:monospace;font-size:12px}
+
+/* ── TOGGLE SWITCH ── */
+.tog-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--line)}
+.tog-row:last-child{border-bottom:none}
+.tog-info{flex:1;min-width:0}
+.tog-info b{display:block;font:600 13px var(--f);color:var(--text)}
+.tog-info small{display:block;font:400 11px var(--f);color:var(--muted);line-height:1.4;margin-top:2px}
+.tog{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-bar{position:absolute;cursor:pointer;inset:0;border-radius:24px;background:rgba(0,0,0,.18);transition:.2s}
+.tog-bar::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.tog input:checked+.tog-bar{background:var(--gold2)}
+.tog input:checked+.tog-bar::before{transform:translateX(20px)}
+
+/* ── NUMBER + UNIT BADGE ── */
+.num-row{display:flex;align-items:stretch;border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;background:#fff;transition:.15s}
+.num-row:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(192,152,64,.12)}
+.num-row input{border:none;box-shadow:none;flex:1;min-width:0;border-radius:0;background:transparent}
+.num-row input:focus{box-shadow:none;border-color:transparent}
+.num-unit{padding:0 10px;background:var(--surface);color:var(--muted);font:700 11px var(--f);letter-spacing:.03em;display:flex;align-items:center;border-left:1px solid var(--line2);white-space:nowrap;flex-shrink:0}
+
+/* ── FIELD HINT ── */
+.fhint{font:400 11px var(--f);color:var(--muted);margin-top:3px;line-height:1.4}
+.fhint b{font-weight:600;color:var(--sub)}
+
+/* ── SETTINGS CARD ── */
+.sc{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px}
+.sc:last-child{margin-bottom:0}
+.sc-h{padding:11px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--surface),#fff)}
+.sc-ico{font-size:15px;flex-shrink:0;line-height:1}
+.sc-h h4{font:700 12px var(--f);color:var(--text);margin:0;letter-spacing:.01em}
+.sc-desc{font:400 11px var(--f);color:var(--muted);margin-left:auto;white-space:nowrap}
+.sc-b{padding:14px 16px}
+.sc-hr{border:none;border-top:1px solid var(--line);margin:10px -16px;padding:0}
+.coming-soon{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:var(--r);background:var(--surface);border:1px dashed var(--line2)}
+.coming-soon b{display:block;font:600 12px var(--f);color:var(--sub);margin-bottom:2px}
+.coming-soon span{font:400 11px var(--f);color:var(--muted);line-height:1.5}
 </style>
 </head>
 <body>
@@ -371,7 +408,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
 // ── STATE ─────────────────────────────────────────────────────────────────
 const state = {
   section: 'settingsHome',
-  bizArea: 'front',
+  bizArea: 'brand',
   bizPane: 'frontBrand',
   snapshot: null,
   access: null,
@@ -478,36 +515,20 @@ const SUB_LABELS = {
 };
 
 const AREAS = [
-  { key:'front',         label:'Front & content' },
-  { key:'operations',    label:'Operations & policy' },
-  { key:'policies',      label:'Rental policies' },
-  { key:'company',       label:'Company & stations' },
-  { key:'communications',label:'Notifications' }
+  { key:'brand',      label:'Brand' },
+  { key:'operations', label:'Operations' },
+  { key:'content',    label:'Content' },
+  { key:'tools',      label:'Tools' }
 ];
 
 const PANES = [
-  { key:'frontBrand',      area:'front',         label:'Brand identity',        short:'Brand' },
-  { key:'vehicleCatalog',  area:'front',         label:'Vehicle catalog',        short:'Catalog' },
-  { key:'uiLabels',        area:'front',         label:'UI Labels',              short:'UI Labels' },
-  { key:'rentalTerms',     area:'front',         label:'Rental terms',           short:'Rental terms' },
-  { key:'insuranceTexts',  area:'front',         label:'Insurance texts',        short:'Insurance texts' },
-  { key:'seoPages',        area:'front',         label:'SEO & pages',            short:'SEO' },
-  { key:'socialContact',   area:'front',         label:'Social & contact',       short:'Social' },
-  { key:'operations',      area:'operations',    label:'Operational defaults',   short:'Operations' },
-  { key:'bookingPolicies', area:'operations',    label:'Booking policies',       short:'Booking' },
-  { key:'paymentDeposit',  area:'operations',    label:'Payment & deposit',      short:'Payment' },
-  { key:'additionalDriver',area:'operations',    label:'Additional driver',      short:'Add. driver' },
-  { key:'pricingDefaults', area:'operations',    label:'Pricing surcharges',     short:'Surcharges' },
-  { key:'mileagePolicy',   area:'policies',      label:'Mileage policy',         short:'Mileage' },
-  { key:'damageExcess',    area:'policies',      label:'Damage excess',          short:'Damage excess' },
-  { key:'locations',       area:'company',       label:'Stations & locations',   short:'Stations' },
-  { key:'invoicingContract',area:'company',      label:'Invoicing & contract',   short:'Invoicing' },
-  { key:'corporateB2B',    area:'company',       label:'Corporate & B2B',        short:'Corporate' },
-  { key:'privacyGdpr',     area:'company',       label:'Privacy & GDPR',         short:'Privacy' },
-  { key:'integrations',    area:'company',       label:'Integrations & APIs',    short:'Integrations' },
-  { key:'backupRestore',   area:'company',       label:'Backup & restore',       short:'Backup' },
-  { key:'automation',      area:'communications',label:'Triggered emails',       short:'Triggered emails' },
-  { key:'emailTemplates',  area:'communications',label:'Email templates',        short:'Email templates' }
+  { key:'frontBrand',     area:'brand',      label:'Brand identity',  short:'Identity' },
+  { key:'vehicleCatalog', area:'operations', label:'Catalog display', short:'Catalog' },
+  { key:'operations',     area:'operations', label:'Pricing & ops',   short:'Pricing & ops' },
+  { key:'automation',     area:'operations', label:'Email triggers',  short:'Email triggers' },
+  { key:'rentalTerms',    area:'content',    label:'Rental terms',    short:'Rental terms' },
+  { key:'insuranceTexts', area:'content',    label:'Insurance texts', short:'Insurance texts' },
+  { key:'backupRestore',  area:'tools',      label:'Backup & restore',short:'Backup' }
 ];
 
 function activeGroup() {
@@ -713,7 +734,7 @@ function renderOverview() {
       const cd = CMDS_DATA[ci];
       const sec = cd.sects[li] || cd.sects[0];
       const pane = cd.panes?.[li];
-      if (sec === 'business') { state.bizPane = pane||'frontBrand'; state.bizArea = PANES.find(p=>p.key===state.bizPane)?.area||'front'; goto('business'); renderBizPane(); }
+      if (sec === 'business') { state.bizPane = pane||'frontBrand'; state.bizArea = PANES.find(p=>p.key===state.bizPane)?.area||'brand'; goto('business'); renderBizPane(); }
       else goto(sec);
     });
   });
@@ -731,196 +752,148 @@ function renderBizPane() {
 }
 
 function buildPaneFields(key, s) {
-  const f = (label, input) => `<div class="field-group"><label>${label}</label>${input}</div>`;
-  const inp = (id, val='', type='text', ph='') => `<input id="${id}" type="${type}" value="${esc(val)}" placeholder="${esc(ph)}">`;
-  const ta = (id, val='', ph='') => `<textarea id="${id}" placeholder="${esc(ph)}">${esc(val)}</textarea>`;
+  const f = (label, input, hint='') => `<div class="field-group"><label>${label}</label>${input}${hint?`<div class="fhint">${hint}</div>`:''}</div>`;
+  const inp = (id, val='', type='text', ph='') => `<input id="${id}" type="${type}" value="${esc(String(val??''))}" placeholder="${esc(ph)}">`;
+  const ta = (id, val='', ph='', rows=4) => `<textarea id="${id}" rows="${rows}" placeholder="${esc(ph)}">${esc(String(val??''))}</textarea>`;
   const sel = (id, opts, cur='') => `<select id="${id}">${opts.map(([v,l])=>`<option value="${v}"${v==cur?' selected':''}>${l}</option>`).join('')}</select>`;
-  const chk = (id, checked, label) => `<div class="check-row"><input type="checkbox" id="${id}"${checked?' checked':''}><label for="${id}">${label}</label></div>`;
   const row2 = (...fields) => `<div class="field-row cols-2">${fields.join('')}</div>`;
   const row3 = (...fields) => `<div class="field-row cols-3">${fields.join('')}</div>`;
-  const sub = txt => `<div class="field-sub">${txt}</div>`;
+  const tog = (id, checked, label, hint='') => `<div class="tog-row"><div class="tog-info"><b>${label}</b>${hint?`<small>${hint}</small>`:''}</div><label class="tog"><input type="checkbox" id="${id}"${checked?' checked':''}><span class="tog-bar"></span></label></div>`;
+  const num = (id, val, unit='', ph='') => unit
+    ? `<div class="num-row"><input id="${id}" type="number" value="${esc(String(val??''))}" placeholder="${ph||'0'}"><span class="num-unit">${unit}</span></div>`
+    : `<input id="${id}" type="number" value="${esc(String(val??''))}" placeholder="${ph||'0'}">`;
+  const sc = (ico, title, desc, body) => `<div class="sc"><div class="sc-h"><span class="sc-ico">${ico}</span><h4>${title}</h4>${desc?`<span class="sc-desc">${desc}</span>`:''}</div><div class="sc-b">${body}</div></div>`;
 
   switch(key) {
     case 'frontBrand': return `
-      ${row2(f('Company name',inp('bsCompanyName',s.companyName,'text','Diamond Rent A Car')),f('Tagline',inp('bsCompanyTagline',s.companyTagline,'text','Drive in style')))}
-      ${row2(f('City',inp('bsCompanyCity',s.companyCity)),f('Address',inp('bsCompanyAddress',s.companyAddress)))}
-      ${row2(f('Phone',inp('bsCompanyPhone',s.companyPhone,'tel','+30...')),f('Email',inp('bsCompanyEmail',s.companyEmail,'email','info@..')))}
-      ${f('Footer note',ta('bsFooterNote',s.footerNote,'Short company footer text...'))}`;
+      ${sc('🏢', 'Company identity', '', `
+        ${row2(f('Company name',inp('bsCompanyName',s.companyName,'text','Diamond Rent A Car')),f('Tagline',inp('bsCompanyTagline',s.companyTagline,'text','Professional car rental')))}
+        ${row2(f('City',inp('bsCompanyCity',s.companyCity,'text','Thessaloniki')),f('Address',inp('bsCompanyAddress',s.companyAddress,'text','Thessaloniki, Greece')))}
+        ${row2(f('Phone',inp('bsCompanyPhone',s.companyPhone,'tel','+30 2310 000 000')),f('Email',inp('bsCompanyEmail',s.companyEmail,'email','info@diamondrentacar.gr')))}
+        ${f('Footer note',ta('bsFooterNote',s.footerNote,'Short text shown in the website footer and booking pages...'),
+          'Displayed at the bottom of the site and in booking confirmation pages.')}
+      `)}
+      ${sc('🌐', 'Social & contact', 'Links shown on the website', `
+        ${row2(f('Facebook URL',inp('bsFacebookUrl',s.facebookUrl,'url','https://facebook.com/...')),f('Instagram URL',inp('bsInstagramUrl',s.instagramUrl,'url','https://instagram.com/...')))}
+        ${row2(f('WhatsApp number',inp('bsWhatsappNumber',s.whatsappNumber,'tel','+30 69...')),f('Google Maps link',inp('bsGoogleMapsUrl',s.googleMapsUrl,'url','https://maps.google.com/...')))}
+        <div class="fhint">Leave any field blank to hide that link from the website.</div>
+      `)}`;
 
     case 'vehicleCatalog': return `
-      ${row2(
-        f('Vehicles page display mode',sel('bsVehiclesPageDisplayMode',[['models','By models'],['categories','By category']],s.vehiclesPageDisplayMode)),
-        f('Models source',sel('bsVehiclesPageModelsSource',[['vehicles','Fleet vehicles'],['fleet','Fleet catalog']],s.vehiclesPageModelsSource))
-      )}
-      <div class="info-box">Controls how the public vehicle catalog is displayed to customers.</div>`;
-
-    case 'uiLabels': return `
-      ${sub('Booking flow labels')}
-      ${row3(f('Daily rate',inp('bsDailyRateLabel',s.dailyRateLabel,'text','Daily rate')),f('Days',inp('bsDaysLabel',s.daysLabel,'text','Days')),f('Booking summary',inp('bsBookingSummaryLabel',s.bookingSummaryLabel,'text','Booking summary')))}
-      ${sub('Price breakdown labels')}
-      ${row3(f('Base charge',inp('bsBaseChargeLabel',s.baseChargeLabel)),f('Insurance',inp('bsInsuranceLabel',s.insuranceLabel)),f('Extras',inp('bsExtrasLabel',s.extrasLabel)))}
-      ${row3(f('Location fee',inp('bsLocationFeeLabel',s.locationFeeLabel)),f('Age fee',inp('bsAgeFeeLabel',s.ageFeeLabel)),f('Night fee',inp('bsNightFeeLabel',s.nightFeeLabel)))}
-      ${row2(f('Grand total',inp('bsGrandTotalLabel',s.grandTotalLabel)),f('No extras selected',inp('bsNoExtrasLabel',s.noExtrasLabel)))}`;
-
-    case 'rentalTerms': return `
-      ${row2(f('Page title',inp('bsRentalTermsTitle',s.rentalTermsTitle,'text','Rental terms')),f('',''))}
-      ${f('Intro',ta('bsRentalTermsIntro',s.rentalTermsIntro,'Short introduction paragraph...'))}
-      ${f('Rental terms body',ta('bsRentalTermsBody',s.rentalTermsBody,'Full rental terms text...'))}
-      ${f('Driver requirements & guarantee',ta('bsRentalRequirementsBody',s.rentalRequirementsBody))}
-      ${f('Policies (fuel, cancellations, delays)',ta('bsRentalPoliciesBody',s.rentalPoliciesBody))}
-      ${f('Privacy & other terms',ta('bsRentalPrivacyBody',s.rentalPrivacyBody))}`;
-
-    case 'insuranceTexts': return `
-      ${sub('Insurance terms')}
-      ${row2(f('Terms page title',inp('bsInsuranceTermsTitle',s.insuranceTermsTitle)),f('Terms intro',inp('bsInsuranceTermsIntro',s.insuranceTermsIntro)))}
-      ${f('Terms body',ta('bsInsuranceTermsBody',s.insuranceTermsBody))}
-      ${sub('Insurance details')}
-      ${row2(f('Details page title',inp('bsInsuranceDetailsTitle',s.insuranceDetailsTitle)),f('Details intro',inp('bsInsuranceDetailsIntro',s.insuranceDetailsIntro)))}
-      ${f('Details body',ta('bsInsuranceDetailsBody',s.insuranceDetailsBody))}`;
-
-    case 'seoPages': return `
-      ${sub('Homepage')}
-      ${row2(f('Title',inp('bsSeoHomeTitle',s.seoHomeTitle)),f('Meta description',inp('bsSeoHomeDescription',s.seoHomeDescription)))}
-      ${sub('Vehicles page')}
-      ${row2(f('Title',inp('bsSeoVehiclesTitle',s.seoVehiclesTitle)),f('Meta description',inp('bsSeoVehiclesDescription',s.seoVehiclesDescription)))}
-      ${sub('Analytics')}
-      ${row2(f('Google Analytics 4 ID',inp('bsGa4Id',s.ga4Id,'text','G-XXXXXXXXXX')),f('Google Tag Manager ID',inp('bsGtmId',s.gtmId,'text','GTM-XXXXXXX')))}`;
-
-    case 'socialContact': return `
-      ${row2(f('Facebook URL',inp('bsFacebookUrl',s.facebookUrl,'url','https://facebook.com/...')),f('Instagram URL',inp('bsInstagramUrl',s.instagramUrl,'url','https://instagram.com/...')))}
-      ${row2(f('WhatsApp number',inp('bsWhatsappNumber',s.whatsappNumber,'tel','+30 69...')),f('Google Maps URL',inp('bsGoogleMapsUrl',s.googleMapsUrl,'url','https://maps.google.com/...')))}
-      ${f('TripAdvisor URL',inp('bsTripAdvisorUrl',s.tripAdvisorUrl,'url','https://tripadvisor.com/...'))}`;
+      ${sc('🚗', 'Catalog display', 'How the vehicle selection page works', `
+        ${row2(
+          f('Display mode',sel('bsVehiclesPageDisplayMode',[['categories','By category (recommended)'],['models','Individual models']],s.vehiclesPageDisplayMode||'categories')),
+          f('Data source',sel('bsVehiclesPageModelsSource',[['fleet','Fleet catalog'],['vehicles','Vehicle list']],s.vehiclesPageModelsSource||'fleet'))
+        )}
+        <div class="fhint" style="margin-top:6px">
+          <b>By category</b> — customers choose a vehicle class (economy, SUV…), you assign a specific car later.<br>
+          <b>Individual models</b> — customers pick a specific vehicle from the list.<br>
+          <b>Data source</b> — which CMS collection the booking flow reads vehicle data from.
+        </div>
+      `)}`;
 
     case 'operations': return `
-      ${row3(
-        f('Currency',sel('bsCurrency',[['EUR','EUR (€)'],['USD','USD ($)'],['GBP','GBP (£)'],['CHF','CHF']],s.currency||'EUR')),
-        f('VAT rate %',inp('bsVatRate',s.vatRate,'number','24')),
-        f('Default deposit €',inp('bsDefaultDeposit',s.defaultDeposit,'number','0'))
-      )}
-      ${row2(f('Night window start (hour)',inp('bsNightStartHour',s.nightStartHour,'number','22')),f('Night window end (hour)',inp('bsNightEndHour',s.nightEndHour,'number','7')))}
-      ${row2(f('Operating hours label',inp('bsOperatingHoursLabel',s.operatingHoursLabel,'text','Mon–Sat 08:00–20:00')),f('',f('',chk('bsAllowOverbooking',s.allowOverbooking,'Allow overbooking'))))}
-      ${f('After-hours notice',ta('bsAfterHoursNotice',s.afterHoursNotice,'Message shown for after-hours requests...'))}`;
-
-    case 'bookingPolicies': return `
-      ${row3(f('Min rental days',inp('bsMinRentalDays',s.minRentalDays,'number','1')),f('Max rental days',inp('bsMaxRentalDays',s.maxRentalDays,'number','30')),f('Advance booking days',inp('bsAdvanceBookingDays',s.advanceBookingDays,'number','0')))}
-      ${row3(f('Min driver age',inp('bsMinDriverAge',s.minDriverAge,'number','21')),f('Young driver threshold',inp('bsYoungDriverAge',s.youngDriverAge,'number','25')),f('Senior driver threshold',inp('bsSeniorDriverAge',s.seniorDriverAge,'number','70')))}
-      ${f('Fuel policy',sel('bsFuelPolicy',[['full-to-full','Full to full'],['full-to-empty','Full to empty'],['empty-to-empty','Empty to empty']],s.fuelPolicy))}
-      ${f('Cancellation policy',ta('bsCancellationPolicy',s.cancellationPolicy,'Describe your cancellation terms...'))}`;
-
-    case 'paymentDeposit': return `
-      ${row2(
-        f('Deposit type',sel('bsDepositType',[['fixed','Fixed amount'],['percentage','Percentage of total'],['none','No deposit']],s.depositType)),
-        f('Deposit amount / %',inp('bsDepositAmount',s.depositAmount,'number','0'))
-      )}
-      ${sub('Accepted payment methods')}
-      ${chk('bsPayCash',s.payCash,'Cash')}
-      ${chk('bsPayCard',s.payCard,'Credit / debit card')}
-      ${chk('bsPayTransfer',s.payTransfer,'Bank transfer')}
-      ${f('Accepted card types',inp('bsCardTypes',s.cardTypes,'text','Visa, Mastercard, Amex'))}`;
-
-    case 'additionalDriver': return `
-      ${chk('bsAdditionalDriverAllowed',s.additionalDriverAllowed,'Allow additional drivers')}
-      ${row3(f('Additional driver fee / day €',inp('bsAdditionalDriverFee',s.additionalDriverFee,'number','0')),f('Min age',inp('bsAdditionalDriverMinAge',s.additionalDriverMinAge,'number','21')),f('Min license years',inp('bsAdditionalDriverMinLicenseYears',s.additionalDriverMinLicenseYears,'number','1')))}
-      ${f('Notes',ta('bsAdditionalDriverNotes',s.additionalDriverNotes))}`;
-
-    case 'pricingDefaults': return `
-      ${sub('Night hours surcharge')}
-      ${row3(f('Type',sel('bsNightSurchargeType',[['none','None'],['percentage','Percentage'],['fixed','Fixed']],s.nightSurchargeType)),f('Amount / %',inp('bsNightSurchargeAmount',s.nightSurchargeAmount,'number','0')),f('',''))}
-      ${sub('Young driver surcharge')}
-      ${row3(f('Type',sel('bsYoungDriverSurchargeType',[['none','None'],['per-day','Per day'],['percentage','Percentage'],['fixed','Fixed']],s.youngDriverSurchargeType)),f('Amount / %',inp('bsYoungDriverSurchargeAmount',s.youngDriverSurchargeAmount,'number','0')),f('',''))}
-      ${sub('Senior driver surcharge')}
-      ${row3(f('Type',sel('bsSeniorDriverSurchargeType',[['none','None'],['per-day','Per day'],['percentage','Percentage'],['fixed','Fixed']],s.seniorDriverSurchargeType)),f('Amount / %',inp('bsSeniorDriverSurchargeAmount',s.seniorDriverSurchargeAmount,'number','0')),f('',''))}
-      ${sub('Airport / zone surcharge')}
-      ${row3(f('Type',sel('bsAirportSurchargeType',[['none','None'],['fixed','Fixed'],['percentage','Percentage']],s.airportSurchargeType)),f('Amount / %',inp('bsAirportSurchargeAmount',s.airportSurchargeAmount,'number','0')),f('Location keys (comma-separated)',inp('bsAirportLocationKeys',s.airportLocationKeys,'text','airport_1,airport_2')))}
-      ${sub('Last-minute booking surcharge')}
-      ${row3(chk('bsLastMinuteSurchargeEnabled',s.lastMinuteSurchargeEnabled,'Enable'),f('Threshold hours',inp('bsLastMinuteThresholdHours',s.lastMinuteThresholdHours,'number','6')),f('Type + amount',sel('bsLastMinuteSurchargeType',[['percentage','Percentage'],['fixed','Fixed']],s.lastMinuteSurchargeType)+'<input id="bsLastMinuteSurchargeAmount" type="number" value="${esc(s.lastMinuteSurchargeAmount||0)}" style="margin-top:4px">'.replace(/\$\{esc\([^)]+\)\}/,''+esc(s.lastMinuteSurchargeAmount||0))))}
-      ${sub('Cross-border surcharge')}
-      ${row3(chk('bsCrossBorderSurchargeEnabled',s.crossBorderSurchargeEnabled,'Enable'),f('Fixed amount €',inp('bsCrossBorderSurchargeAmount',s.crossBorderSurchargeAmount,'number','0')),f('Allowed country codes',inp('bsAllowedCrossBorderCountries',s.allowedCrossBorderCountries,'text','AL,MK,BG')))}`;
-
-    case 'mileagePolicy': return `
-      ${row2(f('Mileage type',sel('bsMileageType',[['unlimited','Unlimited'],['limited','Limited']],s.mileageType)),f('Included km / day (if limited)',inp('bsIncludedKmPerDay',s.includedKmPerDay,'number','0')))}
-      ${row2(f('Extra km rate €',inp('bsExtraKmRate',s.extraKmRate,'number','0')),f('Late return fee € / hour',inp('bsLateReturnFeePerHour',s.lateReturnFeePerHour,'number','0')))}
-      ${chk('bsOneWayAllowed',s.oneWayAllowed,'Allow one-way rentals')}
-      ${f('One-way rental fee €',inp('bsOneWayFee',s.oneWayFee,'number','0'))}`;
-
-    case 'damageExcess': return `
-      ${f('Default damage excess €',inp('bsDefaultExcess',s.defaultExcess,'number','0'))}
-      ${sub('Coverage options')}
-      ${row3(chk('bsCdwEnabled',s.cdwEnabled,'CDW enabled'),f('CDW daily rate €',inp('bsCdwDailyRate',s.cdwDailyRate,'number','0')),f('',f('','')))}
-      ${row3(chk('bsScdwEnabled',s.scdwEnabled,'SCDW enabled'),f('SCDW daily rate €',inp('bsScdwDailyRate',s.scdwDailyRate,'number','0')),f('',f('','')))}
-      ${row3(chk('bsTheftEnabled',s.theftEnabled,'Theft protection'),f('Theft daily rate €',inp('bsTheftDailyRate',s.theftDailyRate,'number','0')),f('',f('','')))}
-      ${row3(chk('bsGlassTireEnabled',s.glassTireEnabled,'Glass & tire cover'),f('Glass/tire daily rate €',inp('bsGlassTireDailyRate',s.glassTireDailyRate,'number','0')),f('',f('','')))}`;
-
-    case 'locations': return renderLocationsPane();
-
-    case 'invoicingContract': return `
-      ${row2(f('Company legal name',inp('bsCompanyLegalName',s.companyLegalName)),f('VAT number',inp('bsCompanyVat',s.companyVat,'text','EL12345678')))}
-      ${row2(f('Tax office',inp('bsTaxOffice',s.taxOffice)),f('',f('','')))}
-      ${row2(f('Invoice prefix',inp('bsInvoicePrefix',s.invoicePrefix,'text','INV-')),f('Receipt prefix',inp('bsReceiptPrefix',s.receiptPrefix,'text','REC-')))}
-      ${f('Contract header text',ta('bsContractHeaderText',s.contractHeaderText))}
-      ${f('Contract footer text',ta('bsContractFooterText',s.contractFooterText))}`;
-
-    case 'corporateB2B': return `
-      ${chk('bsCorporateEnabled',s.corporateEnabled,'Enable corporate / B2B accounts')}
-      ${row3(f('Corporate discount %',inp('bsCorporateDiscount',s.corporateDiscount,'number','0')),f('Agent commission %',inp('bsAgentCommission',s.agentCommission,'number','0')),f('B2B contact email',inp('bsB2bContactEmail',s.b2bContactEmail,'email','b2b@...')))}
-      ${f('B2B invoice terms',inp('bsB2bInvoiceTerms',s.b2bInvoiceTerms,'text','Net 30'))}
-      ${f('B2B terms & conditions',ta('bsB2bTermsText',s.b2bTermsText))}`;
-
-    case 'privacyGdpr': return `
-      ${f('Privacy policy',ta('bsPrivacyPolicyBody',s.privacyPolicyBody))}
-      ${f('Cookie policy',ta('bsCookiePolicyBody',s.cookiePolicyBody))}
-      ${f('GDPR consent text',ta('bsGdprConsentText',s.gdprConsentText))}
-      ${row3(f('Data retention (days)',inp('bsDataRetentionDays',s.dataRetentionDays,'number','365')),f('DPO name',inp('bsDpoName',s.dpoName)),f('DPO email',inp('bsDpoEmail',s.dpoEmail,'email','')))}`;
-
-    case 'integrations': return `
-      ${sub('Payment gateway')}
-      ${row3(f('Gateway',sel('bsPaymentGateway',[['none','None / manual'],['stripe','Stripe'],['paypal','PayPal'],['alpha','Alpha Bank'],['piraeus','Piraeus'],['viva','Viva Wallet']],s.paymentGateway)),f('Test mode',sel('bsPaymentTestMode',[['live','Live'],['test','Test/sandbox']],s.paymentTestMode)),f('',f('','')))}
-      ${row2(f('Stripe publishable key',inp('bsStripePublishableKey',s.stripePublishableKey,'text','pk_live_...')),f('PayPal client ID',inp('bsPaypalClientId',s.paypalClientId,'text','AX...')))}
-      ${sub('Google Calendar')}
-      ${row3(chk('bsGoogleCalendarEnabled',s.googleCalendarEnabled,'Enable sync'),f('Calendar ID',inp('bsGoogleCalendarId',s.googleCalendarId,'text','xxx@group.calendar.google.com')),f('',f('','')))}
-      ${sub('Outbound webhook')}
-      ${row3(chk('bsWebhookEnabled',s.webhookEnabled,'Enable webhook'),f('Webhook URL',inp('bsWebhookUrl',s.webhookUrl,'url','https://...')),f('Events (comma-separated)',inp('bsWebhookEvents',s.webhookEvents,'text','booking.confirmed,...')))}
-      ${sub('OTA channel sync')}
-      ${row3(chk('bsOtaSyncEnabled',s.otaSyncEnabled,'Enable OTA sync'),f('OTA provider',sel('bsOtaProvider',[['none','None'],['booking','Booking.com'],['rentalcars','RentalCars.com'],['cartrawler','CarTrawler'],['custom','Custom API']],s.otaProvider)),f('OTA API key',inp('bsOtaApiKey',s.otaApiKey,'password','')))}`;
-
-    case 'backupRestore': return `
-      ${sub('Export')}
-      <div class="info-box" style="margin-bottom:12px">Export includes all settings, pricing, categories and fleet data. Staff users and roles are excluded.</div>
-      <div class="btns" style="margin-bottom:16px">
-        <button class="btn good" id="expFullBtn">Export full snapshot</button>
-        <button class="btn" id="expCopyBtn">Copy to clipboard</button>
-        <button class="btn" id="expSettingsBtn">Export settings only</button>
-      </div>
-      ${sub('Restore from backup')}
-      <div class="warn-box" style="margin-bottom:12px">Warning: importing a backup overwrites all settings, pricing, categories and fleet data. Export a fresh backup first.</div>
-      <div class="field-group" style="margin-bottom:12px"><label>Paste backup JSON</label><textarea id="importJson" style="font-family:monospace;height:120px;font-size:12px" placeholder='{"businessSettings":{...}}'></textarea></div>
-      <div class="btns">
-        <button class="btn" id="validateJsonBtn">Validate JSON</button>
-        <button class="btn danger" id="importJsonBtn">Import & restore</button>
-      </div>
-      <div id="importResult" style="margin-top:8px;font-size:13px;color:var(--muted)"></div>`;
+      ${sc('💶', 'Financial', '', `
+        ${row3(
+          f('Currency',sel('bsCurrency',[['EUR','EUR — Euro (€)'],['USD','USD — Dollar ($)'],['GBP','GBP — Pound (£)'],['CHF','CHF — Swiss Franc']],s.currency||'EUR')),
+          f('VAT rate',num('bsVatRate',s.vatRate??24,'%','24')),
+          f('Default deposit',num('bsDefaultDeposit',s.defaultDeposit??300,'EUR','300'))
+        )}
+        <div class="fhint">VAT is added to the booking total shown to customers. The deposit is pre-authorised at vehicle pickup.</div>
+      `)}
+      ${sc('🌙', 'Night surcharge window', 'Pickups & drop-offs in this window trigger the night fee', `
+        ${row2(
+          f('Window start',num('bsNightStartHour',s.nightStartHour??22,'h','22')),
+          f('Window end',num('bsNightEndHour',s.nightEndHour??8,'h','7'))
+        )}
+        <div class="fhint">Applies the night surcharge fee rule for any pickup or drop-off between these hours. Set both to 0 to disable night surcharges entirely.</div>
+      `)}
+      ${sc('📅', 'Booking limits', '', `
+        ${row3(
+          f('Min rental',num('bsMinRentalDays',s.minRentalDays??1,'days','1')),
+          f('Max rental',num('bsMaxRentalDays',s.maxRentalDays??30,'days','30')),
+          f('Min driver age',num('bsMinDriverAge',s.minDriverAge??21,'yrs','21'))
+        )}
+        ${f('Billing grace period',num('bsBillingGraceMinutes',s.billingGraceMinutes??30,'min','30'),
+          'Extra buffer minutes before an overdue vehicle triggers an additional day charge.')}
+      `)}
+      ${sc('🕘', 'Operating hours', '', `
+        ${f('Hours label',inp('bsOperatingHoursLabel',s.operatingHoursLabel,'text','Mon–Sat 09:00–21:00'),
+          'Shown on the website contact section and the booking page header.')}
+        ${f('After-hours notice',ta('bsAfterHoursNotice',s.afterHoursNotice,'Message shown when a customer books outside your operating hours...',3),
+          'Displayed when a booking request falls outside the above operating hours.')}
+        <hr class="sc-hr">
+        ${tog('bsAllowOverbooking',s.allowOverbooking,'Allow overbooking','When on, bookings can be confirmed even if no vehicle is currently marked available in the fleet.')}
+      `)}`;
 
     case 'automation': return `
-      ${chk('bsEnableTriggeredEmails',s.enableTriggeredEmails,'Enable Wix triggered emails')}
-      ${row2(f('Booking confirmed trigger ID',inp('bsBookingConfirmedTriggerId',s.bookingConfirmedTriggerId,'text','trigger-id-here')),f('Booking cancelled trigger ID',inp('bsBookingCanceledTriggerId',s.bookingCanceledTriggerId,'text','trigger-id-here')))}
-      <div class="info-box">These are Wix Automations trigger IDs. Create triggers in your Wix dashboard and paste the IDs here.</div>`;
+      ${sc('✉️', 'Wix triggered emails', '', `
+        ${tog('bsEnableTriggeredEmails',s.enableTriggeredEmails,'Enable automated emails','Sends automated emails when bookings are confirmed or cancelled using Wix Automations.')}
+        <hr class="sc-hr">
+        ${row2(
+          f('Confirmed booking trigger ID',inp('bsBookingConfirmedTriggerId',s.bookingConfirmedTriggerId,'text','Paste trigger ID'),
+            'Create an Automation in your Wix dashboard and paste its trigger ID here.'),
+          f('Cancelled booking trigger ID',inp('bsBookingCanceledTriggerId',s.bookingCanceledTriggerId,'text','Paste trigger ID'))
+        )}
+        <div class="fhint" style="margin-top:6px">Find trigger IDs in Wix dashboard → Automations → open an automation → copy the trigger ID from the URL or settings panel.</div>
+      `)}
+      ${sc('📧', 'Email sender identity', 'Used in all automated emails', `
+        ${row2(
+          f('From name',inp('bsEmailFromName',s.emailFromName,'text','DIAMOND Rent A Car')),
+          f('Reply-to email',inp('bsEmailReplyTo',s.emailReplyTo,'email','info@diamondrentacar.gr'))
+        )}
+      `)}`;
 
-    case 'emailTemplates': return `
-      ${sub('Sender identity')}
-      ${row2(f('From name',inp('bsEmailFromName',s.emailFromName,'text','Diamond Rent A Car')),f('Reply-to email',inp('bsEmailReplyTo',s.emailReplyTo,'email','')))}
-      ${sub('Booking confirmed')}
-      ${f('Subject',inp('bsEmailConfirmedSubject',s.emailConfirmedSubject,'text','Your booking is confirmed'))}
-      ${f('Preheader',inp('bsEmailConfirmedPreheader',s.emailConfirmedPreheader,'text','Here are your booking details...'))}
-      ${f('Body note',ta('bsEmailConfirmedBodyNote',s.emailConfirmedBodyNote))}
-      ${sub('Booking cancelled')}
-      ${f('Subject',inp('bsEmailCancelledSubject',s.emailCancelledSubject,'text','Your booking has been cancelled'))}
-      ${f('Body note',ta('bsEmailCancelledBodyNote',s.emailCancelledBodyNote))}
-      ${sub('Return reminder')}
-      ${row3(chk('bsEmailReturnReminderEnabled',s.emailReturnReminderEnabled,'Enable reminder'),f('Hours before return',inp('bsEmailReturnReminderHours',s.emailReturnReminderHours,'number','24')),f('Subject',inp('bsEmailReturnReminderSubject',s.emailReturnReminderSubject)))}
-      ${sub('Review request')}
-      ${row3(chk('bsEmailReviewRequestEnabled',s.emailReviewRequestEnabled,'Enable request'),f('Days after return',inp('bsEmailReviewRequestDays',s.emailReviewRequestDays,'number','2')),f('Subject',inp('bsEmailReviewRequestSubject',s.emailReviewRequestSubject)))}`;
+    case 'rentalTerms': return `
+      ${sc('📄', 'Rental terms page', 'Public-facing rental terms and conditions', `
+        ${f('Page title',inp('bsRentalTermsTitle',s.rentalTermsTitle,'text','Rental terms & policies'))}
+        ${f('Introduction',ta('bsRentalTermsIntro',s.rentalTermsIntro,'Short intro paragraph shown at the top of the page...',3))}
+        ${f('Main rental terms',ta('bsRentalTermsBody',s.rentalTermsBody,'Full rental terms text...',7))}
+      `)}
+      ${sc('📋', 'Driver requirements', 'What the customer must present at pickup', `
+        ${f('Requirements text',ta('bsRentalRequirementsBody',s.rentalRequirementsBody,'License, ID, payment method, age requirements...',5))}
+      `)}
+      ${sc('📌', 'Policies & privacy', '', `
+        ${f('Policies (fuel, cancellations, delays)',ta('bsRentalPoliciesBody',s.rentalPoliciesBody,'Fuel policy, cancellation terms, late return fees...',5))}
+        ${f('Privacy & data handling',ta('bsRentalPrivacyBody',s.rentalPrivacyBody,'How personal data is collected, used and stored...',4))}
+      `)}`;
 
-    default: return `<div class="info-box">Pane "${key}" — coming soon.</div>`;
+    case 'insuranceTexts': return `
+      ${sc('🛡', 'Insurance terms page', '', `
+        ${row2(
+          f('Page title',inp('bsInsuranceTermsTitle',s.insuranceTermsTitle,'text','Insurance terms')),
+          f('Introduction line',inp('bsInsuranceTermsIntro',s.insuranceTermsIntro,'Short intro...'))
+        )}
+        ${f('Terms body',ta('bsInsuranceTermsBody',s.insuranceTermsBody,'Full insurance terms text...',7))}
+      `)}
+      ${sc('ℹ️', 'Insurance details page', '', `
+        ${row2(
+          f('Page title',inp('bsInsuranceDetailsTitle',s.insuranceDetailsTitle,'text','Insurance details')),
+          f('Introduction line',inp('bsInsuranceDetailsIntro',s.insuranceDetailsIntro,'Short intro...'))
+        )}
+        ${f('Details body',ta('bsInsuranceDetailsBody',s.insuranceDetailsBody,'Description of each coverage option (CDW, SCDW, FULL)...',7))}
+      `)}`;
+
+    case 'backupRestore': return `
+      ${sc('📦', 'Export snapshot', '', `
+        <div class="fhint" style="margin-bottom:12px">Exports all settings, pricing rules, categories and fleet. Staff users and roles are excluded for security.</div>
+        <div class="btns">
+          <button class="btn good" id="expFullBtn">Export full snapshot</button>
+          <button class="btn" id="expCopyBtn">Copy JSON to clipboard</button>
+          <button class="btn" id="expSettingsBtn">Export settings only</button>
+        </div>
+      `)}
+      ${sc('⚠️', 'Restore from backup', '', `
+        <div class="warn-box" style="margin-bottom:12px">Importing a backup will overwrite all settings, pricing, categories and fleet data. Export a fresh backup first.</div>
+        ${f('Paste backup JSON',`<textarea id="importJson" style="font-family:monospace;height:110px;font-size:12px" placeholder='{"businessSettings":{...}}'></textarea>`)}
+        <div class="btns" style="margin-top:8px">
+          <button class="btn" id="validateJsonBtn">Validate JSON</button>
+          <button class="btn danger" id="importJsonBtn">Import & restore</button>
+        </div>
+        <div id="importResult" style="margin-top:8px;font-size:13px"></div>
+      `)}`;
+
+    default: return `<div class="coming-soon"><div>🔒</div><div><b>Coming soon</b><span>This section is planned but not yet connected to the CMS. It will be available in a future update.</span></div></div>`;
   }
 }
 
@@ -988,94 +961,63 @@ function bindBizActions() {
 }
 
 function saveBizSettings() {
-  // Fall back to snapshot for fields not in current pane's DOM
   const s = biz();
   const v = (id, sk, d='') => { const e=el(id); return e ? e.value.trim() : (s[sk]??d); };
   const n = (id, sk, d=0) => { const e=el(id); return e ? (Number(e.value)||0) : (s[sk]??d); };
   const c = (id, sk) => { const e=el(id); return e ? !!e.checked : !!(s[sk]??false); };
   post('saveBusinessSettings', {
-    companyName:v('bsCompanyName','companyName'), companyTagline:v('bsCompanyTagline','companyTagline'),
-    companyCity:v('bsCompanyCity','companyCity'), companyAddress:v('bsCompanyAddress','companyAddress'),
-    companyPhone:v('bsCompanyPhone','companyPhone'), companyEmail:v('bsCompanyEmail','companyEmail'),
-    footerNote:v('bsFooterNote','footerNote'),
-    currency:v('bsCurrency','currency','EUR'), vatRate:n('bsVatRate','vatRate'),
-    nightStartHour:n('bsNightStartHour','nightStartHour'), nightEndHour:n('bsNightEndHour','nightEndHour'),
-    defaultDeposit:n('bsDefaultDeposit','defaultDeposit'), allowOverbooking:c('bsAllowOverbooking','allowOverbooking'),
-    operatingHoursLabel:v('bsOperatingHoursLabel','operatingHoursLabel'), afterHoursNotice:v('bsAfterHoursNotice','afterHoursNotice'),
-    vehiclesPageDisplayMode:v('bsVehiclesPageDisplayMode','vehiclesPageDisplayMode','models'),
-    vehiclesPageModelsSource:v('bsVehiclesPageModelsSource','vehiclesPageModelsSource','vehicles'),
-    dailyRateLabel:v('bsDailyRateLabel','dailyRateLabel'), daysLabel:v('bsDaysLabel','daysLabel'),
-    bookingSummaryLabel:v('bsBookingSummaryLabel','bookingSummaryLabel'), baseChargeLabel:v('bsBaseChargeLabel','baseChargeLabel'),
-    insuranceLabel:v('bsInsuranceLabel','insuranceLabel'), extrasLabel:v('bsExtrasLabel','extrasLabel'),
-    locationFeeLabel:v('bsLocationFeeLabel','locationFeeLabel'), ageFeeLabel:v('bsAgeFeeLabel','ageFeeLabel'),
-    nightFeeLabel:v('bsNightFeeLabel','nightFeeLabel'), grandTotalLabel:v('bsGrandTotalLabel','grandTotalLabel'),
-    noExtrasLabel:v('bsNoExtrasLabel','noExtrasLabel'),
-    rentalTermsTitle:v('bsRentalTermsTitle','rentalTermsTitle'), rentalTermsIntro:v('bsRentalTermsIntro','rentalTermsIntro'),
-    rentalTermsBody:v('bsRentalTermsBody','rentalTermsBody'), rentalRequirementsBody:v('bsRentalRequirementsBody','rentalRequirementsBody'),
-    rentalPoliciesBody:v('bsRentalPoliciesBody','rentalPoliciesBody'), rentalPrivacyBody:v('bsRentalPrivacyBody','rentalPrivacyBody'),
-    insuranceTermsTitle:v('bsInsuranceTermsTitle','insuranceTermsTitle'), insuranceTermsIntro:v('bsInsuranceTermsIntro','insuranceTermsIntro'),
-    insuranceTermsBody:v('bsInsuranceTermsBody','insuranceTermsBody'), insuranceDetailsTitle:v('bsInsuranceDetailsTitle','insuranceDetailsTitle'),
-    insuranceDetailsIntro:v('bsInsuranceDetailsIntro','insuranceDetailsIntro'), insuranceDetailsBody:v('bsInsuranceDetailsBody','insuranceDetailsBody'),
-    seoHomeTitle:v('bsSeoHomeTitle','seoHomeTitle'), seoHomeDescription:v('bsSeoHomeDescription','seoHomeDescription'),
-    seoVehiclesTitle:v('bsSeoVehiclesTitle','seoVehiclesTitle'), seoVehiclesDescription:v('bsSeoVehiclesDescription','seoVehiclesDescription'),
-    ga4Id:v('bsGa4Id','ga4Id'), gtmId:v('bsGtmId','gtmId'),
-    facebookUrl:v('bsFacebookUrl','facebookUrl'), instagramUrl:v('bsInstagramUrl','instagramUrl'),
-    whatsappNumber:v('bsWhatsappNumber','whatsappNumber'), googleMapsUrl:v('bsGoogleMapsUrl','googleMapsUrl'),
-    tripAdvisorUrl:v('bsTripAdvisorUrl','tripAdvisorUrl'),
-    minRentalDays:n('bsMinRentalDays','minRentalDays',1), maxRentalDays:n('bsMaxRentalDays','maxRentalDays',30),
-    advanceBookingDays:n('bsAdvanceBookingDays','advanceBookingDays'), minDriverAge:n('bsMinDriverAge','minDriverAge',21),
-    youngDriverAge:n('bsYoungDriverAge','youngDriverAge',25), seniorDriverAge:n('bsSeniorDriverAge','seniorDriverAge',70),
-    fuelPolicy:v('bsFuelPolicy','fuelPolicy','full-to-full'), cancellationPolicy:v('bsCancellationPolicy','cancellationPolicy'),
-    depositType:v('bsDepositType','depositType','fixed'), depositAmount:n('bsDepositAmount','depositAmount'),
-    payCash:c('bsPayCash','payCash'), payCard:c('bsPayCard','payCard'), payTransfer:c('bsPayTransfer','payTransfer'),
-    cardTypes:v('bsCardTypes','cardTypes'),
-    additionalDriverAllowed:c('bsAdditionalDriverAllowed','additionalDriverAllowed'),
-    additionalDriverFee:n('bsAdditionalDriverFee','additionalDriverFee'), additionalDriverMinAge:n('bsAdditionalDriverMinAge','additionalDriverMinAge',21),
-    additionalDriverMinLicenseYears:n('bsAdditionalDriverMinLicenseYears','additionalDriverMinLicenseYears',1),
-    additionalDriverNotes:v('bsAdditionalDriverNotes','additionalDriverNotes'),
-    nightSurchargeType:v('bsNightSurchargeType','nightSurchargeType','none'), nightSurchargeAmount:n('bsNightSurchargeAmount','nightSurchargeAmount'),
-    youngDriverSurchargeType:v('bsYoungDriverSurchargeType','youngDriverSurchargeType','none'), youngDriverSurchargeAmount:n('bsYoungDriverSurchargeAmount','youngDriverSurchargeAmount'),
-    seniorDriverSurchargeType:v('bsSeniorDriverSurchargeType','seniorDriverSurchargeType','none'), seniorDriverSurchargeAmount:n('bsSeniorDriverSurchargeAmount','seniorDriverSurchargeAmount'),
-    airportSurchargeType:v('bsAirportSurchargeType','airportSurchargeType','none'), airportSurchargeAmount:n('bsAirportSurchargeAmount','airportSurchargeAmount'),
-    airportLocationKeys:v('bsAirportLocationKeys','airportLocationKeys'),
-    lastMinuteSurchargeEnabled:c('bsLastMinuteSurchargeEnabled','lastMinuteSurchargeEnabled'), lastMinuteThresholdHours:n('bsLastMinuteThresholdHours','lastMinuteThresholdHours',6),
-    lastMinuteSurchargeType:v('bsLastMinuteSurchargeType','lastMinuteSurchargeType','percentage'), lastMinuteSurchargeAmount:n('bsLastMinuteSurchargeAmount','lastMinuteSurchargeAmount'),
-    crossBorderSurchargeEnabled:c('bsCrossBorderSurchargeEnabled','crossBorderSurchargeEnabled'), crossBorderSurchargeAmount:n('bsCrossBorderSurchargeAmount','crossBorderSurchargeAmount'),
-    allowedCrossBorderCountries:v('bsAllowedCrossBorderCountries','allowedCrossBorderCountries'),
-    mileageType:v('bsMileageType','mileageType','unlimited'), includedKmPerDay:n('bsIncludedKmPerDay','includedKmPerDay'),
-    extraKmRate:n('bsExtraKmRate','extraKmRate'), lateReturnFeePerHour:n('bsLateReturnFeePerHour','lateReturnFeePerHour'),
-    oneWayAllowed:c('bsOneWayAllowed','oneWayAllowed'), oneWayFee:n('bsOneWayFee','oneWayFee'),
-    defaultExcess:n('bsDefaultExcess','defaultExcess'),
-    cdwEnabled:c('bsCdwEnabled','cdwEnabled'), cdwDailyRate:n('bsCdwDailyRate','cdwDailyRate'),
-    scdwEnabled:c('bsScdwEnabled','scdwEnabled'), scdwDailyRate:n('bsScdwDailyRate','scdwDailyRate'),
-    theftEnabled:c('bsTheftEnabled','theftEnabled'), theftDailyRate:n('bsTheftDailyRate','theftDailyRate'),
-    glassTireEnabled:c('bsGlassTireEnabled','glassTireEnabled'), glassTireDailyRate:n('bsGlassTireDailyRate','glassTireDailyRate'),
-    companyLegalName:v('bsCompanyLegalName','companyLegalName'), companyVat:v('bsCompanyVat','companyVat'),
-    taxOffice:v('bsTaxOffice','taxOffice'), invoicePrefix:v('bsInvoicePrefix','invoicePrefix'),
-    receiptPrefix:v('bsReceiptPrefix','receiptPrefix'), contractHeaderText:v('bsContractHeaderText','contractHeaderText'),
-    contractFooterText:v('bsContractFooterText','contractFooterText'),
-    corporateEnabled:c('bsCorporateEnabled','corporateEnabled'), corporateDiscount:n('bsCorporateDiscount','corporateDiscount'),
-    agentCommission:n('bsAgentCommission','agentCommission'), b2bContactEmail:v('bsB2bContactEmail','b2bContactEmail'),
-    b2bInvoiceTerms:v('bsB2bInvoiceTerms','b2bInvoiceTerms'), b2bTermsText:v('bsB2bTermsText','b2bTermsText'),
-    privacyPolicyBody:v('bsPrivacyPolicyBody','privacyPolicyBody'), cookiePolicyBody:v('bsCookiePolicyBody','cookiePolicyBody'),
-    gdprConsentText:v('bsGdprConsentText','gdprConsentText'), dataRetentionDays:n('bsDataRetentionDays','dataRetentionDays',365),
-    dpoName:v('bsDpoName','dpoName'), dpoEmail:v('bsDpoEmail','dpoEmail'),
-    paymentGateway:v('bsPaymentGateway','paymentGateway','none'), paymentTestMode:v('bsPaymentTestMode','paymentTestMode','live'),
-    stripePublishableKey:v('bsStripePublishableKey','stripePublishableKey'), paypalClientId:v('bsPaypalClientId','paypalClientId'),
-    googleCalendarEnabled:c('bsGoogleCalendarEnabled','googleCalendarEnabled'), googleCalendarId:v('bsGoogleCalendarId','googleCalendarId'),
-    webhookEnabled:c('bsWebhookEnabled','webhookEnabled'), webhookUrl:v('bsWebhookUrl','webhookUrl'), webhookEvents:v('bsWebhookEvents','webhookEvents'),
-    otaSyncEnabled:c('bsOtaSyncEnabled','otaSyncEnabled'), otaProvider:v('bsOtaProvider','otaProvider','none'), otaApiKey:v('bsOtaApiKey','otaApiKey'),
-    enableTriggeredEmails:c('bsEnableTriggeredEmails','enableTriggeredEmails'),
-    bookingConfirmedTriggerId:v('bsBookingConfirmedTriggerId','bookingConfirmedTriggerId'),
-    bookingCanceledTriggerId:v('bsBookingCanceledTriggerId','bookingCanceledTriggerId'),
-    emailFromName:v('bsEmailFromName','emailFromName'), emailReplyTo:v('bsEmailReplyTo','emailReplyTo'),
-    emailConfirmedSubject:v('bsEmailConfirmedSubject','emailConfirmedSubject'), emailConfirmedPreheader:v('bsEmailConfirmedPreheader','emailConfirmedPreheader'),
-    emailConfirmedBodyNote:v('bsEmailConfirmedBodyNote','emailConfirmedBodyNote'),
-    emailCancelledSubject:v('bsEmailCancelledSubject','emailCancelledSubject'), emailCancelledBodyNote:v('bsEmailCancelledBodyNote','emailCancelledBodyNote'),
-    emailReturnReminderEnabled:c('bsEmailReturnReminderEnabled','emailReturnReminderEnabled'), emailReturnReminderHours:n('bsEmailReturnReminderHours','emailReturnReminderHours',24),
-    emailReturnReminderSubject:v('bsEmailReturnReminderSubject','emailReturnReminderSubject'),
-    emailReviewRequestEnabled:c('bsEmailReviewRequestEnabled','emailReviewRequestEnabled'), emailReviewRequestDays:n('bsEmailReviewRequestDays','emailReviewRequestDays',2),
-    emailReviewRequestSubject:v('bsEmailReviewRequestSubject','emailReviewRequestSubject')
+    // Brand identity
+    companyName:            v('bsCompanyName','companyName'),
+    companyTagline:         v('bsCompanyTagline','companyTagline'),
+    companyCity:            v('bsCompanyCity','companyCity'),
+    companyAddress:         v('bsCompanyAddress','companyAddress'),
+    companyPhone:           v('bsCompanyPhone','companyPhone'),
+    companyEmail:           v('bsCompanyEmail','companyEmail'),
+    footerNote:             v('bsFooterNote','footerNote'),
+    // Social & contact
+    facebookUrl:            v('bsFacebookUrl','facebookUrl'),
+    instagramUrl:           v('bsInstagramUrl','instagramUrl'),
+    whatsappNumber:         v('bsWhatsappNumber','whatsappNumber'),
+    googleMapsUrl:          v('bsGoogleMapsUrl','googleMapsUrl'),
+    // Financial
+    currency:               v('bsCurrency','currency','EUR'),
+    vatRate:                n('bsVatRate','vatRate',24),
+    defaultDeposit:         n('bsDefaultDeposit','defaultDeposit',300),
+    // Night window
+    nightStartHour:         n('bsNightStartHour','nightStartHour',22),
+    nightEndHour:           n('bsNightEndHour','nightEndHour',8),
+    // Booking limits
+    minRentalDays:          n('bsMinRentalDays','minRentalDays',1),
+    maxRentalDays:          n('bsMaxRentalDays','maxRentalDays',30),
+    minDriverAge:           n('bsMinDriverAge','minDriverAge',21),
+    billingGraceMinutes:    n('bsBillingGraceMinutes','billingGraceMinutes',30),
+    // Operations
+    operatingHoursLabel:    v('bsOperatingHoursLabel','operatingHoursLabel'),
+    afterHoursNotice:       v('bsAfterHoursNotice','afterHoursNotice'),
+    allowOverbooking:       c('bsAllowOverbooking','allowOverbooking'),
+    // Catalog display
+    vehiclesPageDisplayMode: v('bsVehiclesPageDisplayMode','vehiclesPageDisplayMode','categories'),
+    vehiclesPageModelsSource: v('bsVehiclesPageModelsSource','vehiclesPageModelsSource','fleet'),
+    // Email automation
+    enableTriggeredEmails:  c('bsEnableTriggeredEmails','enableTriggeredEmails'),
+    bookingConfirmedTriggerId: v('bsBookingConfirmedTriggerId','bookingConfirmedTriggerId'),
+    bookingCanceledTriggerId:  v('bsBookingCanceledTriggerId','bookingCanceledTriggerId'),
+    emailFromName:          v('bsEmailFromName','emailFromName'),
+    emailReplyTo:           v('bsEmailReplyTo','emailReplyTo'),
+    // Rental terms
+    rentalTermsTitle:       v('bsRentalTermsTitle','rentalTermsTitle'),
+    rentalTermsIntro:       v('bsRentalTermsIntro','rentalTermsIntro'),
+    rentalTermsBody:        v('bsRentalTermsBody','rentalTermsBody'),
+    rentalRequirementsBody: v('bsRentalRequirementsBody','rentalRequirementsBody'),
+    rentalPoliciesBody:     v('bsRentalPoliciesBody','rentalPoliciesBody'),
+    rentalPrivacyBody:      v('bsRentalPrivacyBody','rentalPrivacyBody'),
+    // Insurance texts
+    insuranceTermsTitle:    v('bsInsuranceTermsTitle','insuranceTermsTitle'),
+    insuranceTermsIntro:    v('bsInsuranceTermsIntro','insuranceTermsIntro'),
+    insuranceTermsBody:     v('bsInsuranceTermsBody','insuranceTermsBody'),
+    insuranceDetailsTitle:  v('bsInsuranceDetailsTitle','insuranceDetailsTitle'),
+    insuranceDetailsIntro:  v('bsInsuranceDetailsIntro','insuranceDetailsIntro'),
+    insuranceDetailsBody:   v('bsInsuranceDetailsBody','insuranceDetailsBody'),
   });
 }
 

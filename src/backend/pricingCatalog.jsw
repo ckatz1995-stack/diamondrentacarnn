@@ -157,6 +157,15 @@ function normalizeBusinessSettings(item){
     nightFeeLabel: text(item?.nightFeeLabel, ''),
     grandTotalLabel: text(item?.grandTotalLabel, ''),
     noExtrasLabel: text(item?.noExtrasLabel, ''),
+    minRentalDays: toNumber(item?.minRentalDays, DEFAULT_BUSINESS_SETTINGS.minRentalDays),
+    maxRentalDays: toNumber(item?.maxRentalDays, DEFAULT_BUSINESS_SETTINGS.maxRentalDays),
+    minDriverAge: toNumber(item?.minDriverAge, DEFAULT_BUSINESS_SETTINGS.minDriverAge),
+    facebookUrl: text(item?.facebookUrl, DEFAULT_BUSINESS_SETTINGS.facebookUrl),
+    instagramUrl: text(item?.instagramUrl, DEFAULT_BUSINESS_SETTINGS.instagramUrl),
+    whatsappNumber: text(item?.whatsappNumber, DEFAULT_BUSINESS_SETTINGS.whatsappNumber),
+    googleMapsUrl: text(item?.googleMapsUrl, DEFAULT_BUSINESS_SETTINGS.googleMapsUrl),
+    emailFromName: text(item?.emailFromName, DEFAULT_BUSINESS_SETTINGS.emailFromName),
+    emailReplyTo: text(item?.emailReplyTo, DEFAULT_BUSINESS_SETTINGS.emailReplyTo),
     active: readBool(item?.active, true)
   };
 }
