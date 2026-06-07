@@ -27,7 +27,7 @@ $w.onReady(async function () {
     const msg = normalizeBridgeMessage(event && event.data);
     if (!msg || typeof msg !== 'object' || !msg.type) return;
 
-    if (msg.type === 'loginReady' || msg.type === 'requestAuthState' || msg.type === 'requestLoginBootstrap') {
+    if (msg.type === 'loginReady' || msg.type === 'requestAuthState') {
       await refreshAuthState();
       return;
     }
