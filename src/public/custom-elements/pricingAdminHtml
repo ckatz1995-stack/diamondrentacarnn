@@ -539,47 +539,53 @@ button:active{transform:scale(.97)}
 
         <div class="settings-command-deck">
           <div class="settings-command-card">
-            <div class="settings-command-kicker">Front &amp; catalog</div>
-            <h3 class="settings-command-title">Brand, operations &amp; vehicle presentation</h3>
-            <p class="settings-command-copy">Γρήγορη πρόσβαση στα σημεία που επηρεάζουν το front look, τη λογική κατηγοριών/μοντέλων και τα βασικά operational defaults.</p>
+            <div class="settings-command-kicker">Front &amp; content</div>
+            <h3 class="settings-command-title">Brand, catalog, SEO &amp; customer-facing content</h3>
+            <p class="settings-command-copy">Όλα όσα βλέπει ο πελάτης: brand identity, vehicle catalog mode, UI labels checkout, SEO meta και legal content pages.</p>
             <div class="settings-command-pills">
-              <span class="pill">Front company</span>
-              <span class="pill">Operations</span>
-              <span class="pill">Vehicle catalog</span>
+              <span class="pill">Brand identity</span>
+              <span class="pill">UI Labels</span>
+              <span class="pill">SEO &amp; pages</span>
+              <span class="pill">Rental terms</span>
             </div>
             <div class="settings-command-actions">
-              <button class="btn" data-home-go="business" data-focus-group="frontBrand">Front &amp; company</button>
-              <button class="btn" data-home-go="business" data-focus-group="operations">Operations</button>
-              <button class="btn" data-home-go="business" data-focus-group="vehicleCatalog">Vehicle catalog</button>
+              <button class="btn" data-home-go="business" data-focus-group="frontBrand">Brand</button>
+              <button class="btn" data-home-go="business" data-focus-group="uiLabels">UI Labels</button>
+              <button class="btn" data-home-go="business" data-focus-group="seoPages">SEO</button>
+              <button class="btn" data-home-go="business" data-focus-group="vehicleCatalog">Catalog</button>
             </div>
           </div>
           <div class="settings-command-card">
-            <div class="settings-command-kicker">Pricing &amp; legal</div>
-            <h3 class="settings-command-title">Rules, coverages &amp; commercial policy</h3>
-            <p class="settings-command-copy">Ενιαίο σημείο για δυναμική τιμολόγηση, ασφάλειες, extras, fees και όρους που επηρεάζουν προσφορά, checkout και contract.</p>
+            <div class="settings-command-kicker">Operations &amp; commercial</div>
+            <h3 class="settings-command-title">Booking rules, pricing, payment &amp; fleet</h3>
+            <p class="settings-command-copy">Ελάχιστες μέρες, ακύρωση, καύσιμα, ηλικία οδηγού, τρόποι πληρωμής, deposit και η πλήρης τιμολογιακή πολιτική.</p>
             <div class="settings-command-pills">
+              <span class="pill">Booking policies</span>
+              <span class="pill">Payment</span>
               <span class="pill">Dynamic pricing</span>
-              <span class="pill">Insurance</span>
-              <span class="pill">Fees &amp; extras</span>
+              <span class="pill">Fleet</span>
             </div>
             <div class="settings-command-actions">
+              <button class="btn" data-home-go="business" data-focus-group="bookingPolicies">Booking rules</button>
+              <button class="btn" data-home-go="business" data-focus-group="paymentDeposit">Payment</button>
               <button class="btn" data-settings-section="dynamicPricing">Dynamic pricing</button>
-              <button class="btn" data-settings-section="insurance">Insurance</button>
-              <button class="btn" data-settings-section="fees">Fees</button>
+              <button class="btn" data-settings-section="fleetCategories">Fleet</button>
             </div>
           </div>
           <div class="settings-command-card">
-            <div class="settings-command-kicker">Team &amp; privacy</div>
-            <h3 class="settings-command-title">Access control, staff roles &amp; audit visibility</h3>
-            <p class="settings-command-copy">Σύνδεσε ρόλους, χρήστες, active sessions και privacy checks με το ίδιο admin language που χρησιμοποιείς σε Daily, Fleet και Bookings.</p>
+            <div class="settings-command-kicker">Company &amp; team</div>
+            <h3 class="settings-command-title">Invoicing, stations, staff &amp; access control</h3>
+            <p class="settings-command-copy">ΑΦΜ, τιμολόγιο, σύμβαση, σταθμοί παραλαβής, staff ρόλοι, χρήστες, active sessions και πλήρες change history.</p>
             <div class="settings-command-pills">
-              <span class="pill">Security</span>
-              <span class="pill">Roles</span>
-              <span class="pill">Users &amp; audit</span>
+              <span class="pill">Invoicing</span>
+              <span class="pill">Stations</span>
+              <span class="pill">Roles &amp; users</span>
+              <span class="pill">Audit</span>
             </div>
             <div class="settings-command-actions">
+              <button class="btn" data-home-go="business" data-focus-group="invoicingContract">Invoicing</button>
+              <button class="btn" data-home-go="business" data-focus-group="locations">Stations</button>
               <button class="btn" data-settings-section="security">Security</button>
-              <button class="btn" data-settings-section="roles">Roles</button>
               <button class="btn" data-settings-section="users">Users</button>
             </div>
           </div>
