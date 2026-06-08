@@ -229,6 +229,9 @@ tr:hover td{background:rgba(0,0,0,.02)}
 /* ── FIELD HINT ── */
 .fhint{font:400 11px var(--f);color:var(--muted);margin-top:3px;line-height:1.4}
 .fhint b{font-weight:600;color:var(--sub)}
+input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shadow:0 0 0 3px rgba(220,38,38,.1)!important}
+.dirty-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--r-pill);background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font:600 11px var(--f)}
+.dirty-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#D97706;display:inline-block}
 
 /* ── SETTINGS CARD ── */
 .sc{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px}
@@ -280,7 +283,8 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <div class="area-rail" id="bizAreaRail"></div>
       <div class="pane-rail" id="bizPaneRail"></div>
       <div id="bizPaneContent"></div>
-      <div class="btns" id="bizActions" style="justify-content:flex-end">
+      <div class="btns" id="bizActions" style="justify-content:flex-end;align-items:center">
+        <span class="dirty-badge" id="bizDirtyBadge" style="display:none">Unsaved changes</span>
         <button class="btn" id="bizResetBtn">Reset defaults</button>
         <button class="btn primary" id="bizSaveBtn">Save settings</button>
       </div>
@@ -295,7 +299,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
     <div class="section-banner">Vehicle classes shown to customers (Economy, SUV, Van…). Each category defines the base daily rate, seats, and features. Rate rules can override pricing per season.</div>
     <div class="tbl-search"><input id="catSearch" placeholder="Search categories…" /></div>
     <div class="tbl-wrap"><table id="catTable"><thead><tr>
-      <th>Code</th><th>Title</th><th>Price/day</th><th>Seats</th><th>Transmission</th><th>Public</th><th>Status</th><th>Actions</th>
+      <th>Code</th><th>Title / Specs</th><th>Price/day</th><th>Transmission</th><th>AC</th><th>Public</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="catBody"></tbody></table></div>
   </section>
 
@@ -468,7 +472,7 @@ const state = {
   bizPane: 'frontBrand',
   snapshot: null,
   access: null,
-  modal: null,
+  bizDirty: false,
   busy: false
 };
 
@@ -477,6 +481,14 @@ const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 const money = (n, cur='EUR') => `${cur} ${Number(n||0).toFixed(2)}`;
 const fmtDate = s => s ? new Date(s).toLocaleDateString('el-GR') : '—';
 const fmtDT = s => s ? new Date(s).toLocaleString('el-GR') : '—';
+const fmtAgo = s => {
+  if (!s) return '—';
+  const diff = Date.now() - new Date(s).getTime();
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff/60000)+'m ago';
+  if (diff < 86400000) return Math.floor(diff/3600000)+'h ago';
+  return Math.floor(diff/86400000)+'d ago';
+};
 const slug = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
 const el = id => document.getElementById(id);
 const biz = () => state.snapshot?.businessSettings || {};
@@ -601,9 +613,12 @@ function activeGroup() {
 
 function canManageStaff() { return !!(state.access?.currentStaff?.canManageStaff || state.access?.currentStaff?.isAdmin); }
 function canViewAudit()   { return !!(state.access?.currentStaff?.canViewAudit   || state.access?.currentStaff?.isAdmin); }
-function canEditPricing() { return !!(state.access?.currentStaff?.canManageBusinessSettings || state.access?.currentStaff?.isAdmin || state.access?.accessState !== 'ready'); }
 
 function goto(section, opts={}) {
+  if (state.bizDirty && section !== 'businessSettings') {
+    if (!confirm('You have unsaved business settings changes. Leave without saving?')) return;
+    clearDirty();
+  }
   state.section = section;
   if (opts.bizArea) state.bizArea = opts.bizArea;
   if (opts.bizPane) state.bizPane = opts.bizPane;
@@ -670,11 +685,20 @@ function renderNav() {
   }));
   el('navBar').querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => goto(b.dataset.s)));
   el('navBar').querySelectorAll('[data-area]').forEach(b => b.addEventListener('click', () => {
+    const newPane = PANES.find(p=>p.area===b.dataset.area)?.key || state.bizPane;
+    if (state.bizDirty && newPane !== state.bizPane) {
+      if (!confirm('You have unsaved changes. Switch pane without saving?')) return;
+      clearDirty();
+    }
     state.bizArea = b.dataset.area;
-    state.bizPane = PANES.find(p=>p.area===state.bizArea)?.key || state.bizPane;
+    state.bizPane = newPane;
     renderNav(); renderBizPane();
   }));
   el('navBar').querySelectorAll('[data-pane]').forEach(b => b.addEventListener('click', () => {
+    if (state.bizDirty && b.dataset.pane !== state.bizPane) {
+      if (!confirm('You have unsaved changes. Switch pane without saving?')) return;
+      clearDirty();
+    }
     state.bizPane = b.dataset.pane;
     renderNav(); renderBizPane();
   }));
@@ -808,12 +832,30 @@ function renderOverview() {
 }
 
 // ── BUSINESS PANES ────────────────────────────────────────────────────────
+function markDirty() {
+  state.bizDirty = true;
+  const b = el('bizDirtyBadge');
+  if (b) b.style.display = 'inline-flex';
+}
+
+function clearDirty() {
+  state.bizDirty = false;
+  const b = el('bizDirtyBadge');
+  if (b) b.style.display = 'none';
+}
+
 function renderBizPane() {
   const c = el('bizPaneContent');
   if (!c) return;
   const pane = PANES.find(p=>p.key===state.bizPane) || PANES[0];
   const s = biz();
   c.innerHTML = `<div class="pane-head"><h3>${pane.label}<span class="pane-badge">${pane.short}</span></h3></div><div id="paneFields">${buildPaneFields(pane.key, s)}</div>`;
+  clearDirty();
+  // Track unsaved changes on any field in the pane
+  c.querySelectorAll('input,select,textarea').forEach(inp => {
+    inp.addEventListener('input', markDirty, { once: false });
+    inp.addEventListener('change', markDirty, { once: false });
+  });
   bindPaneEvents(pane.key);
   requestResize();
 }
@@ -1034,6 +1076,7 @@ function bindBizActions() {
 }
 
 function saveBizSettings() {
+  clearDirty();
   const s = biz();
   const v = (id, sk, d='') => { const e=el(id); return e ? e.value.trim() : (s[sk]??d); };
   const n = (id, sk, d=0) => { const e=el(id); return e ? (Number(e.value)||0) : (s[sk]??d); };
@@ -1099,18 +1142,21 @@ function renderFleetCats() {
   const rows = (state.snapshot?.vehicleCategories||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const q = el('catSearch')?.value?.toLowerCase()||'';
   const filtered = q ? rows.filter(r=>`${r.title}${r.category}`.toLowerCase().includes(q)) : rows;
-  el('catBody').innerHTML = filtered.length ? filtered.map(r=>`<tr>
-    <td><code>${esc(r.category||'—')}</code></td>
-    <td>${esc(r.title||r.displayTitle||'—')}</td>
-    <td>${money(r.price,cur())}</td>
-    <td>${r.seats||'—'}</td>
-    <td>${esc(r.transmission||'—')}</td>
-    <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
-    <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns">
-      <button class="btn sm" data-edit-cat="${esc(r._id||'')}">Edit</button>
-      <button class="btn sm danger" data-del-cat="${esc(r._id||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="8" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
+  el('catBody').innerHTML = filtered.length ? filtered.map(r=>{
+    const specs = [r.seats?`${r.seats} seats`:'',r.doors?`${r.doors} doors`:'',r.luggage?`${r.luggage} bags`:''].filter(Boolean).join(' · ');
+    return `<tr>
+      <td><code>${esc(r.category||'—')}</code></td>
+      <td><strong>${esc(r.title||r.displayTitle||'—')}</strong>${specs?`<div style="font-size:11px;color:var(--muted)">${esc(specs)}</div>`:''}</td>
+      <td>${money(r.price,cur())}</td>
+      <td><span class="badge ${r.transmission==='automatic'?'perday':r.transmission==='cvt'?'reserved':'inactive'}" style="text-transform:capitalize">${esc(r.transmission||'—')}</span></td>
+      <td>${r.airCondition?'<span class="badge active">AC</span>':'<span class="badge inactive">No AC</span>'}</td>
+      <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
+      <td class="btns">
+        <button class="btn sm" data-edit-cat="${esc(r._id||'')}">Edit</button>
+        <button class="btn sm danger" data-del-cat="${esc(r._id||'')}" data-label="${esc(r.title||'')}">Delete</button>
+      </td></tr>`;
+  }).join('') : '<tr><td colspan="8" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
 }
 
 function renderFleetVehs() {
@@ -1255,14 +1301,22 @@ function renderFees() {
 
 function renderRoles() {
   const rows = (state.access?.roles||[]);
-  el('rolesBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td><code>${esc(r.key||'—')}</code></td>
-    <td>${esc(r.label||'—')}</td>
-    <td style="font-size:12px;color:var(--muted)">${Object.keys(r.permissions||{}).length} modules, ${(r.specialPermissions||[]).length} specials</td>
-    <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns">
-      <button class="btn sm" data-edit-role="${esc(r._id||'')}">Edit</button>
-    </td></tr>`).join('') : '<tr><td colspan="5" class="tbl-empty">No roles yet.</td></tr>';
+  el('rolesBody').innerHTML = rows.length ? rows.map(r=>{
+    const modCount = Object.keys(r.permissions||{}).length;
+    const spCount = (r.specialPermissions||[]).length;
+    const permsText = r.isAdmin ? 'Full admin access' : `${modCount} module${modCount!==1?'s':''}, ${spCount} special${spCount!==1?'s':''}`;
+    return `<tr>
+      <td><code>${esc(r.key||'—')}</code></td>
+      <td>
+        <strong>${esc(r.label||'—')}</strong>
+        ${r.isAdmin?'<span class="badge active" style="margin-left:4px;font-size:10px">Admin</span>':''}
+      </td>
+      <td style="font-size:12px;color:var(--muted)">${permsText}</td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
+      <td class="btns">
+        <button class="btn sm" data-edit-role="${esc(r._id||'')}">Edit</button>
+      </td></tr>`;
+  }).join('') : '<tr><td colspan="5" class="tbl-empty">No roles yet.</td></tr>';
 }
 
 function renderUsers() {
@@ -1300,12 +1354,15 @@ function renderUsers() {
 
 function renderSessions() {
   const rows = (state.access?.sessionRows||[]);
-  el('sessionsBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td>${esc(r.email||r.actorEmail||'—')}</td>
-    <td>${fmtDT(r.createdAt)}</td>
-    <td>${fmtDT(r.lastSeenAt||r.updatedAt)}</td>
-    <td><button class="btn sm danger" data-revoke-session="${esc(r.email||r.actorEmail||'')}">Revoke</button></td>
-  </tr>`).join('') : '<tr><td colspan="4" class="tbl-empty">No active sessions found.</td></tr>';
+  el('sessionsBody').innerHTML = rows.length ? rows.map(r=>{
+    const lastSeen = r.lastSeenAt||r.updatedAt;
+    return `<tr>
+      <td>${esc(r.email||r.actorEmail||'—')}</td>
+      <td style="font-size:12px">${fmtDT(r.createdAt)}</td>
+      <td><span title="${fmtDT(lastSeen)}">${fmtAgo(lastSeen)}</span></td>
+      <td><button class="btn sm danger" data-revoke-session="${esc(r.email||r.actorEmail||'')}">Revoke</button></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="4" class="tbl-empty">No active sessions found.</td></tr>';
 }
 
 function renderAudit() {
@@ -1313,8 +1370,12 @@ function renderAudit() {
   el('auditBody').innerHTML = rows.length ? rows.map(r=>{
     const actionShort = (r.action||'—').replace(/([A-Z])/g,' $1').trim();
     const entityId = r.entityId ? `<code style="font-size:10px;color:var(--muted)">${esc(String(r.entityId).slice(0,12))}…</code>` : '—';
+    const diff = r.createdAt ? Date.now() - new Date(r.createdAt).getTime() : Infinity;
+    const timeCell = diff < 86400000
+      ? `<span title="${fmtDT(r.createdAt)}">${fmtAgo(r.createdAt)}</span>`
+      : `<span style="font-size:11px">${fmtDT(r.createdAt)}</span>`;
     return `<tr>
-      <td style="white-space:nowrap;font-size:12px">${fmtDT(r.createdAt)}</td>
+      <td style="white-space:nowrap">${timeCell}</td>
       <td style="font-size:12px">${esc(r.actorEmail||'—')}</td>
       <td><code style="font-size:11px">${esc(actionShort)}</code></td>
       <td>${entityId}</td>
@@ -1363,6 +1424,14 @@ function mn(id, d=0) { return Number(el('m_'+id)?.value??d)||d; }
 function mc(id) { return !!el('m_'+id)?.checked; }
 function mr2(...f) { return `<div class="field-row cols-2">${f.join('')}</div>`; }
 function mr3(...f) { return `<div class="field-row cols-3">${f.join('')}</div>`; }
+// Highlight invalid field and show toast; returns false to allow caller to abort
+function merr(id, msg) {
+  const e = el('m_'+id);
+  if (e) { e.classList.add('err'); e.focus(); setTimeout(()=>e.classList.remove('err'),2500); }
+  showToast(msg, 'error');
+  return false;
+}
+const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // ── CRUD BUTTON BINDINGS ──────────────────────────────────────────────────
 function bindCrudButtons() {
@@ -1405,8 +1474,9 @@ function openCatModal(id='') {
     + mfld('Description',mta('description',item.description))
     + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
   openModal(id?'Edit fleet category':'Add fleet category', body, () => {
-    if (!mv('title')) return showToast('Title is required','error');
-    if (!mv('category')) return showToast('Category code is required','error');
+    if (!mv('title')) return merr('title','Title is required');
+    if (!mv('category')) return merr('category','Category code is required');
+    if (mn('price') < 0) return merr('price','Price cannot be negative');
     post('upsertVehicleCategory',{ _id:id||undefined, title:mv('title'), category:mv('category').toUpperCase(),
       price:mn('price'), seats:mv('seats'), doors:mv('doors'), luggage:mv('luggage'),
       transmission:mv('transmission'), fuelType:mv('fuelType'), airCondition:mc('airCondition'),
@@ -1424,8 +1494,8 @@ function openVehModal(id='') {
     + mchk('active',item.active!==false,'Active')
     + mfld('Notes',mta('notes',item.notes));
   openModal(id?'Edit fleet vehicle':'Add fleet vehicle', body, () => {
-    if (!mv('plate')) return showToast('Plate is required','error');
-    if (!mv('model')) return showToast('Model is required','error');
+    if (!mv('plate')) return merr('plate','Plate is required');
+    if (!mv('model')) return merr('model','Model is required');
     post('upsertFleetVehicle',{ _id:id||undefined, plate:mv('plate').toUpperCase(), model:mv('model'),
       category:mv('category'), status:mv('status'), active:mc('active'), notes:mv('notes') });
     closeModal();
@@ -1434,16 +1504,18 @@ function openVehModal(id='') {
 
 function openSeasonModal(id='') {
   const item = id ? (state.snapshot?.pricingSeasons||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Label *',minp('label',item.label)),mfld('Priority',minp('priority',item.priority,'number','0')))
-    + mr2(mfld('Start date *',minp('startDate',item.startDate?.slice(0,10),'date')),mfld('End date *',minp('endDate',item.endDate?.slice(0,10),'date')))
-    + mchk('repeatYearly',item.repeatYearly,'Repeat yearly')
+  const body = mr2(mfld('Label *',minp('label',item.label,'text','High season')),mfld('Key (slug)',minp('key',item.key||'','text','high_season')))
+    + mr3(mfld('Start date *',minp('startDate',item.startDate?.slice(0,10),'date')),mfld('End date *',minp('endDate',item.endDate?.slice(0,10),'date')),mfld('Priority',minp('priority',item.priority,'number','0')))
+    + mchk('repeatYearly',item.repeatYearly,'Repeat yearly (match month/day each year)')
     + mfld('Description',mta('description',item.description))
     + mchk('active',item.active!==false,'Active');
   openModal(id?'Edit pricing season':'Add pricing season', body, () => {
-    if (!mv('label')) return showToast('Label is required','error');
-    if (!mv('startDate')||!mv('endDate')) return showToast('Start and end dates required','error');
-    if (mv('startDate')>=mv('endDate')) return showToast('Start date must be before end date','error');
-    post('upsertPricingSeason',{ _id:id||undefined, label:mv('label'), startDate:mv('startDate'), endDate:mv('endDate'),
+    if (!mv('label')) return merr('label','Label is required');
+    if (!mv('startDate')) return merr('startDate','Start date is required');
+    if (!mv('endDate')) return merr('endDate','End date is required');
+    if (mv('startDate')>=mv('endDate')) return merr('startDate','Start date must be before end date');
+    const key = mv('key') ? slug(mv('key')) : slug(mv('label'));
+    post('upsertPricingSeason',{ _id:id||undefined, key, label:mv('label'), startDate:mv('startDate'), endDate:mv('endDate'),
       priority:mn('priority'), repeatYearly:mc('repeatYearly'), description:mv('description'), active:mc('active') });
     closeModal();
   });
@@ -1460,8 +1532,9 @@ function openRuleModal(id='') {
     + mfld('Label',minp('label',item.label))
     + mchk('active',item.active!==false,'Active');
   openModal(id?'Edit rate rule':'Add rate rule', body, () => {
-    if (mn('minDays')<1) return showToast('Min days must be at least 1','error');
-    if (mn('maxDays')>0 && mn('maxDays')<mn('minDays')) return showToast('Max days must be ≥ min days','error');
+    if (mn('minDays')<1) return merr('minDays','Min days must be at least 1');
+    if (mn('maxDays')>0 && mn('maxDays')<mn('minDays')) return merr('maxDays','Max days must be ≥ min days');
+    if (mn('pricePerDay')<0) return merr('pricePerDay','Price cannot be negative');
     post('upsertCategoryRateRule',{ _id:id||undefined, categoryCode:mv('categoryCode'), seasonKey:mv('seasonKey'),
       minDays:mn('minDays',1), maxDays:mn('maxDays'), pricePerDay:mn('pricePerDay'), label:mv('label'), active:mc('active') });
     closeModal();
@@ -1475,8 +1548,9 @@ function openInsModal(id='') {
     + mfld('Description',mta('description',item.description))
     + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
   openModal(id?'Edit insurance plan':'Add insurance plan', body, () => {
-    if (!mv('key')) return showToast('Key is required','error');
-    if (!mv('title')) return showToast('Title is required','error');
+    if (!mv('key')) return merr('key','Key is required');
+    if (!mv('title')) return merr('title','Title is required');
+    if (mn('pricePerDay')<0) return merr('pricePerDay','Price cannot be negative');
     post('upsertInsurancePlan',{ _id:id||undefined, key:slug(mv('key')), title:mv('title'), label:mv('label'),
       pricePerDay:mn('pricePerDay'), description:mv('description'), sortOrder:mn('sortOrder'),
       active:mc('active'), publicVisible:mc('publicVisible') });
@@ -1491,8 +1565,9 @@ function openExtraModal(id='') {
     + mfld('Description',mta('description',item.description))
     + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
   openModal(id?'Edit extra service':'Add extra service', body, () => {
-    if (!mv('key')) return showToast('Key is required','error');
-    if (!mv('title')) return showToast('Title is required','error');
+    if (!mv('key')) return merr('key','Key is required');
+    if (!mv('title')) return merr('title','Title is required');
+    if (mn('price')<0) return merr('price','Price cannot be negative');
     post('upsertExtraService',{ _id:id||undefined, key:slug(mv('key')), title:mv('title'),
       price:mn('price'), billingMode:mv('billingMode','perDay'), description:mv('description'),
       sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
@@ -1508,8 +1583,9 @@ function openFeeModal(id='') {
     + mfld('Description',mta('description',item.description))
     + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
   openModal(id?'Edit fee rule':'Add fee rule', body, () => {
-    if (!mv('key')) return showToast('Key is required','error');
-    if (!mv('title')) return showToast('Title is required','error');
+    if (!mv('key')) return merr('key','Key is required');
+    if (!mv('title')) return merr('title','Title is required');
+    if (mn('amount')<0) return merr('amount','Amount cannot be negative');
     post('upsertFeeRule',{ _id:id||undefined, key:slug(mv('key')), title:mv('title'),
       amount:mn('amount'), billingMode:mv('billingMode','perBooking'), ruleType:mv('ruleType','manual'),
       audienceGroup:mv('audienceGroup'), description:mv('description'),
@@ -1535,7 +1611,8 @@ function openRoleModal(id='') {
   const body = mr2(mfld('Key *',minp('key',item.key,'text','manager')),mfld('Label *',minp('label',item.label,'text','Manager')))
     + mchk('active',item.active!==false,'Active') + matrix;
   openModal(id?'Edit role':'Add role', body, () => {
-    if (!mv('key')||!mv('label')) return showToast('Key and label required','error');
+    if (!mv('key')) return merr('key','Role key is required');
+    if (!mv('label')) return merr('label','Role label is required');
     const permissions = {};
     MODULES.forEach(m=>{ const acts=ACTIONS.filter(a=>el(`m_p_${m}_${a}`)?.checked); if(acts.length) permissions[m]=acts; });
     const specialPermissions = SPECIALS.filter(s=>el(`m_sp_${s}`)?.checked);
@@ -1554,7 +1631,9 @@ function openUserModal(id='') {
     + mfld('Notes',mta('notes',item.notes))
     + mchk('active',item.active!==false,'Active');
   openModal(id?'Edit staff user':'Add / invite staff user', body, () => {
-    if (!mv('fullName')||!mv('email')) return showToast('Name and email required','error');
+    if (!mv('fullName')) return merr('fullName','Full name is required');
+    if (!mv('email')) return merr('email','Email is required');
+    if (!reEmail.test(mv('email'))) return merr('email','Enter a valid email address');
     const payload = { _id:id||undefined, fullName:mv('fullName'), email:mv('email'), roleKey:mv('roleKey'),
       jobTitle:mv('jobTitle'), phone:mv('phone'), startDate:mv('startDate'), emergencyName:mv('emergencyName'),
       emergencyPhone:mv('emergencyPhone'), notes:mv('notes'), active:mc('active') };
@@ -1593,7 +1672,8 @@ function openAddLocation() {
     + mr2(mfld('Sort order',minp('sortOrder','','number','0')),mfld('',mchk('active',true,'Active')+mchk('publicVisible',true,'Public visible')))
     + _locationFieldLabelsBody();
   openModal('Add pickup location', body, () => {
-    if (!mv('label')||!mv('address')) return showToast('Label and address required','error');
+    if (!mv('label')) return merr('label','Location label is required');
+    if (!mv('address')) return merr('address','Address is required');
     post('upsertPickupLocation', _locationPayload());
     closeModal(); renderPickupLocations();
   });
@@ -1608,6 +1688,8 @@ function openEditLocation(id) {
     + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')))
     + _locationFieldLabelsBody(item);
   openModal('Edit pickup location', body, () => {
+    if (!mv('label')) return merr('label','Location label is required');
+    if (!mv('address')) return merr('address','Address is required');
     post('upsertPickupLocation', _locationPayload({_id:item._id}));
     closeModal(); renderPickupLocations();
   }, () => {
@@ -1617,12 +1699,6 @@ function openEditLocation(id) {
 
 function editLocation(id) { return openEditLocation(id); }
 
-function deleteLocation(id, label) {
-  if (!confirm('Delete location "'+label+'"?')) return;
-  post('deletePickupLocation',{itemId:id,itemKey:id});
-  renderPickupLocations();
-}
-
 // ── SECURITY BUTTONS ──────────────────────────────────────────────────────
 function bindSecurityButtons() {
   el('revokeAllBtn')?.addEventListener('click', () => {
@@ -1630,22 +1706,28 @@ function bindSecurityButtons() {
     (state.access?.sessionRows||[]).forEach(r => post('revokeStaffSessions',{email:r.email||r.actorEmail}));
   });
   el('pwSetBtn')?.addEventListener('click', () => {
-    const email = el('pwEmail')?.value?.trim();
+    const emailEl = el('pwEmail');
+    const email = emailEl?.value?.trim();
     const pw = el('pwNew')?.value?.trim();
-    if (!email) return showToast('Enter a staff email','error');
-    if (!pw||pw.length<8) return showToast('Password must be at least 8 characters','error');
+    if (!email) { emailEl?.focus(); return showToast('Enter a staff email','error'); }
+    if (!reEmail.test(email)) { emailEl?.focus(); return showToast('Enter a valid email address','error'); }
+    if (!pw||pw.length<8) { el('pwNew')?.focus(); return showToast('Password must be at least 8 characters','error'); }
     if (!confirm(`Set password for ${email}?`)) return;
     post('setStaffPassword',{email,newPassword:pw,mustChangePassword:!!el('pwMustChange')?.checked});
   });
   el('pwResetBtn')?.addEventListener('click', () => {
-    const email = el('pwEmail')?.value?.trim();
-    if (!email) return showToast('Enter a staff email','error');
+    const emailEl = el('pwEmail');
+    const email = emailEl?.value?.trim();
+    if (!email) { emailEl?.focus(); return showToast('Enter a staff email','error'); }
+    if (!reEmail.test(email)) { emailEl?.focus(); return showToast('Enter a valid email address','error'); }
     if (!confirm(`Send password reset email to ${email}?`)) return;
     post('resetStaffPassword',{email});
   });
   el('inviteBtn')?.addEventListener('click', () => {
-    const email = el('pwEmail')?.value?.trim();
-    if (!email) return showToast('Enter a staff email','error');
+    const emailEl = el('pwEmail');
+    const email = emailEl?.value?.trim();
+    if (!email) { emailEl?.focus(); return showToast('Enter a staff email','error'); }
+    if (!reEmail.test(email)) { emailEl?.focus(); return showToast('Enter a valid email address','error'); }
     if (!confirm(`Send invite to ${email}?`)) return;
     post('inviteStaffUser', { email, fullName: '', roleKey: '' });
   });
