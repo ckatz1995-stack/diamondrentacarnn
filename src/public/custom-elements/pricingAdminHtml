@@ -294,7 +294,10 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
   <section id="s-fleetCategories" class="section">
     <div class="section-head">
       <h2>Fleet categories</h2>
-      <button class="btn primary" id="addCatBtn">+ Add category</button>
+      <div class="btns">
+        <button class="btn sm" data-export="categories">Export CSV</button>
+        <button class="btn primary" id="addCatBtn">+ Add category</button>
+      </div>
     </div>
     <div class="section-banner">Vehicle classes shown to customers (Economy, SUV, Van…). Each category defines the base daily rate, seats, and features. Rate rules can override pricing per season.</div>
     <div class="tbl-search"><input id="catSearch" placeholder="Search categories…" /></div>
@@ -306,7 +309,10 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
   <section id="s-fleetVehicles" class="section">
     <div class="section-head">
       <h2>Fleet vehicles</h2>
-      <button class="btn primary" id="addVehBtn">+ Add vehicle</button>
+      <div class="btns">
+        <button class="btn sm" data-export="vehicles">Export CSV</button>
+        <button class="btn primary" id="addVehBtn">+ Add vehicle</button>
+      </div>
     </div>
     <div class="section-banner">Individual vehicles in the fleet. Mark vehicles as available, in maintenance, or reserved. Inactive vehicles are hidden from bookings entirely.</div>
     <div class="btns" id="vehStatsBand" style="margin-bottom:8px"></div>
@@ -345,7 +351,10 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
   <section id="s-insurance" class="section">
     <div class="section-head">
       <h2>Insurance plans</h2>
-      <button class="btn primary" id="addInsBtn">+ Add plan</button>
+      <div class="btns">
+        <button class="btn sm" data-export="insurance">Export CSV</button>
+        <button class="btn primary" id="addInsBtn">+ Add plan</button>
+      </div>
     </div>
     <div class="section-banner">Coverage options shown to customers during booking. CDW is typically included at no charge; SCDW and FULL reduce the excess with a daily fee.</div>
     <div class="tbl-search"><input id="insSearch" placeholder="Search insurance plans…" /></div>
@@ -357,7 +366,10 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
   <section id="s-extras" class="section">
     <div class="section-head">
       <h2>Extra services</h2>
-      <button class="btn primary" id="addExtraBtn">+ Add service</button>
+      <div class="btns">
+        <button class="btn sm" data-export="extras">Export CSV</button>
+        <button class="btn primary" id="addExtraBtn">+ Add service</button>
+      </div>
     </div>
     <div class="section-banner">Optional add-ons customers can select during booking — child seats, GPS, additional drivers. Billing mode controls whether the fee is charged per day or once per booking.</div>
     <div class="tbl-search"><input id="extrasSearch" placeholder="Search extra services…" /></div>
@@ -369,7 +381,10 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
   <section id="s-fees" class="section">
     <div class="section-head">
       <h2>Fee rules</h2>
-      <button class="btn primary" id="addFeeBtn">+ Add fee</button>
+      <div class="btns">
+        <button class="btn sm" data-export="fees">Export CSV</button>
+        <button class="btn primary" id="addFeeBtn">+ Add fee</button>
+      </div>
     </div>
     <div class="section-banner">Automatic surcharges applied to bookings — young/senior driver premiums, night pickup/dropoff fees, and manual charges added by staff during booking review.</div>
     <div class="tbl-search"><input id="feesSearch" placeholder="Search fee rules…" /></div>
@@ -392,7 +407,10 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
   <section id="s-users" class="section">
     <div class="section-head">
       <h2>Staff users</h2>
-      <button class="btn primary" id="addUserBtn">+ Add / invite user</button>
+      <div class="btns">
+        <button class="btn sm" data-export="users">Export CSV</button>
+        <button class="btn primary" id="addUserBtn">+ Add / invite user</button>
+      </div>
     </div>
     <div class="section-banner">Staff members who can log into the backroom. Each user is assigned a role that controls their permissions. Inactive users cannot log in.</div>
     <div id="userStatsBand" class="btns" style="margin-bottom:10px"></div>
@@ -438,7 +456,10 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
   <section id="s-pickupLocations" class="section">
     <div class="section-head">
       <h2>Pickup locations</h2>
-      <button class="btn primary" id="addLocationBtn">+ Add location</button>
+      <div class="btns">
+        <button class="btn sm" data-export="locations">Export CSV</button>
+        <button class="btn primary" id="addLocationBtn">+ Add location</button>
+      </div>
     </div>
     <div class="section-banner">Manage all pickup and dropoff locations shown to customers in the booking flow. Each location can have a custom fee, a station group, and display labels for the booking form.</div>
     <div class="tbl-search"><input id="locSearch" placeholder="Search locations…" /></div>
@@ -1810,6 +1831,11 @@ function bindTableSearch() {
   el('userSearch')?.addEventListener('input', renderUsers);
   el('auditSearch')?.addEventListener('input', renderAudit);
   el('auditExportBtn')?.addEventListener('click', exportAuditCsv);
+  // Generic table CSV export via [data-export]
+  el('app')?.addEventListener('click', e => {
+    const btn = e.target.closest('[data-export]');
+    if (btn) exportTable(btn.dataset.export);
+  });
 }
 
 // ── ADD BUTTONS ───────────────────────────────────────────────────────────
@@ -1868,6 +1894,55 @@ function exportAuditCsv() {
   ], rows);
   downloadBlob(csv, `audit-log-${dateStr()}.csv`, 'text/csv');
   showToast(`Exported ${rows.length} audit entries`, 'success');
+}
+
+// Column definitions and data sources for each exportable table
+const EXPORTS = {
+  categories: { name:'fleet-categories', src:()=>state.snapshot?.vehicleCategories, cols:[
+    {label:'Code',key:'category'},{label:'Title',key:'title'},{label:'Price/day',key:'price'},
+    {label:'Seats',key:'seats'},{label:'Doors',key:'doors'},{label:'Luggage',key:'luggage'},
+    {label:'Transmission',key:'transmission'},{label:'Fuel',key:'fuelType'},
+    {label:'Air conditioning',get:r=>r.airCondition?'Yes':'No'},{label:'Sort',key:'sortOrder'},
+    {label:'Public',get:r=>r.publicVisible!==false?'Yes':'No'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  vehicles: { name:'fleet-vehicles', src:()=>state.snapshot?.fleetVehicles, cols:[
+    {label:'Plate',key:'plate'},{label:'Model',key:'model'},{label:'Category',key:'category'},
+    {label:'Status',key:'status'},{label:'Active',get:r=>r.active!==false?'Yes':'No'},{label:'Notes',key:'notes'}
+  ]},
+  insurance: { name:'insurance-plans', src:()=>state.snapshot?.insurancePlans, cols:[
+    {label:'Key',key:'key'},{label:'Title',key:'title'},{label:'Label',key:'label'},
+    {label:'Price/day',key:'pricePerDay'},{label:'Sort',key:'sortOrder'},
+    {label:'Public',get:r=>r.publicVisible!==false?'Yes':'No'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  extras: { name:'extra-services', src:()=>state.snapshot?.extraServices, cols:[
+    {label:'Key',key:'key'},{label:'Title',key:'title'},{label:'Price',key:'price'},
+    {label:'Billing mode',key:'billingMode'},{label:'Sort',key:'sortOrder'},
+    {label:'Public',get:r=>r.publicVisible!==false?'Yes':'No'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  fees: { name:'fee-rules', src:()=>state.snapshot?.feeRules, cols:[
+    {label:'Key',key:'key'},{label:'Title',key:'title'},{label:'Amount',key:'amount'},
+    {label:'Billing mode',key:'billingMode'},{label:'Rule type',key:'ruleType'},
+    {label:'Audience group',key:'audienceGroup'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  locations: { name:'pickup-locations', src:()=>state.snapshot?.pickupLocations, cols:[
+    {label:'Label',key:'label'},{label:'Key',key:'key'},{label:'Address',key:'address'},
+    {label:'Station',key:'stationKey'},{label:'Type',key:'locationType'},{label:'Extra fee',key:'extraFee'},
+    {label:'Public',get:r=>r.publicVisible!==false?'Yes':'No'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  users: { name:'staff-users', src:()=>state.access?.users, cols:[
+    {label:'Full name',key:'fullName'},{label:'Email',key:'email'},{label:'Role',key:'roleKey'},
+    {label:'Job title',key:'jobTitle'},{label:'Phone',key:'phone'},{label:'Start date',key:'startDate'},
+    {label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]}
+};
+
+function exportTable(kind) {
+  const def = EXPORTS[kind];
+  if (!def) return;
+  const rows = (def.src()||[]);
+  if (!rows.length) return showToast('Nothing to export yet', 'error');
+  downloadBlob(toCSV(def.cols, rows), `${def.name}-${dateStr()}.csv`, 'text/csv');
+  showToast(`Exported ${rows.length} ${rows.length===1?'row':'rows'}`, 'success');
 }
 
 function dateStr() { return new Date().toISOString().slice(0,10); }
