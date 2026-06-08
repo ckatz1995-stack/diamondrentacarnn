@@ -103,8 +103,14 @@ label{display:block;font:600 12px var(--f);color:var(--sub);margin-bottom:4px;le
 .cmd-card:nth-child(2)::before{background:linear-gradient(90deg,#10B981,#6EE7B7,#10B981)}
 .cmd-card:nth-child(3)::before{background:linear-gradient(90deg,#3B82F6,#93C5FD,#3B82F6)}
 .cmd-card:nth-child(4)::before{background:linear-gradient(90deg,#8B5CF6,#C4B5FD,#8B5CF6)}
+.cmd-card:nth-child(5)::before{background:linear-gradient(90deg,#F59E0B,#FCD34D,#F59E0B)}
 .cmd-card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);border-color:var(--gold-border)}
-.cmd-icon{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.cmd-icon{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px;background:var(--surface)}
+.cmd-card:nth-child(1) .cmd-icon{background:rgba(192,152,64,.12)}
+.cmd-card:nth-child(2) .cmd-icon{background:rgba(16,185,129,.1)}
+.cmd-card:nth-child(3) .cmd-icon{background:rgba(59,130,246,.1)}
+.cmd-card:nth-child(4) .cmd-icon{background:rgba(139,92,246,.1)}
+.cmd-card:nth-child(5) .cmd-icon{background:rgba(245,158,11,.1)}
 .cmd-card h4{font-size:14px;font-weight:700;margin-bottom:4px}
 .cmd-card p{font-size:12px;color:var(--muted);line-height:1.4;margin-bottom:10px}
 .cmd-links{display:flex;gap:6px;flex-wrap:wrap}
@@ -286,6 +292,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <h2>Fleet categories</h2>
       <button class="btn primary" id="addCatBtn">+ Add category</button>
     </div>
+    <div class="section-banner">Vehicle classes shown to customers (Economy, SUV, Van…). Each category defines the base daily rate, seats, and features. Rate rules can override pricing per season.</div>
     <div class="tbl-search"><input id="catSearch" placeholder="Search categories…" /></div>
     <div class="tbl-wrap"><table id="catTable"><thead><tr>
       <th>Code</th><th>Title</th><th>Price/day</th><th>Seats</th><th>Transmission</th><th>Public</th><th>Status</th><th>Actions</th>
@@ -297,6 +304,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <h2>Fleet vehicles</h2>
       <button class="btn primary" id="addVehBtn">+ Add vehicle</button>
     </div>
+    <div class="section-banner">Individual vehicles in the fleet. Mark vehicles as available, in maintenance, or reserved. Inactive vehicles are hidden from bookings entirely.</div>
     <div class="tbl-search"><input id="vehSearch" placeholder="Search vehicles…" /></div>
     <div class="tbl-wrap"><table id="vehTable"><thead><tr>
       <th>Plate</th><th>Model</th><th>Category</th><th>Status</th><th>Active</th><th>Actions</th>
@@ -305,22 +313,23 @@ tr:hover td{background:rgba(0,0,0,.02)}
 
   <section id="s-dynamicPricing" class="section">
     <div class="section-head"><h2>Dynamic pricing</h2></div>
-    <div class="panel">
+    <div class="section-banner">Define seasonal periods and per-category daily rates. Seasons with higher priority override overlapping seasons. A rate rule with no season applies year-round.</div>
+    <div class="panel blue-top">
       <div class="panel-head">
         <h3>Pricing seasons</h3>
         <button class="btn primary sm" id="addSeasonBtn">+ Add season</button>
       </div>
       <div class="tbl-wrap"><table><thead><tr>
-        <th>Label</th><th>Start</th><th>End</th><th>Priority</th><th>Repeat</th><th>Status</th><th>Actions</th>
+        <th>Key</th><th>Label</th><th>Start</th><th>End</th><th>Priority</th><th>Repeat</th><th>Status</th><th>Actions</th>
       </tr></thead><tbody id="seasonsBody"></tbody></table></div>
     </div>
-    <div class="panel">
+    <div class="panel gold-top">
       <div class="panel-head">
         <h3>Rate rules</h3>
         <button class="btn primary sm" id="addRuleBtn">+ Add rule</button>
       </div>
       <div class="tbl-wrap"><table><thead><tr>
-        <th>Category</th><th>Season</th><th>Days</th><th>Price/day</th><th>Status</th><th>Actions</th>
+        <th>Category</th><th>Season</th><th>Days</th><th>Price/day</th><th>Label</th><th>Status</th><th>Actions</th>
       </tr></thead><tbody id="rulesBody"></tbody></table></div>
     </div>
   </section>
@@ -330,6 +339,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <h2>Insurance plans</h2>
       <button class="btn primary" id="addInsBtn">+ Add plan</button>
     </div>
+    <div class="section-banner">Coverage options shown to customers during booking. CDW is typically included at no charge; SCDW and FULL reduce the excess with a daily fee.</div>
     <div class="tbl-wrap"><table id="insTable"><thead><tr>
       <th>Key</th><th>Title</th><th>Price/day</th><th>Sort</th><th>Public</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="insBody"></tbody></table></div>
@@ -340,6 +350,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <h2>Extra services</h2>
       <button class="btn primary" id="addExtraBtn">+ Add service</button>
     </div>
+    <div class="section-banner">Optional add-ons customers can select during booking — child seats, GPS, additional drivers. Billing mode controls whether the fee is charged per day or once per booking.</div>
     <div class="tbl-wrap"><table><thead><tr>
       <th>Key</th><th>Title</th><th>Price</th><th>Billing</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="extrasBody"></tbody></table></div>
@@ -350,6 +361,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <h2>Fee rules</h2>
       <button class="btn primary" id="addFeeBtn">+ Add fee</button>
     </div>
+    <div class="section-banner">Automatic surcharges applied to bookings — young/senior driver premiums, night pickup/dropoff fees, and manual charges added by staff during booking review.</div>
     <div class="tbl-wrap"><table><thead><tr>
       <th>Key</th><th>Title</th><th>Amount</th><th>Billing</th><th>Type</th><th>Group</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="feesBody"></tbody></table></div>
@@ -360,6 +372,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <h2>Roles</h2>
       <button class="btn primary" id="addRoleBtn">+ Add role</button>
     </div>
+    <div class="section-banner">Roles define what staff members can see and do. Assign a role to each staff user to control access to bookings, pricing, fleet, and admin settings.</div>
     <div class="tbl-wrap"><table><thead><tr>
       <th>Key</th><th>Label</th><th>Permissions</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="rolesBody"></tbody></table></div>
@@ -370,6 +383,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <h2>Staff users</h2>
       <button class="btn primary" id="addUserBtn">+ Add / invite user</button>
     </div>
+    <div class="section-banner">Staff members who can log into the backroom. Each user is assigned a role that controls their permissions. Inactive users cannot log in.</div>
     <div id="userStatsBand" class="btns" style="margin-bottom:10px"></div>
     <div class="tbl-search"><input id="userSearch" placeholder="Search users…" /></div>
     <div class="tbl-wrap"><table><thead><tr>
@@ -379,6 +393,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
 
   <section id="s-security" class="section">
     <div class="section-head"><h2>Security</h2></div>
+    <div class="section-banner">Manage active login sessions and staff passwords. Revoking a session forces immediate logout on the affected device.</div>
     <div class="panel">
       <div class="panel-head">
         <h3>Active sessions</h3>
@@ -409,7 +424,8 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <h2>Pickup locations</h2>
       <button class="btn primary" id="addLocationBtn">+ Add location</button>
     </div>
-    <div class="section-banner">Manage all pickup and dropoff locations shown to customers in the booking flow. Each location can have a custom fee and display labels.</div>
+    <div class="section-banner">Manage all pickup and dropoff locations shown to customers in the booking flow. Each location can have a custom fee, a station group, and display labels for the booking form.</div>
+    <div class="tbl-search"><input id="locSearch" placeholder="Search locations…" /></div>
     <div class="tbl-wrap"><table id="locTable"><thead><tr>
       <th>Label</th><th>Address</th><th>Station</th><th>Type</th><th>Fee</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="locBody"></tbody></table></div>
@@ -417,6 +433,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
 
   <section id="s-audit" class="section">
     <div class="section-head"><h2>Change history</h2></div>
+    <div class="section-banner">Last 100 admin actions recorded in the system. Each entry shows who made the change, what was changed, and a short summary.</div>
     <div class="tbl-wrap"><table><thead><tr>
       <th>Time</th><th>Actor</th><th>Action</th><th>Entity ID</th><th>Entity</th><th>Summary</th>
     </tr></thead><tbody id="auditBody"></tbody></table></div>
@@ -936,15 +953,29 @@ function buildPaneFields(key, s) {
       `)}`;
 
     case 'stations': {
-      const profiles = (state.snapshot?.stationProfiles)||[];
-      return sc('🏠', 'Station profiles', 'Rental stations / hub locations', `
-        ${profiles.length ? profiles.map(p=>`
-          <div style="padding:10px 0;border-bottom:1px solid var(--line)">
-            <strong>${esc(p.label||p.key||'—')}</strong>
-            <code style="font-size:11px;color:var(--muted);margin-left:8px">${esc(p.key||'—')}</code>
-            ${p.description?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(p.description)}</div>`:''}
-          </div>`).join('') : '<div class="fhint">No stations defined. Stations are added via the Pickup Locations section.</div>'}
-      `);
+      const locs = (state.snapshot?.pickupLocations||[]);
+      const groups = {};
+      locs.forEach(l => {
+        const k = l.stationKey||'default';
+        if (!groups[k]) groups[k] = [];
+        groups[k].push(l);
+      });
+      const keys = Object.keys(groups).sort();
+      const body = keys.length ? keys.map(k=>{
+        const items = groups[k];
+        const active = items.filter(x=>x.active!==false).length;
+        return `<div style="padding:12px 0;border-bottom:1px solid var(--line)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <code style="font-size:12px;background:var(--surface);padding:2px 8px;border-radius:var(--r-pill)">${esc(k)}</code>
+            <span class="badge ${active>0?'active':'inactive'}">${active} active location${active!==1?'s':''}</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${items.map(l=>`<span class="chip ${l.active!==false?'linked':''}">${esc(l.label||l.key||'—')}</span>`).join('')}
+          </div>
+        </div>`;
+      }).join('') : '<div class="fhint">No pickup locations defined yet. Add locations in the <b>Pickup locations</b> section, then assign them a station key here.</div>';
+      return sc('🏠', 'Station groups', 'Pickup locations grouped by station key', body)
+        + `<div class="fhint" style="margin-top:8px">Station keys group locations into hubs (e.g. <code>airport</code>, <code>city_center</code>). Set the <b>Station key</b> when editing a pickup location.</div>`;
     }
 
     default: return `<div class="coming-soon"><div>🔒</div><div><b>Coming soon</b><span>This section is planned but not yet connected to the CMS. It will be available in a future update.</span></div></div>`;
@@ -1097,34 +1128,38 @@ function renderFleetVehs() {
 
 function renderPickupLocations() {
   const body = el('locBody'); if (!body) return;
-  const locs = (state.snapshot?.pickupLocations||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const q = el('locSearch')?.value?.toLowerCase()||'';
+  const all = (state.snapshot?.pickupLocations||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const locs = q ? all.filter(l=>`${l.label}${l.address}${l.stationKey}`.toLowerCase().includes(q)) : all;
   const typeLabels = { both:'Pickup & dropoff', pickup:'Pickup only', dropoff:'Dropoff only' };
   body.innerHTML = locs.length ? locs.map(l=>`<tr>
-    <td><strong>${esc(l.label||'—')}</strong></td>
+    <td><strong>${esc(l.label||'—')}</strong>${l.key?`<div style="font-size:11px;color:var(--muted)"><code>${esc(l.key)}</code></div>`:''}</td>
     <td style="font-size:12px;color:var(--muted)">${esc(l.address||'—')}</td>
     <td><code>${esc(l.stationKey||'default')}</code></td>
     <td>${esc(typeLabels[l.locationType]||l.locationType||'both')}</td>
-    <td>${l.extraFee>0?money(l.extraFee,cur()):'—'}</td>
+    <td>${l.extraFee>0?money(l.extraFee,cur()):'<span style="color:var(--muted)">—</span>'}</td>
     <td><span class="badge ${l.active!==false?'active':'inactive'}">${l.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-loc="${esc(l._id||l.key||'')}">Edit</button>
       <button class="btn sm danger" data-del-loc="${esc(l._id||l.key||'')}" data-key="${esc(l.key||'')}" data-label="${esc(l.label||'')}">Delete</button>
     </td></tr>`).join('')
-  : `<tr><td colspan="7" class="tbl-empty">No pickup locations yet. Add your first location to enable the booking flow.</td></tr>`;
+  : q ? `<tr><td colspan="7" class="tbl-empty">No locations match "${esc(q)}".</td></tr>`
+      : `<tr><td colspan="7" class="tbl-empty">No pickup locations yet. Add your first location to enable the booking flow.</td></tr>`;
 }
 
 function renderSeasons() {
   const rows = (state.snapshot?.pricingSeasons||[]).slice().sort((a,b)=>(a.priority||0)-(b.priority||0));
   el('seasonsBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td>${esc(r.label||'—')}</td>
+    <td><code style="font-size:11px">${esc(r.key||'—')}</code></td>
+    <td><strong>${esc(r.label||'—')}</strong></td>
     <td>${fmtDate(r.startDate)}</td><td>${fmtDate(r.endDate)}</td>
-    <td>${r.priority||0}</td>
-    <td>${r.repeatYearly?'Yes':'No'}</td>
+    <td><span class="badge ${(r.priority||0)>0?'perday':'inactive'}">${r.priority||0}</span></td>
+    <td>${r.repeatYearly?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
     <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-season="${esc(r._id||'')}">Edit</button>
       <button class="btn sm danger" data-del-season="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.label||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="7" class="tbl-empty">No seasons yet.</td></tr>';
+    </td></tr>`).join('') : '<tr><td colspan="8" class="tbl-empty">No seasons yet. Rate rules without a season apply year-round.</td></tr>';
 }
 
 function renderRules() {
@@ -1134,17 +1169,19 @@ function renderRules() {
   el('rulesBody').innerHTML = rows.length ? rows.map(r=>{
     const cat = cats.find(c=>c.category===r.categoryCode||c._id===r.vehicleCategoryId);
     const sea = seas.find(s=>s.key===r.seasonKey);
+    const dayRange = `${r.minDays||1}–${r.maxDays>0?r.maxDays:'∞'} d`;
     return `<tr>
-      <td>${esc(cat?.title||r.categoryCode||'All')}</td>
-      <td>${esc(sea?.label||r.seasonKey||'All seasons')}</td>
-      <td>${r.minDays||1}–${r.maxDays>0?r.maxDays:'∞'}d</td>
-      <td>${money(r.pricePerDay,cur())}</td>
+      <td>${esc(cat?.title||r.categoryCode||'—')}<div style="font-size:11px;color:var(--muted)">${r.categoryCode?`<code>${esc(r.categoryCode)}</code>`:''}</div></td>
+      <td>${sea ? `<span class="badge perday">${esc(sea.label)}</span>` : '<span style="color:var(--muted);font-size:12px">All seasons</span>'}</td>
+      <td><code style="font-size:12px">${esc(dayRange)}</code></td>
+      <td><strong>${money(r.pricePerDay,cur())}</strong></td>
+      <td style="font-size:12px;color:var(--muted)">${esc(r.label||'—')}</td>
       <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
       <td class="btns">
         <button class="btn sm" data-edit-rule="${esc(r._id||'')}">Edit</button>
         <button class="btn sm danger" data-del-rule="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.label||r.categoryCode||'')}">Delete</button>
       </td></tr>`;
-  }).join('') : '<tr><td colspan="6" class="tbl-empty">No rate rules yet.</td></tr>';
+  }).join('') : '<tr><td colspan="7" class="tbl-empty">No rate rules yet. Add a rule to define daily rates for each vehicle category.</td></tr>';
 }
 
 function renderInsurance() {
@@ -1589,6 +1626,7 @@ function bindSecurityButtons() {
 function bindTableSearch() {
   el('catSearch')?.addEventListener('input', renderFleetCats);
   el('vehSearch')?.addEventListener('input', renderFleetVehs);
+  el('locSearch')?.addEventListener('input', renderPickupLocations);
   el('userSearch')?.addEventListener('input', renderUsers);
 }
 
