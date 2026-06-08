@@ -418,7 +418,12 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <h3 style="margin-bottom:14px">Password management</h3>
       <div class="field-row cols-2">
         <div class="field-group"><label>Staff email</label><input id="pwEmail" placeholder="staff@example.com" /></div>
-        <div class="field-group"><label>New password</label><input id="pwNew" type="password" placeholder="Min 8 characters" /></div>
+        <div class="field-group"><label>New password</label>
+          <div style="display:flex;gap:6px">
+            <input id="pwNew" type="password" placeholder="Min 8 characters" />
+            <button class="btn sm" id="pwToggleBtn" type="button" style="flex-shrink:0">Show</button>
+          </div>
+        </div>
       </div>
       <div class="check-row"><input type="checkbox" id="pwMustChange" /><label for="pwMustChange">Must change on next login</label></div>
       <div class="btns" style="margin-top:12px">
@@ -443,8 +448,12 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
   </section>
 
   <section id="s-audit" class="section">
-    <div class="section-head"><h2>Change history</h2></div>
+    <div class="section-head">
+      <h2>Change history</h2>
+      <button class="btn sm" id="auditExportBtn">Export CSV</button>
+    </div>
     <div class="section-banner">Last 100 admin actions recorded in the system. Each entry shows who made the change, what was changed, and a short summary.</div>
+    <div class="tbl-search"><input id="auditSearch" placeholder="Search by actor, action, entity or summary…" /></div>
     <div class="tbl-wrap"><table><thead><tr>
       <th>Time</th><th>Actor</th><th>Action</th><th>Entity ID</th><th>Entity</th><th>Summary</th>
     </tr></thead><tbody id="auditBody"></tbody></table></div>
@@ -1395,8 +1404,10 @@ function renderSessions() {
 }
 
 function renderAudit() {
-  const rows = (state.access?.auditRows||[]).slice().reverse().slice(0,100);
-  el('auditBody').innerHTML = rows.length ? rows.map(r=>{
+  const q = el('auditSearch')?.value?.toLowerCase()||'';
+  const all = (state.access?.auditRows||[]).slice().reverse();
+  const filtered = (q ? all.filter(r=>`${r.actorEmail}${r.action}${r.entityType}${r.summary}${r.entityId}`.toLowerCase().includes(q)) : all).slice(0,100);
+  el('auditBody').innerHTML = filtered.length ? filtered.map(r=>{
     const actionShort = (r.action||'—').replace(/([A-Z])/g,' $1').trim();
     const entityId = r.entityId ? `<code style="font-size:10px;color:var(--muted)">${esc(String(r.entityId).slice(0,12))}…</code>` : '—';
     const diff = r.createdAt ? Date.now() - new Date(r.createdAt).getTime() : Infinity;
@@ -1411,7 +1422,9 @@ function renderAudit() {
       <td style="font-size:12px">${esc(r.entityType||'—')}</td>
       <td style="font-size:12px">${esc(r.summary||'—')}</td>
     </tr>`;
-  }).join('') : '<tr><td colspan="6" class="tbl-empty">No audit log entries.</td></tr>';
+  }).join('')
+  : q ? '<tr><td colspan="6" class="tbl-empty">No entries match your search.</td></tr>'
+      : '<tr><td colspan="6" class="tbl-empty">No audit log entries.</td></tr>';
 }
 
 // ── MODAL ─────────────────────────────────────────────────────────────────
@@ -1747,6 +1760,13 @@ function editLocation(id) { return openEditLocation(id); }
 
 // ── SECURITY BUTTONS ──────────────────────────────────────────────────────
 function bindSecurityButtons() {
+  el('pwToggleBtn')?.addEventListener('click', () => {
+    const inp = el('pwNew'), btn = el('pwToggleBtn');
+    if (!inp) return;
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Hide' : 'Show';
+  });
   el('revokeAllBtn')?.addEventListener('click', () => {
     if (!confirm('Revoke ALL active sessions? All staff will be logged out.')) return;
     (state.access?.sessionRows||[]).forEach(r => post('revokeStaffSessions',{email:r.email||r.actorEmail}));
@@ -1788,6 +1808,8 @@ function bindTableSearch() {
   el('extrasSearch')?.addEventListener('input', renderExtras);
   el('feesSearch')?.addEventListener('input', renderFees);
   el('userSearch')?.addEventListener('input', renderUsers);
+  el('auditSearch')?.addEventListener('input', renderAudit);
+  el('auditExportBtn')?.addEventListener('click', exportAuditCsv);
 }
 
 // ── ADD BUTTONS ───────────────────────────────────────────────────────────
@@ -1813,12 +1835,39 @@ function bindFallback() {
 
 // ── UTILITIES ─────────────────────────────────────────────────────────────
 function downloadJson(data, filename) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  downloadBlob(JSON.stringify(data, null, 2), filename, 'application/json');
+}
+
+function downloadBlob(text, filename, mime='text/plain') {
+  const blob = new Blob([text], {type:mime});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+// Build a CSV string from an array of header keys and an array of row objects
+function toCSV(headers, rows) {
+  const cell = v => { const s = String(v??''); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  const head = headers.map(h=>cell(h.label)).join(',');
+  const body = rows.map(r=>headers.map(h=>cell(typeof h.get==='function'?h.get(r):r[h.key])).join(',')).join('\n');
+  return head + '\n' + body;
+}
+
+function exportAuditCsv() {
+  const rows = (state.access?.auditRows||[]).slice().reverse();
+  if (!rows.length) return showToast('No audit entries to export', 'error');
+  const csv = toCSV([
+    { label:'Time', get:r=>fmtDT(r.createdAt) },
+    { label:'Actor', key:'actorEmail' },
+    { label:'Action', key:'action' },
+    { label:'Entity ID', key:'entityId' },
+    { label:'Entity type', key:'entityType' },
+    { label:'Summary', key:'summary' }
+  ], rows);
+  downloadBlob(csv, `audit-log-${dateStr()}.csv`, 'text/csv');
+  showToast(`Exported ${rows.length} audit entries`, 'success');
 }
 
 function dateStr() { return new Date().toISOString().slice(0,10); }
