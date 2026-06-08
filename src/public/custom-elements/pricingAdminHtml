@@ -134,9 +134,9 @@ label{display:block;font:600 12px var(--f);color:var(--sub);margin-bottom:4px;le
 .pane-badge{display:inline-block;padding:3px 9px;border-radius:var(--r-pill);background:var(--surface);color:var(--gold2);font:700 10px var(--f);letter-spacing:.06em;text-transform:uppercase;margin-left:8px}
 
 /* ── TABLES ── */
-.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;box-shadow:var(--sh)}
+.tbl-wrap{overflow-x:auto;overflow-y:auto;max-height:560px;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;box-shadow:var(--sh)}
 table{width:100%;border-collapse:collapse;min-width:500px}
-th{padding:10px 12px;text-align:left;font:700 11px var(--f);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);background:var(--surface);white-space:nowrap}
+th{padding:10px 12px;text-align:left;font:700 11px var(--f);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);background:var(--surface);white-space:nowrap;position:sticky;top:0;z-index:1}
 td{padding:9px 12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:0}
 tr:hover td{background:rgba(0,0,0,.02)}
@@ -171,6 +171,20 @@ tr:hover td{background:rgba(0,0,0,.02)}
 .panel.blue-top{border-top:3px solid #2563EB}
 .panel.gold-top{border-top:3px solid #C09840}
 .panel.purple-top{border-top:3px solid #8B5CF6}
+
+/* ── SORTABLE HEADERS ── */
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{color:var(--gold2);background:rgba(192,152,64,.08)}
+th.sortable::after{content:' ⇅';opacity:.28;font-size:8px;letter-spacing:0;font-weight:400;text-transform:none}
+th.sortable.sort-asc::after{content:' ▲';opacity:1;color:var(--gold2)}
+th.sortable.sort-desc::after{content:' ▼';opacity:1;color:var(--gold2)}
+
+/* ── BULK ACTIONS ── */
+.bulk-col{width:36px;text-align:center;padding-left:8px!important;padding-right:4px!important}
+.bulk-col input[type=checkbox]{cursor:pointer;width:14px;height:14px;margin:0;vertical-align:middle}
+.bulk-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#EFF6FF;border:1px solid rgba(37,99,235,.18);border-radius:var(--r);margin-bottom:10px;flex-wrap:wrap;animation:toastIn .18s ease}
+.bulk-bar .bulk-count{font:700 13px var(--f);color:var(--info);flex-shrink:0}
+.bulk-bar .bulk-spacer{flex:1;min-width:8px}
 
 /* ── DRAWER (slide-over) ── */
 .drawer-overlay{position:fixed;inset:0;background:rgba(15,10,5,.42);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:100;opacity:0;visibility:hidden;transition:opacity .26s ease,visibility .26s}
@@ -314,8 +328,23 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     </div>
     <div class="section-banner">Vehicle classes shown to customers (Economy, SUV, Van…). Each category defines the base daily rate, seats, and features. Rate rules can override pricing per season.</div>
     <div class="tbl-search"><input id="catSearch" placeholder="Search categories…" /></div>
+    <div class="bulk-bar" id="catsBulkBar" style="display:none">
+      <span class="bulk-count" id="catsBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="cats">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="cats">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="cats">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="cats" class="btn sm">Clear</button>
+    </div>
     <div class="tbl-wrap"><table id="catTable"><thead><tr>
-      <th>Code</th><th>Title / Specs</th><th>Price/day</th><th>Transmission</th><th>AC</th><th>Vehicles</th><th>Public</th><th>Status</th><th>Actions</th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="cats"></th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="category">Code</th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="title">Title / Specs</th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="price">Price/day</th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="transmission">Transmission</th>
+      <th>AC</th><th>Vehicles</th><th>Public</th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="catBody"></tbody></table></div>
   </section>
 
@@ -330,8 +359,22 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     <div class="section-banner">Individual vehicles in the fleet. Mark vehicles as available, in maintenance, or reserved. Inactive vehicles are hidden from bookings entirely.</div>
     <div class="btns" id="vehStatsBand" style="margin-bottom:8px"></div>
     <div class="tbl-search"><input id="vehSearch" placeholder="Search vehicles…" /></div>
+    <div class="bulk-bar" id="vehsBulkBar" style="display:none">
+      <span class="bulk-count" id="vehsBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="vehs">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="vehs">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="vehs">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="vehs" class="btn sm">Clear</button>
+    </div>
     <div class="tbl-wrap"><table id="vehTable"><thead><tr>
-      <th>Plate</th><th>Model</th><th>Category</th><th>Status</th><th>Active</th><th>Actions</th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="vehs"></th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="plate">Plate</th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="model">Model</th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="category">Category</th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="status">Status</th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="active">Active</th>
+      <th>Actions</th>
     </tr></thead><tbody id="vehBody"></tbody></table></div>
   </section>
 
@@ -371,8 +414,23 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     </div>
     <div class="section-banner">Coverage options shown to customers during booking. CDW is typically included at no charge; SCDW and FULL reduce the excess with a daily fee.</div>
     <div class="tbl-search"><input id="insSearch" placeholder="Search insurance plans…" /></div>
+    <div class="bulk-bar" id="insBulkBar" style="display:none">
+      <span class="bulk-count" id="insBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="ins">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="ins">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="ins">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="ins" class="btn sm">Clear</button>
+    </div>
     <div class="tbl-wrap"><table id="insTable"><thead><tr>
-      <th>Key</th><th>Title</th><th>Price/day</th><th>Sort</th><th>Public</th><th>Status</th><th>Actions</th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="ins"></th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="key">Key</th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="title">Title</th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="pricePerDay">Price/day</th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="sortOrder">Sort</th>
+      <th>Public</th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="insBody"></tbody></table></div>
   </section>
 
@@ -386,8 +444,23 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     </div>
     <div class="section-banner">Optional add-ons customers can select during booking — child seats, GPS, additional drivers. Billing mode controls whether the fee is charged per day or once per booking.</div>
     <div class="tbl-search"><input id="extrasSearch" placeholder="Search extra services…" /></div>
-    <div class="tbl-wrap"><table><thead><tr>
-      <th>Key</th><th>Title</th><th>Price</th><th>Billing</th><th>Public</th><th>Status</th><th>Actions</th>
+    <div class="bulk-bar" id="extrasBulkBar" style="display:none">
+      <span class="bulk-count" id="extrasBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="extras">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="extras">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="extras">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="extras" class="btn sm">Clear</button>
+    </div>
+    <div class="tbl-wrap"><table id="extrasTable"><thead><tr>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="extras"></th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="key">Key</th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="title">Title</th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="price">Price</th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="billingMode">Billing</th>
+      <th>Public</th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="extrasBody"></tbody></table></div>
   </section>
 
@@ -401,8 +474,24 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     </div>
     <div class="section-banner">Automatic surcharges applied to bookings — young/senior driver premiums, night pickup/dropoff fees, and manual charges added by staff during booking review.</div>
     <div class="tbl-search"><input id="feesSearch" placeholder="Search fee rules…" /></div>
-    <div class="tbl-wrap"><table><thead><tr>
-      <th>Key</th><th>Title</th><th>Amount</th><th>Billing</th><th>Type</th><th>Group</th><th>Status</th><th>Actions</th>
+    <div class="bulk-bar" id="feesBulkBar" style="display:none">
+      <span class="bulk-count" id="feesBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="fees">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="fees">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="fees">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="fees" class="btn sm">Clear</button>
+    </div>
+    <div class="tbl-wrap"><table id="feesTable"><thead><tr>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="fees"></th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="key">Key</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="title">Title</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="amount">Amount</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="billingMode">Billing</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="ruleType">Type</th>
+      <th>Group</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="feesBody"></tbody></table></div>
   </section>
 
@@ -428,8 +517,20 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     <div class="section-banner">Staff members who can log into the backroom. Each user is assigned a role that controls their permissions. Inactive users cannot log in.</div>
     <div id="userStatsBand" class="btns" style="margin-bottom:10px"></div>
     <div class="tbl-search"><input id="userSearch" placeholder="Search users…" /></div>
-    <div class="tbl-wrap"><table><thead><tr>
-      <th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th>
+    <div class="bulk-bar" id="usersBulkBar" style="display:none">
+      <span class="bulk-count" id="usersBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="users">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="users">Deactivate</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="users" class="btn sm">Clear</button>
+    </div>
+    <div class="tbl-wrap"><table id="usersTable"><thead><tr>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="users"></th>
+      <th class="sortable" data-sort-table="users" data-sort-col="fullName">Name</th>
+      <th class="sortable" data-sort-table="users" data-sort-col="email">Email</th>
+      <th class="sortable" data-sort-table="users" data-sort-col="roleKey">Role</th>
+      <th class="sortable" data-sort-table="users" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="usersBody"></tbody></table></div>
   </section>
 
@@ -476,8 +577,23 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     </div>
     <div class="section-banner">Manage all pickup and dropoff locations shown to customers in the booking flow. Each location can have a custom fee, a station group, and display labels for the booking form.</div>
     <div class="tbl-search"><input id="locSearch" placeholder="Search locations…" /></div>
+    <div class="bulk-bar" id="locsBulkBar" style="display:none">
+      <span class="bulk-count" id="locsBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="locs">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="locs">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="locs">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="locs" class="btn sm">Clear</button>
+    </div>
     <div class="tbl-wrap"><table id="locTable"><thead><tr>
-      <th>Label</th><th>Address</th><th>Station</th><th>Type</th><th>Fee</th><th>Status</th><th>Actions</th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="locs"></th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="label">Label</th>
+      <th>Address</th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="stationKey">Station</th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="locationType">Type</th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="extraFee">Fee</th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="locBody"></tbody></table></div>
   </section>
 
@@ -524,7 +640,9 @@ const state = {
   snapshot: null,
   access: null,
   bizDirty: false,
-  busy: false
+  busy: false,
+  bulkSel: {},   // tableKey → Set of selected _id strings
+  tableSort: {}  // tableKey → { col, dir }
 };
 
 // ── HELPERS ───────────────────────────────────────────────────────────────
@@ -541,6 +659,12 @@ const fmtAgo = s => {
   return Math.floor(diff/86400000)+'d ago';
 };
 const slug = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+const sortBy = (arr, col, dir) => arr.slice().sort((a,b)=>{
+  const va=a[col]??'', vb=b[col]??'';
+  const cmp=(typeof va==='number'&&typeof vb==='number')
+    ?va-vb:String(va).localeCompare(String(vb),undefined,{numeric:true,sensitivity:'base'});
+  return dir==='desc'?-cmp:cmp;
+});
 const el = id => document.getElementById(id);
 const biz = () => state.snapshot?.businessSettings || {};
 const cur = () => biz().currency || 'EUR';
@@ -1188,16 +1312,104 @@ function saveBizSettings() {
   showToast('Business settings saved', 'success');
 }
 
+// ── SORT & BULK HELPERS ───────────────────────────────────────────────────
+function getBulkSel(table) {
+  if (!state.bulkSel[table]) state.bulkSel[table] = new Set();
+  return state.bulkSel[table];
+}
+function clearBulkSel(table) {
+  state.bulkSel[table] = new Set();
+  updateBulkBar(table);
+  document.querySelectorAll(`input.bulk-row[data-bulk="${table}"],input.bulk-all[data-bulk="${table}"]`)
+    .forEach(c=>{c.checked=false;c.indeterminate=false;});
+}
+function updateBulkBar(table) {
+  const bar = el(table+'BulkBar');
+  const cnt = el(table+'BulkCount');
+  const n = getBulkSel(table).size;
+  if (bar) bar.style.display = n > 0 ? 'flex' : 'none';
+  if (cnt) cnt.textContent = n + ' selected';
+}
+function syncBulkAll(table, visibleRows) {
+  const allChk = document.querySelector(`input.bulk-all[data-bulk="${table}"]`);
+  if (!allChk) return;
+  const sel = getBulkSel(table);
+  const n = visibleRows.filter(r=>r._id&&sel.has(r._id)).length;
+  allChk.checked = n>0 && n>=visibleRows.length;
+  allChk.indeterminate = n>0 && n<visibleRows.length;
+}
+function applySortClasses(table) {
+  const { col, dir } = state.tableSort[table] || {};
+  document.querySelectorAll(`th.sortable[data-sort-table="${table}"]`).forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc');
+    if (th.dataset.sortCol===col) th.classList.add(dir==='desc'?'sort-desc':'sort-asc');
+  });
+}
+const BULK = {
+  cats: {
+    src:()=>state.snapshot?.vehicleCategories||[], upsert:'upsertVehicleCategory',
+    del:(item)=>post('deleteVehicleCategory',{itemId:item._id,categoryCode:item.category}), label:'categories'
+  },
+  vehs: {
+    src:()=>state.snapshot?.fleetVehicles||[], upsert:'upsertFleetVehicle',
+    del:(item)=>post('deleteFleetVehicle',{itemId:item._id,plate:item.plate}), label:'vehicles'
+  },
+  ins: {
+    src:()=>state.snapshot?.insurancePlans||[], upsert:'upsertInsurancePlan',
+    del:(item)=>post('deletePricingItem',{collectionName:'insurancePlans',itemId:item._id,itemKey:item.key}), label:'insurance plans'
+  },
+  extras: {
+    src:()=>state.snapshot?.extraServices||[], upsert:'upsertExtraService',
+    del:(item)=>post('deletePricingItem',{collectionName:'extraServices',itemId:item._id,itemKey:item.key}), label:'extra services'
+  },
+  fees: {
+    src:()=>state.snapshot?.feeRules||[], upsert:'upsertFeeRule',
+    del:(item)=>post('deletePricingItem',{collectionName:'feeRules',itemId:item._id,itemKey:item.key}), label:'fee rules'
+  },
+  locs: {
+    src:()=>state.snapshot?.pickupLocations||[], upsert:'upsertPickupLocation',
+    del:(item)=>post('deletePickupLocation',{itemId:item._id,itemKey:item.key}), label:'locations'
+  },
+  users: {
+    src:()=>state.access?.users||[], upsert:null, del:null, label:'users'
+  }
+};
+function doBulk(table, action) {
+  const cfg = BULK[table]; if(!cfg) return;
+  const sel = getBulkSel(table);
+  const ids = [...sel]; if(!ids.length) return;
+  if (action==='delete') {
+    if (!cfg.del) return showToast('Bulk delete is not available for this table','warn');
+    if (!confirm(`Permanently delete ${ids.length} ${cfg.label}? This cannot be undone.`)) return;
+    ids.forEach(id=>{ const item=cfg.src().find(x=>x._id===id); if(item) cfg.del(item); });
+    showToast(`Deleted ${ids.length} ${cfg.label}`,'success');
+  } else {
+    const active = action==='activate';
+    if (table==='users') {
+      ids.forEach(id=>post(active?'reactivateStaffUser':'deactivateStaffUser',{itemId:id}));
+    } else {
+      ids.forEach(id=>{ const item=cfg.src().find(x=>x._id===id); if(item&&cfg.upsert) post(cfg.upsert,{...item,active}); });
+    }
+    showToast(`${active?'Activated':'Deactivated'} ${ids.length} ${cfg.label}`,'success');
+  }
+  clearBulkSel(table);
+}
+
 // ── CRUD TABLES ───────────────────────────────────────────────────────────
 function renderFleetCats() {
-  const rows = (state.snapshot?.vehicleCategories||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const tblKey = 'cats';
+  const sel = getBulkSel(tblKey);
+  const { col, dir } = state.tableSort[tblKey] || {};
   const vehs = (state.snapshot?.fleetVehicles||[]);
+  let rows = (state.snapshot?.vehicleCategories||[]);
+  rows = col ? sortBy(rows, col, dir) : rows.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const q = el('catSearch')?.value?.toLowerCase()||'';
   const filtered = q ? rows.filter(r=>`${r.title}${r.category}`.toLowerCase().includes(q)) : rows;
   el('catBody').innerHTML = filtered.length ? filtered.map(r=>{
     const specs = [r.seats?`${r.seats} seats`:'',r.doors?`${r.doors} doors`:'',r.luggage?`${r.luggage} bags`:''].filter(Boolean).join(' · ');
     const vCount = vehs.filter(v=>v.category===r.category && v.active!==false).length;
     return `<tr>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
       <td><code>${esc(r.category||'—')}</code></td>
       <td><strong>${esc(r.title||r.displayTitle||'—')}</strong>${specs?`<div style="font-size:11px;color:var(--muted)">${esc(specs)}</div>`:''}</td>
       <td>${money(r.price,cur())}</td>
@@ -1210,20 +1422,25 @@ function renderFleetCats() {
         <button class="btn sm" data-edit-cat="${esc(r._id||'')}">Edit</button>
         <button class="btn sm danger" data-del-cat="${esc(r._id||'')}" data-label="${esc(r.title||'')}">Delete</button>
       </td></tr>`;
-  }).join('') : '<tr><td colspan="9" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
+  }).join('') : '<tr><td colspan="10" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, filtered); applySortClasses(tblKey);
 }
 
 function renderFleetVehs() {
+  const tblKey = 'vehs';
+  const sel = getBulkSel(tblKey);
   const cats = state.snapshot?.vehicleCategories||[];
-  const all = (state.snapshot?.fleetVehicles||[]).slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||''));
+  const rawAll = (state.snapshot?.fleetVehicles||[]);
+  const { col, dir } = state.tableSort[tblKey] || {};
+  const all = col ? sortBy(rawAll, col, dir) : rawAll.slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||''));
   const q = el('vehSearch')?.value?.toLowerCase()||'';
   const filtered = q ? all.filter(r=>`${r.plate}${r.model}${r.category}`.toLowerCase().includes(q)) : all;
 
   const band = el('vehStatsBand');
   if (band) {
-    const byStatus = s => all.filter(v=>v.status===s&&v.active!==false).length;
-    const avail = byStatus('available'), maint = byStatus('maintenance'), resv = byStatus('reserved'), inact = all.filter(v=>v.active===false).length;
-    band.innerHTML = `<span class="chip">Total: <strong>${all.length}</strong></span>`
+    const byStatus = s => rawAll.filter(v=>v.status===s&&v.active!==false).length;
+    const avail = byStatus('available'), maint = byStatus('maintenance'), resv = byStatus('reserved'), inact = rawAll.filter(v=>v.active===false).length;
+    band.innerHTML = `<span class="chip">Total: <strong>${rawAll.length}</strong></span>`
       + (avail ? `<span class="chip" style="border-color:rgba(21,128,61,.25);background:var(--good-bg);color:var(--good)">Available: <strong>${avail}</strong></span>` : '')
       + (maint ? `<span class="chip" style="border-color:rgba(217,119,6,.25);background:#FFFBEB;color:#92400E">Maintenance: <strong>${maint}</strong></span>` : '')
       + (resv  ? `<span class="chip" style="border-color:rgba(37,99,235,.25);background:#EFF6FF;color:#1d4ed8">Reserved: <strong>${resv}</strong></span>` : '')
@@ -1234,6 +1451,7 @@ function renderFleetVehs() {
     const cat = cats.find(c=>c._id===r.vehicleCategoryId||c.category===r.category);
     const statusClass = r.status==='available'?'active':r.status==='maintenance'?'maintenance':r.status==='reserved'?'reserved':'inactive';
     return `<tr>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
       <td><code>${esc(r.plate||'—')}</code></td>
       <td><strong>${esc(r.model||r.displayTitle||'—')}</strong></td>
       <td>${esc(cat?.title||r.category||'—')}</td>
@@ -1244,17 +1462,23 @@ function renderFleetVehs() {
         <button class="btn sm danger" data-del-veh="${esc(r._id||'')}" data-label="${esc(r.plate||'')}">Delete</button>
       </td></tr>`;
   }).join('')
-  : q ? '<tr><td colspan="6" class="tbl-empty">No vehicles match your search.</td></tr>'
-      : '<tr><td colspan="6" class="tbl-empty">No vehicles yet.</td></tr>';
+  : q ? '<tr><td colspan="7" class="tbl-empty">No vehicles match your search.</td></tr>'
+      : '<tr><td colspan="7" class="tbl-empty">No vehicles yet.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, filtered); applySortClasses(tblKey);
 }
 
 function renderPickupLocations() {
+  const tblKey = 'locs';
+  const sel = getBulkSel(tblKey);
   const body = el('locBody'); if (!body) return;
   const q = el('locSearch')?.value?.toLowerCase()||'';
-  const all = (state.snapshot?.pickupLocations||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const { col, dir } = state.tableSort[tblKey] || {};
+  let all = (state.snapshot?.pickupLocations||[]);
+  all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const locs = q ? all.filter(l=>`${l.label}${l.address}${l.stationKey}`.toLowerCase().includes(q)) : all;
   const typeLabels = { both:'Pickup & dropoff', pickup:'Pickup only', dropoff:'Dropoff only' };
   body.innerHTML = locs.length ? locs.map(l=>`<tr>
+    <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(l._id||'')}"${sel.has(l._id)?' checked':''}></td>
     <td><strong>${esc(l.label||'—')}</strong>${l.key?`<div style="font-size:11px;color:var(--muted)"><code>${esc(l.key)}</code></div>`:''}</td>
     <td style="font-size:12px;color:var(--muted)">${esc(l.address||'—')}</td>
     <td><code>${esc(l.stationKey||'default')}</code></td>
@@ -1265,8 +1489,9 @@ function renderPickupLocations() {
       <button class="btn sm" data-edit-loc="${esc(l._id||l.key||'')}">Edit</button>
       <button class="btn sm danger" data-del-loc="${esc(l._id||l.key||'')}" data-key="${esc(l.key||'')}" data-label="${esc(l.label||'')}">Delete</button>
     </td></tr>`).join('')
-  : q ? `<tr><td colspan="7" class="tbl-empty">No locations match "${esc(q)}".</td></tr>`
-      : `<tr><td colspan="7" class="tbl-empty">No pickup locations yet. Add your first location to enable the booking flow.</td></tr>`;
+  : q ? `<tr><td colspan="8" class="tbl-empty">No locations match "${esc(q)}".</td></tr>`
+      : `<tr><td colspan="8" class="tbl-empty">No pickup locations yet. Add your first location to enable the booking flow.</td></tr>`;
+  updateBulkBar(tblKey); syncBulkAll(tblKey, locs); applySortClasses(tblKey);
 }
 
 function renderSeasons() {
@@ -1315,10 +1540,15 @@ function renderRules() {
 }
 
 function renderInsurance() {
+  const tblKey = 'ins';
+  const sel = getBulkSel(tblKey);
   const q = el('insSearch')?.value?.toLowerCase()||'';
-  const all = (state.snapshot?.insurancePlans||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const { col, dir } = state.tableSort[tblKey] || {};
+  let all = (state.snapshot?.insurancePlans||[]);
+  all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const rows = q ? all.filter(r=>`${r.key}${r.title}`.toLowerCase().includes(q)) : all;
   el('insBody').innerHTML = rows.length ? rows.map(r=>`<tr>
+    <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
     <td><code>${esc(r.key||'—')}</code></td>
     <td><strong>${esc(r.title||'—')}</strong>${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,70))}${r.description.length>70?'…':''}</div>`:''}</td>
     <td><strong>${money(r.pricePerDay,cur())}</strong>${r.pricePerDay==0?'<div style="font-size:10px;color:var(--good)">Included</div>':''}</td>
@@ -1329,15 +1559,21 @@ function renderInsurance() {
       <button class="btn sm" data-edit-ins="${esc(r._id||'')}">Edit</button>
       <button class="btn sm danger" data-del-ins="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
     </td></tr>`).join('')
-  : q ? `<tr><td colspan="7" class="tbl-empty">No plans match "${esc(q)}".</td></tr>`
-      : '<tr><td colspan="7" class="tbl-empty">No insurance plans yet.</td></tr>';
+  : q ? `<tr><td colspan="8" class="tbl-empty">No plans match "${esc(q)}".</td></tr>`
+      : '<tr><td colspan="8" class="tbl-empty">No insurance plans yet.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, rows); applySortClasses(tblKey);
 }
 
 function renderExtras() {
+  const tblKey = 'extras';
+  const sel = getBulkSel(tblKey);
   const q = el('extrasSearch')?.value?.toLowerCase()||'';
-  const all = (state.snapshot?.extraServices||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const { col, dir } = state.tableSort[tblKey] || {};
+  let all = (state.snapshot?.extraServices||[]);
+  all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const rows = q ? all.filter(r=>`${r.key}${r.title}`.toLowerCase().includes(q)) : all;
   el('extrasBody').innerHTML = rows.length ? rows.map(r=>`<tr>
+    <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
     <td><code>${esc(r.key||'—')}</code></td>
     <td><strong>${esc(r.title||'—')}</strong>${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,60))}${r.description.length>60?'…':''}</div>`:''}</td>
     <td><strong>${money(r.price,cur())}</strong></td>
@@ -1348,17 +1584,23 @@ function renderExtras() {
       <button class="btn sm" data-edit-extra="${esc(r._id||'')}">Edit</button>
       <button class="btn sm danger" data-del-extra="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
     </td></tr>`).join('')
-  : q ? `<tr><td colspan="7" class="tbl-empty">No services match "${esc(q)}".</td></tr>`
-      : '<tr><td colspan="7" class="tbl-empty">No extra services yet.</td></tr>';
+  : q ? `<tr><td colspan="8" class="tbl-empty">No services match "${esc(q)}".</td></tr>`
+      : '<tr><td colspan="8" class="tbl-empty">No extra services yet.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, rows); applySortClasses(tblKey);
 }
 
 function renderFees() {
+  const tblKey = 'fees';
+  const sel = getBulkSel(tblKey);
   const q = el('feesSearch')?.value?.toLowerCase()||'';
-  const all = (state.snapshot?.feeRules||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const { col, dir } = state.tableSort[tblKey] || {};
+  let all = (state.snapshot?.feeRules||[]);
+  all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const rows = q ? all.filter(r=>`${r.key}${r.title}${r.ruleType}`.toLowerCase().includes(q)) : all;
   el('feesBody').innerHTML = rows.length ? rows.map(r=>{
     const rtClass = r.ruleType==='ageRange'?'agerage':r.ruleType==='nightPickup'||r.ruleType==='nightDropoff'?'nightfee':'inactive';
     return `<tr>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
       <td><code>${esc(r.key||'—')}</code></td>
       <td><strong>${esc(r.title||'—')}</strong></td>
       <td><strong>${money(r.amount,cur())}</strong></td>
@@ -1371,8 +1613,9 @@ function renderFees() {
         <button class="btn sm danger" data-del-fee="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
       </td></tr>`;
   }).join('')
-  : q ? `<tr><td colspan="8" class="tbl-empty">No fees match "${esc(q)}".</td></tr>`
-      : '<tr><td colspan="8" class="tbl-empty">No fee rules yet.</td></tr>';
+  : q ? `<tr><td colspan="9" class="tbl-empty">No fees match "${esc(q)}".</td></tr>`
+      : '<tr><td colspan="9" class="tbl-empty">No fee rules yet.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, rows); applySortClasses(tblKey);
 }
 
 function renderRoles() {
@@ -1396,22 +1639,27 @@ function renderRoles() {
 }
 
 function renderUsers() {
-  const users = (state.access?.users||[]);
+  const tblKey = 'users';
+  const sel = getBulkSel(tblKey);
+  const rawUsers = (state.access?.users||[]);
   const roles = (state.access?.roles||[]);
+  const { col, dir } = state.tableSort[tblKey] || {};
+  const users = col ? sortBy(rawUsers, col, dir) : rawUsers.slice().sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||''));
   const q = el('userSearch')?.value?.toLowerCase()||'';
   const filtered = q ? users.filter(u=>`${u.email}${u.fullName}`.toLowerCase().includes(q)) : users;
 
-  const total = users.length, active = users.filter(u=>u.active!==false).length;
+  const total = rawUsers.length, active = rawUsers.filter(u=>u.active!==false).length;
   const band = el('userStatsBand');
   if (band) band.innerHTML = [
     { l:'Total', v:total }, { l:'Active', v:active }, { l:'Inactive', v:total-active },
-    { l:'Linked to Wix', v:users.filter(u=>u.memberId).length }
+    { l:'Linked to Wix', v:rawUsers.filter(u=>u.memberId).length }
   ].map(s=>`<span class="chip">${s.l}: <strong>${s.v}</strong></span>`).join('');
 
   el('usersBody').innerHTML = filtered.length ? filtered.map(u=>{
     const role = roles.find(r=>r.key===u.roleKey);
     const linked = u.memberId ? '<span class="chip linked">Wix linked</span>' : '';
     return `<tr>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(u._id||'')}"${sel.has(u._id)?' checked':''}></td>
       <td>
         <strong>${esc(u.fullName||'—')}</strong>
         ${u.jobTitle?`<div style="font-size:11px;color:var(--muted)">${esc(u.jobTitle)}</div>`:''}
@@ -1425,7 +1673,8 @@ function renderUsers() {
           ? `<button class="btn sm danger" data-deact-user="${esc(u._id||'')}" data-email="${esc(u.email||'')}">Deactivate</button>`
           : `<button class="btn sm good" data-react-user="${esc(u._id||'')}" data-email="${esc(u.email||'')}">Reactivate</button>`}
       </td></tr>`;
-  }).join('') : '<tr><td colspan="5" class="tbl-empty">No users found.</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="tbl-empty">No users found.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, filtered); applySortClasses(tblKey);
 }
 
 function renderSessions() {
@@ -1948,6 +2197,53 @@ function bindTableSearch() {
     const btn = e.target.closest('[data-export]');
     if (btn) exportTable(btn.dataset.export);
   });
+  // Column sort — delegated on document so it works across the whole page
+  document.addEventListener('click', e => {
+    const th = e.target.closest('th.sortable[data-sort-table][data-sort-col]');
+    if (!th) return;
+    const table = th.dataset.sortTable, col = th.dataset.sortCol;
+    const prev = state.tableSort[table] || {};
+    state.tableSort[table] = { col, dir: prev.col===col && prev.dir==='asc' ? 'desc' : 'asc' };
+    ({ cats:renderFleetCats, vehs:renderFleetVehs, ins:renderInsurance,
+       extras:renderExtras, fees:renderFees, locs:renderPickupLocations, users:renderUsers })[table]?.();
+  });
+}
+
+// ── BULK CHECKBOX & ACTION BINDINGS ──────────────────────────────────────
+function bindBulkHandlers() {
+  const app = el('app');
+  // Checkbox change → update selection Set + sync UI
+  app.addEventListener('change', e => {
+    const chk = e.target.closest('input.bulk-row,input.bulk-all');
+    if (!chk) return;
+    const table = chk.dataset.bulk; if (!table) return;
+    const sel = getBulkSel(table);
+    if (chk.classList.contains('bulk-all')) {
+      // Select / deselect all currently visible rows
+      document.querySelectorAll(`input.bulk-row[data-bulk="${table}"]`).forEach(r => {
+        r.checked = chk.checked;
+        if (r.value) { if (chk.checked) sel.add(r.value); else sel.delete(r.value); }
+      });
+    } else {
+      if (chk.checked) sel.add(chk.value); else sel.delete(chk.value);
+      // Keep "select all" checkbox in sync
+      const rows = document.querySelectorAll(`input.bulk-row[data-bulk="${table}"]`);
+      const allChk = document.querySelector(`input.bulk-all[data-bulk="${table}"]`);
+      if (allChk) {
+        const checked = [...rows].filter(r=>r.checked).length;
+        allChk.checked = checked >= rows.length && rows.length > 0;
+        allChk.indeterminate = checked > 0 && checked < rows.length;
+      }
+    }
+    updateBulkBar(table);
+  });
+  // Bulk action / clear buttons
+  app.addEventListener('click', e => {
+    const btn = e.target.closest('[data-bulk-action]');
+    if (btn) { doBulk(btn.dataset.bulkTable, btn.dataset.bulkAction); return; }
+    const clr = e.target.closest('[data-bulk-clear]');
+    if (clr) clearBulkSel(clr.dataset.bulkClear);
+  });
 }
 
 // ── ADD BUTTONS ───────────────────────────────────────────────────────────
@@ -2067,6 +2363,7 @@ function init() {
   bindFallback();
   bindBizActions();
   bindCrudButtons();
+  bindBulkHandlers();
   bindSecurityButtons();
   bindTableSearch();
 
