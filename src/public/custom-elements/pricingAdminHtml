@@ -340,6 +340,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <button class="btn primary" id="addInsBtn">+ Add plan</button>
     </div>
     <div class="section-banner">Coverage options shown to customers during booking. CDW is typically included at no charge; SCDW and FULL reduce the excess with a daily fee.</div>
+    <div class="tbl-search"><input id="insSearch" placeholder="Search insurance plans…" /></div>
     <div class="tbl-wrap"><table id="insTable"><thead><tr>
       <th>Key</th><th>Title</th><th>Price/day</th><th>Sort</th><th>Public</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="insBody"></tbody></table></div>
@@ -351,8 +352,9 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <button class="btn primary" id="addExtraBtn">+ Add service</button>
     </div>
     <div class="section-banner">Optional add-ons customers can select during booking — child seats, GPS, additional drivers. Billing mode controls whether the fee is charged per day or once per booking.</div>
+    <div class="tbl-search"><input id="extrasSearch" placeholder="Search extra services…" /></div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>Key</th><th>Title</th><th>Price</th><th>Billing</th><th>Status</th><th>Actions</th>
+      <th>Key</th><th>Title</th><th>Price</th><th>Billing</th><th>Public</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="extrasBody"></tbody></table></div>
   </section>
 
@@ -362,6 +364,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <button class="btn primary" id="addFeeBtn">+ Add fee</button>
     </div>
     <div class="section-banner">Automatic surcharges applied to bookings — young/senior driver premiums, night pickup/dropoff fees, and manual charges added by staff during booking review.</div>
+    <div class="tbl-search"><input id="feesSearch" placeholder="Search fee rules…" /></div>
     <div class="tbl-wrap"><table><thead><tr>
       <th>Key</th><th>Title</th><th>Amount</th><th>Billing</th><th>Type</th><th>Group</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="feesBody"></tbody></table></div>
@@ -387,7 +390,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
     <div id="userStatsBand" class="btns" style="margin-bottom:10px"></div>
     <div class="tbl-search"><input id="userSearch" placeholder="Search users…" /></div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th>
+      <th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="usersBody"></tbody></table></div>
   </section>
 
@@ -548,8 +551,11 @@ function showToast(msg, tone='info') {
   const item = document.createElement('div');
   item.className = `toast-item ${tone}`;
   item.textContent = msg;
+  item.style.cursor = 'pointer';
+  item.title = 'Click to dismiss';
+  item.addEventListener('click', () => item.remove());
   c.appendChild(item);
-  setTimeout(() => item.remove(), 4000);
+  setTimeout(() => item.remove(), 5000);
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────
@@ -713,10 +719,6 @@ function renderAll() {
   renderUsers();
   renderSessions();
   renderAudit();
-  bindTableSearch();
-  bindCrudButtons();
-  bindBizActions();
-  bindSecurityButtons();
   requestResize();
 }
 
@@ -735,6 +737,12 @@ function renderOverview() {
 
   const activeCats = cats.filter(x=>x.active!==false).length;
   const activeVehs = vehs.filter(x=>x.active!==false&&x.status!=='inactive').length;
+
+  // Update hero band title dynamically from CMS
+  const heroH1 = document.querySelector('#s-settingsHome .hero-band h1');
+  if (heroH1 && b.companyName) heroH1.textContent = b.companyName + ' — Admin Settings';
+  const heroP = document.querySelector('#s-settingsHome .hero-band p');
+  if (heroP && b.companyTagline) heroP.textContent = b.companyTagline;
 
   const stats = el('ovStats');
   if (stats) stats.innerHTML = [
@@ -1185,51 +1193,64 @@ function renderRules() {
 }
 
 function renderInsurance() {
-  const rows = (state.snapshot?.insurancePlans||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const q = el('insSearch')?.value?.toLowerCase()||'';
+  const all = (state.snapshot?.insurancePlans||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const rows = q ? all.filter(r=>`${r.key}${r.title}`.toLowerCase().includes(q)) : all;
   el('insBody').innerHTML = rows.length ? rows.map(r=>`<tr>
     <td><code>${esc(r.key||'—')}</code></td>
-    <td>${esc(r.title||'—')}${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,60))}${r.description.length>60?'…':''}</div>`:''}</td>
-    <td>${money(r.pricePerDay,cur())}</td>
+    <td><strong>${esc(r.title||'—')}</strong>${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,70))}${r.description.length>70?'…':''}</div>`:''}</td>
+    <td><strong>${money(r.pricePerDay,cur())}</strong>${r.pricePerDay==0?'<div style="font-size:10px;color:var(--good)">Included</div>':''}</td>
     <td>${r.sortOrder||0}</td>
     <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
     <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-ins="${esc(r._id||'')}">Edit</button>
       <button class="btn sm danger" data-del-ins="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="7" class="tbl-empty">No insurance plans yet.</td></tr>';
+    </td></tr>`).join('')
+  : q ? `<tr><td colspan="7" class="tbl-empty">No plans match "${esc(q)}".</td></tr>`
+      : '<tr><td colspan="7" class="tbl-empty">No insurance plans yet.</td></tr>';
 }
 
 function renderExtras() {
-  const rows = (state.snapshot?.extraServices||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const q = el('extrasSearch')?.value?.toLowerCase()||'';
+  const all = (state.snapshot?.extraServices||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const rows = q ? all.filter(r=>`${r.key}${r.title}`.toLowerCase().includes(q)) : all;
   el('extrasBody').innerHTML = rows.length ? rows.map(r=>`<tr>
     <td><code>${esc(r.key||'—')}</code></td>
-    <td>${esc(r.title||'—')}</td>
-    <td>${money(r.price,cur())}</td>
+    <td><strong>${esc(r.title||'—')}</strong>${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,60))}${r.description.length>60?'…':''}</div>`:''}</td>
+    <td><strong>${money(r.price,cur())}</strong></td>
     <td><span class="badge ${r.billingMode==='perDay'?'perday':'perbooking'}">${r.billingMode==='perDay'?'Per day':'Per booking'}</span></td>
+    <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
     <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-extra="${esc(r._id||'')}">Edit</button>
       <button class="btn sm danger" data-del-extra="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="6" class="tbl-empty">No extra services yet.</td></tr>';
+    </td></tr>`).join('')
+  : q ? `<tr><td colspan="7" class="tbl-empty">No services match "${esc(q)}".</td></tr>`
+      : '<tr><td colspan="7" class="tbl-empty">No extra services yet.</td></tr>';
 }
 
 function renderFees() {
-  const rows = (state.snapshot?.feeRules||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const q = el('feesSearch')?.value?.toLowerCase()||'';
+  const all = (state.snapshot?.feeRules||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const rows = q ? all.filter(r=>`${r.key}${r.title}${r.ruleType}`.toLowerCase().includes(q)) : all;
   el('feesBody').innerHTML = rows.length ? rows.map(r=>{
     const rtClass = r.ruleType==='ageRange'?'agerage':r.ruleType==='nightPickup'||r.ruleType==='nightDropoff'?'nightfee':'inactive';
     return `<tr>
       <td><code>${esc(r.key||'—')}</code></td>
-      <td>${esc(r.title||'—')}</td>
-      <td>${money(r.amount,cur())}</td>
+      <td><strong>${esc(r.title||'—')}</strong></td>
+      <td><strong>${money(r.amount,cur())}</strong></td>
       <td><span class="badge ${r.billingMode==='perDay'?'perday':'perbooking'}">${r.billingMode==='perDay'?'Per day':'Per booking'}</span></td>
       <td><span class="badge ${rtClass}">${esc(r.ruleType||'manual')}</span></td>
-      <td>${esc(r.audienceGroup||'—')}</td>
+      <td style="font-size:12px">${esc(r.audienceGroup||'—')}</td>
       <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
       <td class="btns">
         <button class="btn sm" data-edit-fee="${esc(r._id||'')}">Edit</button>
         <button class="btn sm danger" data-del-fee="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
       </td></tr>`;
-  }).join('') : '<tr><td colspan="8" class="tbl-empty">No fee rules yet.</td></tr>';
+  }).join('')
+  : q ? `<tr><td colspan="8" class="tbl-empty">No fees match "${esc(q)}".</td></tr>`
+      : '<tr><td colspan="8" class="tbl-empty">No fee rules yet.</td></tr>';
 }
 
 function renderRoles() {
@@ -1259,10 +1280,13 @@ function renderUsers() {
 
   el('usersBody').innerHTML = filtered.length ? filtered.map(u=>{
     const role = roles.find(r=>r.key===u.roleKey);
-    const linked = u.memberId ? '<span class="chip linked">Linked</span>' : '<span class="chip">Not linked</span>';
+    const linked = u.memberId ? '<span class="chip linked">Wix linked</span>' : '';
     return `<tr>
-      <td>${esc(u.email||'—')} ${linked}</td>
-      <td>${esc(u.fullName||'—')}</td>
+      <td>
+        <strong>${esc(u.fullName||'—')}</strong>
+        ${u.jobTitle?`<div style="font-size:11px;color:var(--muted)">${esc(u.jobTitle)}</div>`:''}
+      </td>
+      <td style="font-size:12px">${esc(u.email||'—')} ${linked}</td>
       <td>${esc(role?.label||u.roleKey||'—')}</td>
       <td><span class="badge ${u.active!==false?'active':'inactive'}">${u.active!==false?'Active':'Inactive'}</span></td>
       <td class="btns">
@@ -1323,9 +1347,14 @@ el('modalCancel')?.addEventListener('click', closeModal);
 el('modal')?.addEventListener('click', e => { if (e.target === el('modal')) closeModal(); });
 el('modalSave')?.addEventListener('click', () => { if (modalSaveFn) modalSaveFn(); });
 el('modalDelete')?.addEventListener('click', () => { if (modalDelFn) modalDelFn(); });
+document.addEventListener('keydown', e => {
+  if (!el('modal')?.classList.contains('show')) return;
+  if (e.key === 'Escape') { closeModal(); }
+  if ((e.ctrlKey||e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (modalSaveFn) modalSaveFn(); }
+});
 
 function mfld(label, input) { return `<div class="field-group" style="margin-bottom:12px"><label>${label}</label>${input}</div>`; }
-function minp(id, val='', type='text', ph='') { return `<input id="m_${id}" type="${type}" value="${esc(val)}" placeholder="${esc(ph)}">`.replace(/\$\{.*?\}/g,String(val||'')); }
+function minp(id, val='', type='text', ph='') { return `<input id="m_${id}" type="${type}" value="${esc(String(val??''))}" placeholder="${esc(ph)}"`+'>'; }
 function msel(id, opts, cur='') { return `<select id="m_${id}">${opts.map(([v,l])=>`<option value="${v}"${v==cur?' selected':''}>${l}</option>`).join('')}</select>`; }
 function mta(id, val='', ph='') { return `<textarea id="m_${id}" placeholder="${esc(ph)}">${esc(val)}</textarea>`; }
 function mchk(id, checked, label) { return `<div class="check-row"><input type="checkbox" id="m_${id}"${checked?' checked':''}><label for="m_${id}">${label}</label></div>`; }
@@ -1627,6 +1656,9 @@ function bindTableSearch() {
   el('catSearch')?.addEventListener('input', renderFleetCats);
   el('vehSearch')?.addEventListener('input', renderFleetVehs);
   el('locSearch')?.addEventListener('input', renderPickupLocations);
+  el('insSearch')?.addEventListener('input', renderInsurance);
+  el('extrasSearch')?.addEventListener('input', renderExtras);
+  el('feesSearch')?.addEventListener('input', renderFees);
   el('userSearch')?.addEventListener('input', renderUsers);
 }
 
@@ -1672,6 +1704,7 @@ function init() {
   bindBizActions();
   bindCrudButtons();
   bindSecurityButtons();
+  bindTableSearch();
 
   // Show loading state until snapshot arrives
   el('ovKpis').innerHTML = '<div class="tbl-empty" style="grid-column:1/-1">Connecting to backend — waiting for data…</div>';
