@@ -299,7 +299,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     <div class="section-banner">Vehicle classes shown to customers (Economy, SUV, Van…). Each category defines the base daily rate, seats, and features. Rate rules can override pricing per season.</div>
     <div class="tbl-search"><input id="catSearch" placeholder="Search categories…" /></div>
     <div class="tbl-wrap"><table id="catTable"><thead><tr>
-      <th>Code</th><th>Title / Specs</th><th>Price/day</th><th>Transmission</th><th>AC</th><th>Public</th><th>Status</th><th>Actions</th>
+      <th>Code</th><th>Title / Specs</th><th>Price/day</th><th>Transmission</th><th>AC</th><th>Vehicles</th><th>Public</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="catBody"></tbody></table></div>
   </section>
 
@@ -309,6 +309,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <button class="btn primary" id="addVehBtn">+ Add vehicle</button>
     </div>
     <div class="section-banner">Individual vehicles in the fleet. Mark vehicles as available, in maintenance, or reserved. Inactive vehicles are hidden from bookings entirely.</div>
+    <div class="btns" id="vehStatsBand" style="margin-bottom:8px"></div>
     <div class="tbl-search"><input id="vehSearch" placeholder="Search vehicles…" /></div>
     <div class="tbl-wrap"><table id="vehTable"><thead><tr>
       <th>Plate</th><th>Model</th><th>Category</th><th>Status</th><th>Active</th><th>Actions</th>
@@ -321,7 +322,10 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     <div class="panel blue-top">
       <div class="panel-head">
         <h3>Pricing seasons</h3>
-        <button class="btn primary sm" id="addSeasonBtn">+ Add season</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="seaStatsBand" style="font-size:12px;color:var(--muted)"></span>
+          <button class="btn primary sm" id="addSeasonBtn">+ Add season</button>
+        </div>
       </div>
       <div class="tbl-wrap"><table><thead><tr>
         <th>Key</th><th>Label</th><th>Start</th><th>End</th><th>Priority</th><th>Repeat</th><th>Status</th><th>Actions</th>
@@ -523,19 +527,16 @@ window.addEventListener('message', e => {
     case 'seedPricingResult':
     case 'resetPricingResult': {
       const r = msg.result || {};
-      const parts = [];
-      if (r.business) parts.push(`Business: ${r.business.saved||r.business.total||0}`);
-      if (r.insurance) parts.push(`Insurance: ${r.insurance.total||0}`);
-      if (r.extras) parts.push(`Extras: ${r.extras.total||0}`);
-      if (r.fees) parts.push(`Fees: ${r.fees.total||0}`);
-      showToast(parts.join(' · ') || 'Done', 'success');
+      const total = (r.business?.saved||0)+(r.insurance?.total||0)+(r.extras?.total||0)+(r.fees?.total||0)+(r.seasons?.total||0)+(r.rules?.total||0);
+      showToast(`${msg.type==='resetPricingResult'?'Reset':'Seed'} complete — ${total} record${total!==1?'s':''} processed`, 'success');
       break;
     }
     case 'staffPasswordResult': {
       const r = msg.result || {};
       const res = el('pwResult');
-      if (res) res.textContent = r.success ? `✓ Password ${r.mode==='set'?'set':'reset'} for ${r.email}` : '✗ Failed';
-      if (res) res.style.color = r.success ? 'var(--good)' : 'var(--danger)';
+      const txt = r.success ? `Password ${r.mode==='set'?'set':'reset'} for ${r.email}` : (r.error||'Password operation failed');
+      if (res) { res.textContent = txt; res.style.color = r.success ? 'var(--good)' : 'var(--danger)'; }
+      showToast(txt, r.success ? 'success' : 'error');
       break;
     }
     case 'staffInviteResult': {
@@ -560,9 +561,11 @@ function setBusy(flag) {
 function showToast(msg, tone='info') {
   const c = el('toastContainer');
   if (!c) return;
+  const icons = { success:'✓', error:'✗', info:'ℹ', warn:'⚠' };
+  const icon = icons[tone] || icons.info;
   const item = document.createElement('div');
   item.className = `toast-item ${tone}`;
-  item.textContent = msg;
+  item.innerHTML = `<span style="font-weight:800;margin-right:6px">${icon}</span>${esc(msg)}`;
   item.style.cursor = 'pointer';
   item.title = 'Click to dismiss';
   item.addEventListener('click', () => item.remove());
@@ -1135,41 +1138,57 @@ function saveBizSettings() {
     insuranceDetailsIntro:  v('bsInsuranceDetailsIntro','insuranceDetailsIntro'),
     insuranceDetailsBody:   v('bsInsuranceDetailsBody','insuranceDetailsBody'),
   });
+  showToast('Business settings saved', 'success');
 }
 
 // ── CRUD TABLES ───────────────────────────────────────────────────────────
 function renderFleetCats() {
   const rows = (state.snapshot?.vehicleCategories||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const vehs = (state.snapshot?.fleetVehicles||[]);
   const q = el('catSearch')?.value?.toLowerCase()||'';
   const filtered = q ? rows.filter(r=>`${r.title}${r.category}`.toLowerCase().includes(q)) : rows;
   el('catBody').innerHTML = filtered.length ? filtered.map(r=>{
     const specs = [r.seats?`${r.seats} seats`:'',r.doors?`${r.doors} doors`:'',r.luggage?`${r.luggage} bags`:''].filter(Boolean).join(' · ');
+    const vCount = vehs.filter(v=>v.category===r.category && v.active!==false).length;
     return `<tr>
       <td><code>${esc(r.category||'—')}</code></td>
       <td><strong>${esc(r.title||r.displayTitle||'—')}</strong>${specs?`<div style="font-size:11px;color:var(--muted)">${esc(specs)}</div>`:''}</td>
       <td>${money(r.price,cur())}</td>
       <td><span class="badge ${r.transmission==='automatic'?'perday':r.transmission==='cvt'?'reserved':'inactive'}" style="text-transform:capitalize">${esc(r.transmission||'—')}</span></td>
       <td>${r.airCondition?'<span class="badge active">AC</span>':'<span class="badge inactive">No AC</span>'}</td>
+      <td><span class="chip" title="Active vehicles in this category">${vCount} vehicle${vCount!==1?'s':''}</span></td>
       <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
       <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
       <td class="btns">
         <button class="btn sm" data-edit-cat="${esc(r._id||'')}">Edit</button>
         <button class="btn sm danger" data-del-cat="${esc(r._id||'')}" data-label="${esc(r.title||'')}">Delete</button>
       </td></tr>`;
-  }).join('') : '<tr><td colspan="8" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
+  }).join('') : '<tr><td colspan="9" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
 }
 
 function renderFleetVehs() {
   const cats = state.snapshot?.vehicleCategories||[];
-  const rows = (state.snapshot?.fleetVehicles||[]).slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||''));
+  const all = (state.snapshot?.fleetVehicles||[]).slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||''));
   const q = el('vehSearch')?.value?.toLowerCase()||'';
-  const filtered = q ? rows.filter(r=>`${r.plate}${r.model}`.toLowerCase().includes(q)) : rows;
+  const filtered = q ? all.filter(r=>`${r.plate}${r.model}${r.category}`.toLowerCase().includes(q)) : all;
+
+  const band = el('vehStatsBand');
+  if (band) {
+    const byStatus = s => all.filter(v=>v.status===s&&v.active!==false).length;
+    const avail = byStatus('available'), maint = byStatus('maintenance'), resv = byStatus('reserved'), inact = all.filter(v=>v.active===false).length;
+    band.innerHTML = `<span class="chip">Total: <strong>${all.length}</strong></span>`
+      + (avail ? `<span class="chip" style="border-color:rgba(21,128,61,.25);background:var(--good-bg);color:var(--good)">Available: <strong>${avail}</strong></span>` : '')
+      + (maint ? `<span class="chip" style="border-color:rgba(217,119,6,.25);background:#FFFBEB;color:#92400E">Maintenance: <strong>${maint}</strong></span>` : '')
+      + (resv  ? `<span class="chip" style="border-color:rgba(37,99,235,.25);background:#EFF6FF;color:#1d4ed8">Reserved: <strong>${resv}</strong></span>` : '')
+      + (inact ? `<span class="chip">Inactive: <strong>${inact}</strong></span>` : '');
+  }
+
   el('vehBody').innerHTML = filtered.length ? filtered.map(r=>{
     const cat = cats.find(c=>c._id===r.vehicleCategoryId||c.category===r.category);
     const statusClass = r.status==='available'?'active':r.status==='maintenance'?'maintenance':r.status==='reserved'?'reserved':'inactive';
     return `<tr>
       <td><code>${esc(r.plate||'—')}</code></td>
-      <td>${esc(r.model||r.displayTitle||'—')}</td>
+      <td><strong>${esc(r.model||r.displayTitle||'—')}</strong></td>
       <td>${esc(cat?.title||r.category||'—')}</td>
       <td><span class="badge ${statusClass}">${esc(r.status||'unknown')}</span></td>
       <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
@@ -1177,7 +1196,9 @@ function renderFleetVehs() {
         <button class="btn sm" data-edit-veh="${esc(r._id||'')}">Edit</button>
         <button class="btn sm danger" data-del-veh="${esc(r._id||'')}" data-label="${esc(r.plate||'')}">Delete</button>
       </td></tr>`;
-  }).join('') : '<tr><td colspan="6" class="tbl-empty">No vehicles yet.</td></tr>';
+  }).join('')
+  : q ? '<tr><td colspan="6" class="tbl-empty">No vehicles match your search.</td></tr>'
+      : '<tr><td colspan="6" class="tbl-empty">No vehicles yet.</td></tr>';
 }
 
 function renderPickupLocations() {
@@ -1203,17 +1224,25 @@ function renderPickupLocations() {
 
 function renderSeasons() {
   const rows = (state.snapshot?.pricingSeasons||[]).slice().sort((a,b)=>(a.priority||0)-(b.priority||0));
-  el('seasonsBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td><code style="font-size:11px">${esc(r.key||'—')}</code></td>
-    <td><strong>${esc(r.label||'—')}</strong></td>
-    <td>${fmtDate(r.startDate)}</td><td>${fmtDate(r.endDate)}</td>
-    <td><span class="badge ${(r.priority||0)>0?'perday':'inactive'}">${r.priority||0}</span></td>
-    <td>${r.repeatYearly?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
-    <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns">
-      <button class="btn sm" data-edit-season="${esc(r._id||'')}">Edit</button>
-      <button class="btn sm danger" data-del-season="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.label||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="8" class="tbl-empty">No seasons yet. Rate rules without a season apply year-round.</td></tr>';
+  const active = rows.filter(r=>r.active!==false).length;
+  const today = new Date().toISOString().slice(0,10);
+  const current = rows.filter(r => r.active!==false && r.startDate?.slice(0,10) <= today && r.endDate?.slice(0,10) >= today).length;
+  const sb = el('seaStatsBand');
+  if (sb) sb.textContent = rows.length ? `${active} active · ${current} currently in effect` : '';
+  el('seasonsBody').innerHTML = rows.length ? rows.map(r=>{
+    const inEffect = r.active!==false && r.startDate?.slice(0,10) <= today && r.endDate?.slice(0,10) >= today;
+    return `<tr${inEffect?' style="background:rgba(37,99,235,.03)"':''}>
+      <td><code style="font-size:11px">${esc(r.key||'—')}</code></td>
+      <td><strong>${esc(r.label||'—')}</strong>${inEffect?'<span class="badge perday" style="margin-left:6px;font-size:10px">Now</span>':''}</td>
+      <td>${fmtDate(r.startDate)}</td><td>${fmtDate(r.endDate)}</td>
+      <td><span class="badge ${(r.priority||0)>0?'perday':'inactive'}">${r.priority||0}</span></td>
+      <td>${r.repeatYearly?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
+      <td class="btns">
+        <button class="btn sm" data-edit-season="${esc(r._id||'')}">Edit</button>
+        <button class="btn sm danger" data-del-season="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.label||'')}">Delete</button>
+      </td></tr>`;
+  }).join('') : '<tr><td colspan="8" class="tbl-empty">No seasons yet. Rate rules without a season apply year-round.</td></tr>';
 }
 
 function renderRules() {
@@ -1395,7 +1424,18 @@ function openModal(title, bodyHtml, onSave, onDelete=null) {
   modalSaveFn = onSave;
   modalDelFn = onDelete;
   el('modal').classList.add('show');
+  // Focus the first editable field in the modal
+  setTimeout(() => el('modalBody')?.querySelector('input:not([type=checkbox]),select,textarea')?.focus(), 60);
   requestResize();
+}
+
+// Wire auto-slug: while key field is empty, fill it from the source field on input
+function wireAutoSlug(srcId, keyId) {
+  const src = el('m_'+srcId), key = el('m_'+keyId);
+  if (!src || !key) return;
+  let locked = key.value !== '';
+  key.addEventListener('input', () => { locked = true; }, { once: true });
+  src.addEventListener('input', () => { if (!locked) key.value = slug(src.value); });
 }
 
 function closeModal() {
@@ -1519,6 +1559,7 @@ function openSeasonModal(id='') {
       priority:mn('priority'), repeatYearly:mc('repeatYearly'), description:mv('description'), active:mc('active') });
     closeModal();
   });
+  wireAutoSlug('label','key');
 }
 
 function openRuleModal(id='') {
@@ -1556,6 +1597,7 @@ function openInsModal(id='') {
       active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
   });
+  wireAutoSlug('title','key');
 }
 
 function openExtraModal(id='') {
@@ -1573,6 +1615,7 @@ function openExtraModal(id='') {
       sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
   });
+  wireAutoSlug('title','key');
 }
 
 function openFeeModal(id='') {
@@ -1592,6 +1635,7 @@ function openFeeModal(id='') {
       sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
   });
+  wireAutoSlug('title','key');
 }
 
 function openRoleModal(id='') {
@@ -1619,6 +1663,7 @@ function openRoleModal(id='') {
     post('upsertStaffRole',{ _id:id||undefined, key:slug(mv('key')), label:mv('label'), active:mc('active'), permissions, specialPermissions });
     closeModal();
   });
+  wireAutoSlug('label','key');
 }
 
 function openUserModal(id='') {
@@ -1677,6 +1722,7 @@ function openAddLocation() {
     post('upsertPickupLocation', _locationPayload());
     closeModal(); renderPickupLocations();
   });
+  wireAutoSlug('label','key');
 }
 
 function openEditLocation(id) {
