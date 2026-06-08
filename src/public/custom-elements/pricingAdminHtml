@@ -172,15 +172,28 @@ tr:hover td{background:rgba(0,0,0,.02)}
 .panel.gold-top{border-top:3px solid #C09840}
 .panel.purple-top{border-top:3px solid #8B5CF6}
 
-/* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;padding:20px;overflow-y:auto}
-.modal-overlay.show{display:flex;align-items:flex-start;justify-content:center}
-.modal-box{background:#fff;border-radius:var(--r-xl);width:100%;max-width:680px;box-shadow:var(--sh-lg);margin:auto}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
-.modal-head h3{margin:0;font-size:17px}
-.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;padding:4px}
-.modal-body{padding:20px}
-.modal-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+/* ── DRAWER (slide-over) ── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(15,10,5,.42);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:100;opacity:0;visibility:hidden;transition:opacity .26s ease,visibility .26s}
+.drawer-overlay.show{opacity:1;visibility:visible}
+.drawer-panel{position:absolute;top:0;right:0;height:100%;width:min(560px,100%);background:var(--card);box-shadow:-14px 0 44px rgba(0,0,0,.22);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .32s cubic-bezier(.32,.72,0,1)}
+.drawer-overlay.show .drawer-panel{transform:translateX(0)}
+.drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:20px 22px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,var(--card2))}
+.drawer-eyebrow{display:inline-flex;align-items:center;gap:6px;font:800 10px var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--gold2);margin-bottom:6px}
+.drawer-eyebrow::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold2)}
+.drawer-head h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.drawer-head p{font:400 12.5px var(--f);color:var(--muted);margin-top:4px;line-height:1.45}
+.drawer-close{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--sub);line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.drawer-close:hover{background:var(--danger-bg);color:var(--danger);border-color:rgba(220,38,38,.3)}
+.drawer-body{flex:1;overflow-y:auto;padding:18px 22px;-webkit-overflow-scrolling:touch}
+.drawer-foot{display:flex;gap:8px;align-items:center;padding:14px 22px;border-top:1px solid var(--line);background:#fff;box-shadow:0 -3px 14px rgba(0,0,0,.05)}
+.drawer-foot .btn{padding:9px 18px}
+@media(max-width:560px){.drawer-panel{width:100%}}
+/* Modal field sections reuse .sc card styles; consistent inner spacing */
+.drawer-body .sc:last-child{margin-bottom:0}
+.drawer-body .field-row{margin-bottom:0}
+.drawer-body .sc-b > * + *{margin-top:12px}
+.drawer-body .tog-row{padding:10px 0}
+.req{color:var(--danger);font-weight:700}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
@@ -481,17 +494,21 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
   </section>
 </div>
 
-<div class="modal-overlay" id="modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3 id="modalTitle">Edit</h3>
-      <button class="modal-close" id="modalClose">×</button>
+<div class="drawer-overlay" id="modal">
+  <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="drawer-head">
+      <div>
+        <span class="drawer-eyebrow" id="modalEyebrow"></span>
+        <h3 id="modalTitle">Edit</h3>
+        <p id="modalSubtitle"></p>
+      </div>
+      <button class="drawer-close" id="modalClose" aria-label="Close">×</button>
     </div>
-    <div class="modal-body" id="modalBody"></div>
-    <div class="modal-foot">
+    <div class="drawer-body" id="modalBody"></div>
+    <div class="drawer-foot">
       <button class="btn danger sm" id="modalDelete" style="margin-right:auto;display:none">Delete</button>
       <button class="btn sm" id="modalCancel">Cancel</button>
-      <button class="btn primary sm" id="modalSave">Save</button>
+      <button class="btn primary" id="modalSave">Save changes</button>
     </div>
   </div>
 </div>
@@ -1451,15 +1468,19 @@ function renderAudit() {
 // ── MODAL ─────────────────────────────────────────────────────────────────
 let modalSaveFn = null, modalDelFn = null;
 
-function openModal(title, bodyHtml, onSave, onDelete=null) {
+function openModal(title, bodyHtml, onSave, onDelete=null, meta={}) {
   el('modalTitle').textContent = title;
   el('modalBody').innerHTML = bodyHtml;
+  const eb = el('modalEyebrow'); if (eb) { eb.textContent = meta.eyebrow||''; eb.style.display = meta.eyebrow?'inline-flex':'none'; }
+  const sub = el('modalSubtitle'); if (sub) { sub.textContent = meta.subtitle||''; sub.style.display = meta.subtitle?'block':'none'; }
+  el('modalSave').textContent = meta.saveLabel || 'Save changes';
   el('modalDelete').style.display = onDelete ? 'inline-flex' : 'none';
   modalSaveFn = onSave;
   modalDelFn = onDelete;
+  el('modalBody').scrollTop = 0;
   el('modal').classList.add('show');
-  // Focus the first editable field in the modal
-  setTimeout(() => el('modalBody')?.querySelector('input:not([type=checkbox]),select,textarea')?.focus(), 60);
+  // Focus the first editable field in the drawer once the slide-in settles
+  setTimeout(() => el('modalBody')?.querySelector('input:not([type=checkbox]):not([type=hidden]),select,textarea')?.focus(), 320);
   requestResize();
 }
 
@@ -1488,11 +1509,26 @@ document.addEventListener('keydown', e => {
   if ((e.ctrlKey||e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (modalSaveFn) modalSaveFn(); }
 });
 
-function mfld(label, input) { return `<div class="field-group" style="margin-bottom:12px"><label>${label}</label>${input}</div>`; }
-function minp(id, val='', type='text', ph='') { return `<input id="m_${id}" type="${type}" value="${esc(String(val??''))}" placeholder="${esc(ph)}"`+'>'; }
-function msel(id, opts, cur='') { return `<select id="m_${id}">${opts.map(([v,l])=>`<option value="${v}"${v==cur?' selected':''}>${l}</option>`).join('')}</select>`; }
-function mta(id, val='', ph='') { return `<textarea id="m_${id}" placeholder="${esc(ph)}">${esc(val)}</textarea>`; }
+// Field group: label (with optional required marker) + input + optional hint
+function mfld(label, input, hint='') {
+  const lab = label ? `<label>${label.replace(/\s\*$/,' <span class="req">*</span>')}</label>` : '';
+  return `<div class="field-group">${lab}${input}${hint?`<div class="fhint">${hint}</div>`:''}</div>`;
+}
+function minp(id, val='', type='text', ph='') { return `<input id="m_${id}" type="${type}" value="${esc(String(val??''))}" placeholder="${esc(ph)}">`; }
+function msel(id, opts, cur='') { return `<select id="m_${id}">${opts.map(([v,l])=>`<option value="${v}"${v==cur?' selected':''}>${esc(l)}</option>`).join('')}</select>`; }
+function mta(id, val='', ph='', rows=3) { return `<textarea id="m_${id}" rows="${rows}" placeholder="${esc(ph)}">${esc(String(val??''))}</textarea>`; }
+// Number input, optionally with a unit badge on the right
+function mnum(id, val, unit='', ph='0') { return unit
+  ? `<div class="num-row"><input id="m_${id}" type="number" value="${esc(String(val??''))}" placeholder="${esc(ph)}"><span class="num-unit">${esc(unit)}</span></div>`
+  : `<input id="m_${id}" type="number" value="${esc(String(val??''))}" placeholder="${esc(ph)}">`; }
+// Toggle switch row (replaces plain checkboxes in modals)
+function mtog(id, checked, label, hint='') {
+  return `<div class="tog-row"><div class="tog-info"><b>${label}</b>${hint?`<small>${hint}</small>`:''}</div><label class="tog"><input type="checkbox" id="m_${id}"${checked?' checked':''}><span class="tog-bar"></span></label></div>`;
+}
+// Plain checkbox row (kept for dense grids like the role permission matrix)
 function mchk(id, checked, label) { return `<div class="check-row"><input type="checkbox" id="m_${id}"${checked?' checked':''}><label for="m_${id}">${label}</label></div>`; }
+// Section card inside a modal — reuses the .sc card styles from the panes
+function msec(ico, title, body, desc='') { return `<div class="sc"><div class="sc-h"><span class="sc-ico">${ico}</span><h4>${esc(title)}</h4>${desc?`<span class="sc-desc">${esc(desc)}</span>`:''}</div><div class="sc-b">${body}</div></div>`; }
 function mv(id, d='') { return el('m_'+id)?.value?.trim()??d; }
 function mn(id, d=0) { return Number(el('m_'+id)?.value??d)||d; }
 function mc(id) { return !!el('m_'+id)?.checked; }
@@ -1541,12 +1577,23 @@ function bindCrudButtons() {
 // ── ENTITY MODALS ─────────────────────────────────────────────────────────
 function openCatModal(id='') {
   const item = id ? (state.snapshot?.vehicleCategories||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Title *',minp('title',item.title,'text','Economy')),mfld('Category code *',minp('category',item.category,'text','ECO')))
-    + mr3(mfld('Price / day €',minp('price',item.price,'number','0')),mfld('Seats',minp('seats',item.seats,'text','5')),mfld('Doors',minp('doors',item.doors,'text','4')))
-    + mr3(mfld('Luggage',minp('luggage',item.luggage,'text','2')),mfld('Transmission',msel('transmission',[['manual','Manual'],['automatic','Automatic'],['cvt','CVT']],item.transmission)),mfld('Fuel type',msel('fuelType',[['petrol','Petrol'],['diesel','Diesel'],['hybrid','Hybrid'],['electric','Electric']],item.fuelType)))
-    + mchk('airCondition',item.airCondition,'Air conditioning')
-    + mfld('Description',mta('description',item.description))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+  const body =
+    msec('🚗','Basics',
+      mr2(mfld('Title *',minp('title',item.title,'text','Economy'),'Customer-facing class name'),
+          mfld('Category code *',minp('category',item.category,'text','ECO'),'Short uppercase code'))
+      + mfld('Description',mta('description',item.description,'Shown on the vehicle selection page')))
+    + msec('⚙️','Specifications',
+      mr3(mfld('Price / day',mnum('price',item.price,cur())),
+          mfld('Seats',minp('seats',item.seats,'text','5')),
+          mfld('Doors',minp('doors',item.doors,'text','4')))
+      + mr3(mfld('Luggage',minp('luggage',item.luggage,'text','2')),
+            mfld('Transmission',msel('transmission',[['manual','Manual'],['automatic','Automatic'],['cvt','CVT']],item.transmission)),
+            mfld('Fuel type',msel('fuelType',[['petrol','Petrol'],['diesel','Diesel'],['hybrid','Hybrid'],['electric','Electric']],item.fuelType)))
+      + mtog('airCondition',item.airCondition,'Air conditioning','Vehicle has working A/C'))
+    + msec('👁','Visibility & ordering',
+      mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive categories are hidden everywhere')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show on the public website'));
   openModal(id?'Edit fleet category':'Add fleet category', body, () => {
     if (!mv('title')) return merr('title','Title is required');
     if (!mv('category')) return merr('category','Category code is required');
@@ -1556,33 +1603,44 @@ function openCatModal(id='') {
       transmission:mv('transmission'), fuelType:mv('fuelType'), airCondition:mc('airCondition'),
       description:mv('description'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
-  });
+  }, null, { eyebrow:'Fleet', subtitle:'Vehicle class shown to customers during booking', saveLabel:id?'Save category':'Create category' });
 }
 
 function openVehModal(id='') {
   const item = id ? (state.snapshot?.fleetVehicles||[]).find(x=>x._id===id)||{} : {};
   const cats = (state.snapshot?.vehicleCategories||[]);
   const catOpts = cats.map(c=>[c.category,`${c.title} (${c.category})`]);
-  const body = mr2(mfld('Plate *',minp('plate',item.plate,'text','ABC-1234')),mfld('Model *',minp('model',item.model,'text','Toyota Yaris')))
-    + mr2(mfld('Category *',msel('category',catOpts,item.category||cats[0]?.category||'')),mfld('Status',msel('status',[['available','Available'],['maintenance','Maintenance'],['reserved','Reserved'],['inactive','Inactive']],item.status||'available')))
-    + mchk('active',item.active!==false,'Active')
-    + mfld('Notes',mta('notes',item.notes));
+  const body =
+    msec('🚙','Vehicle',
+      mr2(mfld('Plate *',minp('plate',item.plate,'text','ABC-1234')),
+          mfld('Model *',minp('model',item.model,'text','Toyota Yaris')))
+      + mr2(mfld('Category *',msel('category',catOpts,item.category||cats[0]?.category||''),'Which class this vehicle belongs to'),
+            mfld('Status',msel('status',[['available','Available'],['maintenance','Maintenance'],['reserved','Reserved'],['inactive','Inactive']],item.status||'available'))))
+    + msec('📝','Notes & availability',
+      mfld('Notes',mta('notes',item.notes,'Internal notes — not shown to customers'))
+      + mtog('active',item.active!==false,'Active','Inactive vehicles are hidden from bookings entirely'));
   openModal(id?'Edit fleet vehicle':'Add fleet vehicle', body, () => {
     if (!mv('plate')) return merr('plate','Plate is required');
     if (!mv('model')) return merr('model','Model is required');
     post('upsertFleetVehicle',{ _id:id||undefined, plate:mv('plate').toUpperCase(), model:mv('model'),
       category:mv('category'), status:mv('status'), active:mc('active'), notes:mv('notes') });
     closeModal();
-  });
+  }, null, { eyebrow:'Fleet', subtitle:'Individual vehicle in your fleet', saveLabel:id?'Save vehicle':'Add vehicle' });
 }
 
 function openSeasonModal(id='') {
   const item = id ? (state.snapshot?.pricingSeasons||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Label *',minp('label',item.label,'text','High season')),mfld('Key (slug)',minp('key',item.key||'','text','high_season')))
-    + mr3(mfld('Start date *',minp('startDate',item.startDate?.slice(0,10),'date')),mfld('End date *',minp('endDate',item.endDate?.slice(0,10),'date')),mfld('Priority',minp('priority',item.priority,'number','0')))
-    + mchk('repeatYearly',item.repeatYearly,'Repeat yearly (match month/day each year)')
-    + mfld('Description',mta('description',item.description))
-    + mchk('active',item.active!==false,'Active');
+  const body =
+    msec('🏷','Season',
+      mr2(mfld('Label *',minp('label',item.label,'text','High season')),
+          mfld('Key (slug)',minp('key',item.key||'','text','high_season'),'Auto-filled from the label'))
+      + mfld('Description',mta('description',item.description,'Optional notes about this period')))
+    + msec('📅','Date range',
+      mr2(mfld('Start date *',minp('startDate',item.startDate?.slice(0,10),'date')),
+          mfld('End date *',minp('endDate',item.endDate?.slice(0,10),'date')))
+      + mfld('Priority',mnum('priority',item.priority,'','0'),'Higher priority wins when seasons overlap')
+      + mtog('repeatYearly',item.repeatYearly,'Repeat yearly','Match the month & day each year'))
+    + msec('👁','Status', mtog('active',item.active!==false,'Active','Inactive seasons are ignored when pricing'));
   openModal(id?'Edit pricing season':'Add pricing season', body, () => {
     if (!mv('label')) return merr('label','Label is required');
     if (!mv('startDate')) return merr('startDate','Start date is required');
@@ -1592,7 +1650,7 @@ function openSeasonModal(id='') {
     post('upsertPricingSeason',{ _id:id||undefined, key, label:mv('label'), startDate:mv('startDate'), endDate:mv('endDate'),
       priority:mn('priority'), repeatYearly:mc('repeatYearly'), description:mv('description'), active:mc('active') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Date range that adjusts rates via rate rules', saveLabel:id?'Save season':'Create season' });
   wireAutoSlug('label','key');
 }
 
@@ -1602,10 +1660,16 @@ function openRuleModal(id='') {
   const seas = (state.snapshot?.pricingSeasons||[]);
   const catOpts = [['','All categories'],...cats.map(c=>[c.category,`${c.title} (${c.category})`])];
   const seaOpts = [['','All seasons'],...seas.map(s=>[s.key,s.label])];
-  const body = mr2(mfld('Category',msel('categoryCode',catOpts,item.categoryCode||'')),mfld('Season',msel('seasonKey',seaOpts,item.seasonKey||'')))
-    + mr3(mfld('Min days',minp('minDays',item.minDays,'number','1')),mfld('Max days (0=unlimited)',minp('maxDays',item.maxDays,'number','0')),mfld('Price / day €',minp('pricePerDay',item.pricePerDay,'number','0')))
-    + mfld('Label',minp('label',item.label))
-    + mchk('active',item.active!==false,'Active');
+  const body =
+    msec('🎯','Scope',
+      mr2(mfld('Category',msel('categoryCode',catOpts,item.categoryCode||''),'Leave as "All" to apply to every category'),
+          mfld('Season',msel('seasonKey',seaOpts,item.seasonKey||''),'Leave as "All" for year-round')))
+    + msec('💲','Pricing',
+      mr3(mfld('Min days',mnum('minDays',item.minDays,'','1')),
+          mfld('Max days',mnum('maxDays',item.maxDays,'','0'),'0 = unlimited'),
+          mfld('Price / day',mnum('pricePerDay',item.pricePerDay,cur())))
+      + mfld('Label',minp('label',item.label,'text','Optional internal label')))
+    + msec('👁','Status', mtog('active',item.active!==false,'Active','Inactive rules are skipped when pricing'));
   openModal(id?'Edit rate rule':'Add rate rule', body, () => {
     if (mn('minDays')<1) return merr('minDays','Min days must be at least 1');
     if (mn('maxDays')>0 && mn('maxDays')<mn('minDays')) return merr('maxDays','Max days must be ≥ min days');
@@ -1613,15 +1677,23 @@ function openRuleModal(id='') {
     post('upsertCategoryRateRule',{ _id:id||undefined, categoryCode:mv('categoryCode'), seasonKey:mv('seasonKey'),
       minDays:mn('minDays',1), maxDays:mn('maxDays'), pricePerDay:mn('pricePerDay'), label:mv('label'), active:mc('active') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Daily rate for a category within a duration band', saveLabel:id?'Save rule':'Create rule' });
 }
 
 function openInsModal(id='') {
   const item = id ? (state.snapshot?.insurancePlans||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Key (slug) *',minp('key',item.key,'text','cdw_basic')),mfld('Title *',minp('title',item.title,'text','Basic CDW')))
-    + mr2(mfld('Label (short)',minp('label',item.label)),mfld('Price / day €',minp('pricePerDay',item.pricePerDay,'number','0')))
-    + mfld('Description',mta('description',item.description))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+  const body =
+    msec('🛡','Plan',
+      mr2(mfld('Title *',minp('title',item.title,'text','Basic CDW')),
+          mfld('Key (slug) *',minp('key',item.key,'text','cdw_basic'),'Auto-filled from the title'))
+      + mfld('Short label',minp('label',item.label,'text','CDW'),'Compact name used in summaries')
+      + mfld('Description',mta('description',item.description,'What this coverage includes')))
+    + msec('💲','Pricing',
+      mfld('Price / day',mnum('pricePerDay',item.pricePerDay,cur()),'Set 0 for a plan that is included free'))
+    + msec('👁','Visibility & ordering',
+      mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive plans are hidden everywhere')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show during booking'));
   openModal(id?'Edit insurance plan':'Add insurance plan', body, () => {
     if (!mv('key')) return merr('key','Key is required');
     if (!mv('title')) return merr('title','Title is required');
@@ -1630,16 +1702,24 @@ function openInsModal(id='') {
       pricePerDay:mn('pricePerDay'), description:mv('description'), sortOrder:mn('sortOrder'),
       active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Coverage option offered during booking', saveLabel:id?'Save plan':'Create plan' });
   wireAutoSlug('title','key');
 }
 
 function openExtraModal(id='') {
   const item = id ? (state.snapshot?.extraServices||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Key (slug) *',minp('key',item.key,'text','child_seat')),mfld('Title *',minp('title',item.title,'text','Child seat')))
-    + mr2(mfld('Price €',minp('price',item.price,'number','0')),mfld('Billing mode',msel('billingMode',[['perDay','Per day'],['perBooking','Per booking']],item.billingMode||'perDay')))
-    + mfld('Description',mta('description',item.description))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+  const body =
+    msec('✚','Service',
+      mr2(mfld('Title *',minp('title',item.title,'text','Child seat')),
+          mfld('Key (slug) *',minp('key',item.key,'text','child_seat'),'Auto-filled from the title'))
+      + mfld('Description',mta('description',item.description,'Shown next to the option during booking')))
+    + msec('💲','Pricing',
+      mr2(mfld('Price',mnum('price',item.price,cur())),
+          mfld('Billing mode',msel('billingMode',[['perDay','Per day'],['perBooking','Per booking']],item.billingMode||'perDay'),'How the fee is charged')))
+    + msec('👁','Visibility & ordering',
+      mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive services are hidden everywhere')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show during booking'));
   openModal(id?'Edit extra service':'Add extra service', body, () => {
     if (!mv('key')) return merr('key','Key is required');
     if (!mv('title')) return merr('title','Title is required');
@@ -1648,17 +1728,26 @@ function openExtraModal(id='') {
       price:mn('price'), billingMode:mv('billingMode','perDay'), description:mv('description'),
       sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Optional add-on customers can select', saveLabel:id?'Save service':'Create service' });
   wireAutoSlug('title','key');
 }
 
 function openFeeModal(id='') {
   const item = id ? (state.snapshot?.feeRules||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Key (slug) *',minp('key',item.key,'text','late_return')),mfld('Title *',minp('title',item.title,'text','Late return fee')))
-    + mr3(mfld('Amount €',minp('amount',item.amount,'number','0')),mfld('Billing mode',msel('billingMode',[['perBooking','Per booking'],['perDay','Per day']],item.billingMode||'perBooking')),mfld('Rule type',msel('ruleType',[['manual','Manual (applied manually)'],['ageRange','Age range (e.g. 19–22, 70+)'],['nightPickup','Night pickup'],['nightDropoff','Night dropoff']],item.ruleType||'manual')))
-    + mfld('Audience group',minp('audienceGroup',item.audienceGroup,'text','19-22 or 70+'),'<span style="font-size:11px;color:var(--muted)">For age range rules: enter the age bracket e.g. <code>19-22</code> or <code>70+</code></span>')
-    + mfld('Description',mta('description',item.description))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+  const body =
+    msec('⚡','Fee',
+      mr2(mfld('Title *',minp('title',item.title,'text','Late return fee')),
+          mfld('Key (slug) *',minp('key',item.key,'text','late_return'),'Auto-filled from the title'))
+      + mfld('Description',mta('description',item.description,'Internal description of when this applies')))
+    + msec('🧮','Charge',
+      mr2(mfld('Amount',mnum('amount',item.amount,cur())),
+          mfld('Billing mode',msel('billingMode',[['perBooking','Per booking'],['perDay','Per day']],item.billingMode||'perBooking')))
+      + mfld('Rule type',msel('ruleType',[['manual','Manual (applied manually)'],['ageRange','Age range (e.g. 19–22, 70+)'],['nightPickup','Night pickup'],['nightDropoff','Night dropoff']],item.ruleType||'manual'),'How this fee is triggered')
+      + mfld('Audience group',minp('audienceGroup',item.audienceGroup,'text','19-22 or 70+'),'For age-range rules, enter the bracket e.g. <code>19-22</code> or <code>70+</code>'))
+    + msec('👁','Visibility & ordering',
+      mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive fees are never applied')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show in fee disclosures'));
   openModal(id?'Edit fee rule':'Add fee rule', body, () => {
     if (!mv('key')) return merr('key','Key is required');
     if (!mv('title')) return merr('title','Title is required');
@@ -1668,7 +1757,7 @@ function openFeeModal(id='') {
       audienceGroup:mv('audienceGroup'), description:mv('description'),
       sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Automatic surcharge applied to bookings', saveLabel:id?'Save fee':'Create fee' });
   wireAutoSlug('title','key');
 }
 
@@ -1678,16 +1767,20 @@ function openRoleModal(id='') {
   const MODULES = ['bookings','rentals','customers','pricing','fleet','reports','financials'];
   const ACTIONS = ['view','insert','edit','delete'];
   const SPECIALS = ['cancelBooking','cancelRental','voidInvoice','manageStaff','manageBusinessSettings','overridePricing','approveManualOverride','viewChangeHistory'];
-  const matrix = `<div class="field-sub">Module permissions</div>
-    <div style="overflow-x:auto"><table class="perm-table"><thead><tr><th>Module</th>${ACTIONS.map(a=>`<th>${a}</th>`).join('')}</tr></thead><tbody>
-    ${MODULES.map(m=>`<tr><td>${m}</td>${ACTIONS.map(a=>`<td><input type="checkbox" id="m_p_${m}_${a}" ${perms[m]?.includes(a)||item.isAdmin?'checked':''}></td>`).join('')}</tr>`).join('')}
-    </tbody></table></div>
-    <div class="field-sub">Special permissions</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
+  const moduleMatrix = `<div style="overflow-x:auto"><table class="perm-table"><thead><tr><th>Module</th>${ACTIONS.map(a=>`<th style="text-transform:capitalize">${a}</th>`).join('')}</tr></thead><tbody>
+    ${MODULES.map(m=>`<tr><td style="text-transform:capitalize">${m}</td>${ACTIONS.map(a=>`<td><input type="checkbox" id="m_p_${m}_${a}" ${perms[m]?.includes(a)||item.isAdmin?'checked':''}></td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+  const specialGrid = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
     ${SPECIALS.map(s=>`<div class="check-row"><input type="checkbox" id="m_sp_${s}" ${(item.specialPermissions||[]).includes(s)||item.isAdmin?'checked':''}><label for="m_sp_${s}">${s}</label></div>`).join('')}
     </div>`;
-  const body = mr2(mfld('Key *',minp('key',item.key,'text','manager')),mfld('Label *',minp('label',item.label,'text','Manager')))
-    + mchk('active',item.active!==false,'Active') + matrix;
+  const body =
+    msec('👤','Role',
+      mr2(mfld('Label *',minp('label',item.label,'text','Manager')),
+          mfld('Key *',minp('key',item.key,'text','manager'),'Auto-filled from the label'))
+      + mtog('active',item.active!==false,'Active','Inactive roles cannot be assigned')
+      + (item.isAdmin?'<div class="info-box" style="margin-top:8px">This is the built-in admin role — it always has every permission.</div>':''))
+    + msec('🧩','Module permissions', moduleMatrix, 'view · insert · edit · delete')
+    + msec('⭐','Special permissions', specialGrid);
   openModal(id?'Edit role':'Add role', body, () => {
     if (!mv('key')) return merr('key','Role key is required');
     if (!mv('label')) return merr('label','Role label is required');
@@ -1696,7 +1789,7 @@ function openRoleModal(id='') {
     const specialPermissions = SPECIALS.filter(s=>el(`m_sp_${s}`)?.checked);
     post('upsertStaffRole',{ _id:id||undefined, key:slug(mv('key')), label:mv('label'), active:mc('active'), permissions, specialPermissions });
     closeModal();
-  });
+  }, null, { eyebrow:'Access', subtitle:'Controls what staff with this role can do', saveLabel:id?'Save role':'Create role' });
   wireAutoSlug('label','key');
 }
 
@@ -1704,11 +1797,20 @@ function openUserModal(id='') {
   const item = id ? (state.access?.users||[]).find(x=>x._id===id)||{} : {};
   const roles = (state.access?.roles||[]);
   const roleOpts = roles.map(r=>[r.key,r.label]);
-  const body = mr2(mfld('Full name *',minp('fullName',item.fullName)),mfld('Email *',minp('email',item.email,'email')))
-    + mr3(mfld('Role',msel('roleKey',roleOpts,item.roleKey||roles[0]?.key||'')),mfld('Job title',minp('jobTitle',item.jobTitle,'text','Manager')),mfld('Phone',minp('phone',item.phone,'tel','+30 69...')))
-    + mr3(mfld('Start date',minp('startDate',item.startDate?.slice(0,10),'date')),mfld('Emergency contact name',minp('emergencyName',item.emergencyName)),mfld('Emergency contact phone',minp('emergencyPhone',item.emergencyPhone,'tel')))
-    + mfld('Notes',mta('notes',item.notes))
-    + mchk('active',item.active!==false,'Active');
+  const body =
+    msec('🪪','Identity',
+      mr2(mfld('Full name *',minp('fullName',item.fullName,'text','Jane Doe')),
+          mfld('Email *',minp('email',item.email,'email','jane@example.com'),id?'':'An invite will be sent to this address')))
+    + msec('💼','Role & job',
+      mr3(mfld('Role',msel('roleKey',roleOpts,item.roleKey||roles[0]?.key||'')),
+          mfld('Job title',minp('jobTitle',item.jobTitle,'text','Manager')),
+          mfld('Phone',minp('phone',item.phone,'tel','+30 69...'))))
+    + msec('🗂','Employment details',
+      mfld('Start date',minp('startDate',item.startDate?.slice(0,10),'date'))
+      + mr2(mfld('Emergency contact name',minp('emergencyName',item.emergencyName)),
+            mfld('Emergency contact phone',minp('emergencyPhone',item.emergencyPhone,'tel')))
+      + mfld('Notes',mta('notes',item.notes,'Internal HR notes')))
+    + msec('👁','Status', mtog('active',item.active!==false,'Active','Inactive users cannot log in'));
   openModal(id?'Edit staff user':'Add / invite staff user', body, () => {
     if (!mv('fullName')) return merr('fullName','Full name is required');
     if (!mv('email')) return merr('email','Email is required');
@@ -1719,17 +1821,21 @@ function openUserModal(id='') {
     if (id) post('upsertStaffUser', payload);
     else post('inviteStaffUser', payload);
     closeModal();
-  });
+  }, null, { eyebrow:'Access', subtitle:id?'Update this staff member’s details':'Invite a new staff member to the backroom', saveLabel:id?'Save user':'Send invite' });
 }
 
 function _locationFieldLabelsBody(item) {
   item = item || {};
-  return '<div class="field-sub">Display labels</div>'
-    + mr2(mfld('Pickup info label',minp('pickupInfoLabel',item.pickupInfoLabel||'','text','e.g. Pickup at airport')),mfld('Pickup info placeholder',minp('pickupInfoPlaceholder',item.pickupInfoPlaceholder||'','text','e.g. Terminal 2')))
-    + mr2(mfld('Dropoff info label',minp('dropoffInfoLabel',item.dropoffInfoLabel||'','text','e.g. Dropoff location')),mfld('Dropoff info placeholder',minp('dropoffInfoPlaceholder',item.dropoffInfoPlaceholder||'','text','e.g. Hotel name')))
-    + '<div class="field-sub">Origin field</div>'
-    + mchk('showOriginField',!!(item.showOriginField),'Show origin field (e.g. flight number, hotel name)')
-    + mr2(mfld('Origin field label',minp('originFieldLabel',item.originFieldLabel||'','text','e.g. Flight number')),mfld('Origin field placeholder',minp('originFieldPlaceholder',item.originFieldPlaceholder||'','text','e.g. A3 123')));
+  return msec('🏷','Booking form labels',
+      mr2(mfld('Pickup info label',minp('pickupInfoLabel',item.pickupInfoLabel||'','text','e.g. Pickup at airport')),
+          mfld('Pickup info placeholder',minp('pickupInfoPlaceholder',item.pickupInfoPlaceholder||'','text','e.g. Terminal 2')))
+      + mr2(mfld('Dropoff info label',minp('dropoffInfoLabel',item.dropoffInfoLabel||'','text','e.g. Dropoff location')),
+            mfld('Dropoff info placeholder',minp('dropoffInfoPlaceholder',item.dropoffInfoPlaceholder||'','text','e.g. Hotel name'))),
+      'Custom prompts shown in the booking form')
+    + msec('✈️','Origin field',
+      mtog('showOriginField',!!(item.showOriginField),'Show origin field','Ask for a flight number, hotel name, etc.')
+      + mr2(mfld('Origin field label',minp('originFieldLabel',item.originFieldLabel||'','text','e.g. Flight number')),
+            mfld('Origin field placeholder',minp('originFieldPlaceholder',item.originFieldPlaceholder||'','text','e.g. A3 123'))));
 }
 
 function _locationPayload(extra) {
@@ -1743,30 +1849,36 @@ function _locationPayload(extra) {
   return Object.assign({}, extra, base);
 }
 
+function _locationCoreBody(item) {
+  item = item || {};
+  return msec('📍','Location',
+      mr2(mfld('Label *',minp('label',item.label||'','text','Thessaloniki Airport')),
+          mfld('Key (slug)',minp('key',item.key||'','text','thessaloniki_airport'),'Auto-filled from the label'))
+      + mfld('Address *',minp('address',item.address||'','text','Full street address'))
+      + mfld('Google Maps URL',minp('mapUrl',item.mapUrl||'','url','https://maps.google.com/...'),'Optional — adds a map link in the booking flow'))
+    + msec('⚙️','Settings',
+      mr3(mfld('Station key',minp('stationKey',item.stationKey||'default','text','default'),'Groups locations into hubs'),
+          mfld('Location type',msel('locationType',[['both','Pickup & dropoff'],['pickup','Pickup only'],['dropoff','Dropoff only']],item.locationType||'both')),
+          mfld('Extra fee',mnum('extraFee',item.extraFee,cur())))
+      + mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive locations are hidden from booking')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show during booking'));
+}
+
 function openAddLocation() {
-  const body = mr2(mfld('Label *',minp('label','','text','Thessaloniki Airport')),mfld('Key (slug)',minp('key','','text','thessaloniki_airport')))
-    + mfld('Address *',minp('address'))
-    + mr3(mfld('Station key',minp('stationKey','default')),mfld('Location type',msel('locationType',[['both','Pickup & dropoff'],['pickup','Pickup only'],['dropoff','Dropoff only']],'both')),mfld('Extra fee €',minp('extraFee','','number','0')))
-    + mfld('Google Maps URL',minp('mapUrl','','url','https://maps.google.com/...'))
-    + mr2(mfld('Sort order',minp('sortOrder','','number','0')),mfld('',mchk('active',true,'Active')+mchk('publicVisible',true,'Public visible')))
-    + _locationFieldLabelsBody();
+  const body = _locationCoreBody({}) + _locationFieldLabelsBody();
   openModal('Add pickup location', body, () => {
     if (!mv('label')) return merr('label','Location label is required');
     if (!mv('address')) return merr('address','Address is required');
     post('upsertPickupLocation', _locationPayload());
     closeModal(); renderPickupLocations();
-  });
+  }, null, { eyebrow:'Fleet', subtitle:'Pickup / dropoff point shown in the booking flow', saveLabel:'Create location' });
   wireAutoSlug('label','key');
 }
 
 function openEditLocation(id) {
   const item = (state.snapshot?.pickupLocations||[]).find(function(x){return x._id===id||x.key===id;})||{};
-  const body = mr2(mfld('Label *',minp('label',item.label)),mfld('Key',minp('key',item.key)))
-    + mfld('Address *',minp('address',item.address))
-    + mr3(mfld('Station key',minp('stationKey',item.stationKey||'default')),mfld('Location type',msel('locationType',[['both','Pickup & dropoff'],['pickup','Pickup only'],['dropoff','Dropoff only']],item.locationType||'both')),mfld('Extra fee €',minp('extraFee',item.extraFee,'number','0')))
-    + mfld('Google Maps URL',minp('mapUrl',item.mapUrl,'url'))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')))
-    + _locationFieldLabelsBody(item);
+  const body = _locationCoreBody(item) + _locationFieldLabelsBody(item);
   openModal('Edit pickup location', body, () => {
     if (!mv('label')) return merr('label','Location label is required');
     if (!mv('address')) return merr('address','Address is required');
@@ -1774,7 +1886,7 @@ function openEditLocation(id) {
     closeModal(); renderPickupLocations();
   }, () => {
     if (confirm('Delete location "'+item.label+'"?')) { post('deletePickupLocation',{itemId:item._id,itemKey:item.key}); closeModal(); renderPickupLocations(); }
-  });
+  }, { eyebrow:'Fleet', subtitle:'Pickup / dropoff point shown in the booking flow', saveLabel:'Save location' });
 }
 
 function editLocation(id) { return openEditLocation(id); }
