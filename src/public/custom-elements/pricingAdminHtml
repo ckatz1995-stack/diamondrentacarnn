@@ -327,7 +327,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       </div>
     </div>
     <div class="section-banner">Vehicle classes shown to customers (Economy, SUV, Van…). Each category defines the base daily rate, seats, and features. Rate rules can override pricing per season.</div>
-    <div class="tbl-search"><input id="catSearch" placeholder="Search categories…" /></div>
+    <div class="tbl-search"><input id="catSearch" aria-label="Search categories" placeholder="Search categories…" /></div>
     <div class="bulk-bar" id="catsBulkBar" style="display:none">
       <span class="bulk-count" id="catsBulkCount">0 selected</span>
       <button class="btn sm good" data-bulk-action="activate" data-bulk-table="cats">Activate</button>
@@ -337,7 +337,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <button data-bulk-clear="cats" class="btn sm">Clear</button>
     </div>
     <div class="tbl-wrap"><table id="catTable"><thead><tr>
-      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="cats"></th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="cats" aria-label="Select all rows"></th>
       <th class="sortable" data-sort-table="cats" data-sort-col="category">Code</th>
       <th class="sortable" data-sort-table="cats" data-sort-col="title">Title / Specs</th>
       <th class="sortable" data-sort-table="cats" data-sort-col="price">Price/day</th>
@@ -358,7 +358,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     </div>
     <div class="section-banner">Individual vehicles in the fleet. Mark vehicles as available, in maintenance, or reserved. Inactive vehicles are hidden from bookings entirely.</div>
     <div class="btns" id="vehStatsBand" style="margin-bottom:8px"></div>
-    <div class="tbl-search"><input id="vehSearch" placeholder="Search vehicles…" /></div>
+    <div class="tbl-search"><input id="vehSearch" aria-label="Search vehicles" placeholder="Search vehicles…" /></div>
     <div class="bulk-bar" id="vehsBulkBar" style="display:none">
       <span class="bulk-count" id="vehsBulkCount">0 selected</span>
       <button class="btn sm good" data-bulk-action="activate" data-bulk-table="vehs">Activate</button>
@@ -368,7 +368,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <button data-bulk-clear="vehs" class="btn sm">Clear</button>
     </div>
     <div class="tbl-wrap"><table id="vehTable"><thead><tr>
-      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="vehs"></th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="vehs" aria-label="Select all rows"></th>
       <th class="sortable" data-sort-table="vehs" data-sort-col="plate">Plate</th>
       <th class="sortable" data-sort-table="vehs" data-sort-col="model">Model</th>
       <th class="sortable" data-sort-table="vehs" data-sort-col="category">Category</th>
@@ -413,7 +413,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       </div>
     </div>
     <div class="section-banner">Coverage options shown to customers during booking. CDW is typically included at no charge; SCDW and FULL reduce the excess with a daily fee.</div>
-    <div class="tbl-search"><input id="insSearch" placeholder="Search insurance plans…" /></div>
+    <div class="tbl-search"><input id="insSearch" aria-label="Search insurance plans" placeholder="Search insurance plans…" /></div>
     <div class="bulk-bar" id="insBulkBar" style="display:none">
       <span class="bulk-count" id="insBulkCount">0 selected</span>
       <button class="btn sm good" data-bulk-action="activate" data-bulk-table="ins">Activate</button>
@@ -423,7 +423,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <button data-bulk-clear="ins" class="btn sm">Clear</button>
     </div>
     <div class="tbl-wrap"><table id="insTable"><thead><tr>
-      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="ins"></th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="ins" aria-label="Select all rows"></th>
       <th class="sortable" data-sort-table="ins" data-sort-col="key">Key</th>
       <th class="sortable" data-sort-table="ins" data-sort-col="title">Title</th>
       <th class="sortable" data-sort-table="ins" data-sort-col="pricePerDay">Price/day</th>
@@ -443,7 +443,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       </div>
     </div>
     <div class="section-banner">Optional add-ons customers can select during booking — child seats, GPS, additional drivers. Billing mode controls whether the fee is charged per day or once per booking.</div>
-    <div class="tbl-search"><input id="extrasSearch" placeholder="Search extra services…" /></div>
+    <div class="tbl-search"><input id="extrasSearch" aria-label="Search extra services" placeholder="Search extra services…" /></div>
     <div class="bulk-bar" id="extrasBulkBar" style="display:none">
       <span class="bulk-count" id="extrasBulkCount">0 selected</span>
       <button class="btn sm good" data-bulk-action="activate" data-bulk-table="extras">Activate</button>
@@ -453,7 +453,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <button data-bulk-clear="extras" class="btn sm">Clear</button>
     </div>
     <div class="tbl-wrap"><table id="extrasTable"><thead><tr>
-      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="extras"></th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="extras" aria-label="Select all rows"></th>
       <th class="sortable" data-sort-table="extras" data-sort-col="key">Key</th>
       <th class="sortable" data-sort-table="extras" data-sort-col="title">Title</th>
       <th class="sortable" data-sort-table="extras" data-sort-col="price">Price</th>
@@ -473,7 +473,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       </div>
     </div>
     <div class="section-banner">Automatic surcharges applied to bookings — young/senior driver premiums, night pickup/dropoff fees, and manual charges added by staff during booking review.</div>
-    <div class="tbl-search"><input id="feesSearch" placeholder="Search fee rules…" /></div>
+    <div class="tbl-search"><input id="feesSearch" aria-label="Search fee rules" placeholder="Search fee rules…" /></div>
     <div class="bulk-bar" id="feesBulkBar" style="display:none">
       <span class="bulk-count" id="feesBulkCount">0 selected</span>
       <button class="btn sm good" data-bulk-action="activate" data-bulk-table="fees">Activate</button>
@@ -483,7 +483,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <button data-bulk-clear="fees" class="btn sm">Clear</button>
     </div>
     <div class="tbl-wrap"><table id="feesTable"><thead><tr>
-      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="fees"></th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="fees" aria-label="Select all rows"></th>
       <th class="sortable" data-sort-table="fees" data-sort-col="key">Key</th>
       <th class="sortable" data-sort-table="fees" data-sort-col="title">Title</th>
       <th class="sortable" data-sort-table="fees" data-sort-col="amount">Amount</th>
@@ -516,7 +516,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     </div>
     <div class="section-banner">Staff members who can log into the backroom. Each user is assigned a role that controls their permissions. Inactive users cannot log in.</div>
     <div id="userStatsBand" class="btns" style="margin-bottom:10px"></div>
-    <div class="tbl-search"><input id="userSearch" placeholder="Search users…" /></div>
+    <div class="tbl-search"><input id="userSearch" aria-label="Search users" placeholder="Search users…" /></div>
     <div class="bulk-bar" id="usersBulkBar" style="display:none">
       <span class="bulk-count" id="usersBulkCount">0 selected</span>
       <button class="btn sm good" data-bulk-action="activate" data-bulk-table="users">Activate</button>
@@ -525,7 +525,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <button data-bulk-clear="users" class="btn sm">Clear</button>
     </div>
     <div class="tbl-wrap"><table id="usersTable"><thead><tr>
-      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="users"></th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="users" aria-label="Select all rows"></th>
       <th class="sortable" data-sort-table="users" data-sort-col="fullName">Name</th>
       <th class="sortable" data-sort-table="users" data-sort-col="email">Email</th>
       <th class="sortable" data-sort-table="users" data-sort-col="roleKey">Role</th>
@@ -549,8 +549,8 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
     <div class="panel">
       <h3 style="margin-bottom:14px">Password management</h3>
       <div class="field-row cols-2">
-        <div class="field-group"><label>Staff email</label><input id="pwEmail" placeholder="staff@example.com" /></div>
-        <div class="field-group"><label>New password</label>
+        <div class="field-group"><label for="pwEmail">Staff email</label><input id="pwEmail" placeholder="staff@example.com" /></div>
+        <div class="field-group"><label for="pwNew">New password</label>
           <div style="display:flex;gap:6px">
             <input id="pwNew" type="password" placeholder="Min 8 characters" />
             <button class="btn sm" id="pwToggleBtn" type="button" style="flex-shrink:0">Show</button>
@@ -576,7 +576,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       </div>
     </div>
     <div class="section-banner">Manage all pickup and dropoff locations shown to customers in the booking flow. Each location can have a custom fee, a station group, and display labels for the booking form.</div>
-    <div class="tbl-search"><input id="locSearch" placeholder="Search locations…" /></div>
+    <div class="tbl-search"><input id="locSearch" aria-label="Search locations" placeholder="Search locations…" /></div>
     <div class="bulk-bar" id="locsBulkBar" style="display:none">
       <span class="bulk-count" id="locsBulkCount">0 selected</span>
       <button class="btn sm good" data-bulk-action="activate" data-bulk-table="locs">Activate</button>
@@ -586,7 +586,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <button data-bulk-clear="locs" class="btn sm">Clear</button>
     </div>
     <div class="tbl-wrap"><table id="locTable"><thead><tr>
-      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="locs"></th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="locs" aria-label="Select all rows"></th>
       <th class="sortable" data-sort-table="locs" data-sort-col="label">Label</th>
       <th>Address</th>
       <th class="sortable" data-sort-table="locs" data-sort-col="stationKey">Station</th>
@@ -603,7 +603,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <button class="btn sm" id="auditExportBtn">Export CSV</button>
     </div>
     <div class="section-banner">Last 100 admin actions recorded in the system. Each entry shows who made the change, what was changed, and a short summary.</div>
-    <div class="tbl-search"><input id="auditSearch" placeholder="Search by actor, action, entity or summary…" /></div>
+    <div class="tbl-search"><input id="auditSearch" aria-label="Search change history" placeholder="Search by actor, action, entity or summary…" /></div>
     <div class="tbl-wrap"><table><thead><tr>
       <th>Time</th><th>Actor</th><th>Action</th><th>Entity ID</th><th>Entity</th><th>Summary</th>
     </tr></thead><tbody id="auditBody"></tbody></table></div>
@@ -1035,7 +1035,7 @@ function renderBizPane() {
 }
 
 function buildPaneFields(key, s) {
-  const f = (label, input, hint='') => `<div class="field-group"><label>${label}</label>${input}${hint?`<div class="fhint">${hint}</div>`:''}</div>`;
+  const f = (label, input, hint='') => { const m=input.match(/id="([^"]+)"/); const fr=m?` for="${m[1]}"`:''; return `<div class="field-group"><label${fr}>${label}</label>${input}${hint?`<div class="fhint">${hint}</div>`:''}</div>`; };
   const inp = (id, val='', type='text', ph='') => `<input id="${id}" type="${type}" value="${esc(String(val??''))}" placeholder="${esc(ph)}">`;
   const ta = (id, val='', ph='', rows=4) => `<textarea id="${id}" rows="${rows}" placeholder="${esc(ph)}">${esc(String(val??''))}</textarea>`;
   const sel = (id, opts, cur='') => `<select id="${id}">${opts.map(([v,l])=>`<option value="${v}"${v==cur?' selected':''}>${l}</option>`).join('')}</select>`;
@@ -1409,7 +1409,7 @@ function renderFleetCats() {
     const specs = [r.seats?`${r.seats} seats`:'',r.doors?`${r.doors} doors`:'',r.luggage?`${r.luggage} bags`:''].filter(Boolean).join(' · ');
     const vCount = vehs.filter(v=>v.category===r.category && v.active!==false).length;
     return `<tr>
-      <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
       <td><code>${esc(r.category||'—')}</code></td>
       <td><strong>${esc(r.title||r.displayTitle||'—')}</strong>${specs?`<div style="font-size:11px;color:var(--muted)">${esc(specs)}</div>`:''}</td>
       <td>${money(r.price,cur())}</td>
@@ -1451,7 +1451,7 @@ function renderFleetVehs() {
     const cat = cats.find(c=>c._id===r.vehicleCategoryId||c.category===r.category);
     const statusClass = r.status==='available'?'active':r.status==='maintenance'?'maintenance':r.status==='reserved'?'reserved':'inactive';
     return `<tr>
-      <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
       <td><code>${esc(r.plate||'—')}</code></td>
       <td><strong>${esc(r.model||r.displayTitle||'—')}</strong></td>
       <td>${esc(cat?.title||r.category||'—')}</td>
@@ -1478,7 +1478,7 @@ function renderPickupLocations() {
   const locs = q ? all.filter(l=>`${l.label}${l.address}${l.stationKey}`.toLowerCase().includes(q)) : all;
   const typeLabels = { both:'Pickup & dropoff', pickup:'Pickup only', dropoff:'Dropoff only' };
   body.innerHTML = locs.length ? locs.map(l=>`<tr>
-    <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(l._id||'')}"${sel.has(l._id)?' checked':''}></td>
+    <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(l._id||'')}"${sel.has(l._id)?' checked':''}></td>
     <td><strong>${esc(l.label||'—')}</strong>${l.key?`<div style="font-size:11px;color:var(--muted)"><code>${esc(l.key)}</code></div>`:''}</td>
     <td style="font-size:12px;color:var(--muted)">${esc(l.address||'—')}</td>
     <td><code>${esc(l.stationKey||'default')}</code></td>
@@ -1548,7 +1548,7 @@ function renderInsurance() {
   all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const rows = q ? all.filter(r=>`${r.key}${r.title}`.toLowerCase().includes(q)) : all;
   el('insBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
+    <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
     <td><code>${esc(r.key||'—')}</code></td>
     <td><strong>${esc(r.title||'—')}</strong>${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,70))}${r.description.length>70?'…':''}</div>`:''}</td>
     <td><strong>${money(r.pricePerDay,cur())}</strong>${r.pricePerDay==0?'<div style="font-size:10px;color:var(--good)">Included</div>':''}</td>
@@ -1573,7 +1573,7 @@ function renderExtras() {
   all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const rows = q ? all.filter(r=>`${r.key}${r.title}`.toLowerCase().includes(q)) : all;
   el('extrasBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
+    <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
     <td><code>${esc(r.key||'—')}</code></td>
     <td><strong>${esc(r.title||'—')}</strong>${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,60))}${r.description.length>60?'…':''}</div>`:''}</td>
     <td><strong>${money(r.price,cur())}</strong></td>
@@ -1600,7 +1600,7 @@ function renderFees() {
   el('feesBody').innerHTML = rows.length ? rows.map(r=>{
     const rtClass = r.ruleType==='ageRange'?'agerage':r.ruleType==='nightPickup'||r.ruleType==='nightDropoff'?'nightfee':'inactive';
     return `<tr>
-      <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
       <td><code>${esc(r.key||'—')}</code></td>
       <td><strong>${esc(r.title||'—')}</strong></td>
       <td><strong>${money(r.amount,cur())}</strong></td>
@@ -1659,7 +1659,7 @@ function renderUsers() {
     const role = roles.find(r=>r.key===u.roleKey);
     const linked = u.memberId ? '<span class="chip linked">Wix linked</span>' : '';
     return `<tr>
-      <td class="bulk-col"><input type="checkbox" class="bulk-row" data-bulk="${tblKey}" value="${esc(u._id||'')}"${sel.has(u._id)?' checked':''}></td>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(u._id||'')}"${sel.has(u._id)?' checked':''}></td>
       <td>
         <strong>${esc(u.fullName||'—')}</strong>
         ${u.jobTitle?`<div style="font-size:11px;color:var(--muted)">${esc(u.jobTitle)}</div>`:''}
@@ -1760,7 +1760,9 @@ document.addEventListener('keydown', e => {
 
 // Field group: label (with optional required marker) + input + optional hint
 function mfld(label, input, hint='') {
-  const lab = label ? `<label>${label.replace(/\s\*$/,' <span class="req">*</span>')}</label>` : '';
+  const m = input.match(/id="([^"]+)"/);
+  const forAttr = m ? ` for="${m[1]}"` : '';
+  const lab = label ? `<label${forAttr}>${label.replace(/\s\*$/,' <span class="req">*</span>')}</label>` : '';
   return `<div class="field-group">${lab}${input}${hint?`<div class="fhint">${hint}</div>`:''}</div>`;
 }
 function minp(id, val='', type='text', ph='') { return `<input id="m_${id}" type="${type}" value="${esc(String(val??''))}" placeholder="${esc(ph)}">`; }
