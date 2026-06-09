@@ -446,7 +446,7 @@ async function upsertByKey(collectionName, item){
 
   const previous = safeItem._id ? (await queryFirstByField(collectionName, '_id', safeItem._id) || null) : null;
   const saved = safeItem._id
-    ? await wixData.update(collectionName, { ...(previous || {}, { suppressAuth: true }), ...safeItem })
+    ? await wixData.update(collectionName, { ...(previous || {}), ...safeItem }, { suppressAuth: true })
     : await wixData.insert(collectionName, safeItem, { suppressAuth: true });
 
   const keepId = saved?._id;
