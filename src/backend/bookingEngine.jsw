@@ -861,7 +861,8 @@ export async function computeQuote(data) {
         const finalDropoffLocationFee = Number(resolvePickupLocationFee(pricingCatalog, dropoffpoint, 'dropoff').toFixed(2));
         const finalLocationFee = Number((finalPickupLocationFee + finalDropoffLocationFee).toFixed(2));
         const totalPrice = Number((finalBaseCost + finalInsuranceCost + finalExtrasCost + finalAgeFee + finalNightFee + finalLocationFee).toFixed(2));
-        return { success: true, totalPrice, basePricePerDay, billableDays, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee, warnings: quoteWarnings };
+        const seasonInfo = dynamicPricing?.season ? { key: dynamicPricing.season.key, label: dynamicPricing.season.label } : null;
+        return { success: true, totalPrice, basePricePerDay, billableDays, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee, season: seasonInfo, rule: dynamicPricing?.rule || null, warnings: quoteWarnings };
     } catch (err) {
         return { success: false, message: (err && err.message) ? err.message : String(err) };
     }

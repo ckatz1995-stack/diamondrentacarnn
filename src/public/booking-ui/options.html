@@ -1509,6 +1509,10 @@ async function fetchFleetModels(categoryCode, vehicleId){
       if(dEl) dEl.textContent = q.billableDays || days;
       const bEl = document.getElementById('baseLine');
       if(bEl) bEl.textContent = formatMoney(q.baseCost);
+      const rateLabel = document.getElementById('rateLabel');
+      if(rateLabel) rateLabel.textContent = q.basePricePerDay > 0 ? `${formatMoney(q.basePricePerDay)} × ${q.billableDays||days} ημέρες` : '';
+      const seasonBadge = document.getElementById('seasonBadge');
+      if(seasonBadge){ const sl = q.season?.label; if(sl){ seasonBadge.textContent = sl; seasonBadge.hidden = false; } else { seasonBadge.hidden = true; } }
       const iEl = document.getElementById('insuranceLine');
       if(iEl) iEl.textContent = formatMoney(q.insuranceCost);
       const insuranceRow = document.getElementById('insuranceRow');
