@@ -11,7 +11,15 @@
 // (see http-functions.js) or call provisionCollections() from any backend.
 
 import { collections } from 'wix-data.v2';
+import { elevate } from 'wix-auth';
 import { COLLECTION_SCHEMAS } from 'backend/collectionSchemas.js';
+
+// The Data Collections create/update API is permission-checked against the
+// caller. An HTTP function runs as an anonymous visitor, so the raw calls
+// return FORBIDDEN. elevate() runs them with the app's own permissions.
+const getCollectionElevated = elevate(collections.getDataCollection);
+const createCollectionElevated = elevate(collections.createDataCollection);
+const updateCollectionElevated = elevate(collections.updateDataCollection);
 
 function buildCollection(schema) {
   return {
@@ -33,7 +41,7 @@ function buildCollection(schema) {
 
 async function getExisting(id) {
   try {
-    return await collections.getDataCollection(id);
+    return await getCollectionElevated(id);
   } catch (_) {
     return null;
   }
@@ -67,7 +75,7 @@ export async function provisionCollections(opts = {}) {
           results.push({ collection: id, action: 'would-create', fields: wanted.fields.length });
           continue;
         }
-        await collections.createDataCollection(wanted);
+        await createCollectionElevated(wanted);
         results.push({ collection: id, action: 'created', fields: wanted.fields.length });
         continue;
       }
@@ -87,7 +95,7 @@ export async function provisionCollections(opts = {}) {
       }
 
       const merged = { ...existing, fields: [ ...(existing.fields || []), ...missing ] };
-      await collections.updateDataCollection(merged);
+      await updateCollectionElevated(merged);
       results.push({ collection: id, action: 'fields-added', addFields: missing.map((f) => f.key) });
     } catch (err) {
       if (isAlreadyExistsError(err)) {
