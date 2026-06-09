@@ -1451,7 +1451,7 @@ function render(){
     const vehicleId = String(vehicle.vehicleCategoryId || vehicle.id || '');
     const serverQuote = vehicleServerQuotes[vehicleId] || null;
     const dailyPrice = serverQuote ? Number(serverQuote.basePricePerDay || 0) : resolveDynamicDailyPrice(vehicle, days);
-    const hasSeasonRate = _activeSeason && _activeSeason.label && Math.abs(dailyPrice - Number(vehicle.price || 0)) > 0.01;
+    const hasSeasonRate = _activeSeason && _activeSeason.label && dailyPrice > 0;
     const baseTotal = Number((dailyPrice * days).toFixed(2));
     const locationExtra = Number((locationFeeFor(document.getElementById('pickupLocation').value, 'pickup') + locationFeeFor(document.getElementById('dropoffLocation').value, 'dropoff')).toFixed(2));
     const grandTotal = serverQuote ? Number(serverQuote.totalPrice || 0) : (baseTotal + ageExtra + nightExtra + locationExtra);

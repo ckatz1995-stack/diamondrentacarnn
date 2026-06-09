@@ -1404,9 +1404,9 @@ async function fetchFleetModels(categoryCode, vehicleId){
 
       document.getElementById('summaryDays').textContent = days;
       document.getElementById('daysText').textContent = days;
-      // Show rate × days label
+      // Show rate × days label (only if we have a real price from a rule)
       const rateLabel = document.getElementById('rateLabel');
-      if(rateLabel) rateLabel.textContent = `${formatMoney(basePricePerDay)} × ${days} ημέρες`;
+      if(rateLabel) rateLabel.textContent = basePricePerDay > 0 ? `${formatMoney(basePricePerDay)} × ${days} ημέρες` : '';
       // Active season badge
       const season = resolveSeason(new Date(state.pickup));
       const seasonBadge = document.getElementById('seasonBadge');
