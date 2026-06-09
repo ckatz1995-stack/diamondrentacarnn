@@ -488,23 +488,25 @@ export async function upsertFeeRule({ authToken, payload = {} } = {}){
 export async function deletePricingItem({ authToken, collectionName, itemId, itemKey } = {}){
   const actor = await requirePricingEdit(authToken);
   if (!collectionName || (!itemId && !itemKey)) throw new Error('Missing collectionName or itemId/itemKey');
+  // Accept both the camelCase key (e.g. 'insurancePlans') and the PascalCase Wix name ('InsurancePlans')
+  const resolvedCollection = PRICING_COLLECTIONS[collectionName] || collectionName;
   const allowed = new Set(Object.values(PRICING_COLLECTIONS));
-  if (!allowed.has(collectionName)) throw new Error('Collection not allowed');
-  const previous = itemId ? await queryFirstByField(collectionName, '_id', itemId) : null;
+  if (!allowed.has(resolvedCollection)) throw new Error('Collection not allowed');
+  const previous = itemId ? await queryFirstByField(resolvedCollection, '_id', itemId) : null;
   const keyToClean = slugKey(itemKey || previous?.key || previous?.label || previous?.title);
   let removed = 0;
   if (itemId) {
-    try { await wixData.remove(collectionName, itemId, { suppressAuth: true }); removed += 1; } catch (_) {}
+    try { await wixData.remove(resolvedCollection, itemId, { suppressAuth: true }); removed += 1; } catch (_) {}
   }
   if (keyToClean) {
-    const dupes = await queryRowsByNormalizedKey(collectionName, keyToClean);
+    const dupes = await queryRowsByNormalizedKey(resolvedCollection, keyToClean);
     for (const row of dupes) {
       if (!row?._id || row._id === itemId) continue;
-      try { await wixData.remove(collectionName, row._id, { suppressAuth: true }); removed += 1; } catch (_) {}
+      try { await wixData.remove(resolvedCollection, row._id, { suppressAuth: true }); removed += 1; } catch (_) {}
     }
   }
   clearPricingCatalogCache();
-  await writePricingAudit(actor, 'pricing.delete', `pricing.${collectionName}`, String(keyToClean || previous?.key || itemId || ''), previous, null, `Διαγραφή pricing item ${text(previous?.label || previous?.title || keyToClean || itemId)} (${removed} row(s))`);
+  await writePricingAudit(actor, 'pricing.delete', `pricing.${resolvedCollection}`, String(keyToClean || previous?.key || itemId || ''), previous, null, `Διαγραφή pricing item ${text(previous?.label || previous?.title || keyToClean || itemId)} (${removed} row(s))`);
   return { success: true, removed };
 }
 
@@ -629,7 +631,12 @@ export async function upsertVehicleCategory({ authToken, payload = {} } = {}){
   if (normalized._id) previous = await queryFirstByField(VEHICLE_CATEGORIES_COLLECTION, '_id', normalized._id);
   if (!previous) previous = await findVehicleCategoryByCategoryCode(normalized.category);
 
-  const saveRow = previous ? { ...previous, ...normalized, _id: previous._id } : normalized;
+  // Preserve the existing Wix image when the admin form doesn't send one
+  // (the category edit form has no image uploader, so image is always '' from the payload).
+  const imageToKeep = normalized.image || (previous ? previous.image : '');
+  const saveRow = previous
+    ? { ...previous, ...normalized, _id: previous._id, image: imageToKeep }
+    : { ...normalized, image: imageToKeep };
   const saved = previous
     ? await wixData.update(VEHICLE_CATEGORIES_COLLECTION, saveRow, { suppressAuth: true })
     : await wixData.insert(VEHICLE_CATEGORIES_COLLECTION, saveRow, { suppressAuth: true });
