@@ -1,0 +1,23 @@
+{
+  "collectionId": "MemberNotifications",
+  "displayName": "Member Notifications",
+  "description": "In-app notifications sent to registered customers (Wix members) via the customer portal.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "Members read their own notifications through backend functions that filter by memberId. Admin can read all.",
+  "fields": [
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: type + title. Written by backend." },
+    { "key": "memberId",              "displayName": "Wix Member ID",           "type": "Text",    "required": true,  "description": "Recipient's Wix member ID" },
+    { "key": "customerId",            "displayName": "Customer ID",             "type": "Text",    "required": false, "description": "Customers._id" },
+    { "key": "type",                  "displayName": "Notification Type",       "type": "Text",    "required": false, "description": "'booking_confirmed' | 'booking_canceled' | 'rental_started' | 'rental_closed' | 'review_request' | 'general'" },
+    { "key": "title",                 "displayName": "Title",                   "type": "Text",    "required": false },
+    { "key": "body",                  "displayName": "Body",                    "type": "LongText","required": false },
+    { "key": "bookingId",             "displayName": "Booking ID",              "type": "Text",    "required": false, "description": "BookingsNew._id — if notification is booking-related" },
+    { "key": "bookingNumber",         "displayName": "Booking Number",          "type": "Text",    "required": false },
+    { "key": "linkUrl",               "displayName": "Link URL",                "type": "URL",     "required": false, "description": "Optional CTA link destination" },
+    { "key": "linkLabel",             "displayName": "Link Label",              "type": "Text",    "required": false },
+    { "key": "read",                  "displayName": "Read",                    "type": "Boolean", "required": false, "description": "true = member has seen this notification" },
+    { "key": "readAt",                "displayName": "Read At",                 "type": "DateTime","required": false },
+    { "key": "sentAt",                "displayName": "Sent At",                 "type": "DateTime","required": false },
+    { "key": "expiresAt",             "displayName": "Expires At",              "type": "DateTime","required": false, "description": "Optional: hide notification after this date" }
+  ]
+}

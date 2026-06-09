@@ -1,0 +1,18 @@
+{
+  "collectionId": "PricingSeasons",
+  "displayName": "Pricing Seasons",
+  "description": "Date ranges that activate different rate rules (Low season, High season, Peak, etc.).",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "fields": [
+    { "key": "key",           "displayName": "Key (slug)",   "type": "Text",    "required": true,  "description": "Unique normalised identifier, e.g. 'high_season', 'easter'" },
+    { "key": "label",         "displayName": "Label",        "type": "Text",    "required": true },
+    { "key": "description",   "displayName": "Description",  "type": "LongText","required": false },
+    { "key": "startDate",     "displayName": "Start Date",   "type": "Date",    "required": true,  "description": "YYYY-MM-DD" },
+    { "key": "endDate",       "displayName": "End Date",     "type": "Date",    "required": true,  "description": "YYYY-MM-DD" },
+    { "key": "priority",      "displayName": "Priority",     "type": "Number",  "required": false, "description": "Higher number wins when seasons overlap" },
+    { "key": "repeatYearly",  "displayName": "Repeat Yearly","type": "Boolean", "required": false, "description": "Match month & day each year, ignoring the year" },
+    { "key": "sortOrder",     "displayName": "Sort Order",   "type": "Number",  "required": false },
+    { "key": "active",        "displayName": "Active",       "type": "Boolean", "required": false },
+    { "key": "publicVisible", "displayName": "Public Visible","type": "Boolean","required": false }
+  ]
+}

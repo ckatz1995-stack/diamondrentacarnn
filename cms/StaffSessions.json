@@ -1,0 +1,21 @@
+{
+  "collectionId": "StaffSessions",
+  "displayName": "Staff Sessions",
+  "description": "Active backroom login sessions. Each session has a token stored in the client's sessionStorage/cookie.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "Sessions are checked on every authenticated backend call. Expired sessions are purged by a scheduled job.",
+  "fields": [
+    { "key": "staffId",               "displayName": "Staff User ID",           "type": "Text",    "required": true,  "description": "StaffUsers._id" },
+    { "key": "username",              "displayName": "Username",                "type": "Text",    "required": false, "description": "Denormalised for quick lookup" },
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: username + session date. Written by backend." },
+    { "key": "token",                 "displayName": "Session Token",           "type": "Text",    "required": true,  "description": "Secure random token (UUID or similar)" },
+    { "key": "roleKey",               "displayName": "Role Key",                "type": "Text",    "required": false, "description": "Snapshot of role at login time" },
+    { "key": "permissions",           "displayName": "Permissions (JSON)",      "type": "LongText","required": false, "description": "Snapshot of role permissions at login time" },
+    { "key": "createdAt",             "displayName": "Created At",              "type": "DateTime","required": false },
+    { "key": "expiresAt",             "displayName": "Expires At",              "type": "DateTime","required": false },
+    { "key": "lastActiveAt",          "displayName": "Last Active At",          "type": "DateTime","required": false },
+    { "key": "ipAddress",             "displayName": "IP Address",              "type": "Text",    "required": false },
+    { "key": "userAgent",             "displayName": "User Agent",              "type": "Text",    "required": false },
+    { "key": "revoked",               "displayName": "Revoked",                 "type": "Boolean", "required": false, "description": "true = session invalidated (logout or admin kick)" }
+  ]
+}

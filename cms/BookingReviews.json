@@ -1,0 +1,28 @@
+{
+  "collectionId": "BookingReviews",
+  "displayName": "Booking Reviews",
+  "description": "Customer reviews submitted after a rental is completed. Linked to a BookingsNew record.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "Public display of reviews should be handled by a separate public-facing query if needed. All inserts go through backend to validate the booking belongs to the customer.",
+  "fields": [
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: customerName + rating. Written by backend." },
+    { "key": "bookingId",             "displayName": "Booking ID",              "type": "Text",    "required": true,  "description": "BookingsNew._id" },
+    { "key": "bookingNumber",         "displayName": "Booking Number",          "type": "Text",    "required": false },
+    { "key": "customerId",            "displayName": "Customer ID",             "type": "Text",    "required": false, "description": "Customers._id" },
+    { "key": "customerName",          "displayName": "Customer Name",           "type": "Text",    "required": false },
+    { "key": "memberId",              "displayName": "Wix Member ID",           "type": "Text",    "required": false },
+    { "key": "rating",                "displayName": "Overall Rating",          "type": "Number",  "required": false, "description": "1–5 star rating" },
+    { "key": "vehicleRating",         "displayName": "Vehicle Rating",          "type": "Number",  "required": false },
+    { "key": "serviceRating",         "displayName": "Service Rating",          "type": "Number",  "required": false },
+    { "key": "valueRating",           "displayName": "Value Rating",            "type": "Number",  "required": false },
+    { "key": "title",                 "displayName": "Review Title",            "type": "Text",    "required": false },
+    { "key": "body",                  "displayName": "Review Body",             "type": "LongText","required": false },
+    { "key": "status",                "displayName": "Status",                  "type": "Text",    "required": false, "description": "'pending' | 'approved' | 'rejected' | 'flagged'" },
+    { "key": "publicVisible",         "displayName": "Public Visible",          "type": "Boolean", "required": false },
+    { "key": "staffReply",            "displayName": "Staff Reply",             "type": "LongText","required": false },
+    { "key": "staffReplyAt",          "displayName": "Staff Reply At",          "type": "DateTime","required": false },
+    { "key": "submittedAt",           "displayName": "Submitted At",            "type": "DateTime","required": false },
+    { "key": "moderatedAt",           "displayName": "Moderated At",            "type": "DateTime","required": false },
+    { "key": "moderatedBy",           "displayName": "Moderated By",            "type": "Text",    "required": false, "description": "StaffUsers._id" }
+  ]
+}

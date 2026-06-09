@@ -1,0 +1,29 @@
+{
+  "collectionId": "PickupLocations",
+  "displayName": "Pickup Locations",
+  "description": "Pickup and dropoff points shown to customers in the booking flow.",
+  "permissions": { "read": "Anyone", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "Read by Anyone so the booking page can display locations without auth.",
+  "fields": [
+    { "key": "key",                      "displayName": "Key (slug)",               "type": "Text",    "required": true,  "description": "Unique normalised identifier, e.g. 'thessaloniki_airport'" },
+    { "key": "label",                    "displayName": "Label",                    "type": "Text",    "required": true,  "description": "Customer-facing name, e.g. 'Thessaloniki Airport'" },
+    { "key": "displayTitle",            "displayName": "Display Title",            "type": "Text",    "required": false, "description": "Computed: label. Written by backend." },
+    { "key": "description",             "displayName": "Description",              "type": "LongText","required": false },
+    { "key": "address",                 "displayName": "Address",                  "type": "Text",    "required": false },
+    { "key": "mapUrl",                  "displayName": "Google Maps URL",          "type": "URL",     "required": false },
+    { "key": "stationKey",              "displayName": "Station Key",              "type": "Text",    "required": false, "description": "Groups locations into hubs, e.g. 'default', 'airport'" },
+    { "key": "stationLabel",            "displayName": "Station Label",            "type": "Text",    "required": false },
+    { "key": "locationType",            "displayName": "Location Type",            "type": "Text",    "required": false, "description": "'both' | 'pickup' | 'dropoff'" },
+    { "key": "extraFee",                "displayName": "Extra Fee",                "type": "Number",  "required": false },
+    { "key": "sortOrder",               "displayName": "Sort Order",               "type": "Number",  "required": false },
+    { "key": "active",                  "displayName": "Active",                   "type": "Boolean", "required": false },
+    { "key": "publicVisible",           "displayName": "Public Visible",           "type": "Boolean", "required": false },
+    { "key": "pickupInfoLabel",         "displayName": "Pickup Info Label",        "type": "Text",    "required": false, "description": "Custom prompt label shown in the booking form" },
+    { "key": "pickupInfoPlaceholder",   "displayName": "Pickup Info Placeholder",  "type": "Text",    "required": false },
+    { "key": "dropoffInfoLabel",        "displayName": "Dropoff Info Label",       "type": "Text",    "required": false },
+    { "key": "dropoffInfoPlaceholder",  "displayName": "Dropoff Info Placeholder", "type": "Text",    "required": false },
+    { "key": "showOriginField",         "displayName": "Show Origin Field",        "type": "Boolean", "required": false, "description": "Ask for flight number, hotel name, etc." },
+    { "key": "originFieldLabel",        "displayName": "Origin Field Label",       "type": "Text",    "required": false },
+    { "key": "originFieldPlaceholder",  "displayName": "Origin Field Placeholder", "type": "Text",    "required": false }
+  ]
+}

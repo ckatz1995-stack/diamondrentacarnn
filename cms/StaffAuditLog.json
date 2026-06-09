@@ -1,0 +1,23 @@
+{
+  "collectionId": "StaffAuditLog",
+  "displayName": "Staff Audit Log",
+  "description": "Immutable log of all significant actions performed by staff members in the backroom.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "Records should never be deleted. Updates only allowed for system corrections. All writes go through backend functions.",
+  "fields": [
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: action + timestamp. Written by backend." },
+    { "key": "staffId",               "displayName": "Staff User ID",           "type": "Text",    "required": false, "description": "StaffUsers._id (null = system action)" },
+    { "key": "staffUsername",         "displayName": "Staff Username",          "type": "Text",    "required": false },
+    { "key": "action",                "displayName": "Action",                  "type": "Text",    "required": true,  "description": "e.g. 'booking.confirm' | 'staff.create' | 'pricing.update'" },
+    { "key": "targetCollection",      "displayName": "Target Collection",       "type": "Text",    "required": false, "description": "CMS collection affected, e.g. 'BookingsNew'" },
+    { "key": "targetId",              "displayName": "Target Record ID",        "type": "Text",    "required": false, "description": "The _id of the record that was changed" },
+    { "key": "targetLabel",           "displayName": "Target Label",            "type": "Text",    "required": false, "description": "Human-readable identifier, e.g. booking number or username" },
+    { "key": "before",                "displayName": "Before (JSON)",           "type": "LongText","required": false, "description": "JSON snapshot of the record before the change" },
+    { "key": "after",                 "displayName": "After (JSON)",            "type": "LongText","required": false, "description": "JSON snapshot of the record after the change" },
+    { "key": "diff",                  "displayName": "Diff (JSON)",             "type": "LongText","required": false, "description": "JSON object of only the changed fields" },
+    { "key": "note",                  "displayName": "Note",                    "type": "Text",    "required": false },
+    { "key": "ipAddress",             "displayName": "IP Address",              "type": "Text",    "required": false },
+    { "key": "sessionToken",          "displayName": "Session Token",           "type": "Text",    "required": false },
+    { "key": "occurredAt",            "displayName": "Occurred At",             "type": "DateTime","required": false }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "collectionId": "Customers",
+  "displayName": "Customers",
+  "description": "Customer profile records. Created when a booking is made. May be linked to a Wix member account.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "memberId links to the Wix Members system when the customer has a registered account. Customers without accounts have memberId = null.",
+  "fields": [
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: fullName + email. Written by backend." },
+    { "key": "fullName",              "displayName": "Full Name",               "type": "Text",    "required": false },
+    { "key": "email",                 "displayName": "Email",                   "type": "Text",    "required": false },
+    { "key": "phone",                 "displayName": "Phone",                   "type": "Text",    "required": false },
+    { "key": "memberId",              "displayName": "Wix Member ID",           "type": "Text",    "required": false, "description": "Linked Wix member account _id, if any" },
+    { "key": "companyId",             "displayName": "Company ID",              "type": "Text",    "required": false, "description": "Companies._id if this is a corporate customer" },
+    { "key": "companyName",           "displayName": "Company Name",            "type": "Text",    "required": false, "description": "Denormalised from Companies" },
+    { "key": "driverAgeBand",         "displayName": "Driver Age Band",         "type": "Text",    "required": false, "description": "'U25' | '25-29' | '30-64' | '65+'" },
+    { "key": "idType",                "displayName": "ID Type",                 "type": "Text",    "required": false, "description": "'passport' | 'national_id' | 'driving_license'" },
+    { "key": "idNumber",              "displayName": "ID Number",               "type": "Text",    "required": false },
+    { "key": "idExpiryDate",          "displayName": "ID Expiry Date",          "type": "DateTime","required": false },
+    { "key": "driverLicenseNumber",   "displayName": "Driver License Number",   "type": "Text",    "required": false },
+    { "key": "driverLicenseExpiry",   "displayName": "Driver License Expiry",   "type": "DateTime","required": false },
+    { "key": "address",               "displayName": "Address",                 "type": "Text",    "required": false },
+    { "key": "city",                  "displayName": "City",                    "type": "Text",    "required": false },
+    { "key": "country",               "displayName": "Country",                 "type": "Text",    "required": false },
+    { "key": "totalBookings",         "displayName": "Total Bookings",          "type": "Number",  "required": false },
+    { "key": "totalSpend",            "displayName": "Total Spend",             "type": "Number",  "required": false },
+    { "key": "firstBookingAt",        "displayName": "First Booking At",        "type": "DateTime","required": false },
+    { "key": "lastBookingAt",         "displayName": "Last Booking At",         "type": "DateTime","required": false },
+    { "key": "tags",                  "displayName": "Tags",                    "type": "Text",    "required": false, "description": "Comma-separated customer tags, e.g. 'vip,repeat'" },
+    { "key": "blacklisted",           "displayName": "Blacklisted",             "type": "Boolean", "required": false },
+    { "key": "blacklistReason",       "displayName": "Blacklist Reason",        "type": "Text",    "required": false },
+    { "key": "notes",                 "displayName": "Internal Notes",          "type": "LongText","required": false }
+  ]
+}

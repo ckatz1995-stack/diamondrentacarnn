@@ -1,0 +1,17 @@
+{
+  "collectionId": "ExtraServices",
+  "displayName": "Extra Services",
+  "description": "Optional add-ons customers can select during booking (child seats, GPS, additional drivers, etc.).",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "fields": [
+    { "key": "key",           "displayName": "Key (slug)",    "type": "Text",     "required": true,  "description": "Unique normalised identifier, e.g. 'child_seat', 'gps', 'second_driver'" },
+    { "key": "title",         "displayName": "Title",         "type": "Text",     "required": true },
+    { "key": "label",         "displayName": "Short Label",   "type": "Text",     "required": false },
+    { "key": "description",   "displayName": "Description",   "type": "LongText", "required": false },
+    { "key": "price",         "displayName": "Price",         "type": "Number",   "required": false },
+    { "key": "billingMode",   "displayName": "Billing Mode",  "type": "Text",     "required": false, "description": "'perDay' | 'perBooking'" },
+    { "key": "sortOrder",     "displayName": "Sort Order",    "type": "Number",   "required": false },
+    { "key": "active",        "displayName": "Active",        "type": "Boolean",  "required": false },
+    { "key": "publicVisible", "displayName": "Public Visible","type": "Boolean",  "required": false }
+  ]
+}

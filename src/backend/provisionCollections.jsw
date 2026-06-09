@@ -1,0 +1,108 @@
+/* eslint-disable */
+// One-time / idempotent provisioning of CMS collections from COLLECTION_SCHEMAS.
+//
+// Uses the Wix Data v2 Collections API (wix-data.v2 -> collections) to create
+// each collection defined in collectionSchemas.js. Safe to run repeatedly:
+//   - if a collection already exists it is left untouched (or, with
+//     addMissingFields, any fields it is missing are appended);
+//   - failures on one collection do not stop the rest.
+//
+// Trigger it through the guarded HTTP function get_provisionCollections
+// (see http-functions.js) or call provisionCollections() from any backend.
+
+import { collections } from 'wix-data.v2';
+import { COLLECTION_SCHEMAS } from 'backend/collectionSchemas.js';
+
+function buildCollection(schema) {
+  return {
+    _id: schema._id,
+    displayName: schema.displayName,
+    fields: (schema.fields || []).map((f) => ({
+      key: f.key,
+      displayName: f.displayName,
+      type: f.type
+    })),
+    permissions: {
+      read: schema.permissions?.read || 'ADMIN',
+      insert: schema.permissions?.insert || 'ADMIN',
+      update: schema.permissions?.update || 'ADMIN',
+      remove: schema.permissions?.remove || 'ADMIN'
+    }
+  };
+}
+
+async function getExisting(id) {
+  try {
+    return await collections.getDataCollection(id);
+  } catch (_) {
+    return null;
+  }
+}
+
+function isAlreadyExistsError(err) {
+  const msg = String(err?.message || err || '').toLowerCase();
+  return msg.includes('already exists') || msg.includes('exists') || msg.includes('duplicate');
+}
+
+/**
+ * Provision all collections.
+ * @param {Object} [opts]
+ * @param {boolean} [opts.dryRun=false]          List actions without writing.
+ * @param {boolean} [opts.addMissingFields=true] Append fields missing from existing collections.
+ * @returns {Promise<{summary:Object, results:Array}>}
+ */
+export async function provisionCollections(opts = {}) {
+  const dryRun = opts.dryRun === true;
+  const addMissingFields = opts.addMissingFields !== false;
+
+  const results = [];
+  for (const schema of COLLECTION_SCHEMAS) {
+    const id = schema._id;
+    const wanted = buildCollection(schema);
+    try {
+      const existing = await getExisting(id);
+
+      if (!existing) {
+        if (dryRun) {
+          results.push({ collection: id, action: 'would-create', fields: wanted.fields.length });
+          continue;
+        }
+        await collections.createDataCollection(wanted);
+        results.push({ collection: id, action: 'created', fields: wanted.fields.length });
+        continue;
+      }
+
+      // Already exists — optionally append any missing fields.
+      const haveKeys = new Set((existing.fields || []).map((f) => f.key));
+      const missing = wanted.fields.filter((f) => !haveKeys.has(f.key));
+
+      if (!missing.length || !addMissingFields) {
+        results.push({ collection: id, action: 'skipped-exists', existingFields: (existing.fields || []).length });
+        continue;
+      }
+
+      if (dryRun) {
+        results.push({ collection: id, action: 'would-add-fields', addFields: missing.map((f) => f.key) });
+        continue;
+      }
+
+      const merged = { ...existing, fields: [ ...(existing.fields || []), ...missing ] };
+      await collections.updateDataCollection(merged);
+      results.push({ collection: id, action: 'fields-added', addFields: missing.map((f) => f.key) });
+    } catch (err) {
+      if (isAlreadyExistsError(err)) {
+        results.push({ collection: id, action: 'skipped-exists' });
+      } else {
+        results.push({ collection: id, action: 'error', message: err?.message || String(err) });
+      }
+    }
+  }
+
+  const summary = results.reduce((acc, r) => {
+    acc[r.action] = (acc[r.action] || 0) + 1;
+    return acc;
+  }, {});
+  summary.total = COLLECTION_SCHEMAS.length;
+
+  return { dryRun, addMissingFields, summary, results };
+}

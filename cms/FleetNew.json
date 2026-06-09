@@ -1,0 +1,26 @@
+{
+  "collectionId": "FleetNew",
+  "displayName": "Fleet Vehicles",
+  "description": "Individual vehicles in the fleet. Each vehicle belongs to a VehiclesNew category.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "fields": [
+    { "key": "plate",                  "displayName": "Plate",                   "type": "Text",    "required": true,  "description": "Licence plate (uppercase), e.g. 'ABC-1234'" },
+    { "key": "model",                  "displayName": "Model",                   "type": "Text",    "required": true,  "description": "Vehicle model name, e.g. 'Toyota Yaris'" },
+    { "key": "displayTitle",           "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: plate + model. Written by backend." },
+    { "key": "category",              "displayName": "Category Code",           "type": "Text",    "required": false, "description": "VehiclesNew.category code, e.g. 'ECO'" },
+    { "key": "categoryId",            "displayName": "Category ID",             "type": "Text",    "required": false, "description": "VehiclesNew._id" },
+    { "key": "categoryDisplayTitle",  "displayName": "Category Display Title",  "type": "Text",    "required": false, "description": "Denormalised from VehiclesNew for query convenience" },
+    { "key": "categoryTitle",         "displayName": "Category Title",          "type": "Text",    "required": false },
+    { "key": "status",                "displayName": "Status",                  "type": "Text",    "required": false, "description": "'available' | 'maintenance' | 'reserved' | 'inactive'" },
+    { "key": "operationalStatus",     "displayName": "Operational Status",      "type": "Text",    "required": false, "description": "'service' | 'blocked' | 'inactive' | 'available'" },
+    { "key": "active",                "displayName": "Active",                  "type": "Boolean", "required": false },
+    { "key": "readyToGo",            "displayName": "Ready To Go",             "type": "Boolean", "required": false },
+    { "key": "hardHold",             "displayName": "Hard Hold",               "type": "Boolean", "required": false, "description": "Vehicle blocked — cannot be assigned to bookings" },
+    { "key": "station",              "displayName": "Station",                 "type": "Text",    "required": false, "description": "Station/hub key this vehicle is based at" },
+    { "key": "currentStationCode",   "displayName": "Current Station Code",    "type": "Text",    "required": false },
+    { "key": "currentStationLabel",  "displayName": "Current Station Label",   "type": "Text",    "required": false },
+    { "key": "stall",                "displayName": "Stall",                   "type": "Text",    "required": false, "description": "Parking bay or stall identifier" },
+    { "key": "mileage",              "displayName": "Mileage",                 "type": "Number",  "required": false },
+    { "key": "notes",                "displayName": "Notes",                   "type": "LongText","required": false, "description": "Internal notes — not shown to customers" }
+  ]
+}

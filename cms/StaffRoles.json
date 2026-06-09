@@ -1,0 +1,16 @@
+{
+  "collectionId": "StaffRoles",
+  "displayName": "Staff Roles",
+  "description": "Role definitions for the backroom access control system. Each role carries a permissions JSON blob.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "fields": [
+    { "key": "key",                   "displayName": "Key (slug)",              "type": "Text",    "required": true,  "description": "Unique identifier, e.g. 'admin' | 'manager' | 'agent' | 'viewer'" },
+    { "key": "label",                 "displayName": "Label",                   "type": "Text",    "required": true,  "description": "Human-readable name shown in the UI" },
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: label. Written by backend." },
+    { "key": "description",           "displayName": "Description",             "type": "LongText","required": false },
+    { "key": "permissions",           "displayName": "Permissions (JSON)",      "type": "LongText","required": false, "description": "JSON object mapping action keys to true/false, e.g. {\"bookings.edit\":true,\"pricing.edit\":false}" },
+    { "key": "isSystemRole",          "displayName": "System Role",             "type": "Boolean", "required": false, "description": "true = built-in role, cannot be deleted" },
+    { "key": "sortOrder",             "displayName": "Sort Order",              "type": "Number",  "required": false },
+    { "key": "active",                "displayName": "Active",                  "type": "Boolean", "required": false }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "collectionId": "RentalsNew",
+  "displayName": "Active Rentals",
+  "description": "Live rental records created when a booking transitions to 'Active Rental'. Tracks check-in/check-out details, condition, fuel, and mileage.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "One-to-one with a BookingsNew record (bookingId). Created automatically when a booking is activated.",
+  "fields": [
+    { "key": "bookingId",             "displayName": "Booking ID",              "type": "Text",    "required": true,  "description": "BookingsNew._id" },
+    { "key": "bookingNumber",         "displayName": "Booking Number",          "type": "Text",    "required": false, "description": "Denormalised from BookingsNew for display" },
+
+    { "key": "vehicleId",             "displayName": "Vehicle ID",              "type": "Text",    "required": false, "description": "FleetNew._id" },
+    { "key": "vehiclePlate",          "displayName": "Vehicle Plate",           "type": "Text",    "required": false },
+    { "key": "vehicleModel",          "displayName": "Vehicle Model",           "type": "Text",    "required": false },
+
+    { "key": "customerName",          "displayName": "Customer Name",           "type": "Text",    "required": false },
+    { "key": "phone",                 "displayName": "Phone",                   "type": "Text",    "required": false },
+    { "key": "email",                 "displayName": "Email",                   "type": "Text",    "required": false },
+
+    { "key": "pickupDateTime",        "displayName": "Pickup Date & Time",      "type": "DateTime","required": false },
+    { "key": "dropoffDateTime",       "displayName": "Dropoff Date & Time",     "type": "DateTime","required": false },
+    { "key": "actualPickupAt",        "displayName": "Actual Pickup Time",      "type": "DateTime","required": false },
+    { "key": "actualDropoffAt",       "displayName": "Actual Dropoff Time",     "type": "DateTime","required": false },
+
+    { "key": "checkInStaffId",        "displayName": "Check-In Staff ID",       "type": "Text",    "required": false, "description": "StaffUsers._id who performed check-in" },
+    { "key": "checkInStaffName",      "displayName": "Check-In Staff Name",     "type": "Text",    "required": false },
+    { "key": "checkOutStaffId",       "displayName": "Check-Out Staff ID",      "type": "Text",    "required": false },
+    { "key": "checkOutStaffName",     "displayName": "Check-Out Staff Name",    "type": "Text",    "required": false },
+
+    { "key": "fuelLevelOut",          "displayName": "Fuel Level Out",          "type": "Text",    "required": false, "description": "'empty' | '1/4' | '1/2' | '3/4' | 'full'" },
+    { "key": "fuelLevelIn",           "displayName": "Fuel Level In",           "type": "Text",    "required": false },
+    { "key": "mileageOut",            "displayName": "Mileage Out",             "type": "Number",  "required": false },
+    { "key": "mileageIn",             "displayName": "Mileage In",              "type": "Number",  "required": false },
+    { "key": "mileageDriven",         "displayName": "Mileage Driven",          "type": "Number",  "required": false },
+
+    { "key": "conditionOut",          "displayName": "Condition Notes Out",     "type": "LongText","required": false },
+    { "key": "conditionIn",           "displayName": "Condition Notes In",      "type": "LongText","required": false },
+    { "key": "damagesOut",            "displayName": "Damages Out (JSON)",      "type": "LongText","required": false, "description": "JSON array of damage annotations" },
+    { "key": "damagesIn",             "displayName": "Damages In (JSON)",       "type": "LongText","required": false },
+
+    { "key": "depositAmount",         "displayName": "Deposit Amount",          "type": "Number",  "required": false },
+    { "key": "depositMethod",         "displayName": "Deposit Method",          "type": "Text",    "required": false, "description": "'cash' | 'card' | 'bank'" },
+    { "key": "depositReturned",       "displayName": "Deposit Returned",        "type": "Boolean", "required": false },
+    { "key": "depositReturnedAt",     "displayName": "Deposit Returned At",     "type": "DateTime","required": false },
+
+    { "key": "rentalStatus",          "displayName": "Rental Status",           "type": "Text",    "required": false, "description": "'active' | 'closed' | 'extended'" },
+    { "key": "closedAt",              "displayName": "Closed At",               "type": "DateTime","required": false },
+    { "key": "extendedDropoffAt",     "displayName": "Extended Dropoff Date",   "type": "DateTime","required": false },
+
+    { "key": "internalNotes",         "displayName": "Internal Notes",          "type": "LongText","required": false },
+    { "key": "checkInSignatureUrl",   "displayName": "Check-In Signature URL",  "type": "URL",     "required": false },
+    { "key": "checkOutSignatureUrl",  "displayName": "Check-Out Signature URL", "type": "URL",     "required": false }
+  ]
+}

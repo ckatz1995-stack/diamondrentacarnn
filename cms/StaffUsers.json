@@ -1,0 +1,24 @@
+{
+  "collectionId": "StaffUsers",
+  "displayName": "Staff Users",
+  "description": "Internal staff accounts for the backroom (admin) panel. Separate from Wix members.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "Passwords are stored as bcrypt hashes in StaffCredentials (separate collection). This collection holds profile and role data only.",
+  "fields": [
+    { "key": "username",              "displayName": "Username",                "type": "Text",    "required": true,  "description": "Unique login identifier (lowercase, no spaces)" },
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: username. Written by backend." },
+    { "key": "fullName",              "displayName": "Full Name",               "type": "Text",    "required": false },
+    { "key": "email",                 "displayName": "Email",                   "type": "Text",    "required": false },
+    { "key": "phone",                 "displayName": "Phone",                   "type": "Text",    "required": false },
+    { "key": "roleId",                "displayName": "Role ID",                 "type": "Text",    "required": false, "description": "StaffRoles._id" },
+    { "key": "roleKey",               "displayName": "Role Key",                "type": "Text",    "required": false, "description": "Denormalised from StaffRoles.key, e.g. 'admin' | 'manager' | 'agent'" },
+    { "key": "roleLabel",             "displayName": "Role Label",              "type": "Text",    "required": false },
+    { "key": "active",                "displayName": "Active",                  "type": "Boolean", "required": false, "description": "false = account disabled (cannot log in)" },
+    { "key": "lastLoginAt",           "displayName": "Last Login At",           "type": "DateTime","required": false },
+    { "key": "lastLoginIp",           "displayName": "Last Login IP",           "type": "Text",    "required": false },
+    { "key": "forcePasswordReset",    "displayName": "Force Password Reset",    "type": "Boolean", "required": false, "description": "true = prompt staff to change password on next login" },
+    { "key": "avatarUrl",             "displayName": "Avatar URL",              "type": "URL",     "required": false },
+    { "key": "notes",                 "displayName": "Notes",                   "type": "LongText","required": false, "description": "Admin-only notes about this staff member" },
+    { "key": "createdBy",             "displayName": "Created By",              "type": "Text",    "required": false, "description": "StaffUsers._id who created this account" }
+  ]
+}
