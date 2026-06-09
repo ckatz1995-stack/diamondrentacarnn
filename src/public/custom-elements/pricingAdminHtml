@@ -103,8 +103,14 @@ label{display:block;font:600 12px var(--f);color:var(--sub);margin-bottom:4px;le
 .cmd-card:nth-child(2)::before{background:linear-gradient(90deg,#10B981,#6EE7B7,#10B981)}
 .cmd-card:nth-child(3)::before{background:linear-gradient(90deg,#3B82F6,#93C5FD,#3B82F6)}
 .cmd-card:nth-child(4)::before{background:linear-gradient(90deg,#8B5CF6,#C4B5FD,#8B5CF6)}
+.cmd-card:nth-child(5)::before{background:linear-gradient(90deg,#F59E0B,#FCD34D,#F59E0B)}
 .cmd-card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);border-color:var(--gold-border)}
-.cmd-icon{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.cmd-icon{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px;background:var(--surface)}
+.cmd-card:nth-child(1) .cmd-icon{background:rgba(192,152,64,.12)}
+.cmd-card:nth-child(2) .cmd-icon{background:rgba(16,185,129,.1)}
+.cmd-card:nth-child(3) .cmd-icon{background:rgba(59,130,246,.1)}
+.cmd-card:nth-child(4) .cmd-icon{background:rgba(139,92,246,.1)}
+.cmd-card:nth-child(5) .cmd-icon{background:rgba(245,158,11,.1)}
 .cmd-card h4{font-size:14px;font-weight:700;margin-bottom:4px}
 .cmd-card p{font-size:12px;color:var(--muted);line-height:1.4;margin-bottom:10px}
 .cmd-links{display:flex;gap:6px;flex-wrap:wrap}
@@ -128,9 +134,9 @@ label{display:block;font:600 12px var(--f);color:var(--sub);margin-bottom:4px;le
 .pane-badge{display:inline-block;padding:3px 9px;border-radius:var(--r-pill);background:var(--surface);color:var(--gold2);font:700 10px var(--f);letter-spacing:.06em;text-transform:uppercase;margin-left:8px}
 
 /* ── TABLES ── */
-.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;box-shadow:var(--sh)}
+.tbl-wrap{overflow-x:auto;overflow-y:auto;max-height:560px;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;box-shadow:var(--sh)}
 table{width:100%;border-collapse:collapse;min-width:500px}
-th{padding:10px 12px;text-align:left;font:700 11px var(--f);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);background:var(--surface);white-space:nowrap}
+th{padding:10px 12px;text-align:left;font:700 11px var(--f);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);background:var(--surface);white-space:nowrap;position:sticky;top:0;z-index:1}
 td{padding:9px 12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:0}
 tr:hover td{background:rgba(0,0,0,.02)}
@@ -138,19 +144,70 @@ tr:hover td{background:rgba(0,0,0,.02)}
 .badge.active{background:var(--good-bg);color:var(--good)}
 .badge.inactive{background:var(--surface);color:var(--muted)}
 .badge.warn{background:#FEF3C7;color:#92400E}
+.badge.perday{background:#EFF6FF;color:#1d4ed8}
+.badge.perbooking{background:#F5F3FF;color:#6d28d9}
+.badge.agerage{background:#FFFBEB;color:#92400E}
+.badge.nightfee{background:#E0F2FE;color:#0369a1}
+.badge.maintenance{background:#FFFBEB;color:#92400E}
+.badge.reserved{background:#EFF6FF;color:#1d4ed8}
 .tbl-search{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .tbl-search input{max-width:280px;padding:7px 11px;font-size:13px}
 .tbl-empty{padding:32px;text-align:center;color:var(--muted);font-size:13px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:10px;text-align:center}
+.empty-state .es-icon{font-size:36px;line-height:1;opacity:.5}
+.empty-state .es-msg{font:600 14px var(--f);color:var(--sub)}
+.empty-state .es-hint{font:400 12px var(--f);color:var(--muted)}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.status-dot.green{background:#16a34a}.status-dot.amber{background:#d97706}.status-dot.red{background:#dc2626}.status-dot.blue{background:#2563EB}
+.section-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.section-toolbar input{flex:1;min-width:180px;max-width:320px;padding:7px 11px;font-size:13px}
+.section-banner{padding:9px 14px;border-radius:var(--r);background:rgba(37,99,235,.05);border-left:3px solid #2563EB;color:#1d4ed8;font-size:12px;margin-bottom:10px}
+.kpi.green{border-left:3px solid #16a34a}
+.kpi.blue{border-left:3px solid #2563EB}
+.kpi.gold{border-left:3px solid #C09840}
+.kpi.purple{border-left:3px solid #8B5CF6}
+.kpi .kpi-icon{font-size:17px;float:right;opacity:.35}
+.panel.green-top{border-top:3px solid #16a34a}
+.panel.blue-top{border-top:3px solid #2563EB}
+.panel.gold-top{border-top:3px solid #C09840}
+.panel.purple-top{border-top:3px solid #8B5CF6}
 
-/* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;padding:20px;overflow-y:auto}
-.modal-overlay.show{display:flex;align-items:flex-start;justify-content:center}
-.modal-box{background:#fff;border-radius:var(--r-xl);width:100%;max-width:680px;box-shadow:var(--sh-lg);margin:auto}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
-.modal-head h3{margin:0;font-size:17px}
-.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;padding:4px}
-.modal-body{padding:20px}
-.modal-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+/* ── SORTABLE HEADERS ── */
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{color:var(--gold2);background:rgba(192,152,64,.08)}
+th.sortable::after{content:' ⇅';opacity:.28;font-size:8px;letter-spacing:0;font-weight:400;text-transform:none}
+th.sortable.sort-asc::after{content:' ▲';opacity:1;color:var(--gold2)}
+th.sortable.sort-desc::after{content:' ▼';opacity:1;color:var(--gold2)}
+
+/* ── BULK ACTIONS ── */
+.bulk-col{width:36px;text-align:center;padding-left:8px!important;padding-right:4px!important}
+.bulk-col input[type=checkbox]{cursor:pointer;width:14px;height:14px;margin:0;vertical-align:middle}
+.bulk-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#EFF6FF;border:1px solid rgba(37,99,235,.18);border-radius:var(--r);margin-bottom:10px;flex-wrap:wrap;animation:toastIn .18s ease}
+.bulk-bar .bulk-count{font:700 13px var(--f);color:var(--info);flex-shrink:0}
+.bulk-bar .bulk-spacer{flex:1;min-width:8px}
+
+/* ── DRAWER (slide-over) ── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(15,10,5,.42);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:100;opacity:0;visibility:hidden;transition:opacity .26s ease,visibility .26s}
+.drawer-overlay.show{opacity:1;visibility:visible}
+.drawer-panel{position:absolute;top:0;right:0;height:100%;width:min(560px,100%);background:var(--card);box-shadow:-14px 0 44px rgba(0,0,0,.22);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .32s cubic-bezier(.32,.72,0,1)}
+.drawer-overlay.show .drawer-panel{transform:translateX(0)}
+.drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:20px 22px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,var(--card2))}
+.drawer-eyebrow{display:inline-flex;align-items:center;gap:6px;font:800 10px var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--gold2);margin-bottom:6px}
+.drawer-eyebrow::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold2)}
+.drawer-head h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.drawer-head p{font:400 12.5px var(--f);color:var(--muted);margin-top:4px;line-height:1.45}
+.drawer-close{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--sub);line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.drawer-close:hover{background:var(--danger-bg);color:var(--danger);border-color:rgba(220,38,38,.3)}
+.drawer-body{flex:1;overflow-y:auto;padding:18px 22px;-webkit-overflow-scrolling:touch}
+.drawer-foot{display:flex;gap:8px;align-items:center;padding:14px 22px;border-top:1px solid var(--line);background:#fff;box-shadow:0 -3px 14px rgba(0,0,0,.05)}
+.drawer-foot .btn{padding:9px 18px}
+@media(max-width:560px){.drawer-panel{width:100%}}
+/* Modal field sections reuse .sc card styles; consistent inner spacing */
+.drawer-body .sc:last-child{margin-bottom:0}
+.drawer-body .field-row{margin-bottom:0}
+.drawer-body .sc-b > * + *{margin-top:12px}
+.drawer-body .tog-row{padding:10px 0}
+.req{color:var(--danger);font-weight:700}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
@@ -199,6 +256,9 @@ tr:hover td{background:rgba(0,0,0,.02)}
 /* ── FIELD HINT ── */
 .fhint{font:400 11px var(--f);color:var(--muted);margin-top:3px;line-height:1.4}
 .fhint b{font-weight:600;color:var(--sub)}
+input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shadow:0 0 0 3px rgba(220,38,38,.1)!important}
+.dirty-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--r-pill);background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font:600 11px var(--f)}
+.dirty-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#D97706;display:inline-block}
 
 /* ── SETTINGS CARD ── */
 .sc{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px}
@@ -227,6 +287,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
   <button class="ftab" data-s="insurance">Insurance</button>
   <button class="ftab" data-s="extras">Extras</button>
   <button class="ftab" data-s="fees">Fees</button>
+  <button class="ftab" data-s="pickupLocations">Pickup locations</button>
   <button class="ftab" data-s="roles">Roles</button>
   <button class="ftab" data-s="users">Users</button>
   <button class="ftab" data-s="security">Security</button>
@@ -249,7 +310,8 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <div class="area-rail" id="bizAreaRail"></div>
       <div class="pane-rail" id="bizPaneRail"></div>
       <div id="bizPaneContent"></div>
-      <div class="btns" id="bizActions" style="justify-content:flex-end">
+      <div class="btns" id="bizActions" style="justify-content:flex-end;align-items:center">
+        <span class="dirty-badge" id="bizDirtyBadge" style="display:none">Unsaved changes</span>
         <button class="btn" id="bizResetBtn">Reset defaults</button>
         <button class="btn primary" id="bizSaveBtn">Save settings</button>
       </div>
@@ -259,43 +321,85 @@ tr:hover td{background:rgba(0,0,0,.02)}
   <section id="s-fleetCategories" class="section">
     <div class="section-head">
       <h2>Fleet categories</h2>
-      <button class="btn primary" id="addCatBtn">+ Add category</button>
+      <div class="btns">
+        <button class="btn sm" data-export="categories">Export CSV</button>
+        <button class="btn primary" id="addCatBtn">+ Add category</button>
+      </div>
     </div>
-    <div class="tbl-search"><input id="catSearch" placeholder="Search categories…" /></div>
+    <div class="section-banner">Vehicle classes shown to customers (Economy, SUV, Van…). Each category defines the base daily rate, seats, and features. Rate rules can override pricing per season.</div>
+    <div class="tbl-search"><input id="catSearch" aria-label="Search categories" placeholder="Search categories…" /></div>
+    <div class="bulk-bar" id="catsBulkBar" style="display:none">
+      <span class="bulk-count" id="catsBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="cats">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="cats">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="cats">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="cats" class="btn sm">Clear</button>
+    </div>
     <div class="tbl-wrap"><table id="catTable"><thead><tr>
-      <th>Code</th><th>Title</th><th>Price/day</th><th>Seats</th><th>Status</th><th>Actions</th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="cats" aria-label="Select all rows"></th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="category">Code</th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="title">Title / Specs</th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="price">Price/day</th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="transmission">Transmission</th>
+      <th>AC</th><th>Vehicles</th><th>Public</th>
+      <th class="sortable" data-sort-table="cats" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="catBody"></tbody></table></div>
   </section>
 
   <section id="s-fleetVehicles" class="section">
     <div class="section-head">
       <h2>Fleet vehicles</h2>
-      <button class="btn primary" id="addVehBtn">+ Add vehicle</button>
+      <div class="btns">
+        <button class="btn sm" data-export="vehicles">Export CSV</button>
+        <button class="btn primary" id="addVehBtn">+ Add vehicle</button>
+      </div>
     </div>
-    <div class="tbl-search"><input id="vehSearch" placeholder="Search vehicles…" /></div>
+    <div class="section-banner">Individual vehicles in the fleet. Mark vehicles as available, in maintenance, or reserved. Inactive vehicles are hidden from bookings entirely.</div>
+    <div class="btns" id="vehStatsBand" style="margin-bottom:8px"></div>
+    <div class="tbl-search"><input id="vehSearch" aria-label="Search vehicles" placeholder="Search vehicles…" /></div>
+    <div class="bulk-bar" id="vehsBulkBar" style="display:none">
+      <span class="bulk-count" id="vehsBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="vehs">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="vehs">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="vehs">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="vehs" class="btn sm">Clear</button>
+    </div>
     <div class="tbl-wrap"><table id="vehTable"><thead><tr>
-      <th>Plate</th><th>Model</th><th>Category</th><th>Status</th><th>Actions</th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="vehs" aria-label="Select all rows"></th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="plate">Plate</th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="model">Model</th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="category">Category</th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="status">Status</th>
+      <th class="sortable" data-sort-table="vehs" data-sort-col="active">Active</th>
+      <th>Actions</th>
     </tr></thead><tbody id="vehBody"></tbody></table></div>
   </section>
 
   <section id="s-dynamicPricing" class="section">
     <div class="section-head"><h2>Dynamic pricing</h2></div>
-    <div class="panel">
+    <div class="section-banner">Define seasonal periods and per-category daily rates. Seasons with higher priority override overlapping seasons. A rate rule with no season applies year-round.</div>
+    <div class="panel blue-top">
       <div class="panel-head">
         <h3>Pricing seasons</h3>
-        <button class="btn primary sm" id="addSeasonBtn">+ Add season</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="seaStatsBand" style="font-size:12px;color:var(--muted)"></span>
+          <button class="btn primary sm" id="addSeasonBtn">+ Add season</button>
+        </div>
       </div>
       <div class="tbl-wrap"><table><thead><tr>
-        <th>Label</th><th>Start</th><th>End</th><th>Priority</th><th>Repeat</th><th>Status</th><th>Actions</th>
+        <th>Key</th><th>Label</th><th>Start</th><th>End</th><th>Priority</th><th>Repeat</th><th>Status</th><th>Actions</th>
       </tr></thead><tbody id="seasonsBody"></tbody></table></div>
     </div>
-    <div class="panel">
+    <div class="panel gold-top">
       <div class="panel-head">
         <h3>Rate rules</h3>
         <button class="btn primary sm" id="addRuleBtn">+ Add rule</button>
       </div>
       <div class="tbl-wrap"><table><thead><tr>
-        <th>Category</th><th>Season</th><th>Days</th><th>Price/day</th><th>Status</th><th>Actions</th>
+        <th>Category</th><th>Season</th><th>Days</th><th>Price/day</th><th>Label</th><th>Status</th><th>Actions</th>
       </tr></thead><tbody id="rulesBody"></tbody></table></div>
     </div>
   </section>
@@ -303,30 +407,91 @@ tr:hover td{background:rgba(0,0,0,.02)}
   <section id="s-insurance" class="section">
     <div class="section-head">
       <h2>Insurance plans</h2>
-      <button class="btn primary" id="addInsBtn">+ Add plan</button>
+      <div class="btns">
+        <button class="btn sm" data-export="insurance">Export CSV</button>
+        <button class="btn primary" id="addInsBtn">+ Add plan</button>
+      </div>
+    </div>
+    <div class="section-banner">Coverage options shown to customers during booking. CDW is typically included at no charge; SCDW and FULL reduce the excess with a daily fee.</div>
+    <div class="tbl-search"><input id="insSearch" aria-label="Search insurance plans" placeholder="Search insurance plans…" /></div>
+    <div class="bulk-bar" id="insBulkBar" style="display:none">
+      <span class="bulk-count" id="insBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="ins">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="ins">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="ins">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="ins" class="btn sm">Clear</button>
     </div>
     <div class="tbl-wrap"><table id="insTable"><thead><tr>
-      <th>Key</th><th>Title</th><th>Price/day</th><th>Sort</th><th>Status</th><th>Actions</th>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="ins" aria-label="Select all rows"></th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="key">Key</th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="title">Title</th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="pricePerDay">Price/day</th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="sortOrder">Sort</th>
+      <th>Public</th>
+      <th class="sortable" data-sort-table="ins" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="insBody"></tbody></table></div>
   </section>
 
   <section id="s-extras" class="section">
     <div class="section-head">
       <h2>Extra services</h2>
-      <button class="btn primary" id="addExtraBtn">+ Add service</button>
+      <div class="btns">
+        <button class="btn sm" data-export="extras">Export CSV</button>
+        <button class="btn primary" id="addExtraBtn">+ Add service</button>
+      </div>
     </div>
-    <div class="tbl-wrap"><table><thead><tr>
-      <th>Key</th><th>Title</th><th>Price</th><th>Billing</th><th>Status</th><th>Actions</th>
+    <div class="section-banner">Optional add-ons customers can select during booking — child seats, GPS, additional drivers. Billing mode controls whether the fee is charged per day or once per booking.</div>
+    <div class="tbl-search"><input id="extrasSearch" aria-label="Search extra services" placeholder="Search extra services…" /></div>
+    <div class="bulk-bar" id="extrasBulkBar" style="display:none">
+      <span class="bulk-count" id="extrasBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="extras">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="extras">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="extras">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="extras" class="btn sm">Clear</button>
+    </div>
+    <div class="tbl-wrap"><table id="extrasTable"><thead><tr>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="extras" aria-label="Select all rows"></th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="key">Key</th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="title">Title</th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="price">Price</th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="billingMode">Billing</th>
+      <th>Public</th>
+      <th class="sortable" data-sort-table="extras" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="extrasBody"></tbody></table></div>
   </section>
 
   <section id="s-fees" class="section">
     <div class="section-head">
       <h2>Fee rules</h2>
-      <button class="btn primary" id="addFeeBtn">+ Add fee</button>
+      <div class="btns">
+        <button class="btn sm" data-export="fees">Export CSV</button>
+        <button class="btn primary" id="addFeeBtn">+ Add fee</button>
+      </div>
     </div>
-    <div class="tbl-wrap"><table><thead><tr>
-      <th>Key</th><th>Title</th><th>Amount</th><th>Billing</th><th>Rule type</th><th>Status</th><th>Actions</th>
+    <div class="section-banner">Automatic surcharges applied to bookings — young/senior driver premiums, night pickup/dropoff fees, and manual charges added by staff during booking review.</div>
+    <div class="tbl-search"><input id="feesSearch" aria-label="Search fee rules" placeholder="Search fee rules…" /></div>
+    <div class="bulk-bar" id="feesBulkBar" style="display:none">
+      <span class="bulk-count" id="feesBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="fees">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="fees">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="fees">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="fees" class="btn sm">Clear</button>
+    </div>
+    <div class="tbl-wrap"><table id="feesTable"><thead><tr>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="fees" aria-label="Select all rows"></th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="key">Key</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="title">Title</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="amount">Amount</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="billingMode">Billing</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="ruleType">Type</th>
+      <th>Group</th>
+      <th class="sortable" data-sort-table="fees" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="feesBody"></tbody></table></div>
   </section>
 
@@ -335,25 +500,43 @@ tr:hover td{background:rgba(0,0,0,.02)}
       <h2>Roles</h2>
       <button class="btn primary" id="addRoleBtn">+ Add role</button>
     </div>
+    <div class="section-banner">Roles define what staff members can see and do. Assign a role to each staff user to control access to bookings, pricing, fleet, and admin settings.</div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>Key</th><th>Label</th><th>Status</th><th>Actions</th>
+      <th>Key</th><th>Label</th><th>Permissions</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody id="rolesBody"></tbody></table></div>
   </section>
 
   <section id="s-users" class="section">
     <div class="section-head">
       <h2>Staff users</h2>
-      <button class="btn primary" id="addUserBtn">+ Add / invite user</button>
+      <div class="btns">
+        <button class="btn sm" data-export="users">Export CSV</button>
+        <button class="btn primary" id="addUserBtn">+ Add / invite user</button>
+      </div>
     </div>
+    <div class="section-banner">Staff members who can log into the backroom. Each user is assigned a role that controls their permissions. Inactive users cannot log in.</div>
     <div id="userStatsBand" class="btns" style="margin-bottom:10px"></div>
-    <div class="tbl-search"><input id="userSearch" placeholder="Search users…" /></div>
-    <div class="tbl-wrap"><table><thead><tr>
-      <th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th>
+    <div class="tbl-search"><input id="userSearch" aria-label="Search users" placeholder="Search users…" /></div>
+    <div class="bulk-bar" id="usersBulkBar" style="display:none">
+      <span class="bulk-count" id="usersBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="users">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="users">Deactivate</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="users" class="btn sm">Clear</button>
+    </div>
+    <div class="tbl-wrap"><table id="usersTable"><thead><tr>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="users" aria-label="Select all rows"></th>
+      <th class="sortable" data-sort-table="users" data-sort-col="fullName">Name</th>
+      <th class="sortable" data-sort-table="users" data-sort-col="email">Email</th>
+      <th class="sortable" data-sort-table="users" data-sort-col="roleKey">Role</th>
+      <th class="sortable" data-sort-table="users" data-sort-col="active">Status</th>
+      <th>Actions</th>
     </tr></thead><tbody id="usersBody"></tbody></table></div>
   </section>
 
   <section id="s-security" class="section">
     <div class="section-head"><h2>Security</h2></div>
+    <div class="section-banner">Manage active login sessions and staff passwords. Revoking a session forces immediate logout on the affected device.</div>
     <div class="panel">
       <div class="panel-head">
         <h3>Active sessions</h3>
@@ -366,8 +549,13 @@ tr:hover td{background:rgba(0,0,0,.02)}
     <div class="panel">
       <h3 style="margin-bottom:14px">Password management</h3>
       <div class="field-row cols-2">
-        <div class="field-group"><label>Staff email</label><input id="pwEmail" placeholder="staff@example.com" /></div>
-        <div class="field-group"><label>New password</label><input id="pwNew" type="password" placeholder="Min 8 characters" /></div>
+        <div class="field-group"><label for="pwEmail">Staff email</label><input id="pwEmail" placeholder="staff@example.com" /></div>
+        <div class="field-group"><label for="pwNew">New password</label>
+          <div style="display:flex;gap:6px">
+            <input id="pwNew" type="password" placeholder="Min 8 characters" />
+            <button class="btn sm" id="pwToggleBtn" type="button" style="flex-shrink:0">Show</button>
+          </div>
+        </div>
       </div>
       <div class="check-row"><input type="checkbox" id="pwMustChange" /><label for="pwMustChange">Must change on next login</label></div>
       <div class="btns" style="margin-top:12px">
@@ -379,25 +567,64 @@ tr:hover td{background:rgba(0,0,0,.02)}
     </div>
   </section>
 
+  <section id="s-pickupLocations" class="section">
+    <div class="section-head">
+      <h2>Pickup locations</h2>
+      <div class="btns">
+        <button class="btn sm" data-export="locations">Export CSV</button>
+        <button class="btn primary" id="addLocationBtn">+ Add location</button>
+      </div>
+    </div>
+    <div class="section-banner">Manage all pickup and dropoff locations shown to customers in the booking flow. Each location can have a custom fee, a station group, and display labels for the booking form.</div>
+    <div class="tbl-search"><input id="locSearch" aria-label="Search locations" placeholder="Search locations…" /></div>
+    <div class="bulk-bar" id="locsBulkBar" style="display:none">
+      <span class="bulk-count" id="locsBulkCount">0 selected</span>
+      <button class="btn sm good" data-bulk-action="activate" data-bulk-table="locs">Activate</button>
+      <button class="btn sm" data-bulk-action="deactivate" data-bulk-table="locs">Deactivate</button>
+      <button class="btn sm danger" data-bulk-action="delete" data-bulk-table="locs">Delete</button>
+      <div class="bulk-spacer"></div>
+      <button data-bulk-clear="locs" class="btn sm">Clear</button>
+    </div>
+    <div class="tbl-wrap"><table id="locTable"><thead><tr>
+      <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="locs" aria-label="Select all rows"></th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="label">Label</th>
+      <th>Address</th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="stationKey">Station</th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="locationType">Type</th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="extraFee">Fee</th>
+      <th class="sortable" data-sort-table="locs" data-sort-col="active">Status</th>
+      <th>Actions</th>
+    </tr></thead><tbody id="locBody"></tbody></table></div>
+  </section>
+
   <section id="s-audit" class="section">
-    <div class="section-head"><h2>Change history</h2></div>
+    <div class="section-head">
+      <h2>Change history</h2>
+      <button class="btn sm" id="auditExportBtn">Export CSV</button>
+    </div>
+    <div class="section-banner">Last 100 admin actions recorded in the system. Each entry shows who made the change, what was changed, and a short summary.</div>
+    <div class="tbl-search"><input id="auditSearch" aria-label="Search change history" placeholder="Search by actor, action, entity or summary…" /></div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Summary</th>
+      <th>Time</th><th>Actor</th><th>Action</th><th>Entity ID</th><th>Entity</th><th>Summary</th>
     </tr></thead><tbody id="auditBody"></tbody></table></div>
   </section>
 </div>
 
-<div class="modal-overlay" id="modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3 id="modalTitle">Edit</h3>
-      <button class="modal-close" id="modalClose">×</button>
+<div class="drawer-overlay" id="modal">
+  <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="drawer-head">
+      <div>
+        <span class="drawer-eyebrow" id="modalEyebrow"></span>
+        <h3 id="modalTitle">Edit</h3>
+        <p id="modalSubtitle"></p>
+      </div>
+      <button class="drawer-close" id="modalClose" aria-label="Close">×</button>
     </div>
-    <div class="modal-body" id="modalBody"></div>
-    <div class="modal-foot">
+    <div class="drawer-body" id="modalBody"></div>
+    <div class="drawer-foot">
       <button class="btn danger sm" id="modalDelete" style="margin-right:auto;display:none">Delete</button>
       <button class="btn sm" id="modalCancel">Cancel</button>
-      <button class="btn primary sm" id="modalSave">Save</button>
+      <button class="btn primary" id="modalSave">Save changes</button>
     </div>
   </div>
 </div>
@@ -412,8 +639,10 @@ const state = {
   bizPane: 'frontBrand',
   snapshot: null,
   access: null,
-  modal: null,
-  busy: false
+  bizDirty: false,
+  busy: false,
+  bulkSel: {},   // tableKey → Set of selected _id strings
+  tableSort: {}  // tableKey → { col, dir }
 };
 
 // ── HELPERS ───────────────────────────────────────────────────────────────
@@ -421,7 +650,21 @@ const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 const money = (n, cur='EUR') => `${cur} ${Number(n||0).toFixed(2)}`;
 const fmtDate = s => s ? new Date(s).toLocaleDateString('el-GR') : '—';
 const fmtDT = s => s ? new Date(s).toLocaleString('el-GR') : '—';
+const fmtAgo = s => {
+  if (!s) return '—';
+  const diff = Date.now() - new Date(s).getTime();
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff/60000)+'m ago';
+  if (diff < 86400000) return Math.floor(diff/3600000)+'h ago';
+  return Math.floor(diff/86400000)+'d ago';
+};
 const slug = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+const sortBy = (arr, col, dir) => arr.slice().sort((a,b)=>{
+  const va=a[col]??'', vb=b[col]??'';
+  const cmp=(typeof va==='number'&&typeof vb==='number')
+    ?va-vb:String(va).localeCompare(String(vb),undefined,{numeric:true,sensitivity:'base'});
+  return dir==='desc'?-cmp:cmp;
+});
 const el = id => document.getElementById(id);
 const biz = () => state.snapshot?.businessSettings || {};
 const cur = () => biz().currency || 'EUR';
@@ -455,19 +698,16 @@ window.addEventListener('message', e => {
     case 'seedPricingResult':
     case 'resetPricingResult': {
       const r = msg.result || {};
-      const parts = [];
-      if (r.business) parts.push(`Business: ${r.business.saved||r.business.total||0}`);
-      if (r.insurance) parts.push(`Insurance: ${r.insurance.total||0}`);
-      if (r.extras) parts.push(`Extras: ${r.extras.total||0}`);
-      if (r.fees) parts.push(`Fees: ${r.fees.total||0}`);
-      showToast(parts.join(' · ') || 'Done', 'success');
+      const total = (r.business?.saved||0)+(r.insurance?.total||0)+(r.extras?.total||0)+(r.fees?.total||0)+(r.seasons?.total||0)+(r.rules?.total||0);
+      showToast(`${msg.type==='resetPricingResult'?'Reset':'Seed'} complete — ${total} record${total!==1?'s':''} processed`, 'success');
       break;
     }
     case 'staffPasswordResult': {
       const r = msg.result || {};
       const res = el('pwResult');
-      if (res) res.textContent = r.success ? `✓ Password ${r.mode==='set'?'set':'reset'} for ${r.email}` : '✗ Failed';
-      if (res) res.style.color = r.success ? 'var(--good)' : 'var(--danger)';
+      const txt = r.success ? `Password ${r.mode==='set'?'set':'reset'} for ${r.email}` : (r.error||'Password operation failed');
+      if (res) { res.textContent = txt; res.style.color = r.success ? 'var(--good)' : 'var(--danger)'; }
+      showToast(txt, r.success ? 'success' : 'error');
       break;
     }
     case 'staffInviteResult': {
@@ -492,24 +732,29 @@ function setBusy(flag) {
 function showToast(msg, tone='info') {
   const c = el('toastContainer');
   if (!c) return;
+  const icons = { success:'✓', error:'✗', info:'ℹ', warn:'⚠' };
+  const icon = icons[tone] || icons.info;
   const item = document.createElement('div');
   item.className = `toast-item ${tone}`;
-  item.textContent = msg;
+  item.innerHTML = `<span style="font-weight:800;margin-right:6px">${icon}</span>${esc(msg)}`;
+  item.style.cursor = 'pointer';
+  item.title = 'Click to dismiss';
+  item.addEventListener('click', () => item.remove());
   c.appendChild(item);
-  setTimeout(() => item.remove(), 4000);
+  setTimeout(() => item.remove(), 5000);
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────
 const GROUPS = [
   { key:'settingsHome', label:'Overview', subs:[] },
   { key:'business',     label:'Business', subs:[] },
-  { key:'operations',   label:'Operations', subs:['fleetCategories','fleetVehicles'] },
+  { key:'operations',   label:'Operations', subs:['fleetCategories','fleetVehicles','pickupLocations'] },
   { key:'pricing',      label:'Pricing rules', subs:['dynamicPricing','insurance','extras','fees'] },
   { key:'team',         label:'Team & access', subs:['roles','users','security','audit'] }
 ];
 
 const SUB_LABELS = {
-  fleetCategories:'Fleet categories', fleetVehicles:'Fleet vehicles',
+  fleetCategories:'Fleet categories', fleetVehicles:'Fleet vehicles', pickupLocations:'Pickup locations',
   dynamicPricing:'Dynamic pricing', insurance:'Insurance', extras:'Extras', fees:'Fees',
   roles:'Roles', users:'Users', security:'Security', audit:'Change history'
 };
@@ -523,6 +768,7 @@ const AREAS = [
 
 const PANES = [
   { key:'frontBrand',     area:'brand',      label:'Brand identity',  short:'Identity' },
+  { key:'stations',       area:'brand',      label:'Station profiles',short:'Stations' },
   { key:'vehicleCatalog', area:'operations', label:'Catalog display', short:'Catalog' },
   { key:'operations',     area:'operations', label:'Pricing & ops',   short:'Pricing & ops' },
   { key:'automation',     area:'operations', label:'Email triggers',  short:'Email triggers' },
@@ -541,9 +787,12 @@ function activeGroup() {
 
 function canManageStaff() { return !!(state.access?.currentStaff?.canManageStaff || state.access?.currentStaff?.isAdmin); }
 function canViewAudit()   { return !!(state.access?.currentStaff?.canViewAudit   || state.access?.currentStaff?.isAdmin); }
-function canEditPricing() { return !!(state.access?.currentStaff?.canManageBusinessSettings || state.access?.currentStaff?.isAdmin || state.access?.accessState !== 'ready'); }
 
 function goto(section, opts={}) {
+  if (state.bizDirty && section !== 'businessSettings') {
+    if (!confirm('You have unsaved business settings changes. Leave without saving?')) return;
+    clearDirty();
+  }
   state.section = section;
   if (opts.bizArea) state.bizArea = opts.bizArea;
   if (opts.bizPane) state.bizPane = opts.bizPane;
@@ -610,11 +859,20 @@ function renderNav() {
   }));
   el('navBar').querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => goto(b.dataset.s)));
   el('navBar').querySelectorAll('[data-area]').forEach(b => b.addEventListener('click', () => {
+    const newPane = PANES.find(p=>p.area===b.dataset.area)?.key || state.bizPane;
+    if (state.bizDirty && newPane !== state.bizPane) {
+      if (!confirm('You have unsaved changes. Switch pane without saving?')) return;
+      clearDirty();
+    }
     state.bizArea = b.dataset.area;
-    state.bizPane = PANES.find(p=>p.area===state.bizArea)?.key || state.bizPane;
+    state.bizPane = newPane;
     renderNav(); renderBizPane();
   }));
   el('navBar').querySelectorAll('[data-pane]').forEach(b => b.addEventListener('click', () => {
+    if (state.bizDirty && b.dataset.pane !== state.bizPane) {
+      if (!confirm('You have unsaved changes. Switch pane without saving?')) return;
+      clearDirty();
+    }
     state.bizPane = b.dataset.pane;
     renderNav(); renderBizPane();
   }));
@@ -649,6 +907,7 @@ function renderAll() {
   renderBizPane();
   renderFleetCats();
   renderFleetVehs();
+  renderPickupLocations();
   renderSeasons();
   renderRules();
   renderInsurance();
@@ -658,10 +917,6 @@ function renderAll() {
   renderUsers();
   renderSessions();
   renderAudit();
-  bindTableSearch();
-  bindCrudButtons();
-  bindBizActions();
-  bindSecurityButtons();
   requestResize();
 }
 
@@ -681,6 +936,12 @@ function renderOverview() {
   const activeCats = cats.filter(x=>x.active!==false).length;
   const activeVehs = vehs.filter(x=>x.active!==false&&x.status!=='inactive').length;
 
+  // Update hero band title dynamically from CMS
+  const heroH1 = document.querySelector('#s-settingsHome .hero-band h1');
+  if (heroH1 && b.companyName) heroH1.textContent = b.companyName + ' — Admin Settings';
+  const heroP = document.querySelector('#s-settingsHome .hero-band p');
+  if (heroP && b.companyTagline) heroP.textContent = b.companyTagline;
+
   const stats = el('ovStats');
   if (stats) stats.innerHTML = [
     { v: b.currency||'EUR', l:'Currency' },
@@ -693,26 +954,27 @@ function renderOverview() {
 
   const kpis = el('ovKpis');
   if (kpis) kpis.innerHTML = [
-    { b: activeVehs,  s:'Active fleet' },
-    { b: activeCats,  s:'Vehicle categories' },
-    { b: ins.filter(x=>x.active!==false).length, s:'Insurance plans' },
-    { b: exts.filter(x=>x.active!==false).length, s:'Extra services' },
-    { b: fees.filter(x=>x.active!==false).length, s:'Fee rules' },
-    { b: seas.filter(x=>x.active!==false).length, s:'Pricing seasons' },
-    { b: rules.filter(x=>x.active!==false).length, s:'Rate rules' },
-    { b: locs.filter(x=>x.active!==false).length, s:'Pickup locations' },
-    { b: b.minRentalDays&&b.maxRentalDays ? `${b.minRentalDays}–${b.maxRentalDays}d` : '—', s:'Rental day range' },
-    { b: b.minDriverAge ? b.minDriverAge+'+' : '—', s:'Min driver age' },
-    { b: money(b.defaultDeposit||0, b.currency), s:'Default deposit' },
-    { b: (state.access?.users||[]).filter(u=>u.active!==false).length, s:'Staff users' }
-  ].map(k=>`<div class="kpi"><b>${esc(String(k.b))}</b><span>${esc(k.s)}</span></div>`).join('');
+    { b: activeVehs, s:'Active fleet', icon:'🚗', color:'green' },
+    { b: activeCats, s:'Vehicle categories', icon:'📂', color:'green' },
+    { b: ins.filter(x=>x.active!==false).length, s:'Insurance plans', icon:'🛡', color:'blue' },
+    { b: exts.filter(x=>x.active!==false).length, s:'Extra services', icon:'✚', color:'blue' },
+    { b: fees.filter(x=>x.active!==false).length, s:'Fee rules', icon:'⚡', color:'blue' },
+    { b: seas.filter(x=>x.active!==false).length, s:'Pricing seasons', icon:'📅', color:'blue' },
+    { b: rules.filter(x=>x.active!==false).length, s:'Rate rules', icon:'💲', color:'gold' },
+    { b: locs.filter(x=>x.active!==false).length, s:'Pickup locations', icon:'📍', color:'gold' },
+    { b: b.currency||'EUR', s:'Currency', icon:'💶', color:'gold' },
+    { b: b.vatRate ? b.vatRate+'%' : '—', s:'VAT rate', icon:'%', color:'gold' },
+    { b: money(b.defaultDeposit||0, b.currency), s:'Default deposit', icon:'🏦', color:'gold' },
+    { b: (state.access?.users||[]).filter(u=>u.active!==false).length, s:'Staff users', icon:'👥', color:'purple' }
+  ].map(k=>`<div class="kpi ${k.color}"><span class="kpi-icon">${k.icon}</span><b>${esc(String(k.b))}</b><span>${esc(k.s)}</span></div>`).join('');
 
   const cmds = el('ovCmds');
   if (cmds) cmds.innerHTML = [
-    { icon:'🏢', title:'Business settings', desc:'Brand, operations, policies, integrations', links:['Brand','Operations','Policies','Integrations'], area:'front', panes:['frontBrand','operations','mileagePolicy','integrations'] },
-    { icon:'🚗', title:'Fleet & operations', desc:'Vehicle categories and individual fleet vehicles', links:['Fleet categories','Fleet vehicles'], sects:['fleetCategories','fleetVehicles'] },
+    { icon:'🏢', title:'Business settings', desc:'Brand, operations, policies, integrations', links:['Brand','Operations','Content','Tools'], area:'front', panes:['frontBrand','operations','rentalTerms','backupRestore'] },
+    { icon:'🚗', title:'Fleet & operations', desc:'Vehicle categories, fleet vehicles, pickup locations', links:['Fleet categories','Fleet vehicles','Pickup locations'], sects:['fleetCategories','fleetVehicles','pickupLocations'] },
     { icon:'💰', title:'Pricing rules', desc:'Seasons, rate rules, insurance and extra services', links:['Pricing seasons','Rate rules','Insurance','Extras'], sects:['dynamicPricing','dynamicPricing','insurance','extras'] },
-    { icon:'👥', title:'Team & access', desc:'Roles, staff users, security and audit log', links:['Roles','Users','Security','Audit'], sects:['roles','users','security','audit'] }
+    { icon:'👥', title:'Team & access', desc:'Roles, staff users, security and audit log', links:['Roles','Users','Security','Audit'], sects:['roles','users','security','audit'] },
+    { icon:'🛠', title:'Tools & data', desc:'Seed default data, reset pricing, export/import snapshots', links:['Seed defaults','Reset pricing','Backup & restore'], sects:['_seed','_reset','business'], panes:[null,null,'backupRestore'] }
   ].map((c,i) => `<div class="cmd-card" data-cmd="${i}">
     <div class="cmd-icon">${c.icon}</div>
     <h4>${c.title}</h4>
@@ -721,10 +983,11 @@ function renderOverview() {
   </div>`).join('');
 
   const CMDS_DATA = [
-    { sects:['business','business','business','business'], panes:['frontBrand','operations','mileagePolicy','integrations'] },
-    { sects:['fleetCategories','fleetVehicles'] },
+    { sects:['business','business','business','business'], panes:['frontBrand','operations','rentalTerms','backupRestore'] },
+    { sects:['fleetCategories','fleetVehicles','pickupLocations'] },
     { sects:['dynamicPricing','dynamicPricing','insurance','extras'] },
-    { sects:['roles','users','security','audit'] }
+    { sects:['roles','users','security','audit'] },
+    { sects:['_seed','_reset','business'], panes:[null,null,'backupRestore'] }
   ];
 
   cmds.querySelectorAll('.cmd-card').forEach(card => {
@@ -734,6 +997,8 @@ function renderOverview() {
       const cd = CMDS_DATA[ci];
       const sec = cd.sects[li] || cd.sects[0];
       const pane = cd.panes?.[li];
+      if (sec === '_seed') { if(confirm('Seed default pricing data? This will add missing defaults.')) post('seedPricingDefaults',{}); return; }
+      if (sec === '_reset') { if(confirm('Reset all pricing to defaults? This overwrites current pricing data.')) post('resetPricingDefaults',{target:'all'}); return; }
       if (sec === 'business') { state.bizPane = pane||'frontBrand'; state.bizArea = PANES.find(p=>p.key===state.bizPane)?.area||'brand'; goto('business'); renderBizPane(); }
       else goto(sec);
     });
@@ -741,18 +1006,36 @@ function renderOverview() {
 }
 
 // ── BUSINESS PANES ────────────────────────────────────────────────────────
+function markDirty() {
+  state.bizDirty = true;
+  const b = el('bizDirtyBadge');
+  if (b) b.style.display = 'inline-flex';
+}
+
+function clearDirty() {
+  state.bizDirty = false;
+  const b = el('bizDirtyBadge');
+  if (b) b.style.display = 'none';
+}
+
 function renderBizPane() {
   const c = el('bizPaneContent');
   if (!c) return;
   const pane = PANES.find(p=>p.key===state.bizPane) || PANES[0];
   const s = biz();
   c.innerHTML = `<div class="pane-head"><h3>${pane.label}<span class="pane-badge">${pane.short}</span></h3></div><div id="paneFields">${buildPaneFields(pane.key, s)}</div>`;
+  clearDirty();
+  // Track unsaved changes on any field in the pane
+  c.querySelectorAll('input,select,textarea').forEach(inp => {
+    inp.addEventListener('input', markDirty, { once: false });
+    inp.addEventListener('change', markDirty, { once: false });
+  });
   bindPaneEvents(pane.key);
   requestResize();
 }
 
 function buildPaneFields(key, s) {
-  const f = (label, input, hint='') => `<div class="field-group"><label>${label}</label>${input}${hint?`<div class="fhint">${hint}</div>`:''}</div>`;
+  const f = (label, input, hint='') => { const m=input.match(/id="([^"]+)"/); const fr=m?` for="${m[1]}"`:''; return `<div class="field-group"><label${fr}>${label}</label>${input}${hint?`<div class="fhint">${hint}</div>`:''}</div>`; };
   const inp = (id, val='', type='text', ph='') => `<input id="${id}" type="${type}" value="${esc(String(val??''))}" placeholder="${esc(ph)}">`;
   const ta = (id, val='', ph='', rows=4) => `<textarea id="${id}" rows="${rows}" placeholder="${esc(ph)}">${esc(String(val??''))}</textarea>`;
   const sel = (id, opts, cur='') => `<select id="${id}">${opts.map(([v,l])=>`<option value="${v}"${v==cur?' selected':''}>${l}</option>`).join('')}</select>`;
@@ -893,28 +1176,34 @@ function buildPaneFields(key, s) {
         <div id="importResult" style="margin-top:8px;font-size:13px"></div>
       `)}`;
 
+    case 'stations': {
+      const locs = (state.snapshot?.pickupLocations||[]);
+      const groups = {};
+      locs.forEach(l => {
+        const k = l.stationKey||'default';
+        if (!groups[k]) groups[k] = [];
+        groups[k].push(l);
+      });
+      const keys = Object.keys(groups).sort();
+      const body = keys.length ? keys.map(k=>{
+        const items = groups[k];
+        const active = items.filter(x=>x.active!==false).length;
+        return `<div style="padding:12px 0;border-bottom:1px solid var(--line)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <code style="font-size:12px;background:var(--surface);padding:2px 8px;border-radius:var(--r-pill)">${esc(k)}</code>
+            <span class="badge ${active>0?'active':'inactive'}">${active} active location${active!==1?'s':''}</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${items.map(l=>`<span class="chip ${l.active!==false?'linked':''}">${esc(l.label||l.key||'—')}</span>`).join('')}
+          </div>
+        </div>`;
+      }).join('') : '<div class="fhint">No pickup locations defined yet. Add locations in the <b>Pickup locations</b> section, then assign them a station key here.</div>';
+      return sc('🏠', 'Station groups', 'Pickup locations grouped by station key', body)
+        + `<div class="fhint" style="margin-top:8px">Station keys group locations into hubs (e.g. <code>airport</code>, <code>city_center</code>). Set the <b>Station key</b> when editing a pickup location.</div>`;
+    }
+
     default: return `<div class="coming-soon"><div>🔒</div><div><b>Coming soon</b><span>This section is planned but not yet connected to the CMS. It will be available in a future update.</span></div></div>`;
   }
-}
-
-function renderLocationsPane() {
-  const locs = (state.snapshot?.pickupLocations||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
-  const rows = locs.map(l=>`<tr>
-    <td>${esc(l.label||l.displayTitle||'—')}</td>
-    <td>${esc(l.address||'—')}</td>
-    <td>${esc(l.stationKey||'default')}</td>
-    <td>${esc(l.locationType||'both')}</td>
-    <td>${l.extraFee>0?money(l.extraFee,cur()):'—'}</td>
-    <td><span class="badge ${l.active!==false?'active':'inactive'}">${l.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns"><button class="btn sm" onclick="editLocation('${esc(l._id||l.key||'')}')">Edit</button>
-    <button class="btn sm danger" onclick="deleteLocation('${esc(l._id||l.key||'')}','${esc(l.label||'')}')">Delete</button></td>
-  </tr>`).join('') || '<tr><td colspan="7" class="tbl-empty">No locations yet</td></tr>';
-  return `<div class="panel-head" style="margin-bottom:10px">
-    <h4>Pickup & dropoff locations</h4>
-    <button class="btn primary sm" onclick="openAddLocation()">+ Add location</button>
-  </div>
-  <div class="tbl-wrap"><table><thead><tr><th>Label</th><th>Address</th><th>Station</th><th>Type</th><th>Fee</th><th>Status</th><th>Actions</th></tr></thead>
-  <tbody>${rows}</tbody></table></div>`;
 }
 
 function bindPaneEvents(key) {
@@ -961,6 +1250,7 @@ function bindBizActions() {
 }
 
 function saveBizSettings() {
+  clearDirty();
   const s = biz();
   const v = (id, sk, d='') => { const e=el(id); return e ? e.value.trim() : (s[sk]??d); };
   const n = (id, sk, d=0) => { const e=el(id); return e ? (Number(e.value)||0) : (s[sk]??d); };
@@ -1019,56 +1309,212 @@ function saveBizSettings() {
     insuranceDetailsIntro:  v('bsInsuranceDetailsIntro','insuranceDetailsIntro'),
     insuranceDetailsBody:   v('bsInsuranceDetailsBody','insuranceDetailsBody'),
   });
+  showToast('Business settings saved', 'success');
+}
+
+// ── SORT & BULK HELPERS ───────────────────────────────────────────────────
+function getBulkSel(table) {
+  if (!state.bulkSel[table]) state.bulkSel[table] = new Set();
+  return state.bulkSel[table];
+}
+function clearBulkSel(table) {
+  state.bulkSel[table] = new Set();
+  updateBulkBar(table);
+  document.querySelectorAll(`input.bulk-row[data-bulk="${table}"],input.bulk-all[data-bulk="${table}"]`)
+    .forEach(c=>{c.checked=false;c.indeterminate=false;});
+}
+function updateBulkBar(table) {
+  const bar = el(table+'BulkBar');
+  const cnt = el(table+'BulkCount');
+  const n = getBulkSel(table).size;
+  if (bar) bar.style.display = n > 0 ? 'flex' : 'none';
+  if (cnt) cnt.textContent = n + ' selected';
+}
+function syncBulkAll(table, visibleRows) {
+  const allChk = document.querySelector(`input.bulk-all[data-bulk="${table}"]`);
+  if (!allChk) return;
+  const sel = getBulkSel(table);
+  const n = visibleRows.filter(r=>r._id&&sel.has(r._id)).length;
+  allChk.checked = n>0 && n>=visibleRows.length;
+  allChk.indeterminate = n>0 && n<visibleRows.length;
+}
+function applySortClasses(table) {
+  const { col, dir } = state.tableSort[table] || {};
+  document.querySelectorAll(`th.sortable[data-sort-table="${table}"]`).forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc');
+    if (th.dataset.sortCol===col) th.classList.add(dir==='desc'?'sort-desc':'sort-asc');
+  });
+}
+const BULK = {
+  cats: {
+    src:()=>state.snapshot?.vehicleCategories||[], upsert:'upsertVehicleCategory',
+    del:(item)=>post('deleteVehicleCategory',{itemId:item._id,categoryCode:item.category}), label:'categories'
+  },
+  vehs: {
+    src:()=>state.snapshot?.fleetVehicles||[], upsert:'upsertFleetVehicle',
+    del:(item)=>post('deleteFleetVehicle',{itemId:item._id,plate:item.plate}), label:'vehicles'
+  },
+  ins: {
+    src:()=>state.snapshot?.insurancePlans||[], upsert:'upsertInsurancePlan',
+    del:(item)=>post('deletePricingItem',{collectionName:'insurancePlans',itemId:item._id,itemKey:item.key}), label:'insurance plans'
+  },
+  extras: {
+    src:()=>state.snapshot?.extraServices||[], upsert:'upsertExtraService',
+    del:(item)=>post('deletePricingItem',{collectionName:'extraServices',itemId:item._id,itemKey:item.key}), label:'extra services'
+  },
+  fees: {
+    src:()=>state.snapshot?.feeRules||[], upsert:'upsertFeeRule',
+    del:(item)=>post('deletePricingItem',{collectionName:'feeRules',itemId:item._id,itemKey:item.key}), label:'fee rules'
+  },
+  locs: {
+    src:()=>state.snapshot?.pickupLocations||[], upsert:'upsertPickupLocation',
+    del:(item)=>post('deletePickupLocation',{itemId:item._id,itemKey:item.key}), label:'locations'
+  },
+  users: {
+    src:()=>state.access?.users||[], upsert:null, del:null, label:'users'
+  }
+};
+function doBulk(table, action) {
+  const cfg = BULK[table]; if(!cfg) return;
+  const sel = getBulkSel(table);
+  const ids = [...sel]; if(!ids.length) return;
+  if (action==='delete') {
+    if (!cfg.del) return showToast('Bulk delete is not available for this table','warn');
+    if (!confirm(`Permanently delete ${ids.length} ${cfg.label}? This cannot be undone.`)) return;
+    ids.forEach(id=>{ const item=cfg.src().find(x=>x._id===id); if(item) cfg.del(item); });
+    showToast(`Deleted ${ids.length} ${cfg.label}`,'success');
+  } else {
+    const active = action==='activate';
+    if (table==='users') {
+      ids.forEach(id=>post(active?'reactivateStaffUser':'deactivateStaffUser',{itemId:id}));
+    } else {
+      ids.forEach(id=>{ const item=cfg.src().find(x=>x._id===id); if(item&&cfg.upsert) post(cfg.upsert,{...item,active}); });
+    }
+    showToast(`${active?'Activated':'Deactivated'} ${ids.length} ${cfg.label}`,'success');
+  }
+  clearBulkSel(table);
 }
 
 // ── CRUD TABLES ───────────────────────────────────────────────────────────
 function renderFleetCats() {
-  const rows = (state.snapshot?.vehicleCategories||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const tblKey = 'cats';
+  const sel = getBulkSel(tblKey);
+  const { col, dir } = state.tableSort[tblKey] || {};
+  const vehs = (state.snapshot?.fleetVehicles||[]);
+  let rows = (state.snapshot?.vehicleCategories||[]);
+  rows = col ? sortBy(rows, col, dir) : rows.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
   const q = el('catSearch')?.value?.toLowerCase()||'';
   const filtered = q ? rows.filter(r=>`${r.title}${r.category}`.toLowerCase().includes(q)) : rows;
-  el('catBody').innerHTML = filtered.length ? filtered.map(r=>`<tr>
-    <td><code>${esc(r.category||'—')}</code></td>
-    <td>${esc(r.title||r.displayTitle||'—')}</td>
-    <td>${money(r.price,cur())}</td>
-    <td>${r.seats||'—'}</td>
-    <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns">
-      <button class="btn sm" data-edit-cat="${esc(r._id||'')}">Edit</button>
-      <button class="btn sm danger" data-del-cat="${esc(r._id||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="6" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
+  el('catBody').innerHTML = filtered.length ? filtered.map(r=>{
+    const specs = [r.seats?`${r.seats} seats`:'',r.doors?`${r.doors} doors`:'',r.luggage?`${r.luggage} bags`:''].filter(Boolean).join(' · ');
+    const vCount = vehs.filter(v=>v.category===r.category && v.active!==false).length;
+    return `<tr>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
+      <td><code>${esc(r.category||'—')}</code></td>
+      <td><strong>${esc(r.title||r.displayTitle||'—')}</strong>${specs?`<div style="font-size:11px;color:var(--muted)">${esc(specs)}</div>`:''}</td>
+      <td>${money(r.price,cur())}</td>
+      <td><span class="badge ${r.transmission==='automatic'?'perday':r.transmission==='cvt'?'reserved':'inactive'}" style="text-transform:capitalize">${esc(r.transmission||'—')}</span></td>
+      <td>${r.airCondition?'<span class="badge active">AC</span>':'<span class="badge inactive">No AC</span>'}</td>
+      <td><span class="chip" title="Active vehicles in this category">${vCount} vehicle${vCount!==1?'s':''}</span></td>
+      <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
+      <td class="btns">
+        <button class="btn sm" data-edit-cat="${esc(r._id||'')}">Edit</button>
+        <button class="btn sm danger" data-del-cat="${esc(r._id||'')}" data-label="${esc(r.title||'')}">Delete</button>
+      </td></tr>`;
+  }).join('') : '<tr><td colspan="10" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, filtered); applySortClasses(tblKey);
 }
 
 function renderFleetVehs() {
+  const tblKey = 'vehs';
+  const sel = getBulkSel(tblKey);
   const cats = state.snapshot?.vehicleCategories||[];
-  const rows = (state.snapshot?.fleetVehicles||[]).slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||''));
+  const rawAll = (state.snapshot?.fleetVehicles||[]);
+  const { col, dir } = state.tableSort[tblKey] || {};
+  const all = col ? sortBy(rawAll, col, dir) : rawAll.slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||''));
   const q = el('vehSearch')?.value?.toLowerCase()||'';
-  const filtered = q ? rows.filter(r=>`${r.plate}${r.model}`.toLowerCase().includes(q)) : rows;
+  const filtered = q ? all.filter(r=>`${r.plate}${r.model}${r.category}`.toLowerCase().includes(q)) : all;
+
+  const band = el('vehStatsBand');
+  if (band) {
+    const byStatus = s => rawAll.filter(v=>v.status===s&&v.active!==false).length;
+    const avail = byStatus('available'), maint = byStatus('maintenance'), resv = byStatus('reserved'), inact = rawAll.filter(v=>v.active===false).length;
+    band.innerHTML = `<span class="chip">Total: <strong>${rawAll.length}</strong></span>`
+      + (avail ? `<span class="chip" style="border-color:rgba(21,128,61,.25);background:var(--good-bg);color:var(--good)">Available: <strong>${avail}</strong></span>` : '')
+      + (maint ? `<span class="chip" style="border-color:rgba(217,119,6,.25);background:#FFFBEB;color:#92400E">Maintenance: <strong>${maint}</strong></span>` : '')
+      + (resv  ? `<span class="chip" style="border-color:rgba(37,99,235,.25);background:#EFF6FF;color:#1d4ed8">Reserved: <strong>${resv}</strong></span>` : '')
+      + (inact ? `<span class="chip">Inactive: <strong>${inact}</strong></span>` : '');
+  }
+
   el('vehBody').innerHTML = filtered.length ? filtered.map(r=>{
     const cat = cats.find(c=>c._id===r.vehicleCategoryId||c.category===r.category);
+    const statusClass = r.status==='available'?'active':r.status==='maintenance'?'maintenance':r.status==='reserved'?'reserved':'inactive';
     return `<tr>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
       <td><code>${esc(r.plate||'—')}</code></td>
-      <td>${esc(r.model||r.displayTitle||'—')}</td>
+      <td><strong>${esc(r.model||r.displayTitle||'—')}</strong></td>
       <td>${esc(cat?.title||r.category||'—')}</td>
-      <td><span class="badge ${r.status==='available'?'active':r.status==='maintenance'?'warn':'inactive'}">${esc(r.status||'unknown')}</span></td>
+      <td><span class="badge ${statusClass}">${esc(r.status||'unknown')}</span></td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
       <td class="btns">
         <button class="btn sm" data-edit-veh="${esc(r._id||'')}">Edit</button>
         <button class="btn sm danger" data-del-veh="${esc(r._id||'')}" data-label="${esc(r.plate||'')}">Delete</button>
       </td></tr>`;
-  }).join('') : '<tr><td colspan="5" class="tbl-empty">No vehicles yet.</td></tr>';
+  }).join('')
+  : q ? '<tr><td colspan="7" class="tbl-empty">No vehicles match your search.</td></tr>'
+      : '<tr><td colspan="7" class="tbl-empty">No vehicles yet.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, filtered); applySortClasses(tblKey);
+}
+
+function renderPickupLocations() {
+  const tblKey = 'locs';
+  const sel = getBulkSel(tblKey);
+  const body = el('locBody'); if (!body) return;
+  const q = el('locSearch')?.value?.toLowerCase()||'';
+  const { col, dir } = state.tableSort[tblKey] || {};
+  let all = (state.snapshot?.pickupLocations||[]);
+  all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const locs = q ? all.filter(l=>`${l.label}${l.address}${l.stationKey}`.toLowerCase().includes(q)) : all;
+  const typeLabels = { both:'Pickup & dropoff', pickup:'Pickup only', dropoff:'Dropoff only' };
+  body.innerHTML = locs.length ? locs.map(l=>`<tr>
+    <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(l._id||'')}"${sel.has(l._id)?' checked':''}></td>
+    <td><strong>${esc(l.label||'—')}</strong>${l.key?`<div style="font-size:11px;color:var(--muted)"><code>${esc(l.key)}</code></div>`:''}</td>
+    <td style="font-size:12px;color:var(--muted)">${esc(l.address||'—')}</td>
+    <td><code>${esc(l.stationKey||'default')}</code></td>
+    <td>${esc(typeLabels[l.locationType]||l.locationType||'both')}</td>
+    <td>${l.extraFee>0?money(l.extraFee,cur()):'<span style="color:var(--muted)">—</span>'}</td>
+    <td><span class="badge ${l.active!==false?'active':'inactive'}">${l.active!==false?'Active':'Inactive'}</span></td>
+    <td class="btns">
+      <button class="btn sm" data-edit-loc="${esc(l._id||l.key||'')}">Edit</button>
+      <button class="btn sm danger" data-del-loc="${esc(l._id||l.key||'')}" data-key="${esc(l.key||'')}" data-label="${esc(l.label||'')}">Delete</button>
+    </td></tr>`).join('')
+  : q ? `<tr><td colspan="8" class="tbl-empty">No locations match "${esc(q)}".</td></tr>`
+      : `<tr><td colspan="8" class="tbl-empty">No pickup locations yet. Add your first location to enable the booking flow.</td></tr>`;
+  updateBulkBar(tblKey); syncBulkAll(tblKey, locs); applySortClasses(tblKey);
 }
 
 function renderSeasons() {
   const rows = (state.snapshot?.pricingSeasons||[]).slice().sort((a,b)=>(a.priority||0)-(b.priority||0));
-  el('seasonsBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td>${esc(r.label||'—')}</td>
-    <td>${fmtDate(r.startDate)}</td><td>${fmtDate(r.endDate)}</td>
-    <td>${r.priority||0}</td>
-    <td>${r.repeatYearly?'Yes':'No'}</td>
-    <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns">
-      <button class="btn sm" data-edit-season="${esc(r._id||'')}">Edit</button>
-      <button class="btn sm danger" data-del-season="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.label||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="7" class="tbl-empty">No seasons yet.</td></tr>';
+  const active = rows.filter(r=>r.active!==false).length;
+  const today = new Date().toISOString().slice(0,10);
+  const current = rows.filter(r => r.active!==false && r.startDate?.slice(0,10) <= today && r.endDate?.slice(0,10) >= today).length;
+  const sb = el('seaStatsBand');
+  if (sb) sb.textContent = rows.length ? `${active} active · ${current} currently in effect` : '';
+  el('seasonsBody').innerHTML = rows.length ? rows.map(r=>{
+    const inEffect = r.active!==false && r.startDate?.slice(0,10) <= today && r.endDate?.slice(0,10) >= today;
+    return `<tr${inEffect?' style="background:rgba(37,99,235,.03)"':''}>
+      <td><code style="font-size:11px">${esc(r.key||'—')}</code></td>
+      <td><strong>${esc(r.label||'—')}</strong>${inEffect?'<span class="badge perday" style="margin-left:6px;font-size:10px">Now</span>':''}</td>
+      <td>${fmtDate(r.startDate)}</td><td>${fmtDate(r.endDate)}</td>
+      <td><span class="badge ${(r.priority||0)>0?'perday':'inactive'}">${r.priority||0}</span></td>
+      <td>${r.repeatYearly?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
+      <td class="btns">
+        <button class="btn sm" data-edit-season="${esc(r._id||'')}">Edit</button>
+        <button class="btn sm danger" data-del-season="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.label||'')}">Delete</button>
+      </td></tr>`;
+  }).join('') : '<tr><td colspan="8" class="tbl-empty">No seasons yet. Rate rules without a season apply year-round.</td></tr>';
 }
 
 function renderRules() {
@@ -1078,92 +1524,147 @@ function renderRules() {
   el('rulesBody').innerHTML = rows.length ? rows.map(r=>{
     const cat = cats.find(c=>c.category===r.categoryCode||c._id===r.vehicleCategoryId);
     const sea = seas.find(s=>s.key===r.seasonKey);
+    const dayRange = `${r.minDays||1}–${r.maxDays>0?r.maxDays:'∞'} d`;
     return `<tr>
-      <td>${esc(cat?.title||r.categoryCode||'All')}</td>
-      <td>${esc(sea?.label||r.seasonKey||'All seasons')}</td>
-      <td>${r.minDays||1}–${r.maxDays>0?r.maxDays:'∞'}d</td>
-      <td>${money(r.pricePerDay,cur())}</td>
+      <td>${esc(cat?.title||r.categoryCode||'—')}<div style="font-size:11px;color:var(--muted)">${r.categoryCode?`<code>${esc(r.categoryCode)}</code>`:''}</div></td>
+      <td>${sea ? `<span class="badge perday">${esc(sea.label)}</span>` : '<span style="color:var(--muted);font-size:12px">All seasons</span>'}</td>
+      <td><code style="font-size:12px">${esc(dayRange)}</code></td>
+      <td><strong>${money(r.pricePerDay,cur())}</strong></td>
+      <td style="font-size:12px;color:var(--muted)">${esc(r.label||'—')}</td>
       <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
       <td class="btns">
         <button class="btn sm" data-edit-rule="${esc(r._id||'')}">Edit</button>
         <button class="btn sm danger" data-del-rule="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.label||r.categoryCode||'')}">Delete</button>
       </td></tr>`;
-  }).join('') : '<tr><td colspan="6" class="tbl-empty">No rate rules yet.</td></tr>';
+  }).join('') : '<tr><td colspan="7" class="tbl-empty">No rate rules yet. Add a rule to define daily rates for each vehicle category.</td></tr>';
 }
 
 function renderInsurance() {
-  const rows = (state.snapshot?.insurancePlans||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const tblKey = 'ins';
+  const sel = getBulkSel(tblKey);
+  const q = el('insSearch')?.value?.toLowerCase()||'';
+  const { col, dir } = state.tableSort[tblKey] || {};
+  let all = (state.snapshot?.insurancePlans||[]);
+  all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const rows = q ? all.filter(r=>`${r.key}${r.title}`.toLowerCase().includes(q)) : all;
   el('insBody').innerHTML = rows.length ? rows.map(r=>`<tr>
+    <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
     <td><code>${esc(r.key||'—')}</code></td>
-    <td>${esc(r.title||'—')}</td>
-    <td>${money(r.pricePerDay,cur())}</td>
+    <td><strong>${esc(r.title||'—')}</strong>${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,70))}${r.description.length>70?'…':''}</div>`:''}</td>
+    <td><strong>${money(r.pricePerDay,cur())}</strong>${r.pricePerDay==0?'<div style="font-size:10px;color:var(--good)">Included</div>':''}</td>
     <td>${r.sortOrder||0}</td>
+    <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
     <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-ins="${esc(r._id||'')}">Edit</button>
       <button class="btn sm danger" data-del-ins="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="6" class="tbl-empty">No insurance plans yet.</td></tr>';
+    </td></tr>`).join('')
+  : q ? `<tr><td colspan="8" class="tbl-empty">No plans match "${esc(q)}".</td></tr>`
+      : '<tr><td colspan="8" class="tbl-empty">No insurance plans yet.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, rows); applySortClasses(tblKey);
 }
 
 function renderExtras() {
-  const rows = (state.snapshot?.extraServices||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const tblKey = 'extras';
+  const sel = getBulkSel(tblKey);
+  const q = el('extrasSearch')?.value?.toLowerCase()||'';
+  const { col, dir } = state.tableSort[tblKey] || {};
+  let all = (state.snapshot?.extraServices||[]);
+  all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const rows = q ? all.filter(r=>`${r.key}${r.title}`.toLowerCase().includes(q)) : all;
   el('extrasBody').innerHTML = rows.length ? rows.map(r=>`<tr>
+    <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
     <td><code>${esc(r.key||'—')}</code></td>
-    <td>${esc(r.title||'—')}</td>
-    <td>${money(r.price,cur())}</td>
-    <td>${esc(r.billingMode||'perDay')}</td>
+    <td><strong>${esc(r.title||'—')}</strong>${r.description?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(r.description.slice(0,60))}${r.description.length>60?'…':''}</div>`:''}</td>
+    <td><strong>${money(r.price,cur())}</strong></td>
+    <td><span class="badge ${r.billingMode==='perDay'?'perday':'perbooking'}">${r.billingMode==='perDay'?'Per day':'Per booking'}</span></td>
+    <td>${r.publicVisible!==false?'<span class="badge active">Yes</span>':'<span class="badge inactive">No</span>'}</td>
     <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
     <td class="btns">
       <button class="btn sm" data-edit-extra="${esc(r._id||'')}">Edit</button>
       <button class="btn sm danger" data-del-extra="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="6" class="tbl-empty">No extra services yet.</td></tr>';
+    </td></tr>`).join('')
+  : q ? `<tr><td colspan="8" class="tbl-empty">No services match "${esc(q)}".</td></tr>`
+      : '<tr><td colspan="8" class="tbl-empty">No extra services yet.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, rows); applySortClasses(tblKey);
 }
 
 function renderFees() {
-  const rows = (state.snapshot?.feeRules||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
-  el('feesBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td><code>${esc(r.key||'—')}</code></td>
-    <td>${esc(r.title||'—')}</td>
-    <td>${money(r.amount,cur())}</td>
-    <td>${esc(r.billingMode||'perBooking')}</td>
-    <td>${esc(r.ruleType||'manual')}</td>
-    <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns">
-      <button class="btn sm" data-edit-fee="${esc(r._id||'')}">Edit</button>
-      <button class="btn sm danger" data-del-fee="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
-    </td></tr>`).join('') : '<tr><td colspan="7" class="tbl-empty">No fee rules yet.</td></tr>';
+  const tblKey = 'fees';
+  const sel = getBulkSel(tblKey);
+  const q = el('feesSearch')?.value?.toLowerCase()||'';
+  const { col, dir } = state.tableSort[tblKey] || {};
+  let all = (state.snapshot?.feeRules||[]);
+  all = col ? sortBy(all, col, dir) : all.slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  const rows = q ? all.filter(r=>`${r.key}${r.title}${r.ruleType}`.toLowerCase().includes(q)) : all;
+  el('feesBody').innerHTML = rows.length ? rows.map(r=>{
+    const rtClass = r.ruleType==='ageRange'?'agerage':r.ruleType==='nightPickup'||r.ruleType==='nightDropoff'?'nightfee':'inactive';
+    return `<tr>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
+      <td><code>${esc(r.key||'—')}</code></td>
+      <td><strong>${esc(r.title||'—')}</strong></td>
+      <td><strong>${money(r.amount,cur())}</strong></td>
+      <td><span class="badge ${r.billingMode==='perDay'?'perday':'perbooking'}">${r.billingMode==='perDay'?'Per day':'Per booking'}</span></td>
+      <td><span class="badge ${rtClass}">${esc(r.ruleType||'manual')}</span></td>
+      <td style="font-size:12px">${esc(r.audienceGroup||'—')}</td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
+      <td class="btns">
+        <button class="btn sm" data-edit-fee="${esc(r._id||'')}">Edit</button>
+        <button class="btn sm danger" data-del-fee="${esc(r._id||'')}" data-key="${esc(r.key||'')}" data-label="${esc(r.title||'')}">Delete</button>
+      </td></tr>`;
+  }).join('')
+  : q ? `<tr><td colspan="9" class="tbl-empty">No fees match "${esc(q)}".</td></tr>`
+      : '<tr><td colspan="9" class="tbl-empty">No fee rules yet.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, rows); applySortClasses(tblKey);
 }
 
 function renderRoles() {
   const rows = (state.access?.roles||[]);
-  el('rolesBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td><code>${esc(r.key||'—')}</code></td>
-    <td>${esc(r.label||'—')}</td>
-    <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
-    <td class="btns">
-      <button class="btn sm" data-edit-role="${esc(r._id||'')}">Edit</button>
-    </td></tr>`).join('') : '<tr><td colspan="4" class="tbl-empty">No roles yet.</td></tr>';
+  el('rolesBody').innerHTML = rows.length ? rows.map(r=>{
+    const modCount = Object.keys(r.permissions||{}).length;
+    const spCount = (r.specialPermissions||[]).length;
+    const permsText = r.isAdmin ? 'Full admin access' : `${modCount} module${modCount!==1?'s':''}, ${spCount} special${spCount!==1?'s':''}`;
+    return `<tr>
+      <td><code>${esc(r.key||'—')}</code></td>
+      <td>
+        <strong>${esc(r.label||'—')}</strong>
+        ${r.isAdmin?'<span class="badge active" style="margin-left:4px;font-size:10px">Admin</span>':''}
+      </td>
+      <td style="font-size:12px;color:var(--muted)">${permsText}</td>
+      <td><span class="badge ${r.active!==false?'active':'inactive'}">${r.active!==false?'Active':'Inactive'}</span></td>
+      <td class="btns">
+        <button class="btn sm" data-edit-role="${esc(r._id||'')}">Edit</button>
+      </td></tr>`;
+  }).join('') : '<tr><td colspan="5" class="tbl-empty">No roles yet.</td></tr>';
 }
 
 function renderUsers() {
-  const users = (state.access?.users||[]);
+  const tblKey = 'users';
+  const sel = getBulkSel(tblKey);
+  const rawUsers = (state.access?.users||[]);
   const roles = (state.access?.roles||[]);
+  const { col, dir } = state.tableSort[tblKey] || {};
+  const users = col ? sortBy(rawUsers, col, dir) : rawUsers.slice().sort((a,b)=>(a.fullName||'').localeCompare(b.fullName||''));
   const q = el('userSearch')?.value?.toLowerCase()||'';
   const filtered = q ? users.filter(u=>`${u.email}${u.fullName}`.toLowerCase().includes(q)) : users;
 
-  const total = users.length, active = users.filter(u=>u.active!==false).length;
+  const total = rawUsers.length, active = rawUsers.filter(u=>u.active!==false).length;
   const band = el('userStatsBand');
   if (band) band.innerHTML = [
     { l:'Total', v:total }, { l:'Active', v:active }, { l:'Inactive', v:total-active },
-    { l:'Linked to Wix', v:users.filter(u=>u.memberId).length }
+    { l:'Linked to Wix', v:rawUsers.filter(u=>u.memberId).length }
   ].map(s=>`<span class="chip">${s.l}: <strong>${s.v}</strong></span>`).join('');
 
   el('usersBody').innerHTML = filtered.length ? filtered.map(u=>{
     const role = roles.find(r=>r.key===u.roleKey);
-    const linked = u.memberId ? '<span class="chip linked">Linked</span>' : '<span class="chip">Not linked</span>';
+    const linked = u.memberId ? '<span class="chip linked">Wix linked</span>' : '';
     return `<tr>
-      <td>${esc(u.email||'—')} ${linked}</td>
-      <td>${esc(u.fullName||'—')}</td>
+      <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(u._id||'')}"${sel.has(u._id)?' checked':''}></td>
+      <td>
+        <strong>${esc(u.fullName||'—')}</strong>
+        ${u.jobTitle?`<div style="font-size:11px;color:var(--muted)">${esc(u.jobTitle)}</div>`:''}
+      </td>
+      <td style="font-size:12px">${esc(u.email||'—')} ${linked}</td>
       <td>${esc(role?.label||u.roleKey||'—')}</td>
       <td><span class="badge ${u.active!==false?'active':'inactive'}">${u.active!==false?'Active':'Inactive'}</span></td>
       <td class="btns">
@@ -1172,41 +1673,73 @@ function renderUsers() {
           ? `<button class="btn sm danger" data-deact-user="${esc(u._id||'')}" data-email="${esc(u.email||'')}">Deactivate</button>`
           : `<button class="btn sm good" data-react-user="${esc(u._id||'')}" data-email="${esc(u.email||'')}">Reactivate</button>`}
       </td></tr>`;
-  }).join('') : '<tr><td colspan="5" class="tbl-empty">No users found.</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="tbl-empty">No users found.</td></tr>';
+  updateBulkBar(tblKey); syncBulkAll(tblKey, filtered); applySortClasses(tblKey);
 }
 
 function renderSessions() {
   const rows = (state.access?.sessionRows||[]);
-  el('sessionsBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td>${esc(r.email||r.actorEmail||'—')}</td>
-    <td>${fmtDT(r.createdAt)}</td>
-    <td>${fmtDT(r.lastSeenAt||r.updatedAt)}</td>
-    <td><button class="btn sm danger" data-revoke-session="${esc(r.email||r.actorEmail||'')}">Revoke</button></td>
-  </tr>`).join('') : '<tr><td colspan="4" class="tbl-empty">No active sessions found.</td></tr>';
+  el('sessionsBody').innerHTML = rows.length ? rows.map(r=>{
+    const lastSeen = r.lastSeenAt||r.updatedAt;
+    return `<tr>
+      <td>${esc(r.email||r.actorEmail||'—')}</td>
+      <td style="font-size:12px">${fmtDT(r.createdAt)}</td>
+      <td><span title="${fmtDT(lastSeen)}">${fmtAgo(lastSeen)}</span></td>
+      <td><button class="btn sm danger" data-revoke-session="${esc(r.email||r.actorEmail||'')}">Revoke</button></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="4" class="tbl-empty">No active sessions found.</td></tr>';
 }
 
 function renderAudit() {
-  const rows = (state.access?.auditRows||[]).slice().reverse().slice(0,100);
-  el('auditBody').innerHTML = rows.length ? rows.map(r=>`<tr>
-    <td style="white-space:nowrap">${fmtDT(r.createdAt)}</td>
-    <td>${esc(r.actorEmail||'—')}</td>
-    <td><code>${esc(r.action||'—')}</code></td>
-    <td>${esc(r.entityType||'—')}</td>
-    <td>${esc(r.summary||'—')}</td>
-  </tr>`).join('') : '<tr><td colspan="5" class="tbl-empty">No audit log entries.</td></tr>';
+  const q = el('auditSearch')?.value?.toLowerCase()||'';
+  const all = (state.access?.auditRows||[]).slice().reverse();
+  const filtered = (q ? all.filter(r=>`${r.actorEmail}${r.action}${r.entityType}${r.summary}${r.entityId}`.toLowerCase().includes(q)) : all).slice(0,100);
+  el('auditBody').innerHTML = filtered.length ? filtered.map(r=>{
+    const actionShort = (r.action||'—').replace(/([A-Z])/g,' $1').trim();
+    const entityId = r.entityId ? `<code style="font-size:10px;color:var(--muted)">${esc(String(r.entityId).slice(0,12))}…</code>` : '—';
+    const diff = r.createdAt ? Date.now() - new Date(r.createdAt).getTime() : Infinity;
+    const timeCell = diff < 86400000
+      ? `<span title="${fmtDT(r.createdAt)}">${fmtAgo(r.createdAt)}</span>`
+      : `<span style="font-size:11px">${fmtDT(r.createdAt)}</span>`;
+    return `<tr>
+      <td style="white-space:nowrap">${timeCell}</td>
+      <td style="font-size:12px">${esc(r.actorEmail||'—')}</td>
+      <td><code style="font-size:11px">${esc(actionShort)}</code></td>
+      <td>${entityId}</td>
+      <td style="font-size:12px">${esc(r.entityType||'—')}</td>
+      <td style="font-size:12px">${esc(r.summary||'—')}</td>
+    </tr>`;
+  }).join('')
+  : q ? '<tr><td colspan="6" class="tbl-empty">No entries match your search.</td></tr>'
+      : '<tr><td colspan="6" class="tbl-empty">No audit log entries.</td></tr>';
 }
 
 // ── MODAL ─────────────────────────────────────────────────────────────────
 let modalSaveFn = null, modalDelFn = null;
 
-function openModal(title, bodyHtml, onSave, onDelete=null) {
+function openModal(title, bodyHtml, onSave, onDelete=null, meta={}) {
   el('modalTitle').textContent = title;
   el('modalBody').innerHTML = bodyHtml;
+  const eb = el('modalEyebrow'); if (eb) { eb.textContent = meta.eyebrow||''; eb.style.display = meta.eyebrow?'inline-flex':'none'; }
+  const sub = el('modalSubtitle'); if (sub) { sub.textContent = meta.subtitle||''; sub.style.display = meta.subtitle?'block':'none'; }
+  el('modalSave').textContent = meta.saveLabel || 'Save changes';
   el('modalDelete').style.display = onDelete ? 'inline-flex' : 'none';
   modalSaveFn = onSave;
   modalDelFn = onDelete;
+  el('modalBody').scrollTop = 0;
   el('modal').classList.add('show');
+  // Focus the first editable field in the drawer once the slide-in settles
+  setTimeout(() => el('modalBody')?.querySelector('input:not([type=checkbox]):not([type=hidden]),select,textarea')?.focus(), 320);
   requestResize();
+}
+
+// Wire auto-slug: while key field is empty, fill it from the source field on input
+function wireAutoSlug(srcId, keyId) {
+  const src = el('m_'+srcId), key = el('m_'+keyId);
+  if (!src || !key) return;
+  let locked = key.value !== '';
+  key.addEventListener('input', () => { locked = true; }, { once: true });
+  src.addEventListener('input', () => { if (!locked) key.value = slug(src.value); });
 }
 
 function closeModal() {
@@ -1219,29 +1752,61 @@ el('modalCancel')?.addEventListener('click', closeModal);
 el('modal')?.addEventListener('click', e => { if (e.target === el('modal')) closeModal(); });
 el('modalSave')?.addEventListener('click', () => { if (modalSaveFn) modalSaveFn(); });
 el('modalDelete')?.addEventListener('click', () => { if (modalDelFn) modalDelFn(); });
+document.addEventListener('keydown', e => {
+  if (!el('modal')?.classList.contains('show')) return;
+  if (e.key === 'Escape') { closeModal(); }
+  if ((e.ctrlKey||e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (modalSaveFn) modalSaveFn(); }
+});
 
-function mfld(label, input) { return `<div class="field-group" style="margin-bottom:12px"><label>${label}</label>${input}</div>`; }
-function minp(id, val='', type='text', ph='') { return `<input id="m_${id}" type="${type}" value="${esc(val)}" placeholder="${esc(ph)}">`.replace(/\$\{.*?\}/g,String(val||'')); }
-function msel(id, opts, cur='') { return `<select id="m_${id}">${opts.map(([v,l])=>`<option value="${v}"${v==cur?' selected':''}>${l}</option>`).join('')}</select>`; }
-function mta(id, val='', ph='') { return `<textarea id="m_${id}" placeholder="${esc(ph)}">${esc(val)}</textarea>`; }
+// Field group: label (with optional required marker) + input + optional hint
+function mfld(label, input, hint='') {
+  const m = input.match(/id="([^"]+)"/);
+  const forAttr = m ? ` for="${m[1]}"` : '';
+  const lab = label ? `<label${forAttr}>${label.replace(/\s\*$/,' <span class="req">*</span>')}</label>` : '';
+  return `<div class="field-group">${lab}${input}${hint?`<div class="fhint">${hint}</div>`:''}</div>`;
+}
+function minp(id, val='', type='text', ph='') { return `<input id="m_${id}" type="${type}" value="${esc(String(val??''))}" placeholder="${esc(ph)}">`; }
+function msel(id, opts, cur='') { return `<select id="m_${id}">${opts.map(([v,l])=>`<option value="${v}"${v==cur?' selected':''}>${esc(l)}</option>`).join('')}</select>`; }
+function mta(id, val='', ph='', rows=3) { return `<textarea id="m_${id}" rows="${rows}" placeholder="${esc(ph)}">${esc(String(val??''))}</textarea>`; }
+// Number input, optionally with a unit badge on the right
+function mnum(id, val, unit='', ph='0') { return unit
+  ? `<div class="num-row"><input id="m_${id}" type="number" value="${esc(String(val??''))}" placeholder="${esc(ph)}"><span class="num-unit">${esc(unit)}</span></div>`
+  : `<input id="m_${id}" type="number" value="${esc(String(val??''))}" placeholder="${esc(ph)}">`; }
+// Toggle switch row (replaces plain checkboxes in modals)
+function mtog(id, checked, label, hint='') {
+  return `<div class="tog-row"><div class="tog-info"><b>${label}</b>${hint?`<small>${hint}</small>`:''}</div><label class="tog"><input type="checkbox" id="m_${id}"${checked?' checked':''}><span class="tog-bar"></span></label></div>`;
+}
+// Plain checkbox row (kept for dense grids like the role permission matrix)
 function mchk(id, checked, label) { return `<div class="check-row"><input type="checkbox" id="m_${id}"${checked?' checked':''}><label for="m_${id}">${label}</label></div>`; }
+// Section card inside a modal — reuses the .sc card styles from the panes
+function msec(ico, title, body, desc='') { return `<div class="sc"><div class="sc-h"><span class="sc-ico">${ico}</span><h4>${esc(title)}</h4>${desc?`<span class="sc-desc">${esc(desc)}</span>`:''}</div><div class="sc-b">${body}</div></div>`; }
 function mv(id, d='') { return el('m_'+id)?.value?.trim()??d; }
 function mn(id, d=0) { return Number(el('m_'+id)?.value??d)||d; }
 function mc(id) { return !!el('m_'+id)?.checked; }
 function mr2(...f) { return `<div class="field-row cols-2">${f.join('')}</div>`; }
 function mr3(...f) { return `<div class="field-row cols-3">${f.join('')}</div>`; }
+// Highlight invalid field and show toast; returns false to allow caller to abort
+function merr(id, msg) {
+  const e = el('m_'+id);
+  if (e) { e.classList.add('err'); e.focus(); setTimeout(()=>e.classList.remove('err'),2500); }
+  showToast(msg, 'error');
+  return false;
+}
+const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // ── CRUD BUTTON BINDINGS ──────────────────────────────────────────────────
 function bindCrudButtons() {
   const app = el('app');
   app.addEventListener('click', e => {
-    const btn = e.target.closest('[data-edit-cat],[data-del-cat],[data-edit-veh],[data-del-veh],[data-edit-season],[data-del-season],[data-edit-rule],[data-del-rule],[data-edit-ins],[data-del-ins],[data-edit-extra],[data-del-extra],[data-edit-fee],[data-del-fee],[data-edit-role],[data-edit-user],[data-deact-user],[data-react-user],[data-revoke-session]');
+    const btn = e.target.closest('[data-edit-cat],[data-del-cat],[data-edit-veh],[data-del-veh],[data-edit-loc],[data-del-loc],[data-edit-season],[data-del-season],[data-edit-rule],[data-del-rule],[data-edit-ins],[data-del-ins],[data-edit-extra],[data-del-extra],[data-edit-fee],[data-del-fee],[data-edit-role],[data-edit-user],[data-deact-user],[data-react-user],[data-revoke-session]');
     if (!btn) return;
     const d = btn.dataset;
     if (d.editCat !== undefined) openCatModal(d.editCat);
     else if (d.delCat !== undefined) { if(confirm(`Delete category "${d.label}"?`)) post('deleteVehicleCategory',{itemId:d.delCat,categoryCode:d.label}); }
     else if (d.editVeh !== undefined) openVehModal(d.editVeh);
     else if (d.delVeh !== undefined) { if(confirm(`Delete vehicle "${d.label}"?`)) post('deleteFleetVehicle',{itemId:d.delVeh,plate:d.label}); }
+    else if (d.editLoc !== undefined) openEditLocation(d.editLoc);
+    else if (d.delLoc !== undefined) { if(confirm('Delete location "'+d.label+'"?')) post('deletePickupLocation',{itemId:d.delLoc,itemKey:d.key}); }
     else if (d.editSeason !== undefined) openSeasonModal(d.editSeason);
     else if (d.delSeason !== undefined) { if(confirm(`Delete season "${d.label}"?`)) post('deletePricingSeason',{itemId:d.delSeason,itemKey:d.key}); }
     else if (d.editRule !== undefined) openRuleModal(d.editRule);
@@ -1263,55 +1828,81 @@ function bindCrudButtons() {
 // ── ENTITY MODALS ─────────────────────────────────────────────────────────
 function openCatModal(id='') {
   const item = id ? (state.snapshot?.vehicleCategories||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Title *',minp('title',item.title,'text','Economy')),mfld('Category code *',minp('category',item.category,'text','ECO')))
-    + mr3(mfld('Price / day €',minp('price',item.price,'number','0')),mfld('Seats',minp('seats',item.seats,'text','5')),mfld('Doors',minp('doors',item.doors,'text','4')))
-    + mr3(mfld('Luggage',minp('luggage',item.luggage,'text','2')),mfld('Transmission',msel('transmission',[['manual','Manual'],['automatic','Automatic'],['cvt','CVT']],item.transmission)),mfld('Fuel type',msel('fuelType',[['petrol','Petrol'],['diesel','Diesel'],['hybrid','Hybrid'],['electric','Electric']],item.fuelType)))
-    + mchk('airCondition',item.airCondition,'Air conditioning')
-    + mfld('Description',mta('description',item.description))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+  const body =
+    msec('🚗','Basics',
+      mr2(mfld('Title *',minp('title',item.title,'text','Economy'),'Customer-facing class name'),
+          mfld('Category code *',minp('category',item.category,'text','ECO'),'Short uppercase code'))
+      + mfld('Description',mta('description',item.description,'Shown on the vehicle selection page')))
+    + msec('⚙️','Specifications',
+      mr3(mfld('Price / day',mnum('price',item.price,cur())),
+          mfld('Seats',minp('seats',item.seats,'text','5')),
+          mfld('Doors',minp('doors',item.doors,'text','4')))
+      + mr3(mfld('Luggage',minp('luggage',item.luggage,'text','2')),
+            mfld('Transmission',msel('transmission',[['manual','Manual'],['automatic','Automatic'],['cvt','CVT']],item.transmission)),
+            mfld('Fuel type',msel('fuelType',[['petrol','Petrol'],['diesel','Diesel'],['hybrid','Hybrid'],['electric','Electric']],item.fuelType)))
+      + mtog('airCondition',item.airCondition,'Air conditioning','Vehicle has working A/C'))
+    + msec('👁','Visibility & ordering',
+      mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive categories are hidden everywhere')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show on the public website'));
   openModal(id?'Edit fleet category':'Add fleet category', body, () => {
-    if (!mv('title')) return showToast('Title is required','error');
-    if (!mv('category')) return showToast('Category code is required','error');
+    if (!mv('title')) return merr('title','Title is required');
+    if (!mv('category')) return merr('category','Category code is required');
+    if (mn('price') < 0) return merr('price','Price cannot be negative');
     post('upsertVehicleCategory',{ _id:id||undefined, title:mv('title'), category:mv('category').toUpperCase(),
       price:mn('price'), seats:mv('seats'), doors:mv('doors'), luggage:mv('luggage'),
       transmission:mv('transmission'), fuelType:mv('fuelType'), airCondition:mc('airCondition'),
       description:mv('description'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
-  });
+  }, null, { eyebrow:'Fleet', subtitle:'Vehicle class shown to customers during booking', saveLabel:id?'Save category':'Create category' });
 }
 
 function openVehModal(id='') {
   const item = id ? (state.snapshot?.fleetVehicles||[]).find(x=>x._id===id)||{} : {};
   const cats = (state.snapshot?.vehicleCategories||[]);
   const catOpts = cats.map(c=>[c.category,`${c.title} (${c.category})`]);
-  const body = mr2(mfld('Plate *',minp('plate',item.plate,'text','ABC-1234')),mfld('Model *',minp('model',item.model,'text','Toyota Yaris')))
-    + mr2(mfld('Category *',msel('category',catOpts,item.category||cats[0]?.category||'')),mfld('Status',msel('status',[['available','Available'],['maintenance','Maintenance'],['reserved','Reserved'],['inactive','Inactive']],item.status||'available')))
-    + mchk('active',item.active!==false,'Active')
-    + mfld('Notes',mta('notes',item.notes));
+  const body =
+    msec('🚙','Vehicle',
+      mr2(mfld('Plate *',minp('plate',item.plate,'text','ABC-1234')),
+          mfld('Model *',minp('model',item.model,'text','Toyota Yaris')))
+      + mr2(mfld('Category *',msel('category',catOpts,item.category||cats[0]?.category||''),'Which class this vehicle belongs to'),
+            mfld('Status',msel('status',[['available','Available'],['maintenance','Maintenance'],['reserved','Reserved'],['inactive','Inactive']],item.status||'available'))))
+    + msec('📝','Notes & availability',
+      mfld('Notes',mta('notes',item.notes,'Internal notes — not shown to customers'))
+      + mtog('active',item.active!==false,'Active','Inactive vehicles are hidden from bookings entirely'));
   openModal(id?'Edit fleet vehicle':'Add fleet vehicle', body, () => {
-    if (!mv('plate')) return showToast('Plate is required','error');
-    if (!mv('model')) return showToast('Model is required','error');
+    if (!mv('plate')) return merr('plate','Plate is required');
+    if (!mv('model')) return merr('model','Model is required');
     post('upsertFleetVehicle',{ _id:id||undefined, plate:mv('plate').toUpperCase(), model:mv('model'),
       category:mv('category'), status:mv('status'), active:mc('active'), notes:mv('notes') });
     closeModal();
-  });
+  }, null, { eyebrow:'Fleet', subtitle:'Individual vehicle in your fleet', saveLabel:id?'Save vehicle':'Add vehicle' });
 }
 
 function openSeasonModal(id='') {
   const item = id ? (state.snapshot?.pricingSeasons||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Label *',minp('label',item.label)),mfld('Priority',minp('priority',item.priority,'number','0')))
-    + mr2(mfld('Start date *',minp('startDate',item.startDate?.slice(0,10),'date')),mfld('End date *',minp('endDate',item.endDate?.slice(0,10),'date')))
-    + mchk('repeatYearly',item.repeatYearly,'Repeat yearly')
-    + mfld('Description',mta('description',item.description))
-    + mchk('active',item.active!==false,'Active');
+  const body =
+    msec('🏷','Season',
+      mr2(mfld('Label *',minp('label',item.label,'text','High season')),
+          mfld('Key (slug)',minp('key',item.key||'','text','high_season'),'Auto-filled from the label'))
+      + mfld('Description',mta('description',item.description,'Optional notes about this period')))
+    + msec('📅','Date range',
+      mr2(mfld('Start date *',minp('startDate',item.startDate?.slice(0,10),'date')),
+          mfld('End date *',minp('endDate',item.endDate?.slice(0,10),'date')))
+      + mfld('Priority',mnum('priority',item.priority,'','0'),'Higher priority wins when seasons overlap')
+      + mtog('repeatYearly',item.repeatYearly,'Repeat yearly','Match the month & day each year'))
+    + msec('👁','Status', mtog('active',item.active!==false,'Active','Inactive seasons are ignored when pricing'));
   openModal(id?'Edit pricing season':'Add pricing season', body, () => {
-    if (!mv('label')) return showToast('Label is required','error');
-    if (!mv('startDate')||!mv('endDate')) return showToast('Start and end dates required','error');
-    if (mv('startDate')>=mv('endDate')) return showToast('Start date must be before end date','error');
-    post('upsertPricingSeason',{ _id:id||undefined, label:mv('label'), startDate:mv('startDate'), endDate:mv('endDate'),
+    if (!mv('label')) return merr('label','Label is required');
+    if (!mv('startDate')) return merr('startDate','Start date is required');
+    if (!mv('endDate')) return merr('endDate','End date is required');
+    if (mv('startDate')>=mv('endDate')) return merr('startDate','Start date must be before end date');
+    const key = mv('key') ? slug(mv('key')) : slug(mv('label'));
+    post('upsertPricingSeason',{ _id:id||undefined, key, label:mv('label'), startDate:mv('startDate'), endDate:mv('endDate'),
       priority:mn('priority'), repeatYearly:mc('repeatYearly'), description:mv('description'), active:mc('active') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Date range that adjusts rates via rate rules', saveLabel:id?'Save season':'Create season' });
+  wireAutoSlug('label','key');
 }
 
 function openRuleModal(id='') {
@@ -1320,66 +1911,105 @@ function openRuleModal(id='') {
   const seas = (state.snapshot?.pricingSeasons||[]);
   const catOpts = [['','All categories'],...cats.map(c=>[c.category,`${c.title} (${c.category})`])];
   const seaOpts = [['','All seasons'],...seas.map(s=>[s.key,s.label])];
-  const body = mr2(mfld('Category',msel('categoryCode',catOpts,item.categoryCode||'')),mfld('Season',msel('seasonKey',seaOpts,item.seasonKey||'')))
-    + mr3(mfld('Min days',minp('minDays',item.minDays,'number','1')),mfld('Max days (0=unlimited)',minp('maxDays',item.maxDays,'number','0')),mfld('Price / day €',minp('pricePerDay',item.pricePerDay,'number','0')))
-    + mfld('Label',minp('label',item.label))
-    + mchk('active',item.active!==false,'Active');
+  const body =
+    msec('🎯','Scope',
+      mr2(mfld('Category',msel('categoryCode',catOpts,item.categoryCode||''),'Leave as "All" to apply to every category'),
+          mfld('Season',msel('seasonKey',seaOpts,item.seasonKey||''),'Leave as "All" for year-round')))
+    + msec('💲','Pricing',
+      mr3(mfld('Min days',mnum('minDays',item.minDays,'','1')),
+          mfld('Max days',mnum('maxDays',item.maxDays,'','0'),'0 = unlimited'),
+          mfld('Price / day',mnum('pricePerDay',item.pricePerDay,cur())))
+      + mfld('Label',minp('label',item.label,'text','Optional internal label')))
+    + msec('👁','Status', mtog('active',item.active!==false,'Active','Inactive rules are skipped when pricing'));
   openModal(id?'Edit rate rule':'Add rate rule', body, () => {
-    if (mn('minDays')<1) return showToast('Min days must be at least 1','error');
+    if (mn('minDays')<1) return merr('minDays','Min days must be at least 1');
+    if (mn('maxDays')>0 && mn('maxDays')<mn('minDays')) return merr('maxDays','Max days must be ≥ min days');
+    if (mn('pricePerDay')<0) return merr('pricePerDay','Price cannot be negative');
     post('upsertCategoryRateRule',{ _id:id||undefined, categoryCode:mv('categoryCode'), seasonKey:mv('seasonKey'),
       minDays:mn('minDays',1), maxDays:mn('maxDays'), pricePerDay:mn('pricePerDay'), label:mv('label'), active:mc('active') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Daily rate for a category within a duration band', saveLabel:id?'Save rule':'Create rule' });
 }
 
 function openInsModal(id='') {
   const item = id ? (state.snapshot?.insurancePlans||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Key (slug) *',minp('key',item.key,'text','cdw_basic')),mfld('Title *',minp('title',item.title,'text','Basic CDW')))
-    + mr2(mfld('Label (short)',minp('label',item.label)),mfld('Price / day €',minp('pricePerDay',item.pricePerDay,'number','0')))
-    + mfld('Description',mta('description',item.description))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+  const body =
+    msec('🛡','Plan',
+      mr2(mfld('Title *',minp('title',item.title,'text','Basic CDW')),
+          mfld('Key (slug) *',minp('key',item.key,'text','cdw_basic'),'Auto-filled from the title'))
+      + mfld('Short label',minp('label',item.label,'text','CDW'),'Compact name used in summaries')
+      + mfld('Description',mta('description',item.description,'What this coverage includes')))
+    + msec('💲','Pricing',
+      mfld('Price / day',mnum('pricePerDay',item.pricePerDay,cur()),'Set 0 for a plan that is included free'))
+    + msec('👁','Visibility & ordering',
+      mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive plans are hidden everywhere')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show during booking'));
   openModal(id?'Edit insurance plan':'Add insurance plan', body, () => {
-    if (!mv('key')) return showToast('Key is required','error');
-    if (!mv('title')) return showToast('Title is required','error');
+    if (!mv('key')) return merr('key','Key is required');
+    if (!mv('title')) return merr('title','Title is required');
+    if (mn('pricePerDay')<0) return merr('pricePerDay','Price cannot be negative');
     post('upsertInsurancePlan',{ _id:id||undefined, key:slug(mv('key')), title:mv('title'), label:mv('label'),
       pricePerDay:mn('pricePerDay'), description:mv('description'), sortOrder:mn('sortOrder'),
       active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Coverage option offered during booking', saveLabel:id?'Save plan':'Create plan' });
+  wireAutoSlug('title','key');
 }
 
 function openExtraModal(id='') {
   const item = id ? (state.snapshot?.extraServices||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Key (slug) *',minp('key',item.key,'text','child_seat')),mfld('Title *',minp('title',item.title,'text','Child seat')))
-    + mr2(mfld('Price €',minp('price',item.price,'number','0')),mfld('Billing mode',msel('billingMode',[['perDay','Per day'],['perBooking','Per booking']],item.billingMode||'perDay')))
-    + mfld('Description',mta('description',item.description))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+  const body =
+    msec('✚','Service',
+      mr2(mfld('Title *',minp('title',item.title,'text','Child seat')),
+          mfld('Key (slug) *',minp('key',item.key,'text','child_seat'),'Auto-filled from the title'))
+      + mfld('Description',mta('description',item.description,'Shown next to the option during booking')))
+    + msec('💲','Pricing',
+      mr2(mfld('Price',mnum('price',item.price,cur())),
+          mfld('Billing mode',msel('billingMode',[['perDay','Per day'],['perBooking','Per booking']],item.billingMode||'perDay'),'How the fee is charged')))
+    + msec('👁','Visibility & ordering',
+      mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive services are hidden everywhere')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show during booking'));
   openModal(id?'Edit extra service':'Add extra service', body, () => {
-    if (!mv('key')) return showToast('Key is required','error');
-    if (!mv('title')) return showToast('Title is required','error');
+    if (!mv('key')) return merr('key','Key is required');
+    if (!mv('title')) return merr('title','Title is required');
+    if (mn('price')<0) return merr('price','Price cannot be negative');
     post('upsertExtraService',{ _id:id||undefined, key:slug(mv('key')), title:mv('title'),
       price:mn('price'), billingMode:mv('billingMode','perDay'), description:mv('description'),
       sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Optional add-on customers can select', saveLabel:id?'Save service':'Create service' });
+  wireAutoSlug('title','key');
 }
 
 function openFeeModal(id='') {
   const item = id ? (state.snapshot?.feeRules||[]).find(x=>x._id===id)||{} : {};
-  const body = mr2(mfld('Key (slug) *',minp('key',item.key,'text','late_return')),mfld('Title *',minp('title',item.title,'text','Late return fee')))
-    + mr3(mfld('Amount €',minp('amount',item.amount,'number','0')),mfld('Billing mode',msel('billingMode',[['perBooking','Per booking'],['perDay','Per day']],item.billingMode||'perBooking')),mfld('Rule type',msel('ruleType',[['manual','Manual'],['automatic','Automatic'],['location','Location-based']],item.ruleType||'manual')))
-    + mfld('Audience group',minp('audienceGroup',item.audienceGroup,'text','all'))
-    + mfld('Description',mta('description',item.description))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+  const body =
+    msec('⚡','Fee',
+      mr2(mfld('Title *',minp('title',item.title,'text','Late return fee')),
+          mfld('Key (slug) *',minp('key',item.key,'text','late_return'),'Auto-filled from the title'))
+      + mfld('Description',mta('description',item.description,'Internal description of when this applies')))
+    + msec('🧮','Charge',
+      mr2(mfld('Amount',mnum('amount',item.amount,cur())),
+          mfld('Billing mode',msel('billingMode',[['perBooking','Per booking'],['perDay','Per day']],item.billingMode||'perBooking')))
+      + mfld('Rule type',msel('ruleType',[['manual','Manual (applied manually)'],['ageRange','Age range (e.g. 19–22, 70+)'],['nightPickup','Night pickup'],['nightDropoff','Night dropoff']],item.ruleType||'manual'),'How this fee is triggered')
+      + mfld('Audience group',minp('audienceGroup',item.audienceGroup,'text','19-22 or 70+'),'For age-range rules, enter the bracket e.g. <code>19-22</code> or <code>70+</code>'))
+    + msec('👁','Visibility & ordering',
+      mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive fees are never applied')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show in fee disclosures'));
   openModal(id?'Edit fee rule':'Add fee rule', body, () => {
-    if (!mv('key')) return showToast('Key is required','error');
-    if (!mv('title')) return showToast('Title is required','error');
+    if (!mv('key')) return merr('key','Key is required');
+    if (!mv('title')) return merr('title','Title is required');
+    if (mn('amount')<0) return merr('amount','Amount cannot be negative');
     post('upsertFeeRule',{ _id:id||undefined, key:slug(mv('key')), title:mv('title'),
       amount:mn('amount'), billingMode:mv('billingMode','perBooking'), ruleType:mv('ruleType','manual'),
       audienceGroup:mv('audienceGroup'), description:mv('description'),
       sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
-  });
+  }, null, { eyebrow:'Pricing', subtitle:'Automatic surcharge applied to bookings', saveLabel:id?'Save fee':'Create fee' });
+  wireAutoSlug('title','key');
 }
 
 function openRoleModal(id='') {
@@ -1388,107 +2018,166 @@ function openRoleModal(id='') {
   const MODULES = ['bookings','rentals','customers','pricing','fleet','reports','financials'];
   const ACTIONS = ['view','insert','edit','delete'];
   const SPECIALS = ['cancelBooking','cancelRental','voidInvoice','manageStaff','manageBusinessSettings','overridePricing','approveManualOverride','viewChangeHistory'];
-  const matrix = `<div class="field-sub">Module permissions</div>
-    <div style="overflow-x:auto"><table class="perm-table"><thead><tr><th>Module</th>${ACTIONS.map(a=>`<th>${a}</th>`).join('')}</tr></thead><tbody>
-    ${MODULES.map(m=>`<tr><td>${m}</td>${ACTIONS.map(a=>`<td><input type="checkbox" id="m_p_${m}_${a}" ${perms[m]?.includes(a)||item.isAdmin?'checked':''}></td>`).join('')}</tr>`).join('')}
-    </tbody></table></div>
-    <div class="field-sub">Special permissions</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
+  const moduleMatrix = `<div style="overflow-x:auto"><table class="perm-table"><thead><tr><th>Module</th>${ACTIONS.map(a=>`<th style="text-transform:capitalize">${a}</th>`).join('')}</tr></thead><tbody>
+    ${MODULES.map(m=>`<tr><td style="text-transform:capitalize">${m}</td>${ACTIONS.map(a=>`<td><input type="checkbox" id="m_p_${m}_${a}" ${perms[m]?.includes(a)||item.isAdmin?'checked':''}></td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+  const specialGrid = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
     ${SPECIALS.map(s=>`<div class="check-row"><input type="checkbox" id="m_sp_${s}" ${(item.specialPermissions||[]).includes(s)||item.isAdmin?'checked':''}><label for="m_sp_${s}">${s}</label></div>`).join('')}
     </div>`;
-  const body = mr2(mfld('Key *',minp('key',item.key,'text','manager')),mfld('Label *',minp('label',item.label,'text','Manager')))
-    + mchk('active',item.active!==false,'Active') + matrix;
+  const body =
+    msec('👤','Role',
+      mr2(mfld('Label *',minp('label',item.label,'text','Manager')),
+          mfld('Key *',minp('key',item.key,'text','manager'),'Auto-filled from the label'))
+      + mtog('active',item.active!==false,'Active','Inactive roles cannot be assigned')
+      + (item.isAdmin?'<div class="info-box" style="margin-top:8px">This is the built-in admin role — it always has every permission.</div>':''))
+    + msec('🧩','Module permissions', moduleMatrix, 'view · insert · edit · delete')
+    + msec('⭐','Special permissions', specialGrid);
   openModal(id?'Edit role':'Add role', body, () => {
-    if (!mv('key')||!mv('label')) return showToast('Key and label required','error');
+    if (!mv('key')) return merr('key','Role key is required');
+    if (!mv('label')) return merr('label','Role label is required');
     const permissions = {};
     MODULES.forEach(m=>{ const acts=ACTIONS.filter(a=>el(`m_p_${m}_${a}`)?.checked); if(acts.length) permissions[m]=acts; });
     const specialPermissions = SPECIALS.filter(s=>el(`m_sp_${s}`)?.checked);
     post('upsertStaffRole',{ _id:id||undefined, key:slug(mv('key')), label:mv('label'), active:mc('active'), permissions, specialPermissions });
     closeModal();
-  });
+  }, null, { eyebrow:'Access', subtitle:'Controls what staff with this role can do', saveLabel:id?'Save role':'Create role' });
+  wireAutoSlug('label','key');
 }
 
 function openUserModal(id='') {
   const item = id ? (state.access?.users||[]).find(x=>x._id===id)||{} : {};
   const roles = (state.access?.roles||[]);
   const roleOpts = roles.map(r=>[r.key,r.label]);
-  const body = mr2(mfld('Full name *',minp('fullName',item.fullName)),mfld('Email *',minp('email',item.email,'email')))
-    + mr3(mfld('Role',msel('roleKey',roleOpts,item.roleKey||roles[0]?.key||'')),mfld('Job title',minp('jobTitle',item.jobTitle,'text','Manager')),mfld('Phone',minp('phone',item.phone,'tel','+30 69...')))
-    + mr3(mfld('Start date',minp('startDate',item.startDate?.slice(0,10),'date')),mfld('Emergency contact name',minp('emergencyName',item.emergencyName)),mfld('Emergency contact phone',minp('emergencyPhone',item.emergencyPhone,'tel')))
-    + mfld('Notes',mta('notes',item.notes))
-    + mchk('active',item.active!==false,'Active');
+  const body =
+    msec('🪪','Identity',
+      mr2(mfld('Full name *',minp('fullName',item.fullName,'text','Jane Doe')),
+          mfld('Email *',minp('email',item.email,'email','jane@example.com'),id?'':'An invite will be sent to this address')))
+    + msec('💼','Role & job',
+      mr3(mfld('Role',msel('roleKey',roleOpts,item.roleKey||roles[0]?.key||'')),
+          mfld('Job title',minp('jobTitle',item.jobTitle,'text','Manager')),
+          mfld('Phone',minp('phone',item.phone,'tel','+30 69...'))))
+    + msec('🗂','Employment details',
+      mfld('Start date',minp('startDate',item.startDate?.slice(0,10),'date'))
+      + mr2(mfld('Emergency contact name',minp('emergencyName',item.emergencyName)),
+            mfld('Emergency contact phone',minp('emergencyPhone',item.emergencyPhone,'tel')))
+      + mfld('Notes',mta('notes',item.notes,'Internal HR notes')))
+    + msec('👁','Status', mtog('active',item.active!==false,'Active','Inactive users cannot log in'));
   openModal(id?'Edit staff user':'Add / invite staff user', body, () => {
-    if (!mv('fullName')||!mv('email')) return showToast('Name and email required','error');
+    if (!mv('fullName')) return merr('fullName','Full name is required');
+    if (!mv('email')) return merr('email','Email is required');
+    if (!reEmail.test(mv('email'))) return merr('email','Enter a valid email address');
     const payload = { _id:id||undefined, fullName:mv('fullName'), email:mv('email'), roleKey:mv('roleKey'),
       jobTitle:mv('jobTitle'), phone:mv('phone'), startDate:mv('startDate'), emergencyName:mv('emergencyName'),
       emergencyPhone:mv('emergencyPhone'), notes:mv('notes'), active:mc('active') };
     if (id) post('upsertStaffUser', payload);
     else post('inviteStaffUser', payload);
     closeModal();
-  });
+  }, null, { eyebrow:'Access', subtitle:id?'Update this staff member’s details':'Invite a new staff member to the backroom', saveLabel:id?'Save user':'Send invite' });
+}
+
+function _locationFieldLabelsBody(item) {
+  item = item || {};
+  return msec('🏷','Booking form labels',
+      mr2(mfld('Pickup info label',minp('pickupInfoLabel',item.pickupInfoLabel||'','text','e.g. Pickup at airport')),
+          mfld('Pickup info placeholder',minp('pickupInfoPlaceholder',item.pickupInfoPlaceholder||'','text','e.g. Terminal 2')))
+      + mr2(mfld('Dropoff info label',minp('dropoffInfoLabel',item.dropoffInfoLabel||'','text','e.g. Dropoff location')),
+            mfld('Dropoff info placeholder',minp('dropoffInfoPlaceholder',item.dropoffInfoPlaceholder||'','text','e.g. Hotel name'))),
+      'Custom prompts shown in the booking form')
+    + msec('✈️','Origin field',
+      mtog('showOriginField',!!(item.showOriginField),'Show origin field','Ask for a flight number, hotel name, etc.')
+      + mr2(mfld('Origin field label',minp('originFieldLabel',item.originFieldLabel||'','text','e.g. Flight number')),
+            mfld('Origin field placeholder',minp('originFieldPlaceholder',item.originFieldPlaceholder||'','text','e.g. A3 123'))));
+}
+
+function _locationPayload(extra) {
+  extra = extra || {};
+  const base = { label:mv('label'), key:slug(mv('key')||mv('label')), address:mv('address'),
+    stationKey:mv('stationKey','default'), locationType:mv('locationType','both'), extraFee:mn('extraFee'),
+    mapUrl:mv('mapUrl'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible'),
+    pickupInfoLabel:mv('pickupInfoLabel'), pickupInfoPlaceholder:mv('pickupInfoPlaceholder'),
+    dropoffInfoLabel:mv('dropoffInfoLabel'), dropoffInfoPlaceholder:mv('dropoffInfoPlaceholder'),
+    showOriginField:mc('showOriginField'), originFieldLabel:mv('originFieldLabel'), originFieldPlaceholder:mv('originFieldPlaceholder') };
+  return Object.assign({}, extra, base);
+}
+
+function _locationCoreBody(item) {
+  item = item || {};
+  return msec('📍','Location',
+      mr2(mfld('Label *',minp('label',item.label||'','text','Thessaloniki Airport')),
+          mfld('Key (slug)',minp('key',item.key||'','text','thessaloniki_airport'),'Auto-filled from the label'))
+      + mfld('Address *',minp('address',item.address||'','text','Full street address'))
+      + mfld('Google Maps URL',minp('mapUrl',item.mapUrl||'','url','https://maps.google.com/...'),'Optional — adds a map link in the booking flow'))
+    + msec('⚙️','Settings',
+      mr3(mfld('Station key',minp('stationKey',item.stationKey||'default','text','default'),'Groups locations into hubs'),
+          mfld('Location type',msel('locationType',[['both','Pickup & dropoff'],['pickup','Pickup only'],['dropoff','Dropoff only']],item.locationType||'both')),
+          mfld('Extra fee',mnum('extraFee',item.extraFee,cur())))
+      + mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
+      + mtog('active',item.active!==false,'Active','Inactive locations are hidden from booking')
+      + mtog('publicVisible',item.publicVisible!==false,'Public visible','Show during booking'));
 }
 
 function openAddLocation() {
-  const body = mr2(mfld('Label *',minp('label','','text','Thessaloniki Airport')),mfld('Key (slug)',minp('key','','text','thessaloniki_airport')))
-    + mfld('Address *',minp('address'))
-    + mr3(mfld('Station key',minp('stationKey','default')),mfld('Location type',msel('locationType',[['both','Pickup & dropoff'],['pickup','Pickup only'],['dropoff','Dropoff only']],'both')),mfld('Extra fee €',minp('extraFee','','number','0')))
-    + mfld('Google Maps URL',minp('mapUrl','','url','https://maps.google.com/...'))
-    + mr2(mfld('Sort order',minp('sortOrder','','number','0')),mfld('',mchk('active',true,'Active')+mchk('publicVisible',true,'Public visible')));
+  const body = _locationCoreBody({}) + _locationFieldLabelsBody();
   openModal('Add pickup location', body, () => {
-    if (!mv('label')||!mv('address')) return showToast('Label and address required','error');
-    post('upsertPickupLocation',{ label:mv('label'), key:slug(mv('key')||mv('label')), address:mv('address'),
-      stationKey:mv('stationKey','default'), locationType:mv('locationType','both'), extraFee:mn('extraFee'),
-      mapUrl:mv('mapUrl'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
-    closeModal(); renderBizPane();
-  });
+    if (!mv('label')) return merr('label','Location label is required');
+    if (!mv('address')) return merr('address','Address is required');
+    post('upsertPickupLocation', _locationPayload());
+    closeModal(); renderPickupLocations();
+  }, null, { eyebrow:'Fleet', subtitle:'Pickup / dropoff point shown in the booking flow', saveLabel:'Create location' });
+  wireAutoSlug('label','key');
 }
 
-function editLocation(id) {
-  const item = (state.snapshot?.pickupLocations||[]).find(x=>x._id===id||x.key===id)||{};
-  const body = mr2(mfld('Label *',minp('label',item.label)),mfld('Key',minp('key',item.key)))
-    + mfld('Address *',minp('address',item.address))
-    + mr3(mfld('Station key',minp('stationKey',item.stationKey||'default')),mfld('Location type',msel('locationType',[['both','Pickup & dropoff'],['pickup','Pickup only'],['dropoff','Dropoff only']],item.locationType||'both')),mfld('Extra fee €',minp('extraFee',item.extraFee,'number','0')))
-    + mfld('Google Maps URL',minp('mapUrl',item.mapUrl,'url'))
-    + mr2(mfld('Sort order',minp('sortOrder',item.sortOrder,'number','0')),mfld('',mchk('active',item.active!==false,'Active')+mchk('publicVisible',item.publicVisible!==false,'Public visible')));
+function openEditLocation(id) {
+  const item = (state.snapshot?.pickupLocations||[]).find(function(x){return x._id===id||x.key===id;})||{};
+  const body = _locationCoreBody(item) + _locationFieldLabelsBody(item);
   openModal('Edit pickup location', body, () => {
-    post('upsertPickupLocation',{ _id:item._id, label:mv('label'), key:mv('key'), address:mv('address'),
-      stationKey:mv('stationKey','default'), locationType:mv('locationType','both'), extraFee:mn('extraFee'),
-      mapUrl:mv('mapUrl'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
-    closeModal(); renderBizPane();
+    if (!mv('label')) return merr('label','Location label is required');
+    if (!mv('address')) return merr('address','Address is required');
+    post('upsertPickupLocation', _locationPayload({_id:item._id}));
+    closeModal(); renderPickupLocations();
   }, () => {
-    if (confirm(`Delete location "${item.label}"?`)) { post('deletePickupLocation',{itemId:item._id,itemKey:item.key}); closeModal(); renderBizPane(); }
-  });
+    if (confirm('Delete location "'+item.label+'"?')) { post('deletePickupLocation',{itemId:item._id,itemKey:item.key}); closeModal(); renderPickupLocations(); }
+  }, { eyebrow:'Fleet', subtitle:'Pickup / dropoff point shown in the booking flow', saveLabel:'Save location' });
 }
 
-function deleteLocation(id, label) {
-  if (!confirm(`Delete location "${label}"?`)) return;
-  post('deletePickupLocation',{itemId:id,itemKey:id});
-  renderBizPane();
-}
+function editLocation(id) { return openEditLocation(id); }
 
 // ── SECURITY BUTTONS ──────────────────────────────────────────────────────
 function bindSecurityButtons() {
+  el('pwToggleBtn')?.addEventListener('click', () => {
+    const inp = el('pwNew'), btn = el('pwToggleBtn');
+    if (!inp) return;
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Hide' : 'Show';
+  });
   el('revokeAllBtn')?.addEventListener('click', () => {
     if (!confirm('Revoke ALL active sessions? All staff will be logged out.')) return;
     (state.access?.sessionRows||[]).forEach(r => post('revokeStaffSessions',{email:r.email||r.actorEmail}));
   });
   el('pwSetBtn')?.addEventListener('click', () => {
-    const email = el('pwEmail')?.value?.trim();
+    const emailEl = el('pwEmail');
+    const email = emailEl?.value?.trim();
     const pw = el('pwNew')?.value?.trim();
-    if (!email) return showToast('Enter a staff email','error');
-    if (!pw||pw.length<8) return showToast('Password must be at least 8 characters','error');
+    if (!email) { emailEl?.focus(); return showToast('Enter a staff email','error'); }
+    if (!reEmail.test(email)) { emailEl?.focus(); return showToast('Enter a valid email address','error'); }
+    if (!pw||pw.length<8) { el('pwNew')?.focus(); return showToast('Password must be at least 8 characters','error'); }
     if (!confirm(`Set password for ${email}?`)) return;
     post('setStaffPassword',{email,newPassword:pw,mustChangePassword:!!el('pwMustChange')?.checked});
   });
   el('pwResetBtn')?.addEventListener('click', () => {
-    const email = el('pwEmail')?.value?.trim();
-    if (!email) return showToast('Enter a staff email','error');
+    const emailEl = el('pwEmail');
+    const email = emailEl?.value?.trim();
+    if (!email) { emailEl?.focus(); return showToast('Enter a staff email','error'); }
+    if (!reEmail.test(email)) { emailEl?.focus(); return showToast('Enter a valid email address','error'); }
     if (!confirm(`Send password reset email to ${email}?`)) return;
     post('resetStaffPassword',{email});
   });
   el('inviteBtn')?.addEventListener('click', () => {
-    const email = el('pwEmail')?.value?.trim();
-    if (!email) return showToast('Enter a staff email','error');
+    const emailEl = el('pwEmail');
+    const email = emailEl?.value?.trim();
+    if (!email) { emailEl?.focus(); return showToast('Enter a staff email','error'); }
+    if (!reEmail.test(email)) { emailEl?.focus(); return showToast('Enter a valid email address','error'); }
     if (!confirm(`Send invite to ${email}?`)) return;
     post('inviteStaffUser', { email, fullName: '', roleKey: '' });
   });
@@ -1498,7 +2187,65 @@ function bindSecurityButtons() {
 function bindTableSearch() {
   el('catSearch')?.addEventListener('input', renderFleetCats);
   el('vehSearch')?.addEventListener('input', renderFleetVehs);
+  el('locSearch')?.addEventListener('input', renderPickupLocations);
+  el('insSearch')?.addEventListener('input', renderInsurance);
+  el('extrasSearch')?.addEventListener('input', renderExtras);
+  el('feesSearch')?.addEventListener('input', renderFees);
   el('userSearch')?.addEventListener('input', renderUsers);
+  el('auditSearch')?.addEventListener('input', renderAudit);
+  el('auditExportBtn')?.addEventListener('click', exportAuditCsv);
+  // Generic table CSV export via [data-export]
+  el('app')?.addEventListener('click', e => {
+    const btn = e.target.closest('[data-export]');
+    if (btn) exportTable(btn.dataset.export);
+  });
+  // Column sort — delegated on document so it works across the whole page
+  document.addEventListener('click', e => {
+    const th = e.target.closest('th.sortable[data-sort-table][data-sort-col]');
+    if (!th) return;
+    const table = th.dataset.sortTable, col = th.dataset.sortCol;
+    const prev = state.tableSort[table] || {};
+    state.tableSort[table] = { col, dir: prev.col===col && prev.dir==='asc' ? 'desc' : 'asc' };
+    ({ cats:renderFleetCats, vehs:renderFleetVehs, ins:renderInsurance,
+       extras:renderExtras, fees:renderFees, locs:renderPickupLocations, users:renderUsers })[table]?.();
+  });
+}
+
+// ── BULK CHECKBOX & ACTION BINDINGS ──────────────────────────────────────
+function bindBulkHandlers() {
+  const app = el('app');
+  // Checkbox change → update selection Set + sync UI
+  app.addEventListener('change', e => {
+    const chk = e.target.closest('input.bulk-row,input.bulk-all');
+    if (!chk) return;
+    const table = chk.dataset.bulk; if (!table) return;
+    const sel = getBulkSel(table);
+    if (chk.classList.contains('bulk-all')) {
+      // Select / deselect all currently visible rows
+      document.querySelectorAll(`input.bulk-row[data-bulk="${table}"]`).forEach(r => {
+        r.checked = chk.checked;
+        if (r.value) { if (chk.checked) sel.add(r.value); else sel.delete(r.value); }
+      });
+    } else {
+      if (chk.checked) sel.add(chk.value); else sel.delete(chk.value);
+      // Keep "select all" checkbox in sync
+      const rows = document.querySelectorAll(`input.bulk-row[data-bulk="${table}"]`);
+      const allChk = document.querySelector(`input.bulk-all[data-bulk="${table}"]`);
+      if (allChk) {
+        const checked = [...rows].filter(r=>r.checked).length;
+        allChk.checked = checked >= rows.length && rows.length > 0;
+        allChk.indeterminate = checked > 0 && checked < rows.length;
+      }
+    }
+    updateBulkBar(table);
+  });
+  // Bulk action / clear buttons
+  app.addEventListener('click', e => {
+    const btn = e.target.closest('[data-bulk-action]');
+    if (btn) { doBulk(btn.dataset.bulkTable, btn.dataset.bulkAction); return; }
+    const clr = e.target.closest('[data-bulk-clear]');
+    if (clr) clearBulkSel(clr.dataset.bulkClear);
+  });
 }
 
 // ── ADD BUTTONS ───────────────────────────────────────────────────────────
@@ -1510,6 +2257,7 @@ function bindAddButtons() {
   el('addInsBtn')?.addEventListener('click', ()=>openInsModal());
   el('addExtraBtn')?.addEventListener('click', ()=>openExtraModal());
   el('addFeeBtn')?.addEventListener('click', ()=>openFeeModal());
+  el('addLocationBtn')?.addEventListener('click', ()=>openAddLocation());
   el('addRoleBtn')?.addEventListener('click', ()=>openRoleModal());
   el('addUserBtn')?.addEventListener('click', ()=>openUserModal());
 }
@@ -1523,12 +2271,88 @@ function bindFallback() {
 
 // ── UTILITIES ─────────────────────────────────────────────────────────────
 function downloadJson(data, filename) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  downloadBlob(JSON.stringify(data, null, 2), filename, 'application/json');
+}
+
+function downloadBlob(text, filename, mime='text/plain') {
+  const blob = new Blob([text], {type:mime});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+// Build a CSV string from an array of header keys and an array of row objects
+function toCSV(headers, rows) {
+  const cell = v => { const s = String(v??''); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  const head = headers.map(h=>cell(h.label)).join(',');
+  const body = rows.map(r=>headers.map(h=>cell(typeof h.get==='function'?h.get(r):r[h.key])).join(',')).join('\n');
+  return head + '\n' + body;
+}
+
+function exportAuditCsv() {
+  const rows = (state.access?.auditRows||[]).slice().reverse();
+  if (!rows.length) return showToast('No audit entries to export', 'error');
+  const csv = toCSV([
+    { label:'Time', get:r=>fmtDT(r.createdAt) },
+    { label:'Actor', key:'actorEmail' },
+    { label:'Action', key:'action' },
+    { label:'Entity ID', key:'entityId' },
+    { label:'Entity type', key:'entityType' },
+    { label:'Summary', key:'summary' }
+  ], rows);
+  downloadBlob(csv, `audit-log-${dateStr()}.csv`, 'text/csv');
+  showToast(`Exported ${rows.length} audit entries`, 'success');
+}
+
+// Column definitions and data sources for each exportable table
+const EXPORTS = {
+  categories: { name:'fleet-categories', src:()=>state.snapshot?.vehicleCategories, cols:[
+    {label:'Code',key:'category'},{label:'Title',key:'title'},{label:'Price/day',key:'price'},
+    {label:'Seats',key:'seats'},{label:'Doors',key:'doors'},{label:'Luggage',key:'luggage'},
+    {label:'Transmission',key:'transmission'},{label:'Fuel',key:'fuelType'},
+    {label:'Air conditioning',get:r=>r.airCondition?'Yes':'No'},{label:'Sort',key:'sortOrder'},
+    {label:'Public',get:r=>r.publicVisible!==false?'Yes':'No'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  vehicles: { name:'fleet-vehicles', src:()=>state.snapshot?.fleetVehicles, cols:[
+    {label:'Plate',key:'plate'},{label:'Model',key:'model'},{label:'Category',key:'category'},
+    {label:'Status',key:'status'},{label:'Active',get:r=>r.active!==false?'Yes':'No'},{label:'Notes',key:'notes'}
+  ]},
+  insurance: { name:'insurance-plans', src:()=>state.snapshot?.insurancePlans, cols:[
+    {label:'Key',key:'key'},{label:'Title',key:'title'},{label:'Label',key:'label'},
+    {label:'Price/day',key:'pricePerDay'},{label:'Sort',key:'sortOrder'},
+    {label:'Public',get:r=>r.publicVisible!==false?'Yes':'No'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  extras: { name:'extra-services', src:()=>state.snapshot?.extraServices, cols:[
+    {label:'Key',key:'key'},{label:'Title',key:'title'},{label:'Price',key:'price'},
+    {label:'Billing mode',key:'billingMode'},{label:'Sort',key:'sortOrder'},
+    {label:'Public',get:r=>r.publicVisible!==false?'Yes':'No'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  fees: { name:'fee-rules', src:()=>state.snapshot?.feeRules, cols:[
+    {label:'Key',key:'key'},{label:'Title',key:'title'},{label:'Amount',key:'amount'},
+    {label:'Billing mode',key:'billingMode'},{label:'Rule type',key:'ruleType'},
+    {label:'Audience group',key:'audienceGroup'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  locations: { name:'pickup-locations', src:()=>state.snapshot?.pickupLocations, cols:[
+    {label:'Label',key:'label'},{label:'Key',key:'key'},{label:'Address',key:'address'},
+    {label:'Station',key:'stationKey'},{label:'Type',key:'locationType'},{label:'Extra fee',key:'extraFee'},
+    {label:'Public',get:r=>r.publicVisible!==false?'Yes':'No'},{label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]},
+  users: { name:'staff-users', src:()=>state.access?.users, cols:[
+    {label:'Full name',key:'fullName'},{label:'Email',key:'email'},{label:'Role',key:'roleKey'},
+    {label:'Job title',key:'jobTitle'},{label:'Phone',key:'phone'},{label:'Start date',key:'startDate'},
+    {label:'Active',get:r=>r.active!==false?'Yes':'No'}
+  ]}
+};
+
+function exportTable(kind) {
+  const def = EXPORTS[kind];
+  if (!def) return;
+  const rows = (def.src()||[]);
+  if (!rows.length) return showToast('Nothing to export yet', 'error');
+  downloadBlob(toCSV(def.cols, rows), `${def.name}-${dateStr()}.csv`, 'text/csv');
+  showToast(`Exported ${rows.length} ${rows.length===1?'row':'rows'}`, 'success');
 }
 
 function dateStr() { return new Date().toISOString().slice(0,10); }
@@ -1541,7 +2365,9 @@ function init() {
   bindFallback();
   bindBizActions();
   bindCrudButtons();
+  bindBulkHandlers();
   bindSecurityButtons();
+  bindTableSearch();
 
   // Show loading state until snapshot arrives
   el('ovKpis').innerHTML = '<div class="tbl-empty" style="grid-column:1/-1">Connecting to backend — waiting for data…</div>';

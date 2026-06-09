@@ -217,6 +217,55 @@ async function handleAction(type, payload = {}) {
     if (type === 'refreshStaffAccess') {
       return sendSnapshots();
     }
+    if (type === 'importSnapshot') {
+      // Restore each section present in the snapshot payload, item by item
+      const snap = payload || {};
+      const tk = authState.sessionToken;
+      if (snap.businessSettings && typeof snap.businessSettings === 'object') {
+        await saveBusinessSettings({ authToken: tk, payload: snap.businessSettings }).catch(() => {});
+      }
+      if (Array.isArray(snap.insurancePlans)) {
+        for (const item of snap.insurancePlans) {
+          await upsertInsurancePlan({ authToken: tk, payload: item }).catch(() => {});
+        }
+      }
+      if (Array.isArray(snap.extraServices)) {
+        for (const item of snap.extraServices) {
+          await upsertExtraService({ authToken: tk, payload: item }).catch(() => {});
+        }
+      }
+      if (Array.isArray(snap.feeRules)) {
+        for (const item of snap.feeRules) {
+          await upsertFeeRule({ authToken: tk, payload: item }).catch(() => {});
+        }
+      }
+      if (Array.isArray(snap.pricingSeasons)) {
+        for (const item of snap.pricingSeasons) {
+          await upsertPricingSeason({ authToken: tk, payload: item }).catch(() => {});
+        }
+      }
+      if (Array.isArray(snap.categoryRateRules)) {
+        for (const item of snap.categoryRateRules) {
+          await upsertCategoryRateRule({ authToken: tk, payload: item }).catch(() => {});
+        }
+      }
+      if (Array.isArray(snap.pickupLocations)) {
+        for (const item of snap.pickupLocations) {
+          await upsertPickupLocation({ authToken: tk, payload: item }).catch(() => {});
+        }
+      }
+      if (Array.isArray(snap.vehicleCategories)) {
+        for (const item of snap.vehicleCategories) {
+          await upsertVehicleCategory({ authToken: tk, payload: item }).catch(() => {});
+        }
+      }
+      if (Array.isArray(snap.fleetVehicles)) {
+        for (const item of snap.fleetVehicles) {
+          await upsertFleetVehicle({ authToken: tk, payload: item }).catch(() => {});
+        }
+      }
+      return sendSnapshots('Το snapshot εισήχθη επιτυχώς.');
+    }
     if (type === 'resetBridgeTelemetry') {
       resetBridgeTelemetry();
       sendBridgeTelemetrySnapshot('Καθαρίστηκαν οι bridge telemetry counters.');
@@ -311,6 +360,7 @@ $w.onReady(async function () {
         'resetStaffPassword',
         'revokeStaffSessions',
         'refreshStaffAccess',
+        'importSnapshot',
         'resetBridgeTelemetry',
         'logoutBackroom'
       ].includes(msg.type)) {
