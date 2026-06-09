@@ -1,8 +1,10 @@
 import wixData from "wix-data";
-import { ok, badRequest, serverError } from "wix-http-functions";
+import { ok, badRequest, serverError, forbidden } from "wix-http-functions";
+import { getSecret } from "wix-secrets-backend";
 import { createBooking, computeQuote } from "backend/bookingEngine";
 import { INSURANCE_OPTIONS } from "backend/bookingConfig";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
+import { provisionCollections } from "backend/provisionCollections.jsw";
 function respond(body, fn = ok){ return fn({ headers: {"Content-Type":"application/json","Cache-Control":"no-store","Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET, POST, OPTIONS","Access-Control-Allow-Headers":"Content-Type"}, body }); }
 function readOrigin(request){ const origin = String(request?.headers?.origin || '').trim(); if (origin) return origin; const referer = String(request?.headers?.referer || '').trim(); if (!referer) return ''; try { return new URL(referer).origin; } catch (_) { return ''; } }
 function parseCsv(value){ return String(value || '').split(',').map((item) => item.trim()).filter(Boolean); }
@@ -369,5 +371,28 @@ export function options_pricing_catalog(request){
 
 export function get_ping(request){
   return ok({ headers: {"Content-Type":"application/json","Access-Control-Allow-Origin":"*"}, body: JSON.stringify({ ok: true, ts: Date.now() }) });
+}
+
+// One-time CMS collection provisioning. Guarded by the Wix secret
+// COLLECTIONS_SETUP_SECRET. Usage:
+//   GET /_functions/provisionCollections?secret=XXX            -> dry run (no writes)
+//   GET /_functions/provisionCollections?secret=XXX&apply=1    -> create collections
+// Add &keepFields=0 to skip appending missing fields to existing collections.
+export async function get_provisionCollections(request){
+  try{
+    const provided = String(request.query?.secret || "").trim();
+    if(!provided) return respond({ success:false, message:"Missing ?secret" }, forbidden);
+    let expected = "";
+    try { expected = String(await getSecret("COLLECTIONS_SETUP_SECRET") || "").trim(); } catch(_) { expected = ""; }
+    if(!expected) return respond({ success:false, message:"Secret COLLECTIONS_SETUP_SECRET is not set in the Wix Secrets Manager." }, serverError);
+    if(provided !== expected) return respond({ success:false, message:"Invalid secret" }, forbidden);
+
+    const dryRun = String(request.query?.apply || "") !== "1";
+    const addMissingFields = String(request.query?.keepFields || "1") !== "0";
+    const report = await provisionCollections({ dryRun, addMissingFields });
+    return respond({ success:true, ...report });
+  }catch(err){
+    return respond({ success:false, message: err.message || String(err) }, serverError);
+  }
 }
 
