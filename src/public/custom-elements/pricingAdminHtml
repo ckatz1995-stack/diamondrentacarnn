@@ -402,6 +402,63 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
         <th>Category</th><th>Season</th><th>Days</th><th>Price/day</th><th>Label</th><th>Status</th><th>Actions</th>
       </tr></thead><tbody id="rulesBody"></tbody></table></div>
     </div>
+
+    <div class="panel" style="border-top:3px solid #10b981">
+      <div class="panel-head">
+        <h3>Price Calculator</h3>
+        <span style="font-size:12px;color:var(--muted)">Compute an exact quote — same engine used at checkout</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:0 0 18px">
+        <div class="field-group">
+          <label for="calcCategory">Vehicle category</label>
+          <select id="calcCategory"></select>
+        </div>
+        <div class="field-group">
+          <label for="calcPickup">Pickup date &amp; time</label>
+          <input type="datetime-local" id="calcPickup">
+        </div>
+        <div class="field-group">
+          <label for="calcDropoff">Dropoff date &amp; time</label>
+          <input type="datetime-local" id="calcDropoff">
+        </div>
+        <div class="field-group">
+          <label for="calcAge">Driver age group</label>
+          <select id="calcAge">
+            <option value="23-69">23–69 (standard)</option>
+            <option value="18-22">18–22 (young driver)</option>
+            <option value="70+">70+ (senior)</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="calcInsurance">Insurance</label>
+          <select id="calcInsurance"></select>
+        </div>
+        <div class="field-group">
+          <label for="calcPickupLoc">Pickup location</label>
+          <select id="calcPickupLoc"></select>
+        </div>
+        <div class="field-group">
+          <label for="calcDropoffLoc">Dropoff location</label>
+          <select id="calcDropoffLoc"></select>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Extras</label>
+        <div id="calcExtrasGrid" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+      <button class="btn primary" id="calcQuoteBtn" style="min-width:160px">Calculate price</button>
+      <div id="calcResult" style="margin-top:20px;display:none">
+        <div id="calcSeasonBadge" style="display:none;margin-bottom:10px"></div>
+        <table style="width:100%;border-collapse:collapse;font-size:14px" id="calcBreakdownTable">
+          <tbody id="calcBreakdownBody"></tbody>
+        </table>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;border-top:2px solid var(--border);margin-top:6px">
+          <strong style="font-size:16px">Total (incl. VAT)</strong>
+          <strong id="calcGrandTotal" style="font-size:22px;color:var(--blue-deep)">—</strong>
+        </div>
+        <div id="calcRuleInfo" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
+      </div>
+    </div>
   </section>
 
   <section id="s-insurance" class="section">
@@ -639,6 +696,7 @@ const state = {
   bizPane: 'frontBrand',
   snapshot: null,
   access: null,
+  siteBaseUrl: '',
   bizDirty: false,
   busy: false,
   bulkSel: {},   // tableKey → Set of selected _id strings
@@ -687,6 +745,7 @@ window.addEventListener('message', e => {
     case 'adminSnapshot':
       state.snapshot = msg.snapshot || {};
       state.access = msg.accessSnapshot || {};
+      if (msg.siteBaseUrl) state.siteBaseUrl = msg.siteBaseUrl;
       renderAll();
       break;
     case 'toast':
@@ -910,6 +969,8 @@ function renderAll() {
   renderPickupLocations();
   renderSeasons();
   renderRules();
+  resetCalcDropdowns();
+  populateCalcDropdowns();
   renderInsurance();
   renderExtras();
   renderFees();
@@ -1538,6 +1599,135 @@ function renderRules() {
       </td></tr>`;
   }).join('') : '<tr><td colspan="7" class="tbl-empty">No rate rules yet. Add a rule to define daily rates for each vehicle category.</td></tr>';
 }
+
+// ── STAFF PRICE CALCULATOR ───────────────────────────────────────────────
+function populateCalcDropdowns() {
+  const snap = state.snapshot || {};
+  // categories
+  const catSel = el('calcCategory');
+  if (catSel && !catSel._populated) {
+    catSel._populated = true;
+    const cats = (snap.vehicleCategories || []).filter(c => c.active !== false);
+    catSel.innerHTML = cats.map(c => `<option value="${esc(c._id||'')}|${esc(c.category||'')}|${esc(c.price||0)}">${esc((c.category||'')+' – '+(c.title||c.label||''))}</option>`).join('');
+  }
+  // insurance
+  const insSel = el('calcInsurance');
+  if (insSel && !insSel._populated) {
+    insSel._populated = true;
+    const plans = (snap.insurancePlans || []).filter(i => i.active !== false);
+    insSel.innerHTML = plans.map(i => `<option value="${esc(i.key||'')}">${esc(i.label||i.key||'')} ${i.pricePerDay > 0 ? '+'+money(i.pricePerDay, cur())+'/day' : '(included)'}</option>`).join('');
+  }
+  // extras
+  const extrasGrid = el('calcExtrasGrid');
+  if (extrasGrid && !extrasGrid._populated) {
+    extrasGrid._populated = true;
+    const extras = (snap.extraServices || []).filter(e => e.active !== false);
+    extrasGrid.innerHTML = extras.map(e => `<label style="display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">
+      <input type="checkbox" class="calc-extra" value="${esc(e.key||'')}" style="margin:0"> ${esc(e.label||e.key||'')} <span style="color:var(--muted);font-size:12px">(${money(e.price||0,cur())}${e.billingMode==='perBooking'?'/bkg':'/day'})</span>
+    </label>`).join('');
+  }
+  // locations
+  const locs = (snap.pickupLocations || []).filter(l => l.active !== false);
+  const locOptions = '<option value="">— Same as standard —</option>' + locs.map(l => `<option value="${esc(l.label||l.key||'')}">${esc(l.label||l.key||'')}</option>`).join('');
+  const pickSel = el('calcPickupLoc');
+  if (pickSel && !pickSel._populated) { pickSel._populated = true; pickSel.innerHTML = locOptions; }
+  const dropSel = el('calcDropoffLoc');
+  if (dropSel && !dropSel._populated) { dropSel._populated = true; dropSel.innerHTML = locOptions; }
+}
+
+function resetCalcDropdowns() {
+  ['calcCategory','calcInsurance','calcPickupLoc','calcDropoffLoc'].forEach(id => { const s = el(id); if(s) s._populated = false; });
+  const g = el('calcExtrasGrid'); if(g) g._populated = false;
+}
+
+async function runCalcQuote() {
+  const catVal = el('calcCategory')?.value || '';
+  const parts = catVal.split('|');
+  const vehicleId = parts[0] || '';
+  const categoryCode = parts[1] || '';
+  const pickup = el('calcPickup')?.value;
+  const dropoff = el('calcDropoff')?.value;
+  const age = el('calcAge')?.value || '23-69';
+  const insuranceKey = el('calcInsurance')?.value || 'cdw';
+  const extras = Array.from(document.querySelectorAll('.calc-extra:checked')).map(c => c.value);
+  const pickupLoc = el('calcPickupLoc')?.value || '';
+  const dropoffLoc = el('calcDropoffLoc')?.value || '';
+
+  if (!pickup || !dropoff) { showToast('Please enter pickup and dropoff date/time', 'error'); return; }
+  if (!vehicleId && !categoryCode) { showToast('Please select a vehicle category', 'error'); return; }
+
+  const btn = el('calcQuoteBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Calculating…'; }
+  try {
+    const apiBase = (state.siteBaseUrl || '').replace(/\/$/, '') + '/_functions';
+    const payload = { vehicleId, categoryId: categoryCode, category: categoryCode, pickupDateTime: new Date(pickup).toISOString(), dropoffDateTime: new Date(dropoff).toISOString(), selectedPackage: insuranceKey, selectedExtras: extras, driverAge: age, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc };
+    const res = await fetch(apiBase + '/computeQuote', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!data?.success) { showToast(data?.message || 'Quote failed', 'error'); return; }
+    showCalcResult(data, pickup, dropoff, categoryCode);
+  } catch(err) {
+    showToast('Quote request failed: ' + (err.message || String(err)), 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Calculate price'; }
+  }
+}
+
+function showCalcResult(q, pickup, dropoff, catCode) {
+  const cur_ = cur();
+  const days = q.billableDays || Math.max(1, Math.ceil((new Date(dropoff) - new Date(pickup)) / 86400000));
+  const vatRate = 0.24;
+  const total = Number(q.totalPrice || 0);
+  const net = Number((total / (1 + vatRate)).toFixed(2));
+  const vat = Number((total - net).toFixed(2));
+
+  const seasonBadge = el('calcSeasonBadge');
+  if (q.pricingSeasonLabel) {
+    seasonBadge.innerHTML = `<span style="padding:4px 12px;border-radius:20px;background:#f59e0b;color:#fff;font-size:13px;font-weight:700">${esc(q.pricingSeasonLabel)}</span> <span style="font-size:13px;color:var(--muted)">active season</span>`;
+    seasonBadge.style.display = 'block';
+  } else {
+    seasonBadge.style.display = 'none';
+  }
+
+  const rows = [
+    ['Vehicle category', catCode || '—'],
+    ['Rental days', days],
+    ['Rate / day', money(q.basePricePerDay || 0, cur_)],
+    ['Rental base', money(q.baseCost || 0, cur_)],
+  ];
+  if (q.insuranceCost > 0) rows.push(['Insurance', money(q.insuranceCost, cur_)]);
+  if (q.extrasCost > 0) rows.push(['Extras', money(q.extrasCost, cur_)]);
+  if (q.ageFee > 0) rows.push(['Age surcharge', money(q.ageFee, cur_)]);
+  if (q.nightFee > 0) rows.push(['Night fee', money(q.nightFee, cur_)]);
+  if (q.locationFee > 0) rows.push(['Location fee', money(q.locationFee, cur_)]);
+  rows.push(['Net value', money(net, cur_)]);
+  rows.push(['VAT 24%', money(vat, cur_)]);
+
+  el('calcBreakdownBody').innerHTML = rows.map(([k,v]) => `<tr><td style="padding:5px 0;color:var(--muted);font-size:13px">${esc(String(k))}</td><td style="padding:5px 0;text-align:right;font-weight:600;font-size:13px">${esc(String(v))}</td></tr>`).join('');
+  const gtEl = el('calcGrandTotal');
+  if (gtEl) gtEl.textContent = money(total, cur_);
+
+  const ruleEl = el('calcRuleInfo');
+  const ruleInfo = [];
+  if (q.pricingSeasonKey) ruleInfo.push(`Season: ${q.pricingSeasonKey}`);
+  if (q.pricingRuleKey) ruleInfo.push(`Rule: ${q.pricingRuleKey}`);
+  if (q.crossSeasonPricing) ruleInfo.push('Cross-season weighted average applied');
+  if (q.basePriceSource) ruleInfo.push(`Source: ${q.basePriceSource}`);
+  if (ruleEl) ruleEl.textContent = ruleInfo.join(' · ');
+
+  const result = el('calcResult');
+  if (result) result.style.display = 'block';
+}
+
+function initCalcSection() {
+  el('calcQuoteBtn')?.addEventListener('click', runCalcQuote);
+  // Pre-set dates to today + 3 days as a convenience
+  const now = new Date(); now.setMinutes(0,0,0);
+  const later = new Date(now); later.setDate(later.getDate() + 3);
+  const fmt = d => d.toISOString().slice(0,16);
+  const pu = el('calcPickup'); if(pu && !pu.value) pu.value = fmt(now);
+  const dr = el('calcDropoff'); if(dr && !dr.value) dr.value = fmt(later);
+}
+// ── END PRICE CALCULATOR ─────────────────────────────────────────────────
 
 function renderInsurance() {
   const tblKey = 'ins';
@@ -2368,6 +2558,7 @@ function init() {
   bindBulkHandlers();
   bindSecurityButtons();
   bindTableSearch();
+  initCalcSection();
 
   // Show loading state until snapshot arrives
   el('ovKpis').innerHTML = '<div class="tbl-empty" style="grid-column:1/-1">Connecting to backend — waiting for data…</div>';

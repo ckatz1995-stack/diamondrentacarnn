@@ -289,6 +289,18 @@ button:hover,.cta:hover,.header-phone:hover{
   font-size:14px;
   font-weight:800;
 }
+.season-badge{
+  display:inline-block;
+  margin-top:6px;
+  padding:2px 9px;
+  border-radius:20px;
+  background:#f59e0b;
+  color:#fff;
+  font-size:.72em;
+  font-weight:700;
+  letter-spacing:.03em;
+}
+.season-row .season-val{ color:#f59e0b; font-weight:700; }
 .spec-grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -1429,12 +1441,17 @@ function render(){
   const nightRows = nightCharges();
   const nightExtra = nightRows.reduce((sum, item) => sum + item.amount, 0);
 
+  // Resolve active season once for all cards
+  const _pickupDate = new Date(window.BookingState ? (BookingState.get('pickup') || '') : '');
+  const _activeSeason = (!isNaN(_pickupDate.getTime())) ? resolveSeason(_pickupDate) : null;
+
   // DIAMOND STATE: Read previously selected category for card highlight
   const bsSelectedCat = (window.BookingState ? BookingState.get('vehicleCategory') : null) || '';
   list.innerHTML = filtered.map(vehicle => {
     const vehicleId = String(vehicle.vehicleCategoryId || vehicle.id || '');
     const serverQuote = vehicleServerQuotes[vehicleId] || null;
     const dailyPrice = serverQuote ? Number(serverQuote.basePricePerDay || 0) : resolveDynamicDailyPrice(vehicle, days);
+    const hasSeasonRate = _activeSeason && _activeSeason.label && Math.abs(dailyPrice - Number(vehicle.price || 0)) > 0.01;
     const baseTotal = Number((dailyPrice * days).toFixed(2));
     const locationExtra = Number((locationFeeFor(document.getElementById('pickupLocation').value, 'pickup') + locationFeeFor(document.getElementById('dropoffLocation').value, 'dropoff')).toFixed(2));
     const grandTotal = serverQuote ? Number(serverQuote.totalPrice || 0) : (baseTotal + ageExtra + nightExtra + locationExtra);
@@ -1460,6 +1477,7 @@ function render(){
               <div class="price-box">
                 <span class="amount">${dailyDisp}</span>
                 <span class="sub">ανά ημέρα</span>
+                ${hasSeasonRate ? `<span class="season-badge">${escapeHtml(_activeSeason.label)}</span>` : ''}
               </div>
             </div>
             <div class="spec-grid">
@@ -1475,6 +1493,7 @@ function render(){
         <div class="result-bottom">
           <div class="total-box">
             <div class="total-stack">
+              ${hasSeasonRate ? `<div class="total-row season-row"><span class="k">Σεζόν</span><span class="v season-val">${escapeHtml(_activeSeason.label)}</span></div>` : ''}
               <div class="total-row"><span class="k">Τιμή / ημέρα</span><span class="v">${dailyDisp}</span></div>
               <div class="total-row"><span class="k">Ημέρες</span><span class="v">${serverQuote ? (serverQuote.billableDays || days) : days}</span></div>
               ${serverQuote && serverQuote.insuranceCost > 0 ? `<div class="total-row"><span class="k">Ασφάλεια CDW</span><span class="v">${fmtMoney(serverQuote.insuranceCost)}</span></div>` : ''}
