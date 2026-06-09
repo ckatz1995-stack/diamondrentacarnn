@@ -283,7 +283,13 @@ function mapVehicleCategoryCatalogItem(item = {}) {
     ...toImageArray(item.images),
     ...toImageArray(item.Images),
     ...toImageArray(item.image),
-    ...toImageArray(item.Image)
+    ...toImageArray(item.Image),
+    ...toImageArray(item.imageUrl),
+    ...toImageArray(item.ImageUrl),
+    ...toImageArray(item.photo),
+    ...toImageArray(item.Photo),
+    ...toImageArray(item.gallery),
+    ...toImageArray(item.Gallery)
   ]);
   const displayName = buildVehicleCategoryDisplayName(categoryCode, title);
   const rawAc = item.airCondition ?? item.AirCondition ?? item.ac ?? item.AC;
@@ -416,7 +422,10 @@ export async function getFleetModelsPreview({ vehicleId, categoryCode } = {}) {
   let query = wixData.query('FleetNew').limit(1000);
   try { query = query.include('Category'); } catch (err) {}
   const res = await query.find({ suppressAuth: true });
-  const categoryFallbackImage = uniqueImageList(toImageArray(vehicleItem?.image || vehicleItem?.Image || ''));
+  const categoryFallbackImage = uniqueImageList([
+    ...toImageArray(vehicleItem?.image || vehicleItem?.Image || ''),
+    ...toImageArray(vehicleItem?.imageUrl || vehicleItem?.ImageUrl || '')
+  ]);
   const categoryLabel = buildVehicleCategoryDisplayName(resolvedCategoryCode, vehicleItem?.title || vehicleItem?.Title || '');
 
   const grouped = new Map();

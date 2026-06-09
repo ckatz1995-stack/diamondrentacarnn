@@ -171,7 +171,7 @@ function normalizeVehicleCategoryItem(payload = {}) {
   const safeId = cleanId(payload._id || payload.id);
   const category = text(payload.category || payload.Category).toUpperCase();
   const title = text(payload.title || payload.Title || payload.label || payload.Label || '');
-  const image = payload.image ?? payload.Image ?? '';
+  const image = payload.image ?? payload.Image ?? payload.imageUrl ?? payload.ImageUrl ?? '';
   return {
     ...(safeId ? { _id: safeId } : {}),
     title: title || category || 'Όχημα',
@@ -633,10 +633,13 @@ export async function upsertVehicleCategory({ authToken, payload = {} } = {}){
 
   // Preserve the existing Wix image when the admin form doesn't send one
   // (the category edit form has no image uploader, so image is always '' from the payload).
-  const imageToKeep = normalized.image || (previous ? previous.image : '');
+  const imageToKeep = normalized.image || (previous ? (previous.image || previous.imageUrl) : '');
+  // Keep the plain-URL mirror (imageUrl) in sync so the public catalog can read
+  // a photo from either field even if one was wiped.
+  const imageUrlToKeep = vehicleCategoryImageUrl(imageToKeep) || (previous ? (previous.imageUrl || '') : '');
   const saveRow = previous
-    ? { ...previous, ...normalized, _id: previous._id, image: imageToKeep }
-    : { ...normalized, image: imageToKeep };
+    ? { ...previous, ...normalized, _id: previous._id, image: imageToKeep, imageUrl: imageUrlToKeep }
+    : { ...normalized, image: imageToKeep, imageUrl: imageUrlToKeep };
   const saved = previous
     ? await wixData.update(VEHICLE_CATEGORIES_COLLECTION, saveRow, { suppressAuth: true })
     : await wixData.insert(VEHICLE_CATEGORIES_COLLECTION, saveRow, { suppressAuth: true });
