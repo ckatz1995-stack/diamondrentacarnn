@@ -1,0 +1,20 @@
+{
+  "collectionId": "StaffPreferences",
+  "displayName": "Staff Preferences",
+  "description": "Per-staff UI preferences and personal settings for the backroom panel.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "One record per StaffUsers entry. Created on first login if absent.",
+  "fields": [
+    { "key": "staffId",               "displayName": "Staff User ID",           "type": "Text",    "required": true,  "description": "StaffUsers._id (one-to-one)" },
+    { "key": "username",              "displayName": "Username",                "type": "Text",    "required": false },
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: username. Written by backend." },
+    { "key": "defaultView",           "displayName": "Default View",            "type": "Text",    "required": false, "description": "Section opened on login, e.g. 'bookings' | 'fleet' | 'pricing'" },
+    { "key": "timezone",              "displayName": "Timezone",                "type": "Text",    "required": false, "description": "IANA timezone string, e.g. 'Europe/Athens'" },
+    { "key": "language",              "displayName": "Language",                "type": "Text",    "required": false, "description": "BCP-47 language tag, e.g. 'en' | 'el'" },
+    { "key": "tablePageSize",         "displayName": "Table Page Size",         "type": "Number",  "required": false, "description": "Rows per page in data tables" },
+    { "key": "sidebarCollapsed",      "displayName": "Sidebar Collapsed",       "type": "Boolean", "required": false },
+    { "key": "notifications",         "displayName": "Notification Settings",   "type": "LongText","required": false, "description": "JSON object of notification preferences" },
+    { "key": "dashboardWidgets",      "displayName": "Dashboard Widgets",       "type": "LongText","required": false, "description": "JSON array of enabled/ordered dashboard widget keys" },
+    { "key": "customData",            "displayName": "Custom Data",             "type": "LongText","required": false, "description": "Catch-all JSON for additional UI state" }
+  ]
+}

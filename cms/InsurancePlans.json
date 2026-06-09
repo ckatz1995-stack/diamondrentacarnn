@@ -1,0 +1,17 @@
+{
+  "collectionId": "InsurancePlans",
+  "displayName": "Insurance Plans",
+  "description": "Coverage options offered during booking (CDW, SCDW, FULL, etc.).",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "fields": [
+    { "key": "key",           "displayName": "Key (slug)",    "type": "Text",     "required": true,  "description": "Unique normalised identifier, e.g. 'cdw', 'scdw', 'full_cover'" },
+    { "key": "title",         "displayName": "Title",         "type": "Text",     "required": true,  "description": "Customer-facing name, e.g. 'Basic CDW'" },
+    { "key": "label",         "displayName": "Short Label",   "type": "Text",     "required": false, "description": "Compact name used in summaries, e.g. 'CDW'" },
+    { "key": "description",   "displayName": "Description",   "type": "LongText", "required": false },
+    { "key": "pricePerDay",   "displayName": "Price Per Day", "type": "Number",   "required": false, "description": "0 = included free" },
+    { "key": "billingMode",   "displayName": "Billing Mode",  "type": "Text",     "required": false, "description": "Always 'perDay'" },
+    { "key": "sortOrder",     "displayName": "Sort Order",    "type": "Number",   "required": false },
+    { "key": "active",        "displayName": "Active",        "type": "Boolean",  "required": false },
+    { "key": "publicVisible", "displayName": "Public Visible","type": "Boolean",  "required": false }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "collectionId": "FeeRules",
+  "displayName": "Fee Rules",
+  "description": "Automatic surcharges applied to bookings — young/senior driver premiums, night pickup/dropoff fees, manual charges.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "fields": [
+    { "key": "key",            "displayName": "Key (slug)",      "type": "Text",     "required": true,  "description": "Unique normalised identifier, e.g. 'young_driver_19_22', 'night_pickup'" },
+    { "key": "title",          "displayName": "Title",           "type": "Text",     "required": true },
+    { "key": "label",          "displayName": "Short Label",     "type": "Text",     "required": false },
+    { "key": "description",    "displayName": "Description",     "type": "LongText", "required": false },
+    { "key": "ruleType",       "displayName": "Rule Type",       "type": "Text",     "required": false, "description": "'manual' | 'ageRange' | 'nightPickup' | 'nightDropoff'" },
+    { "key": "audienceGroup",  "displayName": "Audience Group",  "type": "Text",     "required": false, "description": "For age-range rules: '19-22' or '70+'" },
+    { "key": "amount",         "displayName": "Amount",          "type": "Number",   "required": false },
+    { "key": "billingMode",    "displayName": "Billing Mode",    "type": "Text",     "required": false, "description": "'perDay' | 'perBooking'" },
+    { "key": "sortOrder",      "displayName": "Sort Order",      "type": "Number",   "required": false },
+    { "key": "active",         "displayName": "Active",          "type": "Boolean",  "required": false },
+    { "key": "publicVisible",  "displayName": "Public Visible",  "type": "Boolean",  "required": false }
+  ]
+}

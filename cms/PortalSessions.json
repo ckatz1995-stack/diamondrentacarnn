@@ -1,0 +1,19 @@
+{
+  "collectionId": "PortalSessions",
+  "displayName": "Portal Sessions",
+  "description": "Session tokens for the customer self-service portal. Separate from Wix native auth — used for portal-specific state.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "Token is stored in the customer's browser. Backend validates on each portal API call. Expired sessions are purged by a scheduled job.",
+  "fields": [
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: memberId + created date. Written by backend." },
+    { "key": "memberId",              "displayName": "Wix Member ID",           "type": "Text",    "required": true },
+    { "key": "customerId",            "displayName": "Customer ID",             "type": "Text",    "required": false, "description": "Customers._id" },
+    { "key": "token",                 "displayName": "Session Token",           "type": "Text",    "required": true,  "description": "Secure random UUID" },
+    { "key": "createdAt",             "displayName": "Created At",              "type": "DateTime","required": false },
+    { "key": "expiresAt",             "displayName": "Expires At",              "type": "DateTime","required": false },
+    { "key": "lastActiveAt",          "displayName": "Last Active At",          "type": "DateTime","required": false },
+    { "key": "ipAddress",             "displayName": "IP Address",              "type": "Text",    "required": false },
+    { "key": "userAgent",             "displayName": "User Agent",              "type": "Text",    "required": false },
+    { "key": "revoked",               "displayName": "Revoked",                 "type": "Boolean", "required": false }
+  ]
+}

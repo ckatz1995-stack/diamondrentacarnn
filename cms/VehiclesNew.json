@@ -1,0 +1,28 @@
+{
+  "collectionId": "VehiclesNew",
+  "displayName": "Vehicle Categories",
+  "description": "Vehicle classes shown to customers (Economy, SUV, Van…). Each category defines the base daily rate and specs. Individual vehicles live in FleetNew.",
+  "permissions": { "read": "Anyone", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "Read by Anyone so the public vehicles page can display categories without auth.",
+  "fields": [
+    { "key": "category",      "displayName": "Category Code",   "type": "Text",    "required": true,  "description": "Uppercase short code, e.g. 'ECO', 'SUV', 'VAN'" },
+    { "key": "title",         "displayName": "Title",           "type": "Text",    "required": true,  "description": "Customer-facing class name, e.g. 'Economy'" },
+    { "key": "label",         "displayName": "Short Label",     "type": "Text",    "required": false },
+    { "key": "displayTitle",  "displayName": "Display Title",   "type": "Text",    "required": false, "description": "Computed: title + category code. Written by backend." },
+    { "key": "description",   "displayName": "Description",     "type": "LongText","required": false },
+    { "key": "badge",         "displayName": "Badge",           "type": "Text",    "required": false, "description": "Short badge label shown on the vehicle card" },
+    { "key": "image",         "displayName": "Image",           "type": "Image",   "required": false },
+    { "key": "imageUrl",      "displayName": "Image URL",       "type": "URL",     "required": false, "description": "Computed by backend from wix:image URI" },
+    { "key": "price",         "displayName": "Base Price / Day","type": "Number",  "required": false },
+    { "key": "seats",         "displayName": "Seats",           "type": "Text",    "required": false },
+    { "key": "doors",         "displayName": "Doors",           "type": "Text",    "required": false },
+    { "key": "luggage",       "displayName": "Luggage",         "type": "Text",    "required": false },
+    { "key": "transmission",  "displayName": "Transmission",    "type": "Text",    "required": false, "description": "'manual' | 'automatic' | 'cvt'" },
+    { "key": "fuelType",      "displayName": "Fuel Type",       "type": "Text",    "required": false, "description": "'petrol' | 'diesel' | 'hybrid' | 'electric'" },
+    { "key": "airCondition",  "displayName": "Air Conditioning","type": "Boolean", "required": false },
+    { "key": "sortOrder",     "displayName": "Sort Order",      "type": "Number",  "required": false },
+    { "key": "active",        "displayName": "Active",          "type": "Boolean", "required": false },
+    { "key": "status",        "displayName": "Status",          "type": "Text",    "required": false, "description": "'active' | 'inactive'" },
+    { "key": "publicVisible", "displayName": "Public Visible",  "type": "Boolean", "required": false }
+  ]
+}

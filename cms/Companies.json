@@ -1,0 +1,25 @@
+{
+  "collectionId": "Companies",
+  "displayName": "Companies",
+  "description": "Corporate / travel-agency accounts. Bookings made through a company use the CDP (Corporate Discount Program) rates.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "fields": [
+    { "key": "companyName",           "displayName": "Company Name",            "type": "Text",    "required": true },
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: companyName. Written by backend." },
+    { "key": "cdpCode",               "displayName": "CDP Code",                "type": "Text",    "required": false, "description": "Corporate Discount Program code used in booking flow" },
+    { "key": "contactName",           "displayName": "Contact Name",            "type": "Text",    "required": false },
+    { "key": "contactEmail",          "displayName": "Contact Email",           "type": "Text",    "required": false },
+    { "key": "contactPhone",          "displayName": "Contact Phone",           "type": "Text",    "required": false },
+    { "key": "address",               "displayName": "Address",                 "type": "Text",    "required": false },
+    { "key": "city",                  "displayName": "City",                    "type": "Text",    "required": false },
+    { "key": "country",               "displayName": "Country",                 "type": "Text",    "required": false },
+    { "key": "vatNumber",             "displayName": "VAT Number",              "type": "Text",    "required": false },
+    { "key": "discountType",          "displayName": "Discount Type",           "type": "Text",    "required": false, "description": "'percent' | 'fixed' | 'rate_override'" },
+    { "key": "discountValue",         "displayName": "Discount Value",          "type": "Number",  "required": false, "description": "Percent (0-100) or fixed EUR amount depending on discountType" },
+    { "key": "creditLimit",           "displayName": "Credit Limit",            "type": "Number",  "required": false, "description": "Maximum outstanding balance allowed (0 = no credit)" },
+    { "key": "currentBalance",        "displayName": "Current Balance",         "type": "Number",  "required": false },
+    { "key": "paymentTerms",          "displayName": "Payment Terms",           "type": "Text",    "required": false, "description": "e.g. 'net30' | 'prepaid' | 'monthly'" },
+    { "key": "active",                "displayName": "Active",                  "type": "Boolean", "required": false },
+    { "key": "notes",                 "displayName": "Notes",                   "type": "LongText","required": false }
+  ]
+}

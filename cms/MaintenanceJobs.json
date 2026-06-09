@@ -1,0 +1,30 @@
+{
+  "collectionId": "MaintenanceJobs",
+  "displayName": "Maintenance Jobs",
+  "description": "Scheduled and ad-hoc maintenance tasks for fleet vehicles. Tracks service history and upcoming work.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "fields": [
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: vehiclePlate + jobType. Written by backend." },
+    { "key": "vehicleId",             "displayName": "Vehicle ID",              "type": "Text",    "required": true,  "description": "FleetNew._id" },
+    { "key": "vehiclePlate",          "displayName": "Vehicle Plate",           "type": "Text",    "required": false },
+    { "key": "vehicleModel",          "displayName": "Vehicle Model",           "type": "Text",    "required": false },
+    { "key": "jobType",               "displayName": "Job Type",                "type": "Text",    "required": false, "description": "'service' | 'repair' | 'inspection' | 'cleaning' | 'other'" },
+    { "key": "title",                 "displayName": "Job Title",               "type": "Text",    "required": false },
+    { "key": "description",           "displayName": "Description",             "type": "LongText","required": false },
+    { "key": "status",                "displayName": "Status",                  "type": "Text",    "required": false, "description": "'scheduled' | 'in_progress' | 'completed' | 'canceled'" },
+    { "key": "priority",              "displayName": "Priority",                "type": "Text",    "required": false, "description": "'low' | 'normal' | 'high' | 'urgent'" },
+    { "key": "scheduledAt",           "displayName": "Scheduled At",            "type": "DateTime","required": false },
+    { "key": "startedAt",             "displayName": "Started At",              "type": "DateTime","required": false },
+    { "key": "completedAt",           "displayName": "Completed At",            "type": "DateTime","required": false },
+    { "key": "mileageAtService",      "displayName": "Mileage at Service",      "type": "Number",  "required": false },
+    { "key": "nextServiceMileage",    "displayName": "Next Service Mileage",    "type": "Number",  "required": false },
+    { "key": "nextServiceDate",       "displayName": "Next Service Date",       "type": "DateTime","required": false },
+    { "key": "cost",                  "displayName": "Cost",                    "type": "Number",  "required": false },
+    { "key": "vendor",                "displayName": "Vendor / Garage",         "type": "Text",    "required": false },
+    { "key": "invoiceNumber",         "displayName": "Invoice Number",          "type": "Text",    "required": false },
+    { "key": "assignedStaffId",       "displayName": "Assigned Staff ID",       "type": "Text",    "required": false, "description": "StaffUsers._id responsible for this job" },
+    { "key": "assignedStaffName",     "displayName": "Assigned Staff Name",     "type": "Text",    "required": false },
+    { "key": "blocksVehicle",         "displayName": "Blocks Vehicle",          "type": "Boolean", "required": false, "description": "true = vehicle cannot be assigned to rentals while this job is open" },
+    { "key": "notes",                 "displayName": "Notes",                   "type": "LongText","required": false }
+  ]
+}

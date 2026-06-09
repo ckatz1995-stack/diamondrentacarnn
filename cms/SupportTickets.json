@@ -1,0 +1,42 @@
+{
+  "collectionId": "SupportTickets",
+  "displayName": "Support Tickets",
+  "description": "Customer support requests and internal issue tracking. Can be linked to a booking.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "fields": [
+    { "key": "ticketNumber",          "displayName": "Ticket Number",           "type": "Text",    "required": false, "description": "Human-readable ref, e.g. 'TKT-2026-0001'. Auto-generated." },
+    { "key": "displayTitle",          "displayName": "Display Title",           "type": "Text",    "required": false, "description": "Computed: ticketNumber + subject. Written by backend." },
+    { "key": "subject",               "displayName": "Subject",                 "type": "Text",    "required": false },
+    { "key": "status",                "displayName": "Status",                  "type": "Text",    "required": false, "description": "'open' | 'in_progress' | 'waiting' | 'resolved' | 'closed'" },
+    { "key": "priority",              "displayName": "Priority",                "type": "Text",    "required": false, "description": "'low' | 'normal' | 'high' | 'urgent'" },
+    { "key": "category",              "displayName": "Category",                "type": "Text",    "required": false, "description": "'booking' | 'billing' | 'vehicle' | 'complaint' | 'general'" },
+
+    { "key": "customerId",            "displayName": "Customer ID",             "type": "Text",    "required": false, "description": "Customers._id" },
+    { "key": "customerName",          "displayName": "Customer Name",           "type": "Text",    "required": false },
+    { "key": "customerEmail",         "displayName": "Customer Email",          "type": "Text",    "required": false },
+    { "key": "customerPhone",         "displayName": "Customer Phone",          "type": "Text",    "required": false },
+    { "key": "memberId",              "displayName": "Wix Member ID",           "type": "Text",    "required": false },
+
+    { "key": "bookingId",             "displayName": "Booking ID",              "type": "Text",    "required": false, "description": "BookingsNew._id if ticket is booking-related" },
+    { "key": "bookingNumber",         "displayName": "Booking Number",          "type": "Text",    "required": false },
+
+    { "key": "source",                "displayName": "Source",                  "type": "Text",    "required": false, "description": "'email' | 'phone' | 'portal' | 'backroom'" },
+    { "key": "description",           "displayName": "Description",             "type": "LongText","required": false, "description": "Initial customer message / issue description" },
+    { "key": "internalNotes",         "displayName": "Internal Notes",          "type": "LongText","required": false },
+    { "key": "resolution",            "displayName": "Resolution",              "type": "LongText","required": false },
+
+    { "key": "assignedStaffId",       "displayName": "Assigned Staff ID",       "type": "Text",    "required": false, "description": "StaffUsers._id handling this ticket" },
+    { "key": "assignedStaffName",     "displayName": "Assigned Staff Name",     "type": "Text",    "required": false },
+
+    { "key": "messages",              "displayName": "Messages (JSON)",         "type": "LongText","required": false, "description": "JSON array of {authorType, authorId, authorName, body, sentAt}" },
+
+    { "key": "openedAt",              "displayName": "Opened At",               "type": "DateTime","required": false },
+    { "key": "firstResponseAt",       "displayName": "First Response At",       "type": "DateTime","required": false },
+    { "key": "resolvedAt",            "displayName": "Resolved At",             "type": "DateTime","required": false },
+    { "key": "closedAt",              "displayName": "Closed At",               "type": "DateTime","required": false },
+    { "key": "dueAt",                 "displayName": "Due At",                  "type": "DateTime","required": false },
+
+    { "key": "satisfactionRating",    "displayName": "Satisfaction Rating",     "type": "Number",  "required": false, "description": "1–5 CSAT score submitted by customer after resolution" },
+    { "key": "tags",                  "displayName": "Tags",                    "type": "Text",    "required": false, "description": "Comma-separated internal tags" }
+  ]
+}

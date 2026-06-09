@@ -1,0 +1,21 @@
+{
+  "collectionId": "CategoryRateRules",
+  "displayName": "Category Rate Rules",
+  "description": "Daily rate overrides for a vehicle category within a rental-duration band and/or season.",
+  "permissions": { "read": "Admin", "insert": "Admin", "update": "Admin", "delete": "Admin" },
+  "notes": "A rule with no categoryCode applies to all categories. A rule with no seasonKey applies year-round.",
+  "fields": [
+    { "key": "key",              "displayName": "Key (slug)",        "type": "Text",    "required": false },
+    { "key": "label",            "displayName": "Label",             "type": "Text",    "required": false, "description": "Internal label, e.g. 'SUV High Season 7+ days'" },
+    { "key": "description",      "displayName": "Description",       "type": "LongText","required": false },
+    { "key": "categoryCode",     "displayName": "Category Code",     "type": "Text",    "required": false, "description": "Uppercase code from VehiclesNew.category. Empty = all categories." },
+    { "key": "vehicleCategoryId","displayName": "Vehicle Category ID","type": "Text",   "required": false, "description": "Optional VehiclesNew._id for direct reference" },
+    { "key": "seasonKey",        "displayName": "Season Key",        "type": "Text",    "required": false, "description": "PricingSeasons.key. Empty = all seasons." },
+    { "key": "minDays",          "displayName": "Min Days",          "type": "Number",  "required": false, "description": "Minimum rental duration for this rule to apply (default 1)" },
+    { "key": "maxDays",          "displayName": "Max Days",          "type": "Number",  "required": false, "description": "Maximum rental duration. 0 = unlimited." },
+    { "key": "pricePerDay",      "displayName": "Price Per Day",     "type": "Number",  "required": false },
+    { "key": "sortOrder",        "displayName": "Sort Order",        "type": "Number",  "required": false },
+    { "key": "active",           "displayName": "Active",            "type": "Boolean", "required": false },
+    { "key": "publicVisible",    "displayName": "Public Visible",    "type": "Boolean", "required": false }
+  ]
+}
