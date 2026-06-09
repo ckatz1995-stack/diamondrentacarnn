@@ -61,10 +61,12 @@ async function sendSnapshots(message = '', tone = 'success') {
       getPricingAdminSnapshot({ authToken: authState.sessionToken }),
       getStaffAccessSnapshot({ sessionToken: authState.sessionToken })
     ]);
+    const siteBaseUrl = String(wixLocation.baseUrl || wixLocation.url || '').replace(/\/[^/]*$/, '');
     post({
       type: 'adminSnapshot',
       snapshot,
       accessSnapshot,
+      siteBaseUrl,
       meta: { user: currentUser, bridgeTelemetry: getBridgeTelemetrySnapshot() }
     });
     if (message) post({ type: 'toast', tone, message });

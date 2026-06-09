@@ -799,7 +799,10 @@ html,body{overflow-x:hidden!important}
         <div class="summary-days"><span id="summaryDays">8</span> ημέρες</div>
       </div>
       <div class="summary-rows">
-        <div class="row"><span>Ενοικίαση</span><strong id="baseLine">160,00€</strong></div>
+        <div class="row">
+          <span>Ενοικίαση <small id="rateLabel" style="opacity:.6;font-size:.8em;margin-left:4px"></small><span id="seasonBadge" hidden style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;background:#f59e0b;color:#fff;font-size:.72em;font-weight:600;letter-spacing:.03em;vertical-align:middle"></span></span>
+          <strong id="baseLine">160,00€</strong>
+        </div>
         <div class="row" id="insuranceRow"><span>Ασφάλεια</span><strong id="insuranceLine">0,00€</strong></div>
         <div class="row" id="extrasRow"><span>Extras</span><strong id="extrasLine">0,00€</strong></div>
         <div class="row muted" id="locationRow" hidden><span id="locationLabel">Χρέωση τοποθεσιών</span><strong id="locationLine">0,00€</strong></div>
@@ -1401,6 +1404,20 @@ async function fetchFleetModels(categoryCode, vehicleId){
 
       document.getElementById('summaryDays').textContent = days;
       document.getElementById('daysText').textContent = days;
+      // Show rate × days label
+      const rateLabel = document.getElementById('rateLabel');
+      if(rateLabel) rateLabel.textContent = `${formatMoney(basePricePerDay)} × ${days} ημέρες`;
+      // Active season badge
+      const season = resolveSeason(new Date(state.pickup));
+      const seasonBadge = document.getElementById('seasonBadge');
+      if(seasonBadge){
+        if(season && season.label){
+          seasonBadge.textContent = season.label;
+          seasonBadge.hidden = false;
+        } else {
+          seasonBadge.hidden = true;
+        }
+      }
       document.getElementById('baseLine').textContent = formatMoney(base);
       document.getElementById('insuranceLine').textContent = formatMoney(insuranceTotal);
       document.getElementById('extrasLine').textContent = formatMoney(extrasTotal);
@@ -1412,7 +1429,8 @@ async function fetchFleetModels(categoryCode, vehicleId){
       document.getElementById('vatLine').textContent = formatMoney(vat);
       const gtEl = document.getElementById('grandTotal');
       _localTotalFallback = total;
-      gtEl.textContent = '—';
+      // Show local total immediately — server quote will flash-update it when it arrives
+      gtEl.textContent = formatMoney(total);
       gtEl.classList.remove('diamond-total-flash');
 
       const locationRow = document.getElementById('locationRow');
@@ -1448,7 +1466,7 @@ async function fetchFleetModels(categoryCode, vehicleId){
     let lastServerQuote = null;
     function scheduleServerQuote(){
       if(_quoteTimer) clearTimeout(_quoteTimer);
-      _quoteTimer = setTimeout(callServerQuote, 0);
+      _quoteTimer = setTimeout(callServerQuote, 400);
     }
     async function callServerQuote(){
       if(!vehicle || !state.vehicleId) return;
