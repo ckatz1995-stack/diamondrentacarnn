@@ -1,5 +1,5 @@
 import wixData from "wix-data";
-import { ok, badRequest, serverError, forbidden } from "wix-http-functions";
+import { ok, badRequest, serverError } from "wix-http-functions";
 import { getSecret } from "wix-secrets-backend";
 import { createBooking, computeQuote } from "backend/bookingEngine";
 import { INSURANCE_OPTIONS } from "backend/bookingConfig";
@@ -381,11 +381,11 @@ export function get_ping(request){
 export async function get_provisionCollections(request){
   try{
     const provided = String(request.query?.secret || "").trim();
-    if(!provided) return respond({ success:false, message:"Missing ?secret" }, forbidden);
+    if(!provided) return respond({ success:false, message:"Missing ?secret" }, badRequest);
     let expected = "";
     try { expected = String(await getSecret("COLLECTIONS_SETUP_SECRET") || "").trim(); } catch(_) { expected = ""; }
     if(!expected) return respond({ success:false, message:"Secret COLLECTIONS_SETUP_SECRET is not set in the Wix Secrets Manager." }, serverError);
-    if(provided !== expected) return respond({ success:false, message:"Invalid secret" }, forbidden);
+    if(provided !== expected) return respond({ success:false, message:"Invalid secret" }, badRequest);
 
     const dryRun = String(request.query?.apply || "") !== "1";
     const addMissingFields = String(request.query?.keepFields || "1") !== "0";
