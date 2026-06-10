@@ -2248,6 +2248,33 @@ let vehicleCategories = readCached(VEHICLE_CATEGORIES_STORAGE_KEY, []);
 function getBusinessSettings(){
   return (pricingCatalog && pricingCatalog.businessSettings) ? pricingCatalog.businessSettings : {};
 }
+// Picker parity helpers: same night markers + fee pills as the vehicles page
+function pickerNormKey(value){ return String(value || '').trim().toLowerCase(); }
+function nightWindowHours(){
+  const settings = getBusinessSettings();
+  const sh = Number(settings?.nightStartHour); const eh = Number(settings?.nightEndHour);
+  return { startHour: Number.isFinite(sh) ? sh : 22, endHour: Number.isFinite(eh) ? eh : 8 };
+}
+function isNightTime(timeValue){
+  const raw = String(timeValue || '').trim();
+  const match = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if(!match) return false;
+  const hour = Math.max(0, Math.min(23, Number(match[1] || 0)));
+  const { startHour, endHour } = nightWindowHours();
+  if(startHour > endHour) return hour >= startHour || hour < endHour;
+  return hour >= startHour && hour < endHour;
+}
+function locationFeeFor(value, kind){
+  const rows = Array.isArray(pricingCatalog?.pickupLocations) ? pricingCatalog.pickupLocations : [];
+  const target = pickerNormKey(value);
+  if(!target) return 0;
+  const hit = rows.find((row)=>{
+    const type = pickerNormKey(row?.locationType || 'both') || 'both';
+    if(type !== 'both' && type !== pickerNormKey(kind)) return false;
+    return pickerNormKey(row?.label) === target || pickerNormKey(row?.key) === target;
+  });
+  return Number(hit?.extraFee || 0);
+}
 function applyBusinessIdentity(){
   const settings = getBusinessSettings();
   const companyName = String(settings.companyName || 'DIAMOND Rent A Car').trim() || 'DIAMOND Rent A Car';
@@ -2860,6 +2887,12 @@ function initPageOwnedControls(configs){
     const nextCtrl = controls.get(PICKER_CHAIN[ctrl.id] || '');
     if (!nextCtrl) return;
     setTimeout(() => openPicker(nextCtrl), 140);
+  };
+  window.openPickerById = (id) => {
+    const ctrl = controls.get(id);
+    if (!ctrl) return;
+    try { ctrl.wrapper.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {}
+    openPicker(ctrl);
   };
   configs.forEach((config) => {
     const nativeEl = document.getElementById(config.id) || document.querySelector(config.selector || '');

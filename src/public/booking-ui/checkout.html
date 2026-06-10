@@ -449,6 +449,13 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .custom-day:not(.is-disabled):not(.is-empty):hover{transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){.custom-day:hover{transform:none}}
 </style>
+<style>
+/* Trip summary strip (chips of the saved search) */
+.trip-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 14px;background:rgba(255,255,255,.78);border:1px solid rgba(160,110,35,.14);border-radius:16px;margin-bottom:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.68)}
+.sum-chip{border:1px solid rgba(160,110,35,.22);background:rgba(255,255,255,.85);color:#2b2114;font-size:12.5px;font-weight:800;border-radius:999px;padding:6px 12px;font-family:inherit;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block}
+.trip-strip .trip-edit-link{margin-left:auto;border:0;background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));color:#2a1d09;font-size:12.5px;font-weight:900;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.trip-strip .trip-edit-link:hover{filter:brightness(1.05)}
+</style>
 </head><body>
 <header class="site-header">
   <div class="header-inner">
@@ -501,6 +508,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 </div>
 
 <div class="page">
+  <div class="trip-strip" id="tripStrip" hidden></div>
   <section class="summary-shell">
     <div class="summary-grid">
       <div class="vehicle-visual">
@@ -1904,6 +1912,12 @@ function initPageOwnedControls(configs){
     if (!nextCtrl) return;
     setTimeout(() => openPicker(nextCtrl), 140);
   };
+  window.openPickerById = (id) => {
+    const ctrl = controls.get(id);
+    if (!ctrl) return;
+    try { ctrl.wrapper.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {}
+    openPicker(ctrl);
+  };
   configs.forEach((config) => {
     const nativeEl = document.getElementById(config.id) || document.querySelector(config.selector || '');
     if (!nativeEl || controls.has(config.id)) return;
@@ -2057,4 +2071,42 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
   }catch(_){}
 })();
 
-</script></body></html>
+</script><script>
+/* Trip summary strip: show the saved search as chips with an edit link back to the vehicles page */
+(function(){
+  var strip = document.getElementById('tripStrip');
+  if(!strip) return;
+  function readSearch(){
+    var keys = ['diamond-booking-search-v1','diamond_booking_search_v1'];
+    for(var k=0;k<keys.length;k++){
+      try{ var raw = sessionStorage.getItem(keys[k]) || localStorage.getItem(keys[k]); if(raw) return JSON.parse(raw); }catch(_){ }
+    }
+    return null;
+  }
+  function fmtDT(value){
+    var m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})/);
+    return m ? (m[3] + '/' + m[2] + ' ' + m[4]) : '';
+  }
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  function navVehicles(){
+    try { if (window.parent && window.parent !== window) { parent.postMessage({ type:'wix-booking-nav', path:'/categories' }, '*'); return; } } catch(_){ }
+    location.assign('/categories');
+  }
+  var s = readSearch();
+  if(!s) return;
+  var chips = [];
+  if(s.pickupLocation) chips.push(s.pickupLocation);
+  var pdt = fmtDT(s.pickup); if(pdt) chips.push(pdt);
+  if(s.dropoffLocation && s.dropoffLocation !== s.pickupLocation) chips.push(s.dropoffLocation);
+  var ddt = fmtDT(s.dropoff); if(ddt) chips.push('\u2192 ' + ddt);
+  if(s.age) chips.push('\u0397\u03bb\u03b9\u03ba\u03af\u03b1 ' + s.age);
+  if(s.category && String(s.category).toLowerCase() !== 'all') chips.push('\u039a\u03b1\u03c4\u03b7\u03b3\u03bf\u03c1\u03af\u03b1 ' + s.category);
+  if(!chips.length) return;
+  strip.innerHTML = chips.map(function(c){ return '<span class="sum-chip">' + esc(c) + '</span>'; }).join('') +
+    '<button type="button" class="trip-edit-link" id="tripEditLink">\u0391\u03bb\u03bb\u03b1\u03b3\u03ae</button>';
+  strip.hidden = false;
+  var btn = document.getElementById('tripEditLink');
+  if(btn) btn.addEventListener('click', navVehicles);
+})();
+</script>
+</body></html>

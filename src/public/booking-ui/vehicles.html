@@ -846,6 +846,15 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .custom-panel-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:rgba(60,45,22,.62);padding:2px 4px 8px;border-bottom:1px solid rgba(70,50,16,.08);margin-bottom:8px}
 .custom-day.is-range{background:rgba(63,116,138,.13)}
 .custom-day.is-range-edge{background:rgba(63,116,138,.30);color:#10394a}
+/* Trip summary chips (tap to edit) */
+.search-summary-text{display:flex;flex-wrap:wrap;gap:6px;align-items:center;white-space:normal!important;overflow:visible!important}
+.sum-chip{border:1px solid rgba(160,110,35,.22);background:rgba(255,255,255,.85);color:#2b2114;font-size:12.5px;font-weight:800;border-radius:999px;padding:6px 12px;cursor:pointer;font-family:inherit;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sum-chip:hover{border-color:var(--gold,#e7bf69);background:rgba(231,191,105,.18)}
+.sum-days{font-size:12px;font-weight:900;color:#6a5737;padding:0 4px}
+.trip-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 14px;background:rgba(255,255,255,.78);border:1px solid rgba(160,110,35,.14);border-radius:16px;margin-bottom:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.68)}
+.trip-strip .sum-chip{cursor:default}
+.trip-strip .trip-edit-link{margin-left:auto;border:0;background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));color:#2a1d09;font-size:12.5px;font-weight:900;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.trip-strip .trip-edit-link:hover{filter:brightness(1.05)}
 .custom-day:not(.is-disabled):not(.is-empty):hover{transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){.custom-day:hover{transform:none}}
 </style>
@@ -1970,29 +1979,42 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
   }catch(_){}
 })();
 
-// DIAMOND: Compact search editor summary
+// DIAMOND: Compact search editor summary — chip per setting, tap a chip to edit it
+function fmtChipDate(iso){
+  var m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? (m[3] + '/' + m[2]) : (iso || 'ημ/νία');
+}
 function updateSearchSummaryBar(){
   try{
     var summaryText = document.getElementById('searchSummaryText');
     if(!summaryText) return;
-    var pl = document.getElementById('pickupLocation');
-    var dl = document.getElementById('dropoffLocation');
-    var pd = document.getElementById('pickupDate');
-    var pt = document.getElementById('pickupTime');
-    var dd = document.getElementById('dropoffDate');
-    var dt = document.getElementById('dropoffTime');
+    var val = function(id){ var el = document.getElementById(id); return el ? el.value : ''; };
+    var pl = val('pickupLocation') || 'Παραλαβή';
+    var dl = val('dropoffLocation') || 'Επιστροφή';
     var categoryEl = document.getElementById('category');
-    var ageEl = document.getElementById('ageGroup');
-    var days = typeof currentDays === 'function' ? currentDays() : '?';
-    var from = (pl && pl.value) ? pl.value : 'Παραλαβή';
-    var to = (dl && dl.value) ? dl.value : 'Επιστροφή';
-    var pickupWhen = ((pd && pd.value) ? pd.value : 'ημ/νία') + ((pt && pt.value) ? ' ' + pt.value : '');
-    var dropoffWhen = ((dd && dd.value) ? dd.value : 'ημ/νία') + ((dt && dt.value) ? ' ' + dt.value : '');
-    var categoryText = categoryEl ? categoryEl.options[categoryEl.selectedIndex]?.text || categoryEl.value : 'Όλες οι κατηγορίες';
-    var ageText = ageEl && ageEl.value ? ageEl.value : '23-69';
-    summaryText.textContent = from + ' · ' + pickupWhen + ' → ' + to + ' · ' + dropoffWhen + ' · ' + categoryText + ' · Ηλικία ' + ageText + ' · ' + days + ' ημέρες';
+    var categoryText = categoryEl ? (categoryEl.options[categoryEl.selectedIndex]?.text || categoryEl.value) : 'Όλες';
+    var days = typeof currentDays === 'function' ? currentDays() : '';
+    var chips = [
+      { id: 'pickupLocation', label: pl },
+      { id: 'pickupDate', label: fmtChipDate(val('pickupDate')) + ' ' + (val('pickupTime') || '') },
+      { id: 'dropoffLocation', label: dl },
+      { id: 'dropoffDate', label: fmtChipDate(val('dropoffDate')) + ' ' + (val('dropoffTime') || '') },
+      { id: 'category', label: categoryText },
+      { id: 'ageGroup', label: 'Ηλικία ' + (val('ageGroup') || '23-69') }
+    ];
+    summaryText.innerHTML = chips.map(function(c){
+      return '<button type="button" class="sum-chip" data-edit="' + c.id + '">' + escapeHtml(String(c.label).trim()) + '</button>';
+    }).join('') + (days ? '<span class="sum-days">' + days + ' ' + (days === 1 ? 'ημέρα' : 'ημέρες') + '</span>' : '');
   }catch(_){}
 }
+// Chip taps: expand the form and open the matching picker directly
+document.addEventListener('click', function(e){
+  var chip = e.target.closest('.sum-chip');
+  if(!chip) return;
+  if(typeof window._openSearchPanel === 'function') window._openSearchPanel();
+  var target = chip.dataset.edit;
+  setTimeout(function(){ if(typeof window.openPickerById === 'function') window.openPickerById(target); }, 320);
+});
 (function(){
   var editBtn = document.getElementById('searchEditBtn');
   var formPanel = document.getElementById('searchFormPanel');
@@ -2273,6 +2295,12 @@ function initPageOwnedControls(configs){
     const nextCtrl = controls.get(PICKER_CHAIN[ctrl.id] || '');
     if (!nextCtrl) return;
     setTimeout(() => openPicker(nextCtrl), 140);
+  };
+  window.openPickerById = (id) => {
+    const ctrl = controls.get(id);
+    if (!ctrl) return;
+    try { ctrl.wrapper.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {}
+    openPicker(ctrl);
   };
   configs.forEach((config) => {
     const nativeEl = document.getElementById(config.id) || document.querySelector(config.selector || '');
