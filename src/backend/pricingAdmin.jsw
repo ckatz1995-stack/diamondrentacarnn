@@ -691,6 +691,18 @@ export async function deleteFleetVehicle({ authToken, itemId, plate } = {}){
 }
 
 
+function toIsoDateOnly(value) {
+  const raw = text(value);
+  if (!raw) return '';
+  const dmy = raw.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})$/);
+  if (dmy) return `${dmy[3]}-${String(dmy[2]).padStart(2, '0')}-${String(dmy[1]).padStart(2, '0')}`;
+  const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (iso) return `${iso[1]}-${String(iso[2]).padStart(2, '0')}-${String(iso[3]).padStart(2, '0')}`;
+  const dt = new Date(raw);
+  if (Number.isNaN(dt.getTime())) return raw;
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+}
+
 function normalizePricingSeasonItem(payload = {}) {
   const safeId = cleanId(payload._id || payload.id);
   return {
@@ -698,8 +710,8 @@ function normalizePricingSeasonItem(payload = {}) {
     key: slugKey(payload.key || payload.label || payload.title || `${payload.startDate || ''}_${payload.endDate || ''}`),
     label: text(payload.label || payload.title || 'Season'),
     description: text(payload.description),
-    startDate: text(payload.startDate || payload.start || payload.fromDate),
-    endDate: text(payload.endDate || payload.end || payload.toDate),
+    startDate: toIsoDateOnly(payload.startDate || payload.start || payload.fromDate),
+    endDate: toIsoDateOnly(payload.endDate || payload.end || payload.toDate),
     priority: toNumber(payload.priority, 0),
     sortOrder: toNumber(payload.sortOrder, 9999),
     repeatYearly: readBool(payload.repeatYearly, false),
@@ -710,9 +722,12 @@ function normalizePricingSeasonItem(payload = {}) {
 
 function normalizeCategoryRateRuleItem(payload = {}) {
   const safeId = cleanId(payload._id || payload.id);
+  // Key must encode the rule's scope (category+season+band), never the free-text label:
+  // labels repeat across rules, and upsertByKey deletes other rows sharing the same key.
+  const scopeKey = `${text(payload.categoryCode || payload.category || payload.Category)}_${text(payload.seasonKey || payload.season) || 'all'}_${Math.max(1, Math.floor(toNumber(payload.minDays, 1)))}_${Math.max(0, Math.floor(toNumber(payload.maxDays, 0)))}`;
   return {
     ...(safeId ? { _id: safeId } : {}),
-    key: slugKey(payload.key || payload.label || payload.title || `${payload.categoryCode || payload.category || ''}_${payload.seasonKey || ''}_${payload.minDays || ''}_${payload.maxDays || ''}`),
+    key: slugKey(payload.key || scopeKey),
     label: text(payload.label || payload.title || 'Rate rule'),
     description: text(payload.description),
     categoryCode: text(payload.categoryCode || payload.category || payload.Category).toUpperCase(),

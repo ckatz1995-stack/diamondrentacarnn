@@ -19,6 +19,9 @@ function hasFresh(entry){ return !!entry && (now() - Number(entry.ts || 0) < CAC
 function readBool(value, fallback = false){ if (typeof value === 'boolean') return value; if (typeof value === 'number') return value !== 0; const raw = String(value ?? '').trim().toLowerCase(); if (!raw) return fallback; return ['1','true','yes','y','on'].includes(raw); }
 function toNumber(value, fallback = 0){ const num = Number(value); return Number.isFinite(num) ? num : fallback; }
 function text(value, fallback = ''){ const out = String(value ?? '').trim(); return out || fallback; }
+// Wix module/messaging boundaries can deliver arrays as plain objects ({0:..,1:..}).
+// Discarding them via Array.isArray guards silently empties the price list — coerce instead.
+function toArrayLike(value){ if (Array.isArray(value)) return value; if (value && typeof value === 'object') return Object.values(value); return []; }
 function sortByOrder(a, b){ const sa = toNumber(a?.sortOrder, 9999); const sb = toNumber(b?.sortOrder, 9999); if (sa !== sb) return sa - sb; return text(a?.label).localeCompare(text(b?.label), 'el'); }
 async function safeQuery(collectionName, queryBuilder){ try { const q = typeof queryBuilder === 'function' ? queryBuilder(wixData.query(collectionName)) : wixData.query(collectionName); const res = await q.limit(1000).find({ suppressAuth: true }); return Array.isArray(res?.items) ? res.items : []; } catch (_) { return []; } }
 
@@ -233,19 +236,38 @@ function normalizePickupLocation(item, fallbackSort = 9999){
 }
 
 function parseDateOnly(value){
-  const raw = text(value, '');
+  if (value instanceof Date || (value && typeof value.getTime === 'function')) {
+    const t = Number(value.getTime());
+    if (Number.isNaN(t)) return null;
+    const d = new Date(t); d.setHours(0,0,0,0); return d;
+  }
+  // Strip invisible/bidi marks (e.g. U+200E from locale formatters) before matching
+  const raw = text(value, '').replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g, '').trim();
   if (!raw) return null;
+  // Day-first format (Greek): 30/6/2026, 30.6.2026, 30-6-2026
+  const dmy = raw.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})$/);
+  if (dmy) {
+    const d = new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (iso) {
+    const d = new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
   const dt = new Date(raw);
   if (Number.isNaN(dt.getTime())) return null;
   dt.setHours(0,0,0,0);
   return dt;
 }
 function seasonMatchesDate(date, season){
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return false;
+  // Coerce date-likes (cross-module Date instances, ISO strings, timestamps) instead of relying on instanceof
+  const ts = date && typeof date.getTime === 'function' ? date.getTime() : new Date(date).getTime();
+  if (Number.isNaN(Number(ts))) return false;
   const start = parseDateOnly(season?.startDate);
   const end = parseDateOnly(season?.endDate);
   if (!start || !end) return false;
-  const check = new Date(date);
+  const check = new Date(ts);
   check.setHours(0,0,0,0);
   if (season?.repeatYearly) {
     const monthDay = (d) => ({ m: d.getUTCMonth() + 1, day: d.getUTCDate() });
@@ -260,7 +282,7 @@ function seasonMatchesDate(date, season){
   return check >= start && check <= end;
 }
 function findActiveSeason(pricingSeasons = [], pickupDateTime){
-  const rows = Array.isArray(pricingSeasons) ? pricingSeasons.filter((row) => row && row.active !== false) : [];
+  const rows = toArrayLike(pricingSeasons).filter((row) => row && row.active !== false);
   const matches = rows.filter((row) => seasonMatchesDate(pickupDateTime, row));
   matches.sort((a, b) => {
     const pa = toNumber(b?.priority, 0) - toNumber(a?.priority, 0);
@@ -268,6 +290,22 @@ function findActiveSeason(pricingSeasons = [], pickupDateTime){
     return sortByOrder(a, b);
   });
   return matches[0] || null;
+}
+
+// Staff diagnostics: per-season parse + match trace for a given pickup moment
+export function probeSeasonResolution(catalog, pickupDateTime){
+  const seasons = toArrayLike(catalog?.pricingSeasons);
+  const fmt = (d) => d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : null;
+  return seasons.map((s) => ({
+    key: String(s?.key || ''),
+    rawStart: JSON.stringify(String(s?.startDate ?? '')),
+    rawEnd: JSON.stringify(String(s?.endDate ?? '')),
+    parsedStart: fmt(parseDateOnly(s?.startDate)),
+    parsedEnd: fmt(parseDateOnly(s?.endDate)),
+    active: s?.active !== false,
+    repeatYearly: s?.repeatYearly === true,
+    matches: seasonMatchesDate(pickupDateTime, s)
+  }));
 }
 
 function mergeRowsByKey(defaultRows, cmsRows){
@@ -291,8 +329,10 @@ async function readInsurancePlans(scope = 'public'){ const items = await safeQue
 async function readExtraServices(scope = 'public'){ const items = await safeQuery(PRICING_COLLECTIONS.extraServices, (q) => q.ascending('sortOrder')); const defaults = FALLBACK_EXTRA_OPTIONS.map((item, index) => normalizeExtra(item, (index + 1) * 10)); const cmsRows = items.map((item, index) => normalizeExtra(item, (index + 1) * 10)); let rows = mergeRowsByKey(defaults, cmsRows).filter((item) => item.active !== false); if (scope === 'public') rows = rows.filter((item) => item.publicVisible !== false); return rows.sort(sortByOrder); }
 function feeRuleSlot(rule){ return `${text(rule?.ruleType, 'manual')}|${text(rule?.audienceGroup, '')}`; }
 async function readFeeRules(scope = 'public'){ const items = await safeQuery(PRICING_COLLECTIONS.feeRules, (q) => q.ascending('sortOrder')); const cmsRows = items.map((item, index) => normalizeFeeRule(item, (index + 1) * 10)); const covered = new Set(cmsRows.map(feeRuleSlot)); const defaults = FALLBACK_FEE_RULES.map((item, index) => normalizeFeeRule(item, (index + 1) * 10)).filter((d) => !covered.has(feeRuleSlot(d))); let rows = mergeRowsByKey(defaults, cmsRows).filter((item) => item.active !== false); if (scope === 'public') rows = rows.filter((item) => item.publicVisible !== false); return rows.sort(sortByOrder); }
-async function readPricingSeasons(scope = 'all'){ const items = await safeQuery(PRICING_COLLECTIONS.pricingSeasons, (q) => q.ascending('sortOrder')); let rows = items.map((item, index) => normalizeSeason(item, (index + 1) * 10)).filter((item) => item.active !== false); if (scope === 'public') rows = rows.filter((item) => item.publicVisible !== false); return rows.sort(sortByOrder); }
-async function readCategoryRateRules(scope = 'all'){ const items = await safeQuery(PRICING_COLLECTIONS.categoryRateRules, (q) => q.ascending('sortOrder')); let rows = items.map((item, index) => normalizeCategoryRateRule(item, (index + 1) * 10)).filter((item) => item.active !== false); if (scope === 'public') rows = rows.filter((item) => item.publicVisible !== false); return rows.sort(sortByOrder); }
+// Seasons and rate rules ARE the public price list: never filter them out of the
+// public catalog, or the booking pages cannot display any prices at all.
+async function readPricingSeasons(scope = 'all'){ const items = await safeQuery(PRICING_COLLECTIONS.pricingSeasons, (q) => q.ascending('sortOrder')); const rows = items.map((item, index) => normalizeSeason(item, (index + 1) * 10)).filter((item) => item.active !== false); return rows.sort(sortByOrder); }
+async function readCategoryRateRules(scope = 'all'){ const items = await safeQuery(PRICING_COLLECTIONS.categoryRateRules, (q) => q.ascending('sortOrder')); const rows = items.map((item, index) => normalizeCategoryRateRule(item, (index + 1) * 10)).filter((item) => item.active !== false); return rows.sort(sortByOrder); }
 async function readPickupLocations(scope = 'all'){ const items = await safeQuery(PRICING_COLLECTIONS.pickupLocations, (q) => q.ascending('sortOrder')); let rows = items.map((item, index) => normalizePickupLocation(item, (index + 1) * 10)).filter((item) => item.active !== false); if (scope === 'public') rows = rows.filter((item) => item.publicVisible !== false); return rows.sort(sortByOrder); }
 
 function buildCatalogSnapshot({ businessSettings, insurancePlans, extraServices, feeRules, pricingSeasons, categoryRateRules, pickupLocations }){
@@ -336,15 +376,29 @@ export async function getPricingMaps(options = {}){ const catalog = await getPri
 function athensHour(date, timeZone = 'Europe/Athens'){ const dtf = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); const parts = dtf.formatToParts(date); const lookup = (type) => Number((parts.find((part) => part.type === type) || {}).value || 0); return { hour: lookup('hour'), minute: lookup('minute') }; }
 function isNightShift(date, businessSettings){ if (!(date instanceof Date) || Number.isNaN(date.getTime())) return false; const startHour = toNumber(businessSettings?.nightStartHour, DEFAULT_BUSINESS_SETTINGS.nightStartHour); const endHour = toNumber(businessSettings?.nightEndHour, DEFAULT_BUSINESS_SETTINGS.nightEndHour); const { hour } = athensHour(date, 'Europe/Athens'); return startHour > endHour ? (hour >= startHour || hour < endHour) : (hour >= startHour && hour < endHour); }
 function feeRuleAmount(rule, fallback = 0){ return toNumber(rule?.amount, fallback); }
-export function computeAutomaticFees({ driverAge, pickupDateTime, dropoffDateTime, businessSettings, feeRules = [] } = {}){ const settings = businessSettings || DEFAULT_BUSINESS_SETTINGS; const rules = Array.isArray(feeRules) ? feeRules : []; const ageText = text(driverAge, ''); const ageMatches = rules.filter((rule) => rule.ruleType === 'ageRange' && text(rule.audienceGroup) === ageText); const ageRule = ageMatches.find((rule) => rule._id) || ageMatches[0] || null; const ageFeeFallback = ageText === '19-22' ? 16 : (ageText === '70+' ? 10 : 0); const ageFee = feeRuleAmount(ageRule, ageFeeFallback); const nightPickupRule = rules.find((rule) => rule.ruleType === 'nightPickup') || rules.find((rule) => rule.ruleType === 'night'); const nightDropoffRule = rules.find((rule) => rule.ruleType === 'nightDropoff') || rules.find((rule) => rule.ruleType === 'night'); const pickupNight = isNightShift(pickupDateTime, settings) ? feeRuleAmount(nightPickupRule, 15) : 0; const dropoffNight = isNightShift(dropoffDateTime, settings) ? feeRuleAmount(nightDropoffRule, 15) : 0; return { ageFee: Number(ageFee.toFixed(2)), nightFee: Number((pickupNight + dropoffNight).toFixed(2)), appliedRules: { ageRule: ageRule ? { key: ageRule.key, label: ageRule.label, amount: ageFee } : null, pickupNight: pickupNight ? { key: nightPickupRule?.key || 'nightPickup', label: nightPickupRule?.label || 'Νυχτερινή χρέωση παραλαβής', amount: pickupNight } : null, dropoffNight: dropoffNight ? { key: nightDropoffRule?.key || 'nightDropoff', label: nightDropoffRule?.label || 'Νυχτερινή χρέωση επιστροφής', amount: dropoffNight } : null } }; }
+export function computeAutomaticFees({ driverAge, pickupDateTime, dropoffDateTime, businessSettings, feeRules = [] } = {}){ const settings = businessSettings || DEFAULT_BUSINESS_SETTINGS; const rules = toArrayLike(feeRules); const ageText = text(driverAge, ''); const ageMatches = rules.filter((rule) => rule.ruleType === 'ageRange' && text(rule.audienceGroup) === ageText); const ageRule = ageMatches.find((rule) => rule._id) || ageMatches[0] || null; const ageFeeFallback = ageText === '19-22' ? 16 : (ageText === '70+' ? 10 : 0); const ageFee = feeRuleAmount(ageRule, ageFeeFallback); const nightPickupRule = rules.find((rule) => rule.ruleType === 'nightPickup') || rules.find((rule) => rule.ruleType === 'night'); const nightDropoffRule = rules.find((rule) => rule.ruleType === 'nightDropoff') || rules.find((rule) => rule.ruleType === 'night'); const pickupNight = isNightShift(pickupDateTime, settings) ? feeRuleAmount(nightPickupRule, 15) : 0; const dropoffNight = isNightShift(dropoffDateTime, settings) ? feeRuleAmount(nightDropoffRule, 15) : 0; return { ageFee: Number(ageFee.toFixed(2)), nightFee: Number((pickupNight + dropoffNight).toFixed(2)), appliedRules: { ageRule: ageRule ? { key: ageRule.key, label: ageRule.label, amount: ageFee } : null, pickupNight: pickupNight ? { key: nightPickupRule?.key || 'nightPickup', label: nightPickupRule?.label || 'Νυχτερινή χρέωση παραλαβής', amount: pickupNight } : null, dropoffNight: dropoffNight ? { key: nightDropoffRule?.key || 'nightDropoff', label: nightDropoffRule?.label || 'Νυχτερινή χρέωση επιστροφής', amount: dropoffNight } : null } }; }
 export function getFallbackCatalogSnapshot(){ return buildCatalogSnapshot({ businessSettings: normalizeBusinessSettings(DEFAULT_BUSINESS_SETTINGS), insurancePlans: FALLBACK_INSURANCE_OPTIONS.map((item, index) => normalizeInsurance(item, (index + 1) * 10)), extraServices: FALLBACK_EXTRA_OPTIONS.map((item, index) => normalizeExtra(item, (index + 1) * 10)), feeRules: FALLBACK_FEE_RULES.map((item, index) => normalizeFeeRule(item, (index + 1) * 10)), pricingSeasons: [], categoryRateRules: [], pickupLocations: [] }); }
 export function clearPricingCatalogCache(){ cache = { public: null, all: null }; return true; }
 
-function findCategoryRateRule(rules, resolvedSeason, code, categoryId, days) {
+function extractShortCategoryCode(value){
+  const raw = text(value, '').trim();
+  if (!raw) return '';
+  const match = raw.match(/^([A-Za-z0-9]+)\s*-/);
+  return (match ? match[1] : raw).toUpperCase();
+}
+function categoryCodesMatch(ruleCode, candidate){
+  const a = text(ruleCode, '').trim().toUpperCase();
+  const b = text(candidate, '').trim().toUpperCase();
+  if (!a || !b) return false;
+  return a === b || extractShortCategoryCode(a) === extractShortCategoryCode(b);
+}
+
+function findCategoryRateRule(rules, resolvedSeason, codes, categoryId, days) {
   const candidates = rules.filter((rule) => {
     if (!rule || rule.active === false) return false;
-    if (code && text(rule.categoryCode, '').toUpperCase() && text(rule.categoryCode, '').toUpperCase() !== code) return false;
-    if (!code && categoryId && text(rule.vehicleCategoryId, '') && text(rule.vehicleCategoryId, '') !== categoryId) return false;
+    const ruleCode = text(rule.categoryCode, '');
+    if (codes.length && ruleCode && !codes.some((candidate) => categoryCodesMatch(ruleCode, candidate))) return false;
+    if (!codes.length && categoryId && text(rule.vehicleCategoryId, '') && text(rule.vehicleCategoryId, '') !== categoryId) return false;
     const minDays = Math.max(1, Math.floor(toNumber(rule.minDays, 1)));
     const maxDays = Math.max(0, Math.floor(toNumber(rule.maxDays, 0)));
     if (days < minDays) return false;
@@ -371,17 +425,18 @@ function findCategoryRateRule(rules, resolvedSeason, code, categoryId, days) {
   return candidates[0] || null;
 }
 
-export function resolveDynamicPricingRate({ categoryCode = '', vehicleCategoryId = '', billableDays = 1, pickupDateTime = null, dropoffDateTime = null, catalog = null, fallbackPricePerDay = 0 } = {}) {
+export function resolveDynamicPricingRate({ categoryCode = '', categoryCandidates = [], vehicleCategoryId = '', billableDays = 1, pickupDateTime = null, dropoffDateTime = null, catalog = null, fallbackPricePerDay = 0 } = {}) {
   const safeCatalog = catalog || {};
-  const seasons = Array.isArray(safeCatalog.pricingSeasons) ? safeCatalog.pricingSeasons : [];
-  const rules = Array.isArray(safeCatalog.categoryRateRules) ? safeCatalog.categoryRateRules : [];
+  const seasons = toArrayLike(safeCatalog.pricingSeasons);
+  const rules = toArrayLike(safeCatalog.categoryRateRules);
   const code = text(categoryCode, '').toUpperCase();
+  const codes = [categoryCode, ...toArrayLike(categoryCandidates)].map((value) => text(value, '').trim()).filter(Boolean);
   const categoryId = text(vehicleCategoryId, '');
   const days = Math.max(1, Math.floor(toNumber(billableDays, 1)));
   const pickupDate = pickupDateTime instanceof Date && !isNaN(pickupDateTime.getTime()) ? pickupDateTime : null;
   const dropoffDate = dropoffDateTime instanceof Date && !isNaN(dropoffDateTime.getTime()) ? dropoffDateTime : null;
   const primarySeason = findActiveSeason(seasons, pickupDate || pickupDateTime);
-  const primaryRule = findCategoryRateRule(rules, primarySeason, code, categoryId, days);
+  const primaryRule = findCategoryRateRule(rules, primarySeason, codes, categoryId, days);
   let pricePerDay = primaryRule ? toNumber(primaryRule.pricePerDay, fallbackPricePerDay) : toNumber(fallbackPricePerDay, 0);
 
   // Cross-season: if the rental spans a season boundary, compute a weighted daily average
@@ -395,7 +450,7 @@ export function resolveDynamicPricingRate({ categoryCode = '', vehicleCategoryId
       const dayDate = new Date(pickupDate.getTime() + d * MS_PER_DAY);
       const daySeason = findActiveSeason(seasons, dayDate);
       if (!crossSeason && (daySeason?.key || null) !== firstSeasonKey) crossSeason = true;
-      const dayRule = findCategoryRateRule(rules, daySeason, code, categoryId, days);
+      const dayRule = findCategoryRateRule(rules, daySeason, codes, categoryId, days);
       totalCost += dayRule ? toNumber(dayRule.pricePerDay, fallbackPricePerDay) : toNumber(fallbackPricePerDay, 0);
     }
     if (crossSeason) pricePerDay = Math.round(totalCost / days * 100) / 100;

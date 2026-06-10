@@ -30,6 +30,7 @@ import {
   resetStaffPassword,
   revokeStaffSessions
 } from 'backend/staffAccess.jsw';
+import { computeQuote } from 'backend/bookingEngine';
 import { logoutBackroom, requireBackroomAccess } from 'public/backroomAuth';
 import { getBridgeTelemetrySnapshot, isTrustedBridgeOrigin, resetBridgeTelemetry } from 'public/bridgeUtils';
 import { APP_ROUTES as ROUTES } from 'public/appRoutes';
@@ -61,10 +62,13 @@ async function sendSnapshots(message = '', tone = 'success') {
       getPricingAdminSnapshot({ authToken: authState.sessionToken }),
       getStaffAccessSnapshot({ sessionToken: authState.sessionToken })
     ]);
+    // baseUrl IS the site base (it includes the site path on free wixsite.com domains) — never strip segments from it
+    const siteBaseUrl = String(wixLocation.baseUrl || '').replace(/\/+$/, '');
     post({
       type: 'adminSnapshot',
       snapshot,
       accessSnapshot,
+      siteBaseUrl,
       meta: { user: currentUser, bridgeTelemetry: getBridgeTelemetrySnapshot() }
     });
     if (message) post({ type: 'toast', tone, message });
@@ -76,6 +80,16 @@ async function sendSnapshots(message = '', tone = 'success') {
 }
 
 async function handleAction(type, payload = {}) {
+  if (type === 'computeQuote') {
+    post({ type: 'calcQuoteAck' });
+    try {
+      const result = await computeQuote(payload || {});
+      post({ type: 'calcQuoteResult', result });
+    } catch (err) {
+      post({ type: 'calcQuoteResult', result: { success: false, message: err?.message || String(err) } });
+    }
+    return;
+  }
   post({ type: 'busy', flag: true });
   try {
     if (type === 'saveBusinessSettings') {
@@ -334,6 +348,7 @@ $w.onReady(async function () {
       }
 
       if ([
+        'computeQuote',
         'saveBusinessSettings',
         'upsertInsurancePlan',
         'upsertExtraService',

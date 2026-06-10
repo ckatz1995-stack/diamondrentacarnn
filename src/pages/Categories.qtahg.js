@@ -1,6 +1,7 @@
 import wixLocation from "wix-location";
+import wixWindow from "wix-window";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
-import { getFleetModelsPreview, getVehicleCategoriesCatalog } from "backend/bookingEngine";
+import { computeQuote, getFleetModelsPreview, getVehicleCategoriesCatalog } from "backend/bookingEngine";
 import { BRIDGE_TYPES, buildBookingContext, isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from "public/bridgeUtils";
 
 const COMPONENT_CANDIDATES = ["#bpage2", "#categoriesHtml", "#vehiclesHtml"];
@@ -170,7 +171,30 @@ function handleMessage(event) {
   }
   if (data.type === "request-vehicles-data" || data.type === "categories-ready") {
     sendVehicles();
+    return;
   }
+  if (data.type === "request-server-quotes") {
+    sendServerQuotes(data.requests);
+    return;
+  }
+  if (data.type === "wix-scroll-top") {
+    try { wixWindow.scrollTo(0, 0); } catch (err) {}
+  }
+}
+
+async function sendServerQuotes(requests) {
+  const list = Array.isArray(requests) ? requests.slice(0, 40) : [];
+  if (!list.length) return;
+  const quotes = {};
+  await Promise.all(list.map(async (req) => {
+    const id = String(req?.vehicleId || '');
+    if (!id) return;
+    try {
+      const result = await computeQuote(req || {});
+      if (result?.success) quotes[id] = result;
+    } catch (err) { /* per-vehicle quote failure: leave the local estimate in place */ }
+  }));
+  post({ type: "server-quotes-data", quotes });
 }
 
 $w.onReady(async function () {
@@ -206,6 +230,7 @@ $w.onReady(async function () {
       if (data.type === BRIDGE_TYPES.WIX_NAV && data.path) go(data.path);
       if (data.type === BRIDGE_TYPES.REQUEST_CONTEXT) sendContext();
       if (data.type === "request-vehicles-data" || data.type === "categories-ready") sendVehicles();
+      if (data.type === "request-server-quotes") sendServerQuotes(data.requests);
     });
   }
 });

@@ -1,6 +1,6 @@
 import wixLocation from "wix-location";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
-import { getVehicleCategoryDetails, getFleetModelsPreview } from "backend/bookingEngine";
+import { computeQuote, getVehicleCategoryDetails, getFleetModelsPreview } from "backend/bookingEngine";
 import { BRIDGE_TYPES, buildBookingContext, isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from "public/bridgeUtils";
 
 const COMPONENT_CANDIDATES = ["#bpage3", "#optionsHtml", "#html1"];
@@ -169,6 +169,20 @@ function handleMessage(event) {
   }
   if (data.type === "request-fleet-models-data") {
     sendFleetModels();
+    return;
+  }
+  if (data.type === "request-server-quote") {
+    sendServerQuote(data.request);
+  }
+}
+
+async function sendServerQuote(request) {
+  if (!request || typeof request !== 'object') return;
+  try {
+    const result = await computeQuote(request);
+    post({ type: "server-quote-data", result: result || { success: false } });
+  } catch (err) {
+    post({ type: "server-quote-data", result: { success: false, message: err?.message || String(err) } });
   }
 }
 
@@ -206,6 +220,7 @@ $w.onReady(async function () {
       if (data.type === BRIDGE_TYPES.REQUEST_PRICING) sendPricingCatalog();
       if (data.type === "request-vehicle-category-data") sendCategoryItem();
       if (data.type === "request-fleet-models-data") sendFleetModels();
+      if (data.type === "request-server-quote") sendServerQuote(data.request);
     });
   }
 });

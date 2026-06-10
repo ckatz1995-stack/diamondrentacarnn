@@ -3891,7 +3891,7 @@ function renderLookups(){
   function extractStationCode(label=''){
     const raw = safe(label).trim();
     if (!raw) return '---';
-    const direct = raw.match(/([A-Z]{3})/);
+    const direct = raw.match(/\b([A-Z]{3})\b/);
     if (direct) return direct[1];
     const words = raw.split(/\s+/).filter(Boolean);
     if (!words.length) return '---';
