@@ -1732,9 +1732,10 @@ function showCalcResult(q, pickup, dropoff, catCode) {
   if (dbgEl) {
     if (q.diagnostics) {
       const d = q.diagnostics;
-      const seasonLines = (d.seasons || []).map(s => `  ${s.key}: ${s.startDate} → ${s.endDate}${s.repeatYearly ? ' (yearly)' : ''}${s.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
+      const probeLines = (d.seasonProbe || []).map(p => `  ${p.key}: raw ${p.rawStart}→${p.rawEnd} | parsed ${p.parsedStart || 'FAIL'}→${p.parsedEnd || 'FAIL'}${p.repeatYearly ? ' (yearly)' : ''}${p.active ? '' : ' [inactive]'} | ${p.matches ? 'MATCHES pickup' : 'no match'}`).join('\n');
       const ruleLines = (d.rules || []).map(r => `  ${r.code || '(all)'} | ${r.season || 'all seasons'} | ${r.min}-${r.max || '∞'}d | ${r.price}${r.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
-      dbgEl.textContent = `Engine saw — candidates: [${(d.categoryCandidates || []).join(', ')}] · days: ${d.billableDays} · resolved season: ${d.resolvedSeasonKey || 'NONE'}\nSeasons in catalog:\n${seasonLines}\nRules in catalog:\n${ruleLines}`;
+      const seasonBlock = probeLines || (d.seasons || []).map(s => `  ${s.key}: ${s.startDate} → ${s.endDate}${s.repeatYearly ? ' (yearly)' : ''}${s.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
+      dbgEl.textContent = `Engine saw — candidates: [${(d.categoryCandidates || []).join(', ')}] · days: ${d.billableDays} · pickup: ${d.pickupParsed || '?'} · resolved season: ${d.resolvedSeasonKey || 'NONE'}\nSeason probe:\n${seasonBlock}\nRules in catalog:\n${ruleLines}`;
       dbgEl.style.display = 'block';
     } else {
       dbgEl.style.display = 'none';
