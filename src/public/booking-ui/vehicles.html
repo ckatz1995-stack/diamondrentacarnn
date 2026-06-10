@@ -844,18 +844,24 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div><!-- end search-form-panel -->
   </section>
 
-  <section class="filter-combined" aria-label="Ταξινόμηση αποτελεσμάτων">
-    <div class="filter-row">
-      <div class="filter-slot">
-        <p class="filter-title">Ταξινόμηση αποτελεσμάτων</p>
-        <select id="sortSelect">
-          <option value="priceAsc">Τιμή: Χαμηλότερη → Υψηλό</option>
-          <option value="priceDesc">Τιμή: Υψηλότερη → Χαμηλό</option>
-          <option value="nameAsc">Όνομα: Α → Ω</option>
-        </select>
-      </div>
+  <div class="results-toolbar">
+    <span class="results-count" id="resultMetaRow"></span>
+    <div class="sort-inline">
+      <span class="sort-label">Ταξινόμηση</span>
+      <select id="sortSelect" class="sort-native">
+        <option value="priceAsc">Τιμή ↑</option>
+        <option value="priceDesc">Τιμή ↓</option>
+        <option value="nameAsc">Α → Ω</option>
+      </select>
     </div>
-  </section>
+  </div>
+  <div class="trust-strip">
+    <span class="ts-item">✓ Διαφανής τιμολόγηση</span>
+    <span class="ts-dot" aria-hidden="true">·</span>
+    <span class="ts-item">✓ Προσωπική εξυπηρέτηση</span>
+    <span class="ts-dot" aria-hidden="true">·</span>
+    <span class="ts-item">✓ Γρήγορη απάντηση στο αίτημά σας</span>
+  </div>
 
   <section class="list" id="list">
   <!-- DIAMOND LOADING: Skeleton cards — shown while loading -->
@@ -1431,6 +1437,12 @@ function render(){
 
   // DIAMOND STATE: Read previously selected category for card highlight
   const bsSelectedCat = (window.BookingState ? BookingState.get('vehicleCategory') : null) || '';
+  const _pdEl = document.getElementById('pickupDate');
+  const _ptEl = document.getElementById('pickupTime');
+  const _fpDate = new Date(`${(_pdEl||{}).value||'2000-01-01'}T${(_ptEl||{}).value||'00:00'}:00`);
+  const frontendSeason = !isNaN(_fpDate.getTime()) ? resolveSeason(_fpDate) : null;
+  const metaRowEl = document.getElementById('resultMetaRow');
+  if (metaRowEl) metaRowEl.textContent = filtered.length + ' ' + (filtered.length === 1 ? 'κατηγορία' : 'κατηγορίες') + ' διαθέσιμες';
   list.innerHTML = filtered.map(vehicle => {
     const vehicleId = String(vehicle.vehicleCategoryId || vehicle.id || '');
     const serverQuote = vehicleServerQuotes[vehicleId] || null;
@@ -1441,50 +1453,51 @@ function render(){
     const catCode = extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || '');
     const isSelected = bsSelectedCat && catCode === bsSelectedCat;
     const specs = vehicle.specs || {};
-    const copy = cardCopy(vehicle);
     const dailyDisp = dailyPrice > 0 ? fmtMoney(dailyPrice) : '—';
     const totalDisp = grandTotal > 0 ? fmtMoney(grandTotal) : '—';
+    const displayDays = serverQuote ? (serverQuote.billableDays || days) : days;
+    const seasonLabel = (serverQuote && (serverQuote.season?.label || serverQuote.season?.name)) || frontendSeason?.label || frontendSeason?.name || '';
+    const rawTitle = vehicle.name || vehicle.title || vehicle.model || 'Vehicle';
+    const safeCode = catCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const cleanTitle = (safeCode ? rawTitle.replace(new RegExp('^' + safeCode + '\\s*[-–]\\s*', 'i'), '') : rawTitle).trim() || rawTitle;
+    const catChipLabel = vehicle.categoryLabel || vehicle.label || vehicle.category || catCode || '—';
+    const hasExtras = serverQuote && (Number(serverQuote.insuranceCost||0)>0 || Number(serverQuote.ageFee||0)>0 || Number(serverQuote.nightFee||0)>0 || Number(serverQuote.locationFee||0)>0);
+    const specChips = [
+      specs.gearbox ? escapeHtml(specs.gearbox) : '',
+      specs.seats ? escapeHtml(String(specs.seats)) + ' θέσεις' : '',
+      specs.fuel ? escapeHtml(specs.fuel) : '',
+      (specs.ac && String(specs.ac).trim() && String(specs.ac).toUpperCase() !== 'ΟΧΙ') ? 'A/C' : '',
+      (specs.bags || specs.luggage) ? escapeHtml(String(specs.bags || specs.luggage)) + ' βαλίτσες' : '',
+      specs.doors ? escapeHtml(String(specs.doors)) + ' πόρτες' : '',
+    ].filter(Boolean);
+    const extrasRows = hasExtras ? [
+      Number(serverQuote.insuranceCost||0)>0 ? '<span>Ασφάλεια CDW</span><span>' + fmtMoney(serverQuote.insuranceCost) + '</span>' : '',
+      Number(serverQuote.ageFee||0)>0 ? '<span>' + escapeHtml(ageLabel(ageGroup.value)) + '</span><span>' + fmtMoney(serverQuote.ageFee) + '</span>' : '',
+      Number(serverQuote.nightFee||0)>0 ? '<span>Νυχτερινή χρέωση</span><span>' + fmtMoney(serverQuote.nightFee) + '</span>' : '',
+      Number(serverQuote.locationFee||0)>0 ? '<span>Χρέωση τοποθεσιών</span><span>' + fmtMoney(serverQuote.locationFee) + '</span>' : '',
+    ].filter(Boolean).join('') : '';
+    const extrasHtml = hasExtras ? '<details class="v2-extras"><summary>Ανάλυση χρέωσης</summary><div class="v2-extras-grid">' + extrasRows + '</div></details>' : '';
+    const imgHtml = vehicle.image
+      ? '<img class="v2-img" src="' + escapeHtml(vehicle.image) + '" alt="' + escapeHtml(rawTitle) + '" loading="lazy">'
+      : '<div class="v2-no-img">◆</div>';
     return `
-      <article class="result-card${isSelected ? ' is-selected-card' : ''}">
-        <div class="result-main">
-          <div class="media-col">
-            <div class="vehicle-badge">${escapeHtml(vehicle.categoryLabel || vehicle.label || vehicle.category || "-")}</div>
-            <img class="vehicle-image" src="${escapeHtml(vehicle.image || "")}" alt="${escapeHtml(vehicle.name || vehicle.title || "Όχημα")}">
+      <article class="result-card v2card${isSelected ? ' is-selected-card' : ''}">
+        <div class="v2-grid">
+          <div class="v2-photo">${imgHtml}</div>
+          <div class="v2-info">
+            <span class="v2-cat-chip">${escapeHtml(catChipLabel)}</span>
+            <h2 class="v2-title">${escapeHtml(cleanTitle)}<span class="v2-similar"> ή παρόμοιο</span></h2>
+            <div class="v2-specs">${specChips.map(s => '<span class="v2-spec-chip">' + s + '</span>').join('')}</div>
           </div>
-          <div class="content-col">
-            <div class="head-row">
-              <div>
-                <h2 class="vehicle-title">${escapeHtml(vehicle.name || vehicle.title || vehicle.model || "Vehicle")} <span class="similar">ή παρόμοιο</span></h2>
-                <p class="vehicle-copy">${escapeHtml(copy)}</p>
-              </div>
-              <div class="price-box">
-                <span class="amount">${dailyDisp}</span>
-                <span class="sub">ανά ημέρα</span>
-              </div>
+          <div class="v2-rail">
+            <span class="v2-season-badge${seasonLabel ? '' : ' v2-season-hidden'}">${escapeHtml(seasonLabel || '—')}</span>
+            <div class="v2-rate-line">
+              <span class="v2-amount">${dailyDisp}</span><span class="v2-per"> / ημέρα</span>
             </div>
-            <div class="spec-grid">
-              <div class="spec"><span class="k">Κιβώτιο</span><span class="v">${escapeHtml(specs.gearbox || "—")}</span></div>
-              <div class="spec"><span class="k">Καύσιμο</span><span class="v">${escapeHtml(specs.fuel || "—")}</span></div>
-              <div class="spec"><span class="k">Θέσεις</span><span class="v">${escapeHtml(specs.seats || "—")}</span></div>
-              <div class="spec"><span class="k">Βαλίτσες</span><span class="v">${escapeHtml(specs.bags || specs.luggage || "—")}</span></div>
-              <div class="spec"><span class="k">A/C</span><span class="v">${escapeHtml(specs.ac || "—")}</span></div>
-              <div class="spec"><span class="k">Πόρτες</span><span class="v">${escapeHtml(specs.doors || "—")}</span></div>
-            </div>
+            <div class="v2-total-summary">Σύνολο <strong>${totalDisp}</strong> · ${displayDays} ημ.</div>
+            ${extrasHtml}
+            <button class="cta v2-cta" type="button" data-vehicle-id="${escapeHtml(vehicleId)}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${escapeHtml(selectionButtonLabel())} →</button>
           </div>
-        </div>
-        <div class="result-bottom">
-          <div class="total-box">
-            <div class="total-stack">
-              <div class="total-row"><span class="k">Τιμή / ημέρα</span><span class="v">${dailyDisp}</span></div>
-              <div class="total-row"><span class="k">Ημέρες</span><span class="v">${serverQuote ? (serverQuote.billableDays || days) : days}</span></div>
-              ${serverQuote && serverQuote.insuranceCost > 0 ? `<div class="total-row"><span class="k">Ασφάλεια CDW</span><span class="v">${fmtMoney(serverQuote.insuranceCost)}</span></div>` : ''}
-              ${serverQuote && serverQuote.ageFee > 0 ? `<div class="total-row"><span class="k">${ageLabel(ageGroup.value)}</span><span class="v">${fmtMoney(serverQuote.ageFee)}</span></div>` : ''}
-              ${serverQuote && serverQuote.nightFee > 0 ? `<div class="total-row"><span class="k">Νυχτερινή χρέωση</span><span class="v">${fmtMoney(serverQuote.nightFee)}</span></div>` : ''}
-              ${serverQuote && serverQuote.locationFee > 0 ? `<div class=\"total-row\"><span class=\"k\">Χρέωση τοποθεσιών</span><span class=\"v\">${fmtMoney(serverQuote.locationFee)}</span></div>` : ''}
-              <div class=\"total-row grand\"><span class=\"k\">Σύνολο</span><span class=\"v\">${totalDisp}</span></div>
-            </div>
-          </div>
-          <div class="card-footer"><button class="cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${escapeHtml(selectionButtonLabel())}</button></div>
         </div>
       </article>`;
   }).join("");
@@ -2215,5 +2228,245 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
 /* ===== END MEMBER PORTAL AUTH ===== */
 
 </script>
+<style>
+/* ═══ V2 CARD ═══ */
+.v2card { overflow: visible !important; }
+.v2-grid {
+  display: grid;
+  grid-template-columns: 210px 1fr 210px;
+  min-height: 190px;
+}
+
+/* Photo column */
+.v2-photo {
+  background: linear-gradient(160deg, #dbc882 0%, #c09840 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  border-radius: 30px 0 0 30px;
+  overflow: hidden;
+}
+.v2-img {
+  width: 100%;
+  max-width: 185px;
+  max-height: 126px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 22px rgba(0,0,0,.24));
+}
+.v2-no-img {
+  font-size: 52px;
+  color: rgba(255,255,255,.38);
+  line-height: 1;
+}
+
+/* Info column */
+.v2-info {
+  padding: 20px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-right: 1px solid rgba(160,110,35,.14);
+}
+.v2-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: #1e5c72;
+  background: rgba(30,92,114,.09);
+  border: 1px solid rgba(30,92,114,.20);
+  padding: 3px 11px;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+.v2-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -.025em;
+  line-height: 1.2;
+  color: #1a1510;
+}
+.v2-similar {
+  font-size: 13px;
+  font-weight: 600;
+  color: #7a6240;
+}
+.v2-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.v2-spec-chip {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3d3222;
+  background: rgba(160,110,35,.10);
+  border: 1px solid rgba(160,110,35,.16);
+  border-radius: 8px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+/* Price rail */
+.v2-rail {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  gap: 8px;
+  background: rgba(160,110,35,.05);
+  border-radius: 0 30px 30px 0;
+}
+.v2-season-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #7a4a10;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid rgba(210,140,40,.30);
+  border-radius: 999px;
+  padding: 3px 11px;
+  align-self: flex-start;
+}
+.v2-season-hidden { visibility: hidden; }
+.v2-rate-line {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+.v2-amount {
+  font-size: 30px !important;
+  font-weight: 900 !important;
+  color: #1a4f60 !important;
+  letter-spacing: -.035em;
+  line-height: 1;
+}
+.v2-per {
+  font-size: 13px;
+  font-weight: 700;
+  color: #7a6240;
+}
+.v2-total-summary {
+  font-size: 13.5px;
+  color: #3d3222;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.v2-extras {
+  margin-top: 2px;
+}
+.v2-extras > summary {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e5c72;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  padding: 2px 0;
+}
+.v2-extras > summary::-webkit-details-marker { display: none; }
+.v2-extras-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #3d3222;
+  font-weight: 600;
+}
+.v2-cta {
+  margin-top: auto !important;
+  width: 100% !important;
+  min-height: 46px !important;
+  height: auto !important;
+  font-size: 15px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #3f748a, #2d6072) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgba(30,80,100,.22) !important;
+  letter-spacing: -.01em;
+}
+.v2-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+/* ═══ RESULTS TOOLBAR ═══ */
+.results-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,.32);
+  border: 1px solid rgba(160,110,35,.14);
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+.results-count {
+  font-size: 13px;
+  font-weight: 800;
+  color: #3d3222;
+}
+.sort-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sort-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: #5a4830;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+.sort-native {
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(160,110,35,.16);
+  background: rgba(255,255,255,.88);
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2a1e0a;
+}
+
+/* ═══ TRUST STRIP ═══ */
+.trust-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding: 9px 16px;
+  background: rgba(255,255,255,.28);
+  border: 1px solid rgba(160,110,35,.12);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #3d3222;
+}
+.ts-dot { color: rgba(100,80,40,.35); font-weight: 400; }
+
+/* ═══ MOBILE V2 ═══ */
+@media (max-width: 767px) {
+  .results-toolbar { flex-wrap: wrap; gap: 8px; }
+  .v2-grid { grid-template-columns: 1fr; }
+  .v2-photo { border-radius: 28px 28px 0 0; min-height: 130px; padding: 14px; }
+  .v2-info { border-right: none; border-bottom: 1px solid rgba(160,110,35,.14); }
+  .v2-rail { border-radius: 0 0 28px 28px; background: rgba(160,110,35,.07); }
+  .v2-amount { font-size: 26px !important; }
+  .trust-strip { font-size: 12px; padding: 8px 12px; }
+}
+@media (min-width: 768px) and (max-width: 1100px) {
+  .v2-grid { grid-template-columns: 180px 1fr 190px; }
+}
+</style>
 </body>
 </html>
