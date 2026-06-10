@@ -161,6 +161,24 @@ function cleanText(value) {
   return (value ?? '').toString().trim();
 }
 
+// Wix module/messaging boundaries can deliver arrays as plain objects — coerce instead of discarding
+function toArrayLike(value) {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === 'object') return Object.values(value);
+  return [];
+}
+
+function normalizeCatalogArrays(catalog) {
+  if (!catalog || typeof catalog !== 'object') return catalog;
+  return {
+    ...catalog,
+    pricingSeasons: toArrayLike(catalog.pricingSeasons),
+    categoryRateRules: toArrayLike(catalog.categoryRateRules),
+    feeRules: toArrayLike(catalog.feeRules),
+    pickupLocations: toArrayLike(catalog.pickupLocations)
+  };
+}
+
 function buildVehicleCategoryDisplayName(categoryCode = '', title = '') {
   const code = cleanText(categoryCode).toUpperCase();
   const name = cleanText(title);
@@ -182,7 +200,7 @@ function normalizeLocationCompare(value) {
 }
 
 function resolvePickupLocationFee(catalog, value, kind = 'both') {
-  const rows = Array.isArray(catalog?.pickupLocations) ? catalog.pickupLocations : [];
+  const rows = toArrayLike(catalog?.pickupLocations);
   const target = normalizeLocationCompare(value);
   if (!target) return 0;
   const hit = rows.find((item) => {
@@ -540,6 +558,7 @@ export async function createBooking(data) {
         } catch (e) {
             pricingCatalog = getFallbackCatalogSnapshot();
         }
+        pricingCatalog = normalizeCatalogArrays(pricingCatalog);
 
         const businessSettings = pricingCatalog?.businessSettings || {};
         const allowOverbooking = !!businessSettings?.allowOverbooking;
@@ -827,6 +846,7 @@ export async function computeQuote(data) {
         if (!pickup || !dropoff || Number.isNaN(pickup.getTime()) || Number.isNaN(dropoff.getTime()) || dropoff <= pickup) return { success: false, message: 'Invalid dates' };
         let pricingCatalog;
         try { pricingCatalog = await getPricingCatalog({ scope: 'all' }); } catch (e) { pricingCatalog = getFallbackCatalogSnapshot(); }
+        pricingCatalog = normalizeCatalogArrays(pricingCatalog);
         const vehicle = await wixData.get("VehiclesNew", vehicleId, { suppressAuth: true });
         const catalogHasRules = Array.isArray(pricingCatalog?.categoryRateRules) && pricingCatalog.categoryRateRules.length > 0;
         const fallbackBasePricePerDay = catalogHasRules ? 0 : toFiniteNumber(vehicle?.price, 0);
