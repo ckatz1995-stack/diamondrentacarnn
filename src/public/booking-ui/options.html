@@ -552,7 +552,9 @@ html,body{overflow-x:hidden!important}
 }
 
 /* DIAMOND MOBILE: Fixed bottom summary bar */
-.mobile-summary-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:linear-gradient(180deg,rgba(20,40,48,.98),rgba(14,30,36,.99));border-top:2px solid rgba(231,191,105,.28);box-shadow:0 -4px 24px rgba(0,0,0,.32);padding:0}
+/* Inline running-total strip: position:fixed cannot stick inside the auto-height Wix iframe,
+   so the bar lives in the flow, relocated right under the extras list at boot. */
+.mobile-summary-bar{display:none;margin:14px 0 4px;border-radius:14px;background:linear-gradient(180deg,rgba(20,40,48,.98),rgba(14,30,36,.99));border:1px solid rgba(231,191,105,.28);box-shadow:0 10px 28px rgba(0,0,0,.26);padding:0}
 .mobile-summary-inner{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:10px}
 .mobile-summary-total{display:flex;flex-direction:column;gap:1px}
 .mobile-summary-label{font-size:11px;color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
@@ -1932,20 +1934,32 @@ function notifyHeight(){
   }catch(_){}
 })();
 
-// DIAMOND MOBILE: Fixed bottom summary bar sync with grand total
+// DIAMOND MOBILE: inline running-total strip synced with the grand total
 (function(){
+  var bar = document.getElementById('mobileSummaryBar');
   var mobileTotal = document.getElementById('mobileTotalAmount');
   var mobileContinue = document.getElementById('mobileContinueBtn');
   var desktopContinue = document.getElementById('continueBtn');
   var expandBtn = document.getElementById('mobileSummaryExpand');
   var summaryCard = document.querySelector('.summary-card');
 
+  // Relocate the strip right under the extras list so the total is visible while choosing
+  try {
+    var extrasList = document.getElementById('extrasList');
+    var host = extrasList ? extrasList.closest('.choice-subpanel') : null;
+    if(bar && host && host.parentNode) host.parentNode.insertBefore(bar, host.nextSibling);
+  } catch(_){}
+
   function syncMobileTotal(){
     var gt = document.getElementById('grandTotal');
-    if(mobileTotal && gt) mobileTotal.textContent = gt.textContent;
+    if(!gt) return;
+    var total = gt.textContent || '';
+    if(mobileTotal) mobileTotal.textContent = total;
+    var hasAmount = total && total !== '—';
+    if(desktopContinue) desktopContinue.textContent = hasAmount ? ('Συνέχεια — ' + total + ' →') : 'Συνέχεια →';
+    if(mobileContinue) mobileContinue.textContent = hasAmount ? (total + ' →') : 'Συνέχεια →';
   }
 
-  // Sync on every updateTotals call by observing the grandTotal element
   if(typeof MutationObserver !== 'undefined'){
     var gt = document.getElementById('grandTotal');
     if(gt){
@@ -1953,32 +1967,18 @@ function notifyHeight(){
     }
   }
 
-  // Mobile continue button mirrors the desktop continue button
   if(mobileContinue && desktopContinue){
     mobileContinue.addEventListener('click', function(){
       desktopContinue.click();
     });
   }
 
-  // Expand to show full summary card
   if(expandBtn && summaryCard){
     expandBtn.addEventListener('click', function(){
       summaryCard.scrollIntoView({behavior:'smooth', block:'start'});
     });
   }
 
-  // Adjust page bottom padding to match fixed bar height
-  var bar = document.getElementById('mobileSummaryBar');
-  function adjustPadding(){
-    if(!bar) return;
-    var h = bar.offsetHeight;
-    var page = document.querySelector('.page');
-    if(page && window.innerWidth < 768) page.style.paddingBottom = (h + 8) + 'px';
-    else if(page) page.style.paddingBottom = '';
-  }
-  window.addEventListener('resize', adjustPadding);
-  window.addEventListener('load', adjustPadding);
-  setTimeout(adjustPadding, 100);
   syncMobileTotal();
 })();
 
