@@ -1052,19 +1052,25 @@ bindRouteLinks();
       matches.sort((a,b)=> (Number(b?.priority||0)-Number(a?.priority||0)) || Number(a?.sortOrder||0)-Number(b?.sortOrder||0));
       return matches[0] || null;
     }
+    function categoryCodesMatch(ruleCode, candidate){
+      const a = String(ruleCode || '').trim().toUpperCase();
+      const b = String(candidate || '').trim().toUpperCase();
+      if(!a || !b) return false;
+      return a === b || extractCategoryCode(a) === extractCategoryCode(b);
+    }
     function resolveDynamicDailyPrice(vehicleRef, daysCount){
       const fallback = Number(vehicleRef?.price || 0);
       const rules = Array.isArray(pricingCatalog?.categoryRateRules) ? pricingCatalog.categoryRateRules : [];
       if(!rules.length) return fallback;
       const pickupDate = new Date(state.pickup);
       const season = resolveSeason(pickupDate);
-      const code = String(vehicleRef?.label || vehicleRef?.category || state.category || '').trim().toUpperCase();
+      const codeCandidates = [vehicleRef?.categoryCode, vehicleRef?.category, vehicleRef?.label, state.category].map(v=>String(v||'').trim()).filter(Boolean);
       const vehicleId = String(vehicleRef?.id || state.vehicleId || '');
       const candidates = rules.filter((rule)=>{
         if(!rule || rule.active === false) return false;
-        const ruleCode = String(rule.categoryCode || rule.category || '').trim().toUpperCase();
+        const ruleCode = String(rule.categoryCode || rule.category || '').trim();
         const ruleVehicleId = String(rule.vehicleCategoryId || '');
-        if(ruleCode && code && ruleCode !== code) return false;
+        if(ruleCode && codeCandidates.length && !codeCandidates.some(c=>categoryCodesMatch(ruleCode, c))) return false;
         if(!ruleCode && ruleVehicleId && vehicleId && ruleVehicleId !== vehicleId) return false;
         const min = Math.max(1, Number(rule.minDays || 1));
         const max = Math.max(0, Number(rule.maxDays || 0));
@@ -1085,7 +1091,8 @@ bindRouteLinks();
         const maxB = Math.max(0, Number(b?.maxDays || 0)) || 999999;
         return (maxA - minA) - (maxB - minB);
       });
-      return Number(candidates[0]?.pricePerDay ?? fallback);
+      // Rules are the only price source: never fall back to the legacy category price when rules exist
+      return candidates.length ? Number(candidates[0]?.pricePerDay || 0) : 0;
     }
     function locationFeeFor(value, kind){
       const rows = Array.isArray(pricingCatalog?.pickupLocations) ? pricingCatalog.pickupLocations : [];

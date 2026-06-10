@@ -1091,6 +1091,12 @@ function extractCategoryCode(value){
   const match = raw.match(/^([A-Za-z0-9]+)\s*-/);
   return normalizeCategoryKey(match ? match[1] : raw);
 }
+function categoryCodesMatch(ruleCode, candidate){
+  const a = normalizeCategoryKey(ruleCode);
+  const b = normalizeCategoryKey(candidate);
+  if(!a || !b) return false;
+  return a === b || extractCategoryCode(a) === extractCategoryCode(b);
+}
 function categoryKeyOf(item){
   return normalizeCategoryKey(item?.category || item?.categoryCode || item?.label || item?.title || item?.name || '');
 }
@@ -1171,7 +1177,7 @@ async function scheduleServerQuotes(){
       const res = await fetch(`${currentApiBase()}/computeQuote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vehicleId: id, categoryId: extractCategoryCode(v.categoryCode || v.label || v.category || ''), category: extractCategoryCode(v.categoryCode || v.label || v.category || ''), pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: 'cdw', selectedExtras: [], driverAge: ageVal, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc })
+        body: JSON.stringify({ vehicleId: id, categoryId: String(v.categoryCode || v.category || v.label || '').trim(), category: String(v.categoryCode || v.category || v.label || '').trim(), pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: 'cdw', selectedExtras: [], driverAge: ageVal, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc })
       });
       const data = await res.json();
       if(data?.success) newQuotes[id] = data;
@@ -1304,15 +1310,15 @@ function resolveDynamicDailyPrice(vehicle, days){
   const fallback = Number(vehicle?.price || 0);
   const rules = Array.isArray(pricingCatalog?.categoryRateRules) ? pricingCatalog.categoryRateRules : [];
   if(!rules.length) return fallback;
-  const code = normalizeCategoryKey(vehicle?.label || vehicle?.category);
+  const codeCandidates = [vehicle?.categoryCode, vehicle?.category, vehicle?.label].map(v=>String(v||'').trim()).filter(Boolean);
   const vehicleId = String(vehicle?.id || '');
   const pickupDate = new Date(`${document.getElementById("pickupDate").value}T${document.getElementById("pickupTime").value}:00`);
   const season = resolveSeason(pickupDate);
   const candidates = rules.filter((rule)=>{
     if(!rule || rule.active === false) return false;
-    const ruleCode = normalizeCategoryKey(rule.categoryCode || rule.category);
+    const ruleCode = String(rule.categoryCode || rule.category || '').trim();
     const ruleVehicleId = String(rule.vehicleCategoryId || '');
-    if(ruleCode && code && ruleCode !== code) return false;
+    if(ruleCode && codeCandidates.length && !codeCandidates.some(c=>categoryCodesMatch(ruleCode, c))) return false;
     if(!ruleCode && ruleVehicleId && vehicleId && ruleVehicleId !== vehicleId) return false;
     const min = Math.max(1, Number(rule.minDays || 1));
     const max = Math.max(0, Number(rule.maxDays || 0));
@@ -1333,7 +1339,8 @@ function resolveDynamicDailyPrice(vehicle, days){
     const maxB = Math.max(0, Number(b?.maxDays || 0)) || 999999;
     return (maxA - minA) - (maxB - minB);
   });
-  return Number(candidates[0]?.pricePerDay ?? fallback);
+  // Rules are the only price source: never fall back to the legacy category price when rules exist
+  return candidates.length ? Number(candidates[0]?.pricePerDay || 0) : 0;
 }
 function locationFeeFor(value, kind){
   const rows = Array.isArray(pricingCatalog?.pickupLocations) ? pricingCatalog.pickupLocations : [];
