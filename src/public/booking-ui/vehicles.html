@@ -863,7 +863,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 @media(min-width:980px){
   .page{display:grid;grid-template-columns:310px minmax(0,1fr);gap:14px;align-items:start}
   .page>*{grid-column:2;min-width:0}
-  .page>.search-wrap{grid-column:1;grid-row:1/span 40;margin-bottom:0}
+  .page>.results-toolbar{grid-column:1/-1;grid-row:1}
+  .page>.search-wrap{grid-column:1;grid-row:2/span 40;margin-bottom:0}
   /* Sidebar form: single-column fields */
   .search-grid,.search-options-grid{grid-template-columns:1fr!important}
   .search-summary-bar{flex-wrap:wrap;gap:8px}
@@ -1277,7 +1278,7 @@ function filterVehiclesByCategory(items, selectedCategory){
 function renderCatTabs(items){
   const box = document.getElementById('catTabs');
   if(!box) return;
-  const cats = [...new Set((items || []).map(categoryKeyOf).filter(Boolean))];
+  const cats = [...new Set((items || []).map(categoryKeyOf).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'el'));
   const current = normalizeCategoryKey(categorySelect.value || 'all');
   box.innerHTML = ['__ALL__', ...cats].map((key) => {
     const isAll = key === '__ALL__';
