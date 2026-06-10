@@ -569,7 +569,8 @@ export async function createBooking(data) {
           ''
         );
 
-        const fallbackBasePricePerDay = toFiniteNumber(vehicle.price, 0);
+        const bookingCatalogHasRules = Array.isArray(pricingCatalog?.categoryRateRules) && pricingCatalog.categoryRateRules.length > 0;
+        const fallbackBasePricePerDay = bookingCatalogHasRules ? 0 : toFiniteNumber(vehicle.price, 0);
         const graceMinutes = toFiniteNumber(businessSettings?.billingGraceMinutes, 0);
         const { hours, billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1, graceMinutes, BUSINESS_TIMEZONE);
 
@@ -577,6 +578,7 @@ export async function createBooking(data) {
         const extrasMap = pricingCatalog?.maps?.extras || {};
         const dynamicPricing = resolveDynamicPricingRate({
           categoryCode: resolvedCategoryCode,
+          categoryCandidates: [cleanText(rawCategoryId && rawCategoryId !== rawVehicleId ? rawCategoryId : ''), cleanText(category), cleanText(vehicle?.category), cleanText(vehicle?.Category), cleanText(vehicle?.categoryCode), cleanText(vehicle?.label), cleanText(vehicle?.title)].filter(Boolean),
           vehicleCategoryId: String(vehicleId),
           billableDays,
           pickupDateTime: pickup,
@@ -824,18 +826,21 @@ export async function computeQuote(data) {
         let pricingCatalog;
         try { pricingCatalog = await getPricingCatalog({ scope: 'all' }); } catch (e) { pricingCatalog = getFallbackCatalogSnapshot(); }
         const vehicle = await wixData.get("VehiclesNew", vehicleId, { suppressAuth: true });
-        const fallbackBasePricePerDay = toFiniteNumber(vehicle?.price, 0);
+        const catalogHasRules = Array.isArray(pricingCatalog?.categoryRateRules) && pricingCatalog.categoryRateRules.length > 0;
+        const fallbackBasePricePerDay = catalogHasRules ? 0 : toFiniteNumber(vehicle?.price, 0);
         const rawCategoryId = cleanText(categoryId);
         const rawVehicleId = cleanText(vehicleId);
         const resolvedCategoryCode = extractCategoryCode((rawCategoryId && rawCategoryId !== rawVehicleId ? rawCategoryId : '') || category || vehicle?.category || vehicle?.Category || '');
+        const categoryCandidates = [rawCategoryId && rawCategoryId !== rawVehicleId ? rawCategoryId : '', cleanText(category), cleanText(vehicle?.category), cleanText(vehicle?.Category), cleanText(vehicle?.categoryCode), cleanText(vehicle?.label), cleanText(vehicle?.title)].filter(Boolean);
         const graceMinutes = toFiniteNumber((pricingCatalog?.businessSettings || {}).billingGraceMinutes, 0);
         const { billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1, graceMinutes, BUSINESS_TIMEZONE);
         const insuranceMap = pricingCatalog?.maps?.insurance || {};
         const extrasMap = pricingCatalog?.maps?.extras || {};
-        const dynamicPricing = resolveDynamicPricingRate({ categoryCode: resolvedCategoryCode, vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, dropoffDateTime: dropoff, catalog: pricingCatalog, fallbackPricePerDay: fallbackBasePricePerDay });
+        const dynamicPricing = resolveDynamicPricingRate({ categoryCode: resolvedCategoryCode, categoryCandidates, vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, dropoffDateTime: dropoff, catalog: pricingCatalog, fallbackPricePerDay: fallbackBasePricePerDay });
         const basePricePerDay = toFiniteNumber(dynamicPricing?.pricePerDay, fallbackBasePricePerDay);
         const pkg = cleanText(selectedPackage || 'cdw').toLowerCase();
         const quoteWarnings = [];
+        if (catalogHasRules && dynamicPricing?.source !== 'dynamicRule') quoteWarnings.push('pricing:no-rule-match');
         if (pkg && pkg !== 'none' && pkg !== 'nodw' && !(pkg in insuranceMap)) quoteWarnings.push(`insurance:missing:${pkg}`);
         const insuranceExtraPerDay = toFiniteNumber(insuranceMap[pkg], 0);
         const extrasInput = Array.isArray(selectedExtras) ? selectedExtras : [];

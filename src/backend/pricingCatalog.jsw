@@ -340,11 +340,25 @@ export function computeAutomaticFees({ driverAge, pickupDateTime, dropoffDateTim
 export function getFallbackCatalogSnapshot(){ return buildCatalogSnapshot({ businessSettings: normalizeBusinessSettings(DEFAULT_BUSINESS_SETTINGS), insurancePlans: FALLBACK_INSURANCE_OPTIONS.map((item, index) => normalizeInsurance(item, (index + 1) * 10)), extraServices: FALLBACK_EXTRA_OPTIONS.map((item, index) => normalizeExtra(item, (index + 1) * 10)), feeRules: FALLBACK_FEE_RULES.map((item, index) => normalizeFeeRule(item, (index + 1) * 10)), pricingSeasons: [], categoryRateRules: [], pickupLocations: [] }); }
 export function clearPricingCatalogCache(){ cache = { public: null, all: null }; return true; }
 
-function findCategoryRateRule(rules, resolvedSeason, code, categoryId, days) {
+function extractShortCategoryCode(value){
+  const raw = text(value, '').trim();
+  if (!raw) return '';
+  const match = raw.match(/^([A-Za-z0-9]+)\s*-/);
+  return (match ? match[1] : raw).toUpperCase();
+}
+function categoryCodesMatch(ruleCode, candidate){
+  const a = text(ruleCode, '').trim().toUpperCase();
+  const b = text(candidate, '').trim().toUpperCase();
+  if (!a || !b) return false;
+  return a === b || extractShortCategoryCode(a) === extractShortCategoryCode(b);
+}
+
+function findCategoryRateRule(rules, resolvedSeason, codes, categoryId, days) {
   const candidates = rules.filter((rule) => {
     if (!rule || rule.active === false) return false;
-    if (code && text(rule.categoryCode, '').toUpperCase() && text(rule.categoryCode, '').toUpperCase() !== code) return false;
-    if (!code && categoryId && text(rule.vehicleCategoryId, '') && text(rule.vehicleCategoryId, '') !== categoryId) return false;
+    const ruleCode = text(rule.categoryCode, '');
+    if (codes.length && ruleCode && !codes.some((candidate) => categoryCodesMatch(ruleCode, candidate))) return false;
+    if (!codes.length && categoryId && text(rule.vehicleCategoryId, '') && text(rule.vehicleCategoryId, '') !== categoryId) return false;
     const minDays = Math.max(1, Math.floor(toNumber(rule.minDays, 1)));
     const maxDays = Math.max(0, Math.floor(toNumber(rule.maxDays, 0)));
     if (days < minDays) return false;
@@ -371,17 +385,18 @@ function findCategoryRateRule(rules, resolvedSeason, code, categoryId, days) {
   return candidates[0] || null;
 }
 
-export function resolveDynamicPricingRate({ categoryCode = '', vehicleCategoryId = '', billableDays = 1, pickupDateTime = null, dropoffDateTime = null, catalog = null, fallbackPricePerDay = 0 } = {}) {
+export function resolveDynamicPricingRate({ categoryCode = '', categoryCandidates = [], vehicleCategoryId = '', billableDays = 1, pickupDateTime = null, dropoffDateTime = null, catalog = null, fallbackPricePerDay = 0 } = {}) {
   const safeCatalog = catalog || {};
   const seasons = Array.isArray(safeCatalog.pricingSeasons) ? safeCatalog.pricingSeasons : [];
   const rules = Array.isArray(safeCatalog.categoryRateRules) ? safeCatalog.categoryRateRules : [];
   const code = text(categoryCode, '').toUpperCase();
+  const codes = [categoryCode, ...(Array.isArray(categoryCandidates) ? categoryCandidates : [])].map((value) => text(value, '').trim()).filter(Boolean);
   const categoryId = text(vehicleCategoryId, '');
   const days = Math.max(1, Math.floor(toNumber(billableDays, 1)));
   const pickupDate = pickupDateTime instanceof Date && !isNaN(pickupDateTime.getTime()) ? pickupDateTime : null;
   const dropoffDate = dropoffDateTime instanceof Date && !isNaN(dropoffDateTime.getTime()) ? dropoffDateTime : null;
   const primarySeason = findActiveSeason(seasons, pickupDate || pickupDateTime);
-  const primaryRule = findCategoryRateRule(rules, primarySeason, code, categoryId, days);
+  const primaryRule = findCategoryRateRule(rules, primarySeason, codes, categoryId, days);
   let pricePerDay = primaryRule ? toNumber(primaryRule.pricePerDay, fallbackPricePerDay) : toNumber(fallbackPricePerDay, 0);
 
   // Cross-season: if the rental spans a season boundary, compute a weighted daily average
@@ -395,7 +410,7 @@ export function resolveDynamicPricingRate({ categoryCode = '', vehicleCategoryId
       const dayDate = new Date(pickupDate.getTime() + d * MS_PER_DAY);
       const daySeason = findActiveSeason(seasons, dayDate);
       if (!crossSeason && (daySeason?.key || null) !== firstSeasonKey) crossSeason = true;
-      const dayRule = findCategoryRateRule(rules, daySeason, code, categoryId, days);
+      const dayRule = findCategoryRateRule(rules, daySeason, codes, categoryId, days);
       totalCost += dayRule ? toNumber(dayRule.pricePerDay, fallbackPricePerDay) : toNumber(fallbackPricePerDay, 0);
     }
     if (crossSeason) pricePerDay = Math.round(totalCost / days * 100) / 100;
