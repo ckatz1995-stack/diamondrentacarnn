@@ -754,11 +754,23 @@ window.addEventListener('message', e => {
     case 'busy':
       setBusy(!!msg.flag);
       break;
+    case 'calcQuoteAck': {
+      if (pendingCalc) {
+        pendingCalc.acked = true;
+        const b = el('calcQuoteBtn');
+        if (b) b.textContent = 'Calculating… (engine running)';
+      }
+      break;
+    }
     case 'calcQuoteResult': {
       const ctx = finishCalcQuote();
       const r = msg.result || {};
       if (!r.success) { showToast(r.message || 'Quote failed', 'error'); break; }
-      showCalcResult(r, ctx?.pickup || '', ctx?.dropoff || '', ctx?.categoryCode || '');
+      try {
+        showCalcResult(r, ctx?.pickup || '', ctx?.dropoff || '', ctx?.categoryCode || '');
+      } catch (err) {
+        showToast('Result display error: ' + (err?.message || String(err)), 'error');
+      }
       break;
     }
     case 'seedPricingResult':
@@ -794,6 +806,21 @@ function setBusy(flag) {
   el('busyBar')?.classList.toggle('show', flag);
   document.querySelectorAll('.btn.primary').forEach(b => { if(!b.dataset.allowBusy) b.disabled = flag; });
 }
+
+// Surface any uncaught error as a toast — silent failures are undebuggable for staff
+let _lastErrToast = 0;
+window.addEventListener('error', (e) => {
+  const now = Date.now();
+  if (now - _lastErrToast < 4000) return;
+  _lastErrToast = now;
+  try { showToast('Script error: ' + (e?.message || 'unknown'), 'error'); } catch (_) {}
+});
+window.addEventListener('unhandledrejection', (e) => {
+  const now = Date.now();
+  if (now - _lastErrToast < 4000) return;
+  _lastErrToast = now;
+  try { showToast('Async error: ' + (e?.reason?.message || String(e?.reason || 'unknown')), 'error'); } catch (_) {}
+});
 
 function showToast(msg, tone='info') {
   const c = el('toastContainer');
@@ -1676,8 +1703,13 @@ function runCalcQuote() {
   // Quote goes through the page-code bridge (same channel as rule saves) — no HTTP, no CORS.
   // Dates are sent as raw datetime-local strings: the backend parses them as business-local time.
   pendingCalc = {
-    pickup, dropoff, categoryCode,
-    timer: setTimeout(() => { finishCalcQuote(); showToast('Quote timed out — please retry', 'error'); }, 20000)
+    pickup, dropoff, categoryCode, acked: false,
+    timer: setTimeout(() => {
+      const ctx = finishCalcQuote();
+      showToast(ctx && ctx.acked
+        ? 'The pricing engine did not reply — please try again'
+        : 'No response from the page — hard refresh (Ctrl+Shift+R) and make sure you are still logged in', 'error');
+    }, 12000)
   };
   post('computeQuote', { vehicleId, categoryId: categoryCode, category: categoryCode, pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: insuranceKey, selectedExtras: extras, driverAge: age, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc, debug: true });
 }
@@ -1746,8 +1778,21 @@ function showCalcResult(q, pickup, dropoff, catCode) {
   if (result) result.style.display = 'block';
 }
 
+// Delegated binding: survives even if init() fails partway and never reaches initCalcSection
+document.addEventListener('click', (e) => {
+  const hit = e.target && e.target.closest ? e.target.closest('#calcQuoteBtn') : null;
+  if (!hit || hit.disabled || hit._directBound) return;
+  try { runCalcQuote(); } catch (err) { showToast('Calculator error: ' + (err?.message || String(err)), 'error'); }
+});
+
 function initCalcSection() {
-  el('calcQuoteBtn')?.addEventListener('click', runCalcQuote);
+  const b = el('calcQuoteBtn');
+  if (b && !b._directBound) {
+    b._directBound = true;
+    b.addEventListener('click', () => {
+      try { runCalcQuote(); } catch (err) { showToast('Calculator error: ' + (err?.message || String(err)), 'error'); }
+    });
+  }
   // Pre-set dates to today + 3 days as a convenience
   const now = new Date(); now.setMinutes(0,0,0);
   const later = new Date(now); later.setDate(later.getDate() + 3);

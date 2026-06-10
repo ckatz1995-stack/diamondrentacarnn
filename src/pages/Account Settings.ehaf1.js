@@ -81,6 +81,7 @@ async function sendSnapshots(message = '', tone = 'success') {
 
 async function handleAction(type, payload = {}) {
   if (type === 'computeQuote') {
+    post({ type: 'calcQuoteAck' });
     try {
       const result = await computeQuote(payload || {});
       post({ type: 'calcQuoteResult', result });
