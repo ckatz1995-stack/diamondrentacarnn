@@ -802,6 +802,82 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 #vehicleList.loading{opacity:0}
 #vehicleList.loaded{opacity:1}
 </style>
+<style>
+/* ═══════════════ PRO LIGHT — final professional pass ═══════════════ */
+/* Calm neutral canvas; cars, prices and CTAs carry the colour. */
+html,body{background:#eef0f3!important}
+
+/* Constrained, centered content column like every major rental site */
+:root{--container:1180px!important}
+.page{width:min(1180px,calc(100vw - 28px))!important;padding:16px 0 44px!important}
+.header-inner{width:min(1180px,calc(100vw - 28px))!important}
+
+/* Header: one professional row — brand left, nav middle, phone right */
+.header-inner{padding:10px 0!important;flex-wrap:nowrap!important;justify-content:space-between!important}
+.brand{flex-direction:row!important;align-items:center!important;gap:10px!important}
+.brand-text{display:flex;flex-direction:column;gap:1px}
+.brand strong{font-size:16px!important}
+.brand span{font-size:10px!important;letter-spacing:.18em!important}
+.header-phone{width:auto!important;padding:9px 16px!important;font-size:13.5px!important}
+@media(min-width:768px) and (max-width:1024px){
+  .header-inner{flex-wrap:wrap!important;justify-content:space-between!important}
+  .brand{order:1}
+  .mbr-area{order:2}
+  .header-phone{order:3;width:auto!important;text-align:center}
+  .header-nav{order:4;width:100%!important;justify-content:center!important;padding-top:8px}
+  .header-nav a{font-size:12.5px!important;padding:8px 11px!important}
+}
+
+/* Progress bar: extends the dark header instead of floating on the body */
+.booking-progress{background:linear-gradient(180deg,rgba(20,40,48,.99),rgba(24,46,55,.99))!important;border-bottom:1px solid rgba(231,191,105,.14)!important}
+
+/* Search panel: clean white card */
+.search-wrap{background:#fff!important;border:1px solid #e4e7ec!important;box-shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05)!important;border-radius:18px!important;padding:10px!important}
+.search-bar{background:#f8f9fb!important;border:1px solid #eaecf0!important;border-radius:14px!important}
+.search-wrap .field label{color:#667085!important}
+.search-wrap .field input,.search-wrap .field select,.search-wrap select{background:#fff!important;border:1px solid #d0d5dd!important}
+.search-note{color:#98a2b3!important}
+.search-summary-bar{background:#fff!important;border:none!important;box-shadow:none!important;color:#344054!important;padding:10px 4px!important}
+.search-edit-btn{background:linear-gradient(135deg,#3f748a,#2d6072)!important;color:#fff!important;box-shadow:0 2px 8px rgba(45,96,114,.22)!important}
+.custom-trigger{border:1px solid #d0d5dd!important;background:#fff!important;min-height:46px!important;font-size:15px!important;border-radius:11px!important}
+.helper-note{color:#667085!important}
+
+/* Trust strip + toolbar: quiet white rows */
+.trust-strip{background:#fff!important;border:1px solid #e4e7ec!important;color:#475467!important;box-shadow:0 1px 2px rgba(16,24,40,.04)!important}
+.ts-sep{color:#d0d5dd!important}
+.results-toolbar{background:#fff!important;border:1px solid #e4e7ec!important;box-shadow:0 1px 2px rgba(16,24,40,.04)!important}
+.results-count{color:#475467!important}
+.sort-lbl{color:#667085!important}
+.sort-select-slim{border:1px solid #d0d5dd!important;background:#fff!important;color:#101828!important}
+
+/* Cards: white, hairline border, soft elevation */
+.result-card{background:#fff!important;border:1px solid #e4e7ec!important;box-shadow:0 1px 3px rgba(16,24,40,.07),0 6px 20px rgba(16,24,40,.05)!important;border-radius:16px!important;transition:box-shadow .18s ease,transform .18s ease}
+.result-card:hover{box-shadow:0 2px 6px rgba(16,24,40,.08),0 14px 34px rgba(16,24,40,.10)!important;transform:translateY(-2px)}
+.v2-media{background:linear-gradient(165deg,#f7f8fa 0%,#eceef2 100%)!important}
+.v2-cat{background:#eef5f8!important;border:1px solid #cfe2ea!important;color:#2d6072!important}
+.v2-title{color:#101828!important}
+.v2-similar{color:#98a2b3!important}
+.spec-chips .chip{background:#f2f4f7!important;border:1px solid #e4e7ec!important;color:#475467!important;font-weight:600!important}
+.v2-buy{background:#fafbfc!important;border-left:1px solid #eaecf0!important}
+.v2-price{color:#1d5468!important}
+.v2-per{color:#98a2b3!important}
+.v2-total{color:#475467!important}
+.v2-total strong{color:#101828!important}
+.v2-buy .v2-fees{color:#475467!important}
+.v2-fee-row{border-bottom:1px dashed #e4e7ec!important}
+.is-selected-card{outline:2px solid #2d6072!important;box-shadow:0 0 0 4px rgba(45,96,114,.12),0 6px 20px rgba(16,24,40,.08)!important}
+@media(max-width:767px){.v2-buy{border-left:0!important;border-top:1px solid #eaecf0!important}}
+
+/* Loading / empty states on the light canvas */
+.skeleton-card{background:#fff!important;border:1px solid #e4e7ec!important}
+.skeleton-row{background:linear-gradient(90deg,#eef0f3 25%,#f8f9fb 50%,#eef0f3 75%)!important;background-size:200% 100%!important}
+.empty-state-panel,.empty-card{background:#fff!important;border:1px solid #e4e7ec!important}
+.empty-state-title,.empty-card h2{color:#101828!important}
+.empty-state-sub,.empty-card p{color:#667085!important}
+
+/* Date-range error keeps its red, just on white */
+.date-range-error{background:#fef3f2!important;border-color:#fda29b!important}
+</style>
 </head>
 <body>
 <header class="site-header">
