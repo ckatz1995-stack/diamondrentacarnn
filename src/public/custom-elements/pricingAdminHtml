@@ -340,7 +340,6 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
       <th class="bulk-col"><input type="checkbox" class="bulk-all" data-bulk="cats" aria-label="Select all rows"></th>
       <th class="sortable" data-sort-table="cats" data-sort-col="category">Code</th>
       <th class="sortable" data-sort-table="cats" data-sort-col="title">Title / Specs</th>
-      <th class="sortable" data-sort-table="cats" data-sort-col="price">Price/day</th>
       <th class="sortable" data-sort-table="cats" data-sort-col="transmission">Transmission</th>
       <th>AC</th><th>Vehicles</th><th>Public</th>
       <th class="sortable" data-sort-table="cats" data-sort-col="active">Status</th>
@@ -1473,7 +1472,6 @@ function renderFleetCats() {
       <td class="bulk-col"><input type="checkbox" class="bulk-row" aria-label="Select row" data-bulk="${tblKey}" value="${esc(r._id||'')}"${sel.has(r._id)?' checked':''}></td>
       <td><code>${esc(r.category||'—')}</code></td>
       <td><strong>${esc(r.title||r.displayTitle||'—')}</strong>${specs?`<div style="font-size:11px;color:var(--muted)">${esc(specs)}</div>`:''}</td>
-      <td>${money(r.price,cur())}</td>
       <td><span class="badge ${r.transmission==='automatic'?'perday':r.transmission==='cvt'?'reserved':'inactive'}" style="text-transform:capitalize">${esc(r.transmission||'—')}</span></td>
       <td>${r.airCondition?'<span class="badge active">AC</span>':'<span class="badge inactive">No AC</span>'}</td>
       <td><span class="chip" title="Active vehicles in this category">${vCount} vehicle${vCount!==1?'s':''}</span></td>
@@ -1483,7 +1481,7 @@ function renderFleetCats() {
         <button class="btn sm" data-edit-cat="${esc(r._id||'')}">Edit</button>
         <button class="btn sm danger" data-del-cat="${esc(r._id||'')}" data-label="${esc(r.title||'')}">Delete</button>
       </td></tr>`;
-  }).join('') : '<tr><td colspan="10" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
+  }).join('') : '<tr><td colspan="9" class="tbl-empty">No categories yet. Add one to get started.</td></tr>';
   updateBulkBar(tblKey); syncBulkAll(tblKey, filtered); applySortClasses(tblKey);
 }
 
@@ -2024,8 +2022,7 @@ function openCatModal(id='') {
           mfld('Category code *',minp('category',item.category,'text','ECO'),'Short uppercase code'))
       + mfld('Description',mta('description',item.description,'Shown on the vehicle selection page')))
     + msec('⚙️','Specifications',
-      mr3(mfld('Price / day',mnum('price',item.price,cur())),
-          mfld('Seats',minp('seats',item.seats,'text','5')),
+      mr2(mfld('Seats',minp('seats',item.seats,'text','5')),
           mfld('Doors',minp('doors',item.doors,'text','4')))
       + mr3(mfld('Luggage',minp('luggage',item.luggage,'text','2')),
             mfld('Transmission',msel('transmission',[['manual','Manual'],['automatic','Automatic'],['cvt','CVT']],item.transmission)),
@@ -2038,9 +2035,8 @@ function openCatModal(id='') {
   openModal(id?'Edit fleet category':'Add fleet category', body, () => {
     if (!mv('title')) return merr('title','Title is required');
     if (!mv('category')) return merr('category','Category code is required');
-    if (mn('price') < 0) return merr('price','Price cannot be negative');
     post('upsertVehicleCategory',{ _id:id||undefined, title:mv('title'), category:mv('category').toUpperCase(),
-      price:mn('price'), seats:mv('seats'), doors:mv('doors'), luggage:mv('luggage'),
+      seats:mv('seats'), doors:mv('doors'), luggage:mv('luggage'),
       transmission:mv('transmission'), fuelType:mv('fuelType'), airCondition:mc('airCondition'),
       description:mv('description'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
