@@ -764,8 +764,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .search-summary-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .search-edit-btn{background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));border:0;color:#2a1d09;font-size:13px;font-weight:900;padding:8px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:42px;font-family:inherit;box-shadow:0 8px 18px rgba(160,110,35,.18)}
 .search-edit-btn:hover{filter:brightness(1.04)}
-.search-form-panel{transition:max-height .3s ease,opacity .25s ease;overflow:hidden;max-height:520px;opacity:1}
-.search-form-panel.collapsed{max-height:0;opacity:0;pointer-events:none}
+.search-form-panel{transition:max-height .3s ease,opacity .25s ease;overflow:visible;max-height:1400px;opacity:1}
+.search-form-panel.collapsed{max-height:0;opacity:0;pointer-events:none;overflow:hidden}
 @media(max-width:767px){
   .search-summary-bar{font-size:13px;padding:10px 12px}
   .field input,.field select{font-size:16px}
@@ -801,6 +801,22 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 #vehicleList{transition:opacity .25s ease}
 #vehicleList.loading{opacity:0}
 #vehicleList.loaded{opacity:1}
+</style>
+<style>
+/* ═══ UX PASS: layout-only fixes — all colors untouched ═══ */
+/* Brand: logo beside the two text lines (was: name + city crammed on one line) */
+.brand{flex-direction:row!important;align-items:center!important;gap:10px!important}
+.brand-text{display:flex;flex-direction:column;gap:1px;min-width:0}
+/* Tablet header: brand left, compact phone right, nav centered below
+   (was: everything stacked center with a full-width phone pill) */
+@media(max-width:1024px){
+  .header-inner{flex-wrap:wrap!important;justify-content:space-between!important;row-gap:8px}
+  .brand{order:1}
+  .header-phone{order:2;width:auto!important;text-align:left!important;margin-left:auto}
+  .mbr-area{order:3}
+  .hamburger-btn{order:4}
+  .header-nav{order:5;width:100%;justify-content:center}
+}
 </style>
 </head>
 <body>
@@ -1819,8 +1835,25 @@ function validateDateRange(){
 }
 sortSelect.addEventListener("change", () => { updateState(); render(); });
 ageGroup.addEventListener('change', () => { updateState(); render(); triggerServerQuotes(); });
+// Date guards: no past pickup dates; return date can never sit before pickup.
+function syncDateConstraints(bumpDropoff){
+  const pd = document.getElementById('pickupDate');
+  const dd = document.getElementById('dropoffDate');
+  if(!pd || !dd) return;
+  pd.min = toDateInput(new Date());
+  if(pd.value){
+    dd.min = pd.value;
+    if(bumpDropoff && dd.value && dd.value < pd.value){
+      const next = new Date(`${pd.value}T00:00:00`);
+      next.setDate(next.getDate() + 1);
+      dd.value = toDateInput(next);
+      if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['dropoffDate']);
+    }
+  }
+}
+syncDateConstraints(false);
 ['pickupDate','pickupTime','dropoffDate','dropoffTime','pickupLocation','dropoffLocation'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => { updateState(); validateDateRange(); render(); triggerServerQuotes(); });
+  document.getElementById(id).addEventListener('change', () => { if(id === 'pickupDate') syncDateConstraints(true); updateState(); validateDateRange(); render(); triggerServerQuotes(); });
 });
 categorySelect.addEventListener("change", () => {
   try{ sessionStorage.setItem(CAT_RESTORE_KEY, categorySelect.value); }catch(_){}
@@ -2180,7 +2213,12 @@ function initPageOwnedControls(configs){
       ctrl.panel.classList.add('open');
       ctrl.trigger.setAttribute('aria-expanded', 'true');
       if (ctrl.type === 'date') renderCalendar(ctrl);
-      else syncSelect(ctrl);
+      else {
+        syncSelect(ctrl);
+        // Bring the selected option into view (e.g. time lists open at 15:00, not 00:00)
+        const sel = ctrl.panel.querySelector('.custom-option.is-selected');
+        if (sel) ctrl.panel.scrollTop = Math.max(0, sel.offsetTop - (ctrl.panel.clientHeight / 2) + (sel.offsetHeight / 2));
+      }
     });
     nativeEl.addEventListener('change', () => {
       if (ctrl.type === 'date') syncDate(ctrl); else syncSelect(ctrl);

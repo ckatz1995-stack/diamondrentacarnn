@@ -1841,7 +1841,12 @@ function initPageOwnedControls(configs){
       ctrl.panel.classList.add('open');
       ctrl.trigger.setAttribute('aria-expanded', 'true');
       if (ctrl.type === 'date') renderCalendar(ctrl);
-      else syncSelect(ctrl);
+      else {
+        syncSelect(ctrl);
+        // Bring the selected option into view (e.g. time lists open at 15:00, not 00:00)
+        const sel = ctrl.panel.querySelector('.custom-option.is-selected');
+        if (sel) ctrl.panel.scrollTop = Math.max(0, sel.offsetTop - (ctrl.panel.clientHeight / 2) + (sel.offsetHeight / 2));
+      }
     });
     nativeEl.addEventListener('change', () => {
       if (ctrl.type === 'date') syncDate(ctrl); else syncSelect(ctrl);
