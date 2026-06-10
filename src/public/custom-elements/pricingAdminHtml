@@ -1760,22 +1760,30 @@ function showCalcResult(q, pickup, dropoff, catCode) {
   if ((q.warnings || []).includes('pricing:no-rule-match')) ruleInfo.push('⚠ No rate rule matched');
   if (ruleEl) ruleEl.textContent = ruleInfo.join(' · ');
 
-  const dbgEl = el('calcDebugInfo');
-  if (dbgEl) {
-    if (q.diagnostics) {
-      const d = q.diagnostics;
-      const probeLines = (d.seasonProbe || []).map(p => `  ${p.key}: raw ${p.rawStart}→${p.rawEnd} | parsed ${p.parsedStart || 'FAIL'}→${p.parsedEnd || 'FAIL'}${p.repeatYearly ? ' (yearly)' : ''}${p.active ? '' : ' [inactive]'} | ${p.matches ? 'MATCHES pickup' : 'no match'}`).join('\n');
-      const ruleLines = (d.rules || []).map(r => `  ${r.code || '(all)'} | ${r.season || 'all seasons'} | ${r.min}-${r.max || '∞'}d | ${r.price}${r.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
-      const seasonBlock = probeLines || (d.seasons || []).map(s => `  ${s.key}: ${s.startDate} → ${s.endDate}${s.repeatYearly ? ' (yearly)' : ''}${s.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
-      dbgEl.textContent = `Engine saw — candidates: [${(d.categoryCandidates || []).join(', ')}] · days: ${d.billableDays} · pickup: ${d.pickupParsed || '?'} · resolved season: ${d.resolvedSeasonKey || 'NONE'}\nSeason probe:\n${seasonBlock}\nRules in catalog:\n${ruleLines}`;
-      dbgEl.style.display = 'block';
-    } else {
-      dbgEl.style.display = 'none';
-    }
-  }
-
+  // Show the result FIRST — a debug-render hiccup must never hide the price
   const result = el('calcResult');
   if (result) result.style.display = 'block';
+
+  const dbgEl = el('calcDebugInfo');
+  if (dbgEl) {
+    try {
+      if (q.diagnostics) {
+        const d = q.diagnostics;
+        // Wix serialization can deliver arrays as plain objects — coerce defensively
+        const asArr = (v) => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
+        const probeLines = asArr(d.seasonProbe).map(p => `  ${p.key}: raw ${p.rawStart}→${p.rawEnd} | parsed ${p.parsedStart || 'FAIL'}→${p.parsedEnd || 'FAIL'}${p.repeatYearly ? ' (yearly)' : ''}${p.active ? '' : ' [inactive]'} | ${p.matches ? 'MATCHES pickup' : 'no match'}`).join('\n');
+        const ruleLines = asArr(d.rules).map(r => `  ${r.code || '(all)'} | ${r.season || 'all seasons'} | ${r.min}-${r.max || '∞'}d | ${r.price}${r.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
+        const seasonBlock = probeLines || asArr(d.seasons).map(s => `  ${s.key}: ${s.startDate} → ${s.endDate}${s.repeatYearly ? ' (yearly)' : ''}${s.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
+        dbgEl.textContent = `Engine saw — candidates: [${asArr(d.categoryCandidates).join(', ')}] · days: ${d.billableDays} · pickup: ${d.pickupParsed || '?'} · resolved season: ${d.resolvedSeasonKey || 'NONE'}\nSeason probe:\n${seasonBlock}\nRules in catalog:\n${ruleLines}`;
+        dbgEl.style.display = 'block';
+      } else {
+        dbgEl.style.display = 'none';
+      }
+    } catch (err) {
+      dbgEl.textContent = 'Diagnostics unavailable: ' + (err?.message || String(err));
+      dbgEl.style.display = 'block';
+    }
+  }
 }
 
 // Delegated binding: survives even if init() fails partway and never reaches initCalcSection
