@@ -678,6 +678,48 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .price-box .amount{font-size:26px!important}
   .media-col{min-height:138px!important}
 }
+
+/* ── CARD V2: results-style layout (photo | info | price+action rail) ── */
+.v2card{padding:0!important;overflow:hidden}
+.v2-grid{display:grid;grid-template-columns:240px minmax(0,1fr) 240px;align-items:stretch}
+.v2-media{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(200,138,53,.16),rgba(224,168,72,.05));padding:14px;min-height:150px}
+.v2-media img{max-width:100%;max-height:140px;object-fit:contain;filter:drop-shadow(0 10px 18px rgba(60,30,0,.25))}
+.v2-info{padding:16px 18px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.v2-cat{align-self:flex-start;background:rgba(160,110,35,.12);border:1px solid rgba(160,110,35,.32);color:#7a5e38;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 11px}
+.v2-title{margin:0;font-size:22px;line-height:1.15;color:#1c1408;font-weight:900}
+.v2-similar{font-size:13px;color:#8a7048;font-weight:600;white-space:nowrap}
+.v2-info .spec-chips{margin-top:2px}
+.v2-fees{margin-top:2px;font-size:13px;color:#4a3820;max-width:420px}
+.v2-fees summary{cursor:pointer;font-weight:800;color:#a07828;list-style-position:inside}
+.v2-fees[open] summary{margin-bottom:4px}
+.v2-fee-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed rgba(160,110,35,.18)}
+.v2-buy{display:grid;grid-template-columns:1fr;gap:7px;justify-items:end;align-content:center;text-align:right;padding:16px 18px;border-left:1px dashed rgba(160,110,35,.28);background:rgba(160,110,35,.05)}
+.v2-price{font-size:30px;font-weight:950;color:#a07828;letter-spacing:-.02em;line-height:1}
+.v2-per{font-size:13px;font-weight:700;color:#8a7048;margin-left:4px}
+.v2-total{font-size:13.5px;color:#4a3820}
+.v2-total strong{font-size:16px;color:#1c1408}
+.v2-season{margin:0!important}
+.cta.v2-cta{height:48px!important;font-size:16px!important;width:auto!important;min-width:175px;padding:0 22px!important;border-radius:12px!important;margin-top:4px}
+@media(max-width:900px){
+  .v2-grid{grid-template-columns:1fr}
+  .v2-media{min-height:118px;padding:10px}
+  .v2-media img{max-height:108px}
+  .v2-info{padding:12px 14px 6px}
+  .v2-title{font-size:19px}
+  .v2-buy{grid-template-columns:1fr auto;grid-template-areas:"season cta" "price cta" "total cta";justify-items:start;align-items:center;text-align:left;border-left:0;border-top:1px dashed rgba(160,110,35,.28);padding:12px 14px;column-gap:14px;row-gap:3px}
+  .v2-season{grid-area:season}
+  .v2-price{grid-area:price;font-size:25px}
+  .v2-total{grid-area:total}
+  .cta.v2-cta{grid-area:cta;margin-top:0;min-width:0;height:50px!important;padding:0 18px!important}
+}
+/* Trust strip + slim sort bar */
+.trust-strip{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:center;margin:4px 0 12px;color:#fff8e4;font-size:13.5px;font-weight:800;text-shadow:0 1px 2px rgba(90,48,0,.35)}
+.trust-strip span{white-space:nowrap}
+.filter-combined{padding:10px 16px!important}
+.filter-slot{display:flex;align-items:center;gap:14px}
+.filter-slot .filter-title{margin:0!important;white-space:nowrap}
+.filter-combined select{max-width:340px}
+@media(max-width:620px){.filter-slot{flex-direction:column;align-items:stretch;gap:6px}.filter-combined select{max-width:none}}
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -877,6 +919,12 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div>
     </div><!-- end search-form-panel -->
   </section>
+
+  <div class="trust-strip">
+    <span>✓ Διαφανής τιμολόγηση</span>
+    <span>✓ Προσωπική εξυπηρέτηση</span>
+    <span>✓ Γρήγορη απάντηση στο αίτημά σας</span>
+  </div>
 
   <section class="filter-combined" aria-label="Ταξινόμηση αποτελεσμάτων">
     <div class="filter-row">
@@ -1549,42 +1597,36 @@ function render(){
       String(specs.ac || '').trim() === 'Ναι' ? '❄️ A/C' : ''
     ].filter(Boolean).map((c) => `<span class="chip">${c}</span>`).join('');
     const ctaLabel = escapeHtml(selectionButtonLabel());
+    const rawName = String(vehicle.name || vehicle.title || vehicle.model || 'Όχημα');
+    const cleanName = catCode ? rawName.replace(new RegExp(`^${catCode}\\s*-\\s*`, 'i'), '').trim() || rawName : rawName;
+    const billDays = serverQuote ? (serverQuote.billableDays || days) : days;
+    const feeRows = serverQuote ? [
+      serverQuote.insuranceCost > 0 ? `<div class="v2-fee-row"><span>Ασφάλεια CDW</span><span>${fmtMoney(serverQuote.insuranceCost)}</span></div>` : '',
+      serverQuote.ageFee > 0 ? `<div class="v2-fee-row"><span>${ageLabel(ageGroup.value)}</span><span>${fmtMoney(serverQuote.ageFee)}</span></div>` : '',
+      serverQuote.nightFee > 0 ? `<div class="v2-fee-row"><span>Νυχτερινή χρέωση</span><span>${fmtMoney(serverQuote.nightFee)}</span></div>` : '',
+      serverQuote.locationFee > 0 ? `<div class="v2-fee-row"><span>Χρέωση τοποθεσιών</span><span>${fmtMoney(serverQuote.locationFee)}</span></div>` : ''
+    ].filter(Boolean).join('') : '';
+    const feesBlock = feeRows
+      ? `<details class="v2-fees"><summary>Ανάλυση χρέωσης</summary><div class="v2-fee-row"><span>Ενοικίαση ${billDays} × ${dailyDisp}</span><span>${serverQuote ? fmtMoney(serverQuote.baseCost || dailyPrice * billDays) : fmtMoney(baseTotal)}</span></div>${feeRows}</details>`
+      : '';
     return `
-      <article class="result-card${isSelected ? ' is-selected-card' : ''}">
-        <div class="result-main">
-          <div class="media-col">
-            <div class="vehicle-badge">${escapeHtml(vehicle.categoryLabel || vehicle.label || vehicle.category || "-")}</div>
-            <img class="vehicle-image" src="${escapeHtml(vehicle.image || "")}" alt="${escapeHtml(vehicle.name || vehicle.title || "Όχημα")}">
+      <article class="result-card v2card${isSelected ? ' is-selected-card' : ''}">
+        <div class="v2-grid">
+          <div class="v2-media">
+            <img src="${escapeHtml(vehicle.image || "")}" alt="${escapeHtml(rawName)}" loading="lazy">
           </div>
-          <div class="content-col">
-            <div class="head-row">
-              <div>
-                <h2 class="vehicle-title">${escapeHtml(vehicle.name || vehicle.title || vehicle.model || "Vehicle")} <span class="similar">ή παρόμοιο</span></h2>
-                <p class="vehicle-copy">${escapeHtml(copy)}</p>
-              </div>
-              <div class="price-box">
-                <span class="amount">${dailyDisp}</span>
-                <span class="sub">ανά ημέρα</span>
-                ${hasSeasonRate ? `<span class="season-badge">${escapeHtml(_activeSeason.label)}</span>` : ''}
-              </div>
-            </div>
+          <div class="v2-info">
+            <span class="v2-cat">Κατηγορία ${escapeHtml(catCode || '—')}</span>
+            <h2 class="v2-title">${escapeHtml(cleanName)} <span class="v2-similar">ή παρόμοιο</span></h2>
             <div class="spec-chips">${chips || '<span class="chip">—</span>'}</div>
+            ${feesBlock}
           </div>
-        </div>
-        <div class="result-bottom">
-          <div class="total-box">
-            <div class="total-stack">
-              ${hasSeasonRate ? `<div class="total-row season-row"><span class="k">Σεζόν</span><span class="v season-val">${escapeHtml(_activeSeason.label)}</span></div>` : ''}
-              <div class="total-row"><span class="k">Τιμή / ημέρα</span><span class="v">${dailyDisp}</span></div>
-              <div class="total-row"><span class="k">Ημέρες</span><span class="v">${serverQuote ? (serverQuote.billableDays || days) : days}</span></div>
-              ${serverQuote && serverQuote.insuranceCost > 0 ? `<div class="total-row"><span class="k">Ασφάλεια CDW</span><span class="v">${fmtMoney(serverQuote.insuranceCost)}</span></div>` : ''}
-              ${serverQuote && serverQuote.ageFee > 0 ? `<div class="total-row"><span class="k">${ageLabel(ageGroup.value)}</span><span class="v">${fmtMoney(serverQuote.ageFee)}</span></div>` : ''}
-              ${serverQuote && serverQuote.nightFee > 0 ? `<div class="total-row"><span class="k">Νυχτερινή χρέωση</span><span class="v">${fmtMoney(serverQuote.nightFee)}</span></div>` : ''}
-              ${serverQuote && serverQuote.locationFee > 0 ? `<div class=\"total-row\"><span class=\"k\">Χρέωση τοποθεσιών</span><span class=\"v\">${fmtMoney(serverQuote.locationFee)}</span></div>` : ''}
-              <div class=\"total-row grand\"><span class=\"k\">Σύνολο</span><span class=\"v\">${totalDisp}</span></div>
-            </div>
+          <div class="v2-buy">
+            ${hasSeasonRate ? `<span class="season-badge v2-season">${escapeHtml(_activeSeason.label)}</span>` : ''}
+            <div class="v2-price">${dailyDisp}<span class="v2-per">/ ημέρα</span></div>
+            <div class="v2-total">Σύνολο <strong>${totalDisp}</strong> · ${billDays} ${billDays === 1 ? 'ημέρα' : 'ημέρες'}</div>
+            <button class="cta v2-cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${ctaLabel}</button>
           </div>
-          <div class="card-footer"><button class="cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${ctaLabel}</button></div>
         </div>
       </article>`;
   }).join("");
