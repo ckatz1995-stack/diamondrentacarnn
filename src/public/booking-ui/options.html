@@ -875,7 +875,18 @@ html,body{overflow-x:hidden!important}
     }
     function currentApiBase(){ return `${currentSiteBase()}/_functions`; }
     function currentTermsUrl(){ return `${currentSiteBase()}/rental-terms`; }
-    let pricingCatalog = safeRead(PRICING_CATALOG_STORAGE_KEY) || null;
+    function coerceCatalogArrays(cat){
+      if(!cat || typeof cat !== 'object') return cat;
+      const arr = (v) => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
+      cat.pricingSeasons = arr(cat.pricingSeasons);
+      cat.categoryRateRules = arr(cat.categoryRateRules);
+      cat.feeRules = arr(cat.feeRules);
+      cat.pickupLocations = arr(cat.pickupLocations);
+      cat.insurancePlans = arr(cat.insurancePlans);
+      cat.extraServices = arr(cat.extraServices);
+      return cat;
+    }
+    let pricingCatalog = coerceCatalogArrays(safeRead(PRICING_CATALOG_STORAGE_KEY) || null);
     let _catalogFromApi = false;
 
 function getBusinessSettings(){
@@ -1179,7 +1190,7 @@ bindRouteLinks();
         return pricingCatalog;
       }
       if(isEmbedded()){
-        pricingCatalog = safeRead(PRICING_CATALOG_STORAGE_KEY) || defaultPricingCatalog();
+        pricingCatalog = coerceCatalogArrays(safeRead(PRICING_CATALOG_STORAGE_KEY) || defaultPricingCatalog());
         renderPricingChoices();
         return pricingCatalog;
       }
@@ -1188,10 +1199,10 @@ bindRouteLinks();
         const rawText = await res.text();
         const data = JSON.parse(rawText);
         if(!res.ok || !data?.success) throw new Error(data?.message || 'Pricing catalog failed');
-        pricingCatalog = data;
+        pricingCatalog = coerceCatalogArrays(data);
         safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
       }catch(err){
-        pricingCatalog = safeRead(PRICING_CATALOG_STORAGE_KEY) || defaultPricingCatalog();
+        pricingCatalog = coerceCatalogArrays(safeRead(PRICING_CATALOG_STORAGE_KEY) || defaultPricingCatalog());
       }
       renderPricingChoices();
       return pricingCatalog;
@@ -1203,7 +1214,7 @@ bindRouteLinks();
         const rawText = await res.text();
         const json = JSON.parse(rawText);
         if(!res.ok || !json?.success) return;
-        pricingCatalog = json;
+        pricingCatalog = coerceCatalogArrays(json);
         _catalogFromApi = true;
         safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
         renderPricingChoices();
@@ -1856,7 +1867,7 @@ async function loadVehicle(){
       if(data.type === 'pricing-catalog-data'){
         document.getElementById('insuranceLink').href = currentTermsUrl();
         if(!_catalogFromApi){
-          pricingCatalog = data.catalog || pricingCatalog;
+          pricingCatalog = coerceCatalogArrays(data.catalog || pricingCatalog);
           safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
           applyBusinessIdentity();
           renderPricingChoices();

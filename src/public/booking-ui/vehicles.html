@@ -1125,7 +1125,18 @@ const category = qp("category") || _catStored || storedSearch.category || "all";
 const age = qp("age") || storedSearch.age || '23-69';
 
 let vehicles = [];
-let pricingCatalog = safeRead(PRICING_CATALOG_STORAGE_KEY, null);
+function coerceCatalogArrays(cat){
+  if(!cat || typeof cat !== 'object') return cat;
+  const arr = (v) => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
+  cat.pricingSeasons = arr(cat.pricingSeasons);
+  cat.categoryRateRules = arr(cat.categoryRateRules);
+  cat.feeRules = arr(cat.feeRules);
+  cat.pickupLocations = arr(cat.pickupLocations);
+  cat.insurancePlans = arr(cat.insurancePlans);
+  cat.extraServices = arr(cat.extraServices);
+  return cat;
+}
+let pricingCatalog = coerceCatalogArrays(safeRead(PRICING_CATALOG_STORAGE_KEY, null));
 let _catalogFromApi = false;
 let embeddedContext = null;
 let vehiclesMeta = { displayMode: 'categories', modelsSource: 'fleet' };
@@ -1206,7 +1217,7 @@ async function fetchRealCatalog(){
     const rawText = await res.text();
     const json = JSON.parse(rawText);
     if(!res.ok || !json?.success) return;
-    pricingCatalog = json;
+    pricingCatalog = coerceCatalogArrays(json);
     _catalogFromApi = true;
     vehiclesMeta = { displayMode: String(pricingCatalog?.businessSettings?.vehiclesPageDisplayMode || 'categories').trim().toLowerCase() === 'models' ? 'models' : 'categories', modelsSource: String(pricingCatalog?.businessSettings?.vehiclesPageModelsSource || 'fleet').trim().toLowerCase() === 'vehicles' ? 'vehicles' : 'fleet' };
     safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
@@ -1585,7 +1596,7 @@ window.addEventListener('message', (event) => {
   }
   if(data.type === 'pricing-catalog-data'){
     if(!_catalogFromApi){
-      pricingCatalog = data.catalog || pricingCatalog;
+      pricingCatalog = coerceCatalogArrays(data.catalog || pricingCatalog);
       vehiclesMeta = { displayMode: String(pricingCatalog?.businessSettings?.vehiclesPageDisplayMode || 'categories').trim().toLowerCase() === 'models' ? 'models' : 'categories', modelsSource: String(pricingCatalog?.businessSettings?.vehiclesPageModelsSource || 'fleet').trim().toLowerCase() === 'vehicles' ? 'vehicles' : 'fleet' };
       safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
       populateLocationSelectsFromCatalog();
