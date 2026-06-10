@@ -1168,19 +1168,30 @@ async function scheduleServerQuotes(){
   const pickupLoc = (document.getElementById('pickupLocation') || {}).value || '';
   const dropoffLoc = (document.getElementById('dropoffLocation') || {}).value || '';
   const seen = new Set();
-  const newQuotes = {};
-  await Promise.all((vehicles || []).map(async (v) => {
+  const requests = [];
+  (vehicles || []).forEach((v) => {
     const id = String(v.vehicleCategoryId || v.id || '');
     if(!id || seen.has(id)) return;
     seen.add(id);
+    const catRaw = String(v.categoryCode || v.category || v.label || '').trim();
+    requests.push({ vehicleId: id, categoryId: catRaw, category: catRaw, pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: 'cdw', selectedExtras: [], driverAge: ageVal, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc });
+  });
+  if(!requests.length) return;
+  if(isEmbedded()){
+    // Embedded: quotes go through the Wix page bridge (backend RPC) — immune to cross-origin issues.
+    try { parent.postMessage({ type: 'request-server-quotes', requests }, '*'); } catch(e) {}
+    return;
+  }
+  const newQuotes = {};
+  await Promise.all(requests.map(async (req) => {
     try{
       const res = await fetch(`${currentApiBase()}/computeQuote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vehicleId: id, categoryId: String(v.categoryCode || v.category || v.label || '').trim(), category: String(v.categoryCode || v.category || v.label || '').trim(), pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: 'cdw', selectedExtras: [], driverAge: ageVal, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc })
+        body: JSON.stringify(req)
       });
       const data = await res.json();
-      if(data?.success) newQuotes[id] = data;
+      if(data?.success) newQuotes[req.vehicleId] = data;
     }catch(e){}
   }));
   if(Object.keys(newQuotes).length){
@@ -1594,6 +1605,14 @@ window.addEventListener('message', (event) => {
   if(data.type === 'vehicles-data-error'){
     clearRequestTimers();
     setError(data.message || 'Δεν ήταν δυνατή η ανάκτηση κατηγοριών από τη σελίδα Wix.');
+    return;
+  }
+  if(data.type === 'server-quotes-data'){
+    const quotes = data.quotes && typeof data.quotes === 'object' ? data.quotes : {};
+    if(Object.keys(quotes).length){
+      vehicleServerQuotes = { ...vehicleServerQuotes, ...quotes };
+      if(Array.isArray(vehicles) && vehicles.length) render();
+    }
   }
 });
 

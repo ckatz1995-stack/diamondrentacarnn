@@ -1475,38 +1475,49 @@ async function fetchFleetModels(categoryCode, vehicleId){
       if(_quoteTimer) clearTimeout(_quoteTimer);
       _quoteTimer = setTimeout(callServerQuote, 400);
     }
+    function buildQuotePayload(){
+      const insuranceInput = selectedInsurance();
+      const extrasInputs = selectedExtras();
+      const catRaw = String(vehicle?.categoryCode || vehicle?.category || vehicle?.label || state.category || '').trim();
+      return {
+        vehicleId: state.vehicleId,
+        categoryId: catRaw,
+        category: catRaw,
+        pickupDateTime: state.pickup,
+        dropoffDateTime: state.dropoff,
+        selectedPackage: insuranceInput?.dataset?.key || 'cdw',
+        selectedExtras: extrasInputs.map(function(el){ return el.dataset.key; }).filter(Boolean),
+        driverAge: state.age,
+        pickuppoint: state.pickupLocation,
+        dropoffpoint: state.dropoffLocation
+      };
+    }
+    function handleServerQuoteResult(data){
+      if(!data?.success){
+        const gtEl = document.getElementById('grandTotal');
+        if(gtEl && gtEl.textContent === '—' && _localTotalFallback !== null) gtEl.textContent = formatMoney(_localTotalFallback);
+        return;
+      }
+      applyServerQuote(data);
+    }
     async function callServerQuote(){
       if(!vehicle || !state.vehicleId) return;
+      const payload = buildQuotePayload();
+      if(isEmbedded()){
+        // Embedded: quote goes through the Wix page bridge (backend RPC) — immune to cross-origin issues.
+        try { parent.postMessage({ type: 'request-server-quote', request: payload }, '*'); } catch(e) {}
+        return;
+      }
       try{
-        const insuranceInput = selectedInsurance();
-        const extrasInputs = selectedExtras();
-        const payload = {
-          vehicleId: state.vehicleId,
-          categoryId: extractCategoryCode(vehicle?.label || state.category || ''),
-          category: extractCategoryCode(vehicle?.label || state.category || ''),
-          pickupDateTime: state.pickup,
-          dropoffDateTime: state.dropoff,
-          selectedPackage: insuranceInput?.dataset?.key || 'cdw',
-          selectedExtras: extrasInputs.map(function(el){ return el.dataset.key; }).filter(Boolean),
-          driverAge: state.age,
-          pickuppoint: state.pickupLocation,
-          dropoffpoint: state.dropoffLocation
-        };
         const res = await fetch(currentApiBase() + '/computeQuote', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if(!data?.success){
-          const gtEl = document.getElementById('grandTotal');
-          if(gtEl && gtEl.textContent === '—' && _localTotalFallback !== null) gtEl.textContent = formatMoney(_localTotalFallback);
-          return;
-        }
-        applyServerQuote(data);
+        handleServerQuoteResult(data);
       }catch(e){
-        const gtEl = document.getElementById('grandTotal');
-        if(gtEl && gtEl.textContent === '—' && _localTotalFallback !== null) gtEl.textContent = formatMoney(_localTotalFallback);
+        handleServerQuoteResult(null);
       }
     }
     function applyServerQuote(q){
@@ -1861,6 +1872,10 @@ async function loadVehicle(){
           items: Array.isArray(data.items) ? data.items : []
         };
         if(vehicle) renderModels(vehicle.label || state.category || 'A');
+        return;
+      }
+      if(data.type === 'server-quote-data'){
+        handleServerQuoteResult(data.result || null);
       }
     });
 
