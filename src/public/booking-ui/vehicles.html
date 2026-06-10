@@ -289,6 +289,28 @@ button:hover,.cta:hover,.header-phone:hover{
   font-size:14px;
   font-weight:800;
 }
+/* Compact spec chips — replaces the bulky spec grid */
+.spec-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.spec-chips .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(231,191,105,.10);border:1px solid rgba(231,191,105,.26);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;color:#f3ead2;white-space:nowrap;line-height:1.2}
+/* Quote loading shimmer */
+.price-skel{display:inline-block;width:88px;height:1em;border-radius:8px;vertical-align:middle;background:linear-gradient(90deg,rgba(255,255,255,.08) 25%,rgba(255,255,255,.24) 50%,rgba(255,255,255,.08) 75%);background-size:200% 100%;animation:skel-sh 1.2s linear infinite}
+@keyframes skel-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* Search summary strip above results */
+.search-strip{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 14px;border-radius:14px;background:rgba(20,14,4,.55);border:1px solid rgba(231,191,105,.22);color:#f3ead2;font-size:13.5px;font-weight:600}
+.search-strip .ss-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-strip .ss-edit{flex:none;background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1e0a;border:0;border-radius:999px;padding:7px 15px;font-weight:800;font-size:13px;cursor:pointer}
+.season-badge{
+  display:inline-block;
+  margin-top:6px;
+  padding:2px 9px;
+  border-radius:20px;
+  background:#f59e0b;
+  color:#fff;
+  font-size:.72em;
+  font-weight:700;
+  letter-spacing:.03em;
+}
+.season-row .season-val{ color:#f59e0b; font-weight:700; }
 .spec-grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -395,7 +417,7 @@ button:hover,.cta:hover,.header-phone:hover{
 .total-box{padding:14px 16px}.total-row .k{font-size:13px}.total-row .v{font-size:18px}.total-row.grand .k{font-size:20px}.total-row.grand .v{font-size:34px}
 .cta{height:56px;font-size:18px}
 @media (max-width:1024px){.header-inner{flex-wrap:wrap;justify-content:center}.header-nav{order:3;width:100%;justify-content:center}.header-phone{width:100%;text-align:center}.search-grid,.search-options-grid{grid-template-columns:1fr 1fr}.filter-row{grid-template-columns:1fr}.result-main{grid-template-columns:1fr}.media-col{min-height:180px}.head-row{grid-template-columns:1fr}.price-box{text-align:left}.spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.search-options-grid,.filter-row,.spec-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.content-col{padding:14px}.vehicle-title{font-size:28px}.total-row.grand .v{font-size:30px}.cta{height:54px;font-size:17px}}
+@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.search-options-grid,.filter-row,.spec-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.content-col{padding:12px 14px}.vehicle-title{font-size:21px}.vehicle-copy{display:none}.media-col{min-height:138px;padding:10px}.price-box .amount{font-size:26px}.total-box{padding:10px 14px}.total-stack{gap:4px}.total-row .k{font-size:12.5px}.total-row .v{font-size:15px}.total-row.grand .k{font-size:16px}.total-row.grand .v{font-size:25px}.cta{height:52px;font-size:16px}.result-bottom{padding:0 12px 12px}}
 
 
 @media (max-width:760px){.page{width:min(var(--container), calc(100vw - 8px))}.footer-grid{grid-template-columns:1fr}.footer-bottom{padding:0 16px 18px}}
@@ -644,6 +666,68 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .search-wrap,.filter-combined,.result-card,.empty-card{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .cta{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
 .is-selected-card{outline:2.5px solid var(--gold,#e7bf69)!important;box-shadow:0 0 0 4px rgba(231,191,105,.18),0 22px 54px rgba(0,0,0,.20)!important}
+
+/* ── UX PASS: chips, skeleton tint, summary strip, mobile compaction (theme-aware) ── */
+.spec-chips .chip{background:rgba(160,110,35,.08)!important;border:1px solid rgba(160,110,35,.28)!important;color:#4a3820!important}
+.price-skel{background:linear-gradient(90deg,rgba(160,110,35,.12) 25%,rgba(160,110,35,.30) 50%,rgba(160,110,35,.12) 75%)!important;background-size:200% 100%!important}
+.search-strip{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.22)!important;color:#4a3820!important;box-shadow:0 8px 24px rgba(90,48,0,.14)!important}
+.search-strip .ss-edit{background:linear-gradient(135deg,#c88a35,#e0a848)!important;color:#1a0e04!important}
+.cta .cta-total{font-weight:900}
+@media (max-width:620px){
+  .cta{height:54px!important;font-size:16.5px!important}
+  .price-box .amount{font-size:26px!important}
+  .media-col{min-height:138px!important}
+}
+
+/* ── CARD V2: results-style layout (photo | info | price+action rail) ── */
+.v2card{padding:0!important;overflow:hidden}
+.v2-grid{display:grid;grid-template-columns:240px minmax(0,1fr) 240px;align-items:stretch}
+.v2-media{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(200,138,53,.16),rgba(224,168,72,.05));padding:14px;min-height:150px}
+.v2-media img{max-width:100%;max-height:140px;object-fit:contain;filter:drop-shadow(0 10px 18px rgba(60,30,0,.25))}
+.v2-info{padding:16px 18px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.v2-cat{align-self:flex-start;background:rgba(160,110,35,.12);border:1px solid rgba(160,110,35,.32);color:#7a5e38;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 11px}
+.v2-title{margin:0;font-size:22px;line-height:1.15;color:#1c1408;font-weight:900}
+.v2-similar{font-size:13px;color:#8a7048;font-weight:600;white-space:nowrap}
+.v2-info .spec-chips{margin-top:2px}
+.v2-fees{margin-top:2px;font-size:13px;color:#4a3820;max-width:420px}
+.v2-fees summary{cursor:pointer;font-weight:800;color:#a07828;list-style-position:inside}
+.v2-fees[open] summary{margin-bottom:4px}
+.v2-fee-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed rgba(160,110,35,.18)}
+.v2-buy{display:flex;flex-direction:column;gap:7px;padding:16px 18px;border-left:1px solid rgba(160,110,35,.18);background:rgba(160,110,35,.05)}
+.v2-price{font-size:30px;font-weight:950;color:#a07828;letter-spacing:-.02em;line-height:1}
+.v2-per{font-size:13px;font-weight:700;color:#8a7048;margin-left:4px}
+.v2-total{font-size:13.5px;color:#4a3820}
+.v2-total strong{font-size:16px;color:#1c1408}
+.v2-season{margin:0!important}
+.cta.v2-cta{height:48px!important;font-size:15px!important;width:100%!important;padding:0 16px!important;border-radius:12px!important;margin-top:auto}
+@media(max-width:900px){
+  .v2-grid{grid-template-columns:1fr}
+  .v2-media{min-height:118px;padding:10px}
+  .v2-media img{max-height:108px}
+  .v2-info{padding:12px 14px 6px}
+  .v2-title{font-size:19px}
+  .v2-buy{border-left:0;border-top:1px solid rgba(160,110,35,.18);padding:12px 14px}
+  .v2-price{font-size:26px}
+  .cta.v2-cta{height:50px!important}
+}
+/* Trust strip */
+.trust-strip{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 14px;padding:9px 18px;background:rgba(255,255,255,.26);border:1px solid rgba(160,110,35,.14);border-radius:14px;margin:4px 0 10px;font-size:12.5px;font-weight:800;color:#3d3020}
+.ts-item{white-space:nowrap}
+.ts-sep{color:rgba(120,90,40,.32);font-weight:400}
+/* Compact inline sort toolbar */
+.results-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:rgba(255,255,255,.26);border:1px solid rgba(160,110,35,.12);border-radius:12px;margin-bottom:10px}
+.results-count{font-size:13px;font-weight:800;color:#3d3020}
+.sort-inline-wrap{display:flex;align-items:center;gap:8px}
+.sort-lbl{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:#5a4830;white-space:nowrap}
+.sort-select-slim{height:34px;border-radius:9px;border:1px solid rgba(160,110,35,.18);background:rgba(255,255,255,.90);padding:0 10px;font-size:13px;font-weight:700;color:#2a1e0a;font-family:inherit}
+/* V2 extras: hidden season */
+.v2-season-hidden{visibility:hidden}
+/* V2 photo placeholder */
+.v2-no-img{display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:130px;font-size:56px;color:rgba(255,255,255,.30);line-height:1}
+/* V2 fees inside buy column */
+.v2-buy .v2-fees{width:100%;font-size:12.5px;color:#4a3820;margin-top:0}
+.v2-buy .v2-fees summary{color:#1e5c72;font-size:12px}
+@media(max-width:620px){.results-toolbar{flex-wrap:wrap;gap:8px}.sort-select-slim{flex:1}.trust-strip{font-size:12px;padding:8px 12px}}
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -844,23 +928,24 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div><!-- end search-form-panel -->
   </section>
 
+  <div class="trust-strip">
+    <span class="ts-item">✓ Διαφανής τιμολόγηση</span>
+    <span class="ts-sep" aria-hidden="true">·</span>
+    <span class="ts-item">✓ Προσωπική εξυπηρέτηση</span>
+    <span class="ts-sep" aria-hidden="true">·</span>
+    <span class="ts-item">✓ Γρήγορη απάντηση στο αίτημά σας</span>
+  </div>
+
   <div class="results-toolbar">
     <span class="results-count" id="resultMetaRow"></span>
-    <div class="sort-inline">
-      <span class="sort-label">Ταξινόμηση</span>
-      <select id="sortSelect" class="sort-native">
+    <div class="sort-inline-wrap">
+      <span class="sort-lbl">Ταξινόμηση</span>
+      <select id="sortSelect" class="sort-select-slim">
         <option value="priceAsc">Τιμή ↑</option>
         <option value="priceDesc">Τιμή ↓</option>
         <option value="nameAsc">Α → Ω</option>
       </select>
     </div>
-  </div>
-  <div class="trust-strip">
-    <span class="ts-item">✓ Διαφανής τιμολόγηση</span>
-    <span class="ts-dot" aria-hidden="true">·</span>
-    <span class="ts-item">✓ Προσωπική εξυπηρέτηση</span>
-    <span class="ts-dot" aria-hidden="true">·</span>
-    <span class="ts-item">✓ Γρήγορη απάντηση στο αίτημά σας</span>
   </div>
 
   <section class="list" id="list">
@@ -892,6 +977,11 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     <button class="empty-state-btn" id="emptyStateModifyBtn" type="button">Τροποποίηση αναζήτησης</button>
   </div>
   </section>
+
+  <div class="search-strip" id="changeSearchRow">
+    <span class="ss-txt">Θέλεις άλλες ημερομηνίες ή τοποθεσία;</span>
+    <button class="ss-edit" id="changeSearchBtn" type="button">Αλλαγή αναζήτησης</button>
+  </div>
 </div>
 
 <footer class="footer">
@@ -1085,6 +1175,12 @@ function extractCategoryCode(value){
   const match = raw.match(/^([A-Za-z0-9]+)\s*-/);
   return normalizeCategoryKey(match ? match[1] : raw);
 }
+function categoryCodesMatch(ruleCode, candidate){
+  const a = normalizeCategoryKey(ruleCode);
+  const b = normalizeCategoryKey(candidate);
+  if(!a || !b) return false;
+  return a === b || extractCategoryCode(a) === extractCategoryCode(b);
+}
 function categoryKeyOf(item){
   return normalizeCategoryKey(item?.category || item?.categoryCode || item?.label || item?.title || item?.name || '');
 }
@@ -1113,13 +1209,37 @@ const category = qp("category") || _catStored || storedSearch.category || "all";
 const age = qp("age") || storedSearch.age || '23-69';
 
 let vehicles = [];
-let pricingCatalog = safeRead(PRICING_CATALOG_STORAGE_KEY, null);
+function coerceCatalogArrays(cat){
+  if(!cat || typeof cat !== 'object') return cat;
+  const arr = (v) => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
+  cat.pricingSeasons = arr(cat.pricingSeasons);
+  cat.categoryRateRules = arr(cat.categoryRateRules);
+  cat.feeRules = arr(cat.feeRules);
+  cat.pickupLocations = arr(cat.pickupLocations);
+  cat.insurancePlans = arr(cat.insurancePlans);
+  cat.extraServices = arr(cat.extraServices);
+  return cat;
+}
+let pricingCatalog = coerceCatalogArrays(safeRead(PRICING_CATALOG_STORAGE_KEY, null));
 let _catalogFromApi = false;
 let embeddedContext = null;
 let vehiclesMeta = { displayMode: 'categories', modelsSource: 'fleet' };
 let embeddedVehicleItems = safeRead(VEHICLE_CATEGORIES_STORAGE_KEY, null);
 let vehicleServerQuotes = {};
 let _quotesDebounceTimer = null;
+let _quotesPending = false;
+let _quotesPendingTimer = null;
+
+function markQuotesPending(){
+  _quotesPending = true;
+  clearTimeout(_quotesPendingTimer);
+  _quotesPendingTimer = setTimeout(() => { if(_quotesPending){ _quotesPending = false; if(Array.isArray(vehicles) && vehicles.length) render(); } }, 12000);
+}
+function clearQuotesPending(){
+  _quotesPending = false;
+  clearTimeout(_quotesPendingTimer);
+}
+
 
 function parseSiteBaseFromUrl(value){
   try {
@@ -1156,25 +1276,36 @@ async function scheduleServerQuotes(){
   const pickupLoc = (document.getElementById('pickupLocation') || {}).value || '';
   const dropoffLoc = (document.getElementById('dropoffLocation') || {}).value || '';
   const seen = new Set();
-  const newQuotes = {};
-  await Promise.all((vehicles || []).map(async (v) => {
+  const requests = [];
+  (vehicles || []).forEach((v) => {
     const id = String(v.vehicleCategoryId || v.id || '');
     if(!id || seen.has(id)) return;
     seen.add(id);
+    const catRaw = String(v.categoryCode || v.category || v.label || '').trim();
+    requests.push({ vehicleId: id, categoryId: catRaw, category: catRaw, pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: 'cdw', selectedExtras: [], driverAge: ageVal, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc });
+  });
+  if(!requests.length) return;
+  markQuotesPending();
+  if(isEmbedded()){
+    // Embedded: quotes go through the Wix page bridge (backend RPC) — immune to cross-origin issues.
+    try { parent.postMessage({ type: 'request-server-quotes', requests }, '*'); } catch(e) {}
+    return;
+  }
+  const newQuotes = {};
+  await Promise.all(requests.map(async (req) => {
     try{
       const res = await fetch(`${currentApiBase()}/computeQuote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vehicleId: id, categoryId: extractCategoryCode(v.categoryCode || v.label || v.category || ''), category: extractCategoryCode(v.categoryCode || v.label || v.category || ''), pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: 'cdw', selectedExtras: [], driverAge: ageVal, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc })
+        body: JSON.stringify(req)
       });
       const data = await res.json();
-      if(data?.success) newQuotes[id] = data;
+      if(data?.success) newQuotes[req.vehicleId] = data;
     }catch(e){}
   }));
-  if(Object.keys(newQuotes).length){
-    vehicleServerQuotes = { ...vehicleServerQuotes, ...newQuotes };
-    if(Array.isArray(vehicles) && vehicles.length) render();
-  }
+  clearQuotesPending();
+  if(Object.keys(newQuotes).length) vehicleServerQuotes = { ...vehicleServerQuotes, ...newQuotes };
+  if(Array.isArray(vehicles) && vehicles.length) render();
 }
 
 async function fetchRealCatalog(){
@@ -1183,7 +1314,7 @@ async function fetchRealCatalog(){
     const rawText = await res.text();
     const json = JSON.parse(rawText);
     if(!res.ok || !json?.success) return;
-    pricingCatalog = json;
+    pricingCatalog = coerceCatalogArrays(json);
     _catalogFromApi = true;
     vehiclesMeta = { displayMode: String(pricingCatalog?.businessSettings?.vehiclesPageDisplayMode || 'categories').trim().toLowerCase() === 'models' ? 'models' : 'categories', modelsSource: String(pricingCatalog?.businessSettings?.vehiclesPageModelsSource || 'fleet').trim().toLowerCase() === 'vehicles' ? 'vehicles' : 'fleet' };
     safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
@@ -1273,7 +1404,15 @@ function lookupFeeRule(ruleType, audienceGroup = ''){
     || null;
 }
 function normalizeKey(value){ return String(value || '').trim().toLowerCase(); }
-function parseDateOnly(value){ const d = new Date(value); if(Number.isNaN(d.getTime())) return null; d.setHours(0,0,0,0); return d; }
+function parseDateOnly(value){
+  const raw = String(value || '').replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g, '').trim();
+  if(!raw) return null;
+  const dmy = raw.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})$/);
+  if(dmy){ const d = new Date(Number(dmy[3]), Number(dmy[2])-1, Number(dmy[1])); return Number.isNaN(d.getTime()) ? null : d; }
+  const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(iso){ const d = new Date(Number(iso[1]), Number(iso[2])-1, Number(iso[3])); return Number.isNaN(d.getTime()) ? null : d; }
+  const d = new Date(raw); if(Number.isNaN(d.getTime())) return null; d.setHours(0,0,0,0); return d;
+}
 function seasonMatchesDate(date, season){
   if(!(date instanceof Date) || Number.isNaN(date.getTime())) return false;
   const start = parseDateOnly(season?.startDate);
@@ -1298,15 +1437,15 @@ function resolveDynamicDailyPrice(vehicle, days){
   const fallback = Number(vehicle?.price || 0);
   const rules = Array.isArray(pricingCatalog?.categoryRateRules) ? pricingCatalog.categoryRateRules : [];
   if(!rules.length) return fallback;
-  const code = normalizeCategoryKey(vehicle?.label || vehicle?.category);
+  const codeCandidates = [vehicle?.categoryCode, vehicle?.category, vehicle?.label].map(v=>String(v||'').trim()).filter(Boolean);
   const vehicleId = String(vehicle?.id || '');
   const pickupDate = new Date(`${document.getElementById("pickupDate").value}T${document.getElementById("pickupTime").value}:00`);
   const season = resolveSeason(pickupDate);
   const candidates = rules.filter((rule)=>{
     if(!rule || rule.active === false) return false;
-    const ruleCode = normalizeCategoryKey(rule.categoryCode || rule.category);
+    const ruleCode = String(rule.categoryCode || rule.category || '').trim();
     const ruleVehicleId = String(rule.vehicleCategoryId || '');
-    if(ruleCode && code && ruleCode !== code) return false;
+    if(ruleCode && codeCandidates.length && !codeCandidates.some(c=>categoryCodesMatch(ruleCode, c))) return false;
     if(!ruleCode && ruleVehicleId && vehicleId && ruleVehicleId !== vehicleId) return false;
     const min = Math.max(1, Number(rule.minDays || 1));
     const max = Math.max(0, Number(rule.maxDays || 0));
@@ -1327,7 +1466,8 @@ function resolveDynamicDailyPrice(vehicle, days){
     const maxB = Math.max(0, Number(b?.maxDays || 0)) || 999999;
     return (maxA - minA) - (maxB - minB);
   });
-  return Number(candidates[0]?.pricePerDay ?? fallback);
+  // Rules are the only price source: never fall back to the legacy category price when rules exist
+  return candidates.length ? Number(candidates[0]?.pricePerDay || 0) : 0;
 }
 function locationFeeFor(value, kind){
   const rows = Array.isArray(pricingCatalog?.pickupLocations) ? pricingCatalog.pickupLocations : [];
@@ -1435,68 +1575,78 @@ function render(){
   const nightRows = nightCharges();
   const nightExtra = nightRows.reduce((sum, item) => sum + item.amount, 0);
 
+  // Resolve active season once for all cards
+  const _pdElR = document.getElementById('pickupDate');
+  const _ptElR = document.getElementById('pickupTime');
+  const _pickupDate = _pdElR && _pdElR.value
+    ? new Date(`${_pdElR.value}T${(_ptElR && _ptElR.value) || '00:00'}:00`)
+    : new Date(window.BookingState ? (BookingState.get('pickup') || '') : '');
+  const _activeSeason = (!isNaN(_pickupDate.getTime())) ? resolveSeason(_pickupDate) : null;
+
+  // Update result count display
+  const _rcEl = document.getElementById('resultMetaRow');
+  if (_rcEl) _rcEl.textContent = filtered.length + ' ' + (filtered.length === 1 ? 'κατηγορία' : 'κατηγορίες') + ' διαθέσιμες';
+
   // DIAMOND STATE: Read previously selected category for card highlight
   const bsSelectedCat = (window.BookingState ? BookingState.get('vehicleCategory') : null) || '';
-  const _pdEl = document.getElementById('pickupDate');
-  const _ptEl = document.getElementById('pickupTime');
-  const _fpDate = new Date(`${(_pdEl||{}).value||'2000-01-01'}T${(_ptEl||{}).value||'00:00'}:00`);
-  const frontendSeason = !isNaN(_fpDate.getTime()) ? resolveSeason(_fpDate) : null;
-  const metaRowEl = document.getElementById('resultMetaRow');
-  if (metaRowEl) metaRowEl.textContent = filtered.length + ' ' + (filtered.length === 1 ? 'κατηγορία' : 'κατηγορίες') + ' διαθέσιμες';
   list.innerHTML = filtered.map(vehicle => {
     const vehicleId = String(vehicle.vehicleCategoryId || vehicle.id || '');
     const serverQuote = vehicleServerQuotes[vehicleId] || null;
     const dailyPrice = serverQuote ? Number(serverQuote.basePricePerDay || 0) : resolveDynamicDailyPrice(vehicle, days);
+    const hasSeasonRate = _activeSeason && _activeSeason.label && dailyPrice > 0;
     const baseTotal = Number((dailyPrice * days).toFixed(2));
     const locationExtra = Number((locationFeeFor(document.getElementById('pickupLocation').value, 'pickup') + locationFeeFor(document.getElementById('dropoffLocation').value, 'dropoff')).toFixed(2));
     const grandTotal = serverQuote ? Number(serverQuote.totalPrice || 0) : (baseTotal + ageExtra + nightExtra + locationExtra);
     const catCode = extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || '');
     const isSelected = bsSelectedCat && catCode === bsSelectedCat;
     const specs = vehicle.specs || {};
-    const dailyDisp = dailyPrice > 0 ? fmtMoney(dailyPrice) : '—';
-    const totalDisp = grandTotal > 0 ? fmtMoney(grandTotal) : '—';
-    const displayDays = serverQuote ? (serverQuote.billableDays || days) : days;
-    const seasonLabel = (serverQuote && (serverQuote.season?.label || serverQuote.season?.name)) || frontendSeason?.label || frontendSeason?.name || '';
-    const rawTitle = vehicle.name || vehicle.title || vehicle.model || 'Vehicle';
-    const safeCode = catCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const cleanTitle = (safeCode ? rawTitle.replace(new RegExp('^' + safeCode + '\\s*[-–]\\s*', 'i'), '') : rawTitle).trim() || rawTitle;
-    const catChipLabel = vehicle.categoryLabel || vehicle.label || vehicle.category || catCode || '—';
-    const hasExtras = serverQuote && (Number(serverQuote.insuranceCost||0)>0 || Number(serverQuote.ageFee||0)>0 || Number(serverQuote.nightFee||0)>0 || Number(serverQuote.locationFee||0)>0);
-    const specChips = [
-      specs.gearbox ? escapeHtml(specs.gearbox) : '',
-      specs.seats ? escapeHtml(String(specs.seats)) + ' θέσεις' : '',
-      specs.fuel ? escapeHtml(specs.fuel) : '',
-      (specs.ac && String(specs.ac).trim() && String(specs.ac).toUpperCase() !== 'ΟΧΙ') ? 'A/C' : '',
-      (specs.bags || specs.luggage) ? escapeHtml(String(specs.bags || specs.luggage)) + ' βαλίτσες' : '',
-      specs.doors ? escapeHtml(String(specs.doors)) + ' πόρτες' : '',
-    ].filter(Boolean);
-    const extrasRows = hasExtras ? [
-      Number(serverQuote.insuranceCost||0)>0 ? '<span>Ασφάλεια CDW</span><span>' + fmtMoney(serverQuote.insuranceCost) + '</span>' : '',
-      Number(serverQuote.ageFee||0)>0 ? '<span>' + escapeHtml(ageLabel(ageGroup.value)) + '</span><span>' + fmtMoney(serverQuote.ageFee) + '</span>' : '',
-      Number(serverQuote.nightFee||0)>0 ? '<span>Νυχτερινή χρέωση</span><span>' + fmtMoney(serverQuote.nightFee) + '</span>' : '',
-      Number(serverQuote.locationFee||0)>0 ? '<span>Χρέωση τοποθεσιών</span><span>' + fmtMoney(serverQuote.locationFee) + '</span>' : '',
+    const copy = cardCopy(vehicle);
+    const quotesLoading = _quotesPending && !serverQuote;
+    const dailyDisp = dailyPrice > 0 ? fmtMoney(dailyPrice) : (quotesLoading ? '<span class="price-skel"></span>' : '—');
+    const totalDisp = grandTotal > 0 ? fmtMoney(grandTotal) : (quotesLoading ? '<span class="price-skel"></span>' : '—');
+    const specVal = (v) => { const s = String(v ?? '').trim(); return s && s !== '—' && s !== '-' ? s : ''; };
+    const chips = [
+      specVal(specs.gearbox) ? escapeHtml(specVal(specs.gearbox)) : '',
+      specVal(specs.fuel) ? escapeHtml(specVal(specs.fuel)) : '',
+      specVal(specs.seats) ? escapeHtml(specVal(specs.seats)) + ' θέσεις' : '',
+      specVal(specs.bags || specs.luggage) ? escapeHtml(specVal(specs.bags || specs.luggage)) + ' βαλίτσες' : '',
+      specVal(specs.doors) ? escapeHtml(specVal(specs.doors)) + ' πόρτες' : '',
+      String(specs.ac || '').trim() === 'Ναι' ? 'A/C' : ''
+    ].filter(Boolean).map((c) => `<span class="chip">${c}</span>`).join('');
+    const ctaLabel = escapeHtml(selectionButtonLabel());
+    const rawName = String(vehicle.name || vehicle.title || vehicle.model || 'Όχημα');
+    const cleanName = catCode ? rawName.replace(new RegExp(`^${catCode}\\s*-\\s*`, 'i'), '').trim() || rawName : rawName;
+    const billDays = serverQuote ? (serverQuote.billableDays || days) : days;
+    const feeRows = serverQuote ? [
+      serverQuote.insuranceCost > 0 ? `<div class="v2-fee-row"><span>Ασφάλεια CDW</span><span>${fmtMoney(serverQuote.insuranceCost)}</span></div>` : '',
+      serverQuote.ageFee > 0 ? `<div class="v2-fee-row"><span>${ageLabel(ageGroup.value)}</span><span>${fmtMoney(serverQuote.ageFee)}</span></div>` : '',
+      serverQuote.nightFee > 0 ? `<div class="v2-fee-row"><span>Νυχτερινή χρέωση</span><span>${fmtMoney(serverQuote.nightFee)}</span></div>` : '',
+      serverQuote.locationFee > 0 ? `<div class="v2-fee-row"><span>Χρέωση τοποθεσιών</span><span>${fmtMoney(serverQuote.locationFee)}</span></div>` : ''
     ].filter(Boolean).join('') : '';
-    const extrasHtml = hasExtras ? '<details class="v2-extras"><summary>Ανάλυση χρέωσης</summary><div class="v2-extras-grid">' + extrasRows + '</div></details>' : '';
-    const imgHtml = vehicle.image
-      ? '<img class="v2-img" src="' + escapeHtml(vehicle.image) + '" alt="' + escapeHtml(rawTitle) + '" loading="lazy">'
-      : '<div class="v2-no-img">◆</div>';
+    const feesBlock = feeRows
+      ? `<details class="v2-fees"><summary>Ανάλυση χρέωσης</summary><div class="v2-fee-row"><span>Ενοικίαση ${billDays} × ${dailyDisp}</span><span>${serverQuote ? fmtMoney(serverQuote.baseCost || dailyPrice * billDays) : fmtMoney(baseTotal)}</span></div>${feeRows}</details>`
+      : '';
+    const serverSeasonLabel = serverQuote?.season?.label || serverQuote?.season?.name || '';
+    const displaySeasonLabel = serverSeasonLabel || (hasSeasonRate ? _activeSeason.label : '');
+    const imgSrc = escapeHtml(vehicle.image || '');
+    const imgEl = imgSrc
+      ? `<img src="${imgSrc}" alt="${escapeHtml(rawName)}" loading="lazy">`
+      : `<div class="v2-no-img">◆</div>`;
     return `
       <article class="result-card v2card${isSelected ? ' is-selected-card' : ''}">
         <div class="v2-grid">
-          <div class="v2-photo">${imgHtml}</div>
+          <div class="v2-media">${imgEl}</div>
           <div class="v2-info">
-            <span class="v2-cat-chip">${escapeHtml(catChipLabel)}</span>
-            <h2 class="v2-title">${escapeHtml(cleanTitle)}<span class="v2-similar"> ή παρόμοιο</span></h2>
-            <div class="v2-specs">${specChips.map(s => '<span class="v2-spec-chip">' + s + '</span>').join('')}</div>
+            <span class="v2-cat">Κατηγορία ${escapeHtml(catCode || '—')}</span>
+            <h2 class="v2-title">${escapeHtml(cleanName)}<span class="v2-similar"> ή παρόμοιο</span></h2>
+            <div class="spec-chips">${chips || '<span class="chip">—</span>'}</div>
           </div>
-          <div class="v2-rail">
-            <span class="v2-season-badge${seasonLabel ? '' : ' v2-season-hidden'}">${escapeHtml(seasonLabel || '—')}</span>
-            <div class="v2-rate-line">
-              <span class="v2-amount">${dailyDisp}</span><span class="v2-per"> / ημέρα</span>
-            </div>
-            <div class="v2-total-summary">Σύνολο <strong>${totalDisp}</strong> · ${displayDays} ημ.</div>
-            ${extrasHtml}
-            <button class="cta v2-cta" type="button" data-vehicle-id="${escapeHtml(vehicleId)}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${escapeHtml(selectionButtonLabel())} →</button>
+          <div class="v2-buy">
+            <span class="season-badge v2-season${displaySeasonLabel ? '' : ' v2-season-hidden'}">${escapeHtml(displaySeasonLabel || '—')}</span>
+            <div class="v2-price">${dailyDisp}<span class="v2-per"> / ημέρα</span></div>
+            <div class="v2-total">Σύνολο <strong>${totalDisp}</strong> · ${billDays} ${billDays === 1 ? 'ημέρα' : 'ημέρες'}</div>
+            ${feesBlock}
+            <button class="cta v2-cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${ctaLabel}</button>
           </div>
         </div>
       </article>`;
@@ -1553,7 +1703,7 @@ window.addEventListener('message', (event) => {
   }
   if(data.type === 'pricing-catalog-data'){
     if(!_catalogFromApi){
-      pricingCatalog = data.catalog || pricingCatalog;
+      pricingCatalog = coerceCatalogArrays(data.catalog || pricingCatalog);
       vehiclesMeta = { displayMode: String(pricingCatalog?.businessSettings?.vehiclesPageDisplayMode || 'categories').trim().toLowerCase() === 'models' ? 'models' : 'categories', modelsSource: String(pricingCatalog?.businessSettings?.vehiclesPageModelsSource || 'fleet').trim().toLowerCase() === 'vehicles' ? 'vehicles' : 'fleet' };
       safeWrite(PRICING_CATALOG_STORAGE_KEY, pricingCatalog);
       populateLocationSelectsFromCatalog();
@@ -1581,7 +1731,20 @@ window.addEventListener('message', (event) => {
   if(data.type === 'vehicles-data-error'){
     clearRequestTimers();
     setError(data.message || 'Δεν ήταν δυνατή η ανάκτηση κατηγοριών από τη σελίδα Wix.');
+    return;
   }
+  if(data.type === 'server-quotes-data'){
+    clearQuotesPending();
+    const quotes = data.quotes && typeof data.quotes === 'object' ? data.quotes : {};
+    if(Object.keys(quotes).length) vehicleServerQuotes = { ...vehicleServerQuotes, ...quotes };
+    if(Array.isArray(vehicles) && vehicles.length) render();
+  }
+});
+
+document.getElementById('changeSearchBtn')?.addEventListener('click', () => {
+  if (typeof window._openSearchPanel === 'function') window._openSearchPanel();
+  try { parent.postMessage({ type: 'wix-scroll-top' }, '*'); } catch(e) {}
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
 });
 
 async function loadVehicles(){
@@ -1776,6 +1939,7 @@ function updateSearchSummaryBar(){
     editBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     updateSearchSummaryBar();
   }
+  window._openSearchPanel = function(){ setSearchPanel(true); };
   setSearchPanel(false);
   editBtn.addEventListener('click',function(){
     setSearchPanel(formPanel.classList.contains('collapsed'));
@@ -2228,245 +2392,5 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
 /* ===== END MEMBER PORTAL AUTH ===== */
 
 </script>
-<style>
-/* ═══ V2 CARD ═══ */
-.v2card { overflow: visible !important; }
-.v2-grid {
-  display: grid;
-  grid-template-columns: 210px 1fr 210px;
-  min-height: 190px;
-}
-
-/* Photo column */
-.v2-photo {
-  background: linear-gradient(160deg, #dbc882 0%, #c09840 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 16px;
-  border-radius: 30px 0 0 30px;
-  overflow: hidden;
-}
-.v2-img {
-  width: 100%;
-  max-width: 185px;
-  max-height: 126px;
-  object-fit: contain;
-  filter: drop-shadow(0 10px 22px rgba(0,0,0,.24));
-}
-.v2-no-img {
-  font-size: 52px;
-  color: rgba(255,255,255,.38);
-  line-height: 1;
-}
-
-/* Info column */
-.v2-info {
-  padding: 20px 22px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border-right: 1px solid rgba(160,110,35,.14);
-}
-.v2-cat-chip {
-  display: inline-flex;
-  align-items: center;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .10em;
-  text-transform: uppercase;
-  color: #1e5c72;
-  background: rgba(30,92,114,.09);
-  border: 1px solid rgba(30,92,114,.20);
-  padding: 3px 11px;
-  border-radius: 999px;
-  align-self: flex-start;
-}
-.v2-title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: -.025em;
-  line-height: 1.2;
-  color: #1a1510;
-}
-.v2-similar {
-  font-size: 13px;
-  font-weight: 600;
-  color: #7a6240;
-}
-.v2-specs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: auto;
-  padding-top: 4px;
-}
-.v2-spec-chip {
-  font-size: 12px;
-  font-weight: 700;
-  color: #3d3222;
-  background: rgba(160,110,35,.10);
-  border: 1px solid rgba(160,110,35,.16);
-  border-radius: 8px;
-  padding: 4px 10px;
-  white-space: nowrap;
-}
-
-/* Price rail */
-.v2-rail {
-  display: flex;
-  flex-direction: column;
-  padding: 18px 20px;
-  gap: 8px;
-  background: rgba(160,110,35,.05);
-  border-radius: 0 30px 30px 0;
-}
-.v2-season-badge {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: #7a4a10;
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  border: 1px solid rgba(210,140,40,.30);
-  border-radius: 999px;
-  padding: 3px 11px;
-  align-self: flex-start;
-}
-.v2-season-hidden { visibility: hidden; }
-.v2-rate-line {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-.v2-amount {
-  font-size: 30px !important;
-  font-weight: 900 !important;
-  color: #1a4f60 !important;
-  letter-spacing: -.035em;
-  line-height: 1;
-}
-.v2-per {
-  font-size: 13px;
-  font-weight: 700;
-  color: #7a6240;
-}
-.v2-total-summary {
-  font-size: 13.5px;
-  color: #3d3222;
-  font-weight: 700;
-  line-height: 1.4;
-}
-.v2-extras {
-  margin-top: 2px;
-}
-.v2-extras > summary {
-  font-size: 12px;
-  font-weight: 700;
-  color: #1e5c72;
-  cursor: pointer;
-  list-style: none;
-  user-select: none;
-  padding: 2px 0;
-}
-.v2-extras > summary::-webkit-details-marker { display: none; }
-.v2-extras-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px 12px;
-  margin-top: 8px;
-  font-size: 12px;
-  color: #3d3222;
-  font-weight: 600;
-}
-.v2-cta {
-  margin-top: auto !important;
-  width: 100% !important;
-  min-height: 46px !important;
-  height: auto !important;
-  font-size: 15px !important;
-  border-radius: 12px !important;
-  background: linear-gradient(135deg, #3f748a, #2d6072) !important;
-  color: #fff !important;
-  box-shadow: 0 6px 18px rgba(30,80,100,.22) !important;
-  letter-spacing: -.01em;
-}
-.v2-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
-
-/* ═══ RESULTS TOOLBAR ═══ */
-.results-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px;
-  background: rgba(255,255,255,.32);
-  border: 1px solid rgba(160,110,35,.14);
-  border-radius: 14px;
-  margin-bottom: 10px;
-}
-.results-count {
-  font-size: 13px;
-  font-weight: 800;
-  color: #3d3222;
-}
-.sort-inline {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.sort-label {
-  font-size: 12px;
-  font-weight: 800;
-  color: #5a4830;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  white-space: nowrap;
-}
-.sort-native {
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid rgba(160,110,35,.16);
-  background: rgba(255,255,255,.88);
-  padding: 0 10px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #2a1e0a;
-}
-
-/* ═══ TRUST STRIP ═══ */
-.trust-strip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  padding: 9px 16px;
-  background: rgba(255,255,255,.28);
-  border: 1px solid rgba(160,110,35,.12);
-  border-radius: 12px;
-  margin-bottom: 12px;
-  font-size: 12.5px;
-  font-weight: 800;
-  color: #3d3222;
-}
-.ts-dot { color: rgba(100,80,40,.35); font-weight: 400; }
-
-/* ═══ MOBILE V2 ═══ */
-@media (max-width: 767px) {
-  .results-toolbar { flex-wrap: wrap; gap: 8px; }
-  .v2-grid { grid-template-columns: 1fr; }
-  .v2-photo { border-radius: 28px 28px 0 0; min-height: 130px; padding: 14px; }
-  .v2-info { border-right: none; border-bottom: 1px solid rgba(160,110,35,.14); }
-  .v2-rail { border-radius: 0 0 28px 28px; background: rgba(160,110,35,.07); }
-  .v2-amount { font-size: 26px !important; }
-  .trust-strip { font-size: 12px; padding: 8px 12px; }
-}
-@media (min-width: 768px) and (max-width: 1100px) {
-  .v2-grid { grid-template-columns: 180px 1fr 190px; }
-}
-</style>
 </body>
 </html>
