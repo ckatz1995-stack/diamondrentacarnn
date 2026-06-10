@@ -233,8 +233,23 @@ function normalizePickupLocation(item, fallbackSort = 9999){
 }
 
 function parseDateOnly(value){
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return null;
+    const d = new Date(value); d.setHours(0,0,0,0); return d;
+  }
   const raw = text(value, '');
   if (!raw) return null;
+  // Day-first format (Greek): 30/6/2026, 30.6.2026, 30-6-2026
+  const dmy = raw.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})$/);
+  if (dmy) {
+    const d = new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (iso) {
+    const d = new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
   const dt = new Date(raw);
   if (Number.isNaN(dt.getTime())) return null;
   dt.setHours(0,0,0,0);

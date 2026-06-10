@@ -1031,7 +1031,15 @@ bindRouteLinks();
     }
 
     function normalizeKey(value){ return String(value || '').trim().toLowerCase(); }
-    function parseDateOnly(value){ const d = new Date(value); if(Number.isNaN(d.getTime())) return null; d.setHours(0,0,0,0); return d; }
+    function parseDateOnly(value){
+      const raw = String(value || '').trim();
+      if(!raw) return null;
+      const dmy = raw.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})$/);
+      if(dmy){ const d = new Date(Number(dmy[3]), Number(dmy[2])-1, Number(dmy[1])); return Number.isNaN(d.getTime()) ? null : d; }
+      const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if(iso){ const d = new Date(Number(iso[1]), Number(iso[2])-1, Number(iso[3])); return Number.isNaN(d.getTime()) ? null : d; }
+      const d = new Date(raw); if(Number.isNaN(d.getTime())) return null; d.setHours(0,0,0,0); return d;
+    }
     function seasonMatchesDate(date, season){
       if(!(date instanceof Date) || Number.isNaN(date.getTime())) return false;
       const start = parseDateOnly(season?.startDate);

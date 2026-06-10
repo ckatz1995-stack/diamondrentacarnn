@@ -456,6 +456,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
           <strong id="calcGrandTotal" style="font-size:22px;color:var(--blue-deep)">—</strong>
         </div>
         <div id="calcRuleInfo" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
+        <pre id="calcDebugInfo" style="display:none;margin-top:10px;padding:10px;border:1px dashed var(--border);border-radius:8px;background:rgba(0,0,0,.03);font-size:11px;line-height:1.5;color:var(--muted);white-space:pre-wrap;word-break:break-word"></pre>
       </div>
     </div>
   </section>
@@ -1678,7 +1679,7 @@ function runCalcQuote() {
     pickup, dropoff, categoryCode,
     timer: setTimeout(() => { finishCalcQuote(); showToast('Quote timed out — please retry', 'error'); }, 20000)
   };
-  post('computeQuote', { vehicleId, categoryId: categoryCode, category: categoryCode, pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: insuranceKey, selectedExtras: extras, driverAge: age, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc });
+  post('computeQuote', { vehicleId, categoryId: categoryCode, category: categoryCode, pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: insuranceKey, selectedExtras: extras, driverAge: age, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc, debug: true });
 }
 
 function showCalcResult(q, pickup, dropoff, catCode) {
@@ -1726,6 +1727,19 @@ function showCalcResult(q, pickup, dropoff, catCode) {
   ruleInfo.push(`Source: ${q.rule ? 'dynamic rate rule' : (q.basePriceSource || 'no rule matched — check rules for this category/dates')}`);
   if ((q.warnings || []).includes('pricing:no-rule-match')) ruleInfo.push('⚠ No rate rule matched');
   if (ruleEl) ruleEl.textContent = ruleInfo.join(' · ');
+
+  const dbgEl = el('calcDebugInfo');
+  if (dbgEl) {
+    if (q.diagnostics) {
+      const d = q.diagnostics;
+      const seasonLines = (d.seasons || []).map(s => `  ${s.key}: ${s.startDate} → ${s.endDate}${s.repeatYearly ? ' (yearly)' : ''}${s.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
+      const ruleLines = (d.rules || []).map(r => `  ${r.code || '(all)'} | ${r.season || 'all seasons'} | ${r.min}-${r.max || '∞'}d | ${r.price}${r.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
+      dbgEl.textContent = `Engine saw — candidates: [${(d.categoryCandidates || []).join(', ')}] · days: ${d.billableDays} · resolved season: ${d.resolvedSeasonKey || 'NONE'}\nSeasons in catalog:\n${seasonLines}\nRules in catalog:\n${ruleLines}`;
+      dbgEl.style.display = 'block';
+    } else {
+      dbgEl.style.display = 'none';
+    }
+  }
 
   const result = el('calcResult');
   if (result) result.style.display = 'block';
