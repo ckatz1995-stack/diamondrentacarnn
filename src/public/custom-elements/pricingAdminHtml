@@ -753,6 +753,13 @@ window.addEventListener('message', e => {
     case 'busy':
       setBusy(!!msg.flag);
       break;
+    case 'calcQuoteResult': {
+      const ctx = finishCalcQuote();
+      const r = msg.result || {};
+      if (!r.success) { showToast(r.message || 'Quote failed', 'error'); break; }
+      showCalcResult(r, ctx?.pickup || '', ctx?.dropoff || '', ctx?.categoryCode || '');
+      break;
+    }
     case 'seedPricingResult':
     case 'resetPricingResult': {
       const r = msg.result || {};
@@ -1638,7 +1645,16 @@ function resetCalcDropdowns() {
   const g = el('calcExtrasGrid'); if(g) g._populated = false;
 }
 
-async function runCalcQuote() {
+let pendingCalc = null;
+function finishCalcQuote() {
+  if (pendingCalc?.timer) clearTimeout(pendingCalc.timer);
+  const btn = el('calcQuoteBtn');
+  if (btn) { btn.disabled = false; btn.textContent = 'Calculate price'; }
+  const ctx = pendingCalc;
+  pendingCalc = null;
+  return ctx;
+}
+function runCalcQuote() {
   const catVal = el('calcCategory')?.value || '';
   const parts = catVal.split('|');
   const vehicleId = parts[0] || '';
@@ -1656,18 +1672,13 @@ async function runCalcQuote() {
 
   const btn = el('calcQuoteBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Calculating…'; }
-  try {
-    const apiBase = (state.siteBaseUrl || '').replace(/\/$/, '') + '/_functions';
-    const payload = { vehicleId, categoryId: categoryCode, category: categoryCode, pickupDateTime: new Date(pickup).toISOString(), dropoffDateTime: new Date(dropoff).toISOString(), selectedPackage: insuranceKey, selectedExtras: extras, driverAge: age, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc };
-    const res = await fetch(apiBase + '/computeQuote', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    const data = await res.json();
-    if (!data?.success) { showToast(data?.message || 'Quote failed', 'error'); return; }
-    showCalcResult(data, pickup, dropoff, categoryCode);
-  } catch(err) {
-    showToast('Quote request failed: ' + (err.message || String(err)), 'error');
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Calculate price'; }
-  }
+  // Quote goes through the page-code bridge (same channel as rule saves) — no HTTP, no CORS.
+  // Dates are sent as raw datetime-local strings: the backend parses them as business-local time.
+  pendingCalc = {
+    pickup, dropoff, categoryCode,
+    timer: setTimeout(() => { finishCalcQuote(); showToast('Quote timed out — please retry', 'error'); }, 20000)
+  };
+  post('computeQuote', { vehicleId, categoryId: categoryCode, category: categoryCode, pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: insuranceKey, selectedExtras: extras, driverAge: age, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc });
 }
 
 function showCalcResult(q, pickup, dropoff, catCode) {
@@ -1678,9 +1689,10 @@ function showCalcResult(q, pickup, dropoff, catCode) {
   const net = Number((total / (1 + vatRate)).toFixed(2));
   const vat = Number((total - net).toFixed(2));
 
+  const seasonLabel = q.season?.label || q.pricingSeasonLabel || '';
   const seasonBadge = el('calcSeasonBadge');
-  if (q.pricingSeasonLabel) {
-    seasonBadge.innerHTML = `<span style="padding:4px 12px;border-radius:20px;background:#f59e0b;color:#fff;font-size:13px;font-weight:700">${esc(q.pricingSeasonLabel)}</span> <span style="font-size:13px;color:var(--muted)">active season</span>`;
+  if (seasonLabel) {
+    seasonBadge.innerHTML = `<span style="padding:4px 12px;border-radius:20px;background:#f59e0b;color:#fff;font-size:13px;font-weight:700">${esc(seasonLabel)}</span> <span style="font-size:13px;color:var(--muted)">active season</span>`;
     seasonBadge.style.display = 'block';
   } else {
     seasonBadge.style.display = 'none';
@@ -1706,10 +1718,13 @@ function showCalcResult(q, pickup, dropoff, catCode) {
 
   const ruleEl = el('calcRuleInfo');
   const ruleInfo = [];
-  if (q.pricingSeasonKey) ruleInfo.push(`Season: ${q.pricingSeasonKey}`);
-  if (q.pricingRuleKey) ruleInfo.push(`Rule: ${q.pricingRuleKey}`);
+  const seasonKey = q.season?.key || q.pricingSeasonKey || '';
+  const ruleKey = q.rule?.key || q.rule?.label || q.pricingRuleKey || '';
+  if (seasonKey) ruleInfo.push(`Season: ${seasonKey}`);
+  if (ruleKey) ruleInfo.push(`Rule: ${ruleKey}`);
   if (q.crossSeasonPricing) ruleInfo.push('Cross-season weighted average applied');
-  if (q.basePriceSource) ruleInfo.push(`Source: ${q.basePriceSource}`);
+  ruleInfo.push(`Source: ${q.rule ? 'dynamic rate rule' : (q.basePriceSource || 'no rule matched — check rules for this category/dates')}`);
+  if ((q.warnings || []).includes('pricing:no-rule-match')) ruleInfo.push('⚠ No rate rule matched');
   if (ruleEl) ruleEl.textContent = ruleInfo.join(' · ');
 
   const result = el('calcResult');
