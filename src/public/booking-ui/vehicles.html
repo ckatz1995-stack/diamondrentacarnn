@@ -891,11 +891,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div>
   </section>
 
-  <div class="search-strip" id="searchStrip" hidden>
-    <span class="ss-txt" id="searchStripTxt"></span>
-    <button class="ss-edit" id="searchStripEdit" type="button">Αλλαγή</button>
-  </div>
-
   <section class="list" id="list">
   <!-- DIAMOND LOADING: Skeleton cards — shown while loading -->
   <div class="skeleton-list active" id="skeletonList">
@@ -925,6 +920,11 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     <button class="empty-state-btn" id="emptyStateModifyBtn" type="button">Τροποποίηση αναζήτησης</button>
   </div>
   </section>
+
+  <div class="search-strip" id="changeSearchRow">
+    <span class="ss-txt">Θέλεις άλλες ημερομηνίες ή τοποθεσία;</span>
+    <button class="ss-edit" id="changeSearchBtn" type="button">Αλλαγή αναζήτησης</button>
+  </div>
 </div>
 
 <footer class="footer">
@@ -1183,20 +1183,6 @@ function clearQuotesPending(){
   clearTimeout(_quotesPendingTimer);
 }
 
-function updateSearchStrip(){
-  const strip = document.getElementById('searchStrip');
-  const txt = document.getElementById('searchStripTxt');
-  if(!strip || !txt) return;
-  const pd = document.getElementById('pickupDate')?.value || '';
-  const dd = document.getElementById('dropoffDate')?.value || '';
-  const pt = document.getElementById('pickupTime')?.value || '';
-  const dt = document.getElementById('dropoffTime')?.value || '';
-  const pl = document.getElementById('pickupLocation')?.value || '';
-  if(!pd || !dd){ strip.hidden = true; return; }
-  const fmt = (iso) => { const p = String(iso).split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : iso; };
-  txt.textContent = `${fmt(pd)} ${pt} → ${fmt(dd)} ${dt}${pl ? ` · ${pl}` : ''}`;
-  strip.hidden = false;
-}
 
 function parseSiteBaseFromUrl(value){
   try {
@@ -1562,9 +1548,7 @@ function render(){
       specVal(specs.doors) ? `🚪 ${escapeHtml(specVal(specs.doors))} πόρτες` : '',
       String(specs.ac || '').trim() === 'Ναι' ? '❄️ A/C' : ''
     ].filter(Boolean).map((c) => `<span class="chip">${c}</span>`).join('');
-    const ctaLabel = grandTotal > 0
-      ? `${escapeHtml(selectionButtonLabel())} <span class="cta-total">— ${fmtMoney(grandTotal)}</span>`
-      : escapeHtml(selectionButtonLabel());
+    const ctaLabel = escapeHtml(selectionButtonLabel());
     return `
       <article class="result-card${isSelected ? ' is-selected-card' : ''}">
         <div class="result-main">
@@ -1604,7 +1588,6 @@ function render(){
         </div>
       </article>`;
   }).join("");
-  updateSearchStrip();
   notifyHeight();
 }
 function setLoading(message){
@@ -1695,7 +1678,8 @@ window.addEventListener('message', (event) => {
   }
 });
 
-document.getElementById('searchStripEdit')?.addEventListener('click', () => {
+document.getElementById('changeSearchBtn')?.addEventListener('click', () => {
+  if (typeof window._openSearchPanel === 'function') window._openSearchPanel();
   try { parent.postMessage({ type: 'wix-scroll-top' }, '*'); } catch(e) {}
   try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
 });
@@ -1892,6 +1876,7 @@ function updateSearchSummaryBar(){
     editBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     updateSearchSummaryBar();
   }
+  window._openSearchPanel = function(){ setSearchPanel(true); };
   setSearchPanel(false);
   editBtn.addEventListener('click',function(){
     setSearchPanel(formPanel.classList.contains('collapsed'));
