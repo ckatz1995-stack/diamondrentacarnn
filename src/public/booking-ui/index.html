@@ -1804,6 +1804,37 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .fleet-grid{grid-template-columns:repeat(2,1fr)!important}
 }
 </style>
+<style>
+/* ═══ PICKER POLISH: animation, scrollbar, checkmark, time grid, badges ═══ */
+.custom-panel{border-radius:16px!important;box-shadow:0 18px 44px rgba(0,0,0,.20),0 4px 12px rgba(0,0,0,.10)!important;animation:pickerIn .15s ease}
+@keyframes pickerIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.custom-panel{animation:none}}
+.custom-panel{scrollbar-width:thin;scrollbar-color:rgba(120,90,40,.35) transparent}
+.custom-panel::-webkit-scrollbar{width:8px}
+.custom-panel::-webkit-scrollbar-thumb{background:rgba(120,90,40,.30);border-radius:8px}
+.custom-panel::-webkit-scrollbar-track{background:transparent}
+.custom-option{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px}
+.custom-option .opt-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.custom-option.is-selected::after{content:'✓';font-weight:900;color:var(--accent2,#2d6072);flex:0 0 auto}
+/* Time pickers: 3-column grid — whole list scannable at a glance */
+.custom-options.time-cols{grid-template-columns:repeat(3,minmax(0,1fr))}
+.custom-options.time-cols .custom-option{justify-content:center;text-align:center;padding:10px 4px;min-height:42px;gap:4px}
+.custom-options.time-cols .custom-option .opt-label{flex:0 0 auto;overflow:visible}
+.custom-options.time-cols .custom-option.is-selected::after{content:none}
+.custom-options.time-cols .custom-option.is-selected{box-shadow:0 4px 10px rgba(45,96,114,.30)}
+.opt-night{flex:0 0 auto;font-size:11px;line-height:1;opacity:.8}
+.opt-fee{flex:0 0 auto;font-size:12px;font-weight:800;color:#8a5a10;background:rgba(231,191,105,.30);border:1px solid rgba(160,110,35,.25);padding:2px 9px;border-radius:999px;white-space:nowrap}
+.custom-option.is-selected .opt-fee{background:rgba(255,255,255,.85)}
+/* Calendar: slightly larger targets + selected-day depth */
+.custom-day{min-height:42px}
+.custom-day.is-selected{box-shadow:0 4px 12px rgba(45,96,114,.28)}
+/* Guided flow: panel titles + trip-range shading */
+.custom-panel-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:rgba(60,45,22,.62);padding:2px 4px 8px;border-bottom:1px solid rgba(70,50,16,.08);margin-bottom:8px}
+.custom-day.is-range{background:rgba(63,116,138,.13)}
+.custom-day.is-range-edge{background:rgba(63,116,138,.30);color:#10394a}
+.custom-day:not(.is-disabled):not(.is-empty):hover{transform:scale(1.06)}
+@media(prefers-reduced-motion:reduce){.custom-day:hover{transform:none}}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -2216,6 +2247,33 @@ let vehicleCategories = readCached(VEHICLE_CATEGORIES_STORAGE_KEY, []);
 
 function getBusinessSettings(){
   return (pricingCatalog && pricingCatalog.businessSettings) ? pricingCatalog.businessSettings : {};
+}
+// Picker parity helpers: same night markers + fee pills as the vehicles page
+function pickerNormKey(value){ return String(value || '').trim().toLowerCase(); }
+function nightWindowHours(){
+  const settings = getBusinessSettings();
+  const sh = Number(settings?.nightStartHour); const eh = Number(settings?.nightEndHour);
+  return { startHour: Number.isFinite(sh) ? sh : 22, endHour: Number.isFinite(eh) ? eh : 8 };
+}
+function isNightTime(timeValue){
+  const raw = String(timeValue || '').trim();
+  const match = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if(!match) return false;
+  const hour = Math.max(0, Math.min(23, Number(match[1] || 0)));
+  const { startHour, endHour } = nightWindowHours();
+  if(startHour > endHour) return hour >= startHour || hour < endHour;
+  return hour >= startHour && hour < endHour;
+}
+function locationFeeFor(value, kind){
+  const rows = Array.isArray(pricingCatalog?.pickupLocations) ? pricingCatalog.pickupLocations : [];
+  const target = pickerNormKey(value);
+  if(!target) return 0;
+  const hit = rows.find((row)=>{
+    const type = pickerNormKey(row?.locationType || 'both') || 'both';
+    if(type !== 'both' && type !== pickerNormKey(kind)) return false;
+    return pickerNormKey(row?.label) === target || pickerNormKey(row?.key) === target;
+  });
+  return Number(hit?.extraFee || 0);
 }
 function applyBusinessIdentity(){
   const settings = getBusinessSettings();
@@ -2683,12 +2741,24 @@ function initPageOwnedControls(configs){
     ctrl.trigger.textContent = triggerText;
     ctrl.trigger.classList.toggle('is-placeholder', !nativeEl.value);
     ctrl.trigger.disabled = nativeEl.disabled;
-    const baseSignature = [...nativeEl.options].map((opt) => `${opt.value}::${opt.textContent}::${opt.disabled?'1':'0'}`).join('||');
-    const signature = ctrl.flavor === 'time' ? `${baseSignature}##${getBusinessSettings().operatingHoursLabel || ''}##${getBusinessSettings().afterHoursNotice || ''}` : baseSignature;
+    const isTimeSel = ctrl.flavor === 'time' || /time$/i.test(ctrl.id || '');
+    const isLocSel = /location|point/i.test(ctrl.id || '');
+    const locKind = /^pickup/i.test(ctrl.id || '') ? 'pickup' : 'dropoff';
+    const noteHtml = isTimeSel && typeof getTimePickerMetaHtml === 'function' ? getTimePickerMetaHtml() : '';
+    const optionHtml = [...nativeEl.options].map((opt) => {
+      let badge = '';
+      if (isTimeSel && typeof isNightTime === 'function' && isNightTime(opt.value)) badge = '<span class="opt-night" title="Ισχύει νυχτερινή χρέωση">🌙</span>';
+      if (isLocSel && typeof locationFeeFor === 'function') {
+        const fee = Number(locationFeeFor(opt.value, locKind) || 0);
+        if (fee > 0) badge = `<span class="opt-fee">+${fee}€</span>`;
+      }
+      return `<button type="button" class="custom-option${opt.value === nativeEl.value ? ' is-selected' : ''}" data-value="${escapeCustomUi(opt.value)}" ${opt.disabled ? 'disabled' : ''}><span class="opt-label">${escapeCustomUi(opt.textContent || '')}</span>${badge}</button>`;
+    }).join('');
+    const signature = `${optionHtml}##${noteHtml}`;
     if (signature !== ctrl.signature) {
       ctrl.signature = signature;
-      const noteHtml = ctrl.flavor === 'time' ? getTimePickerMetaHtml() : '';
-      ctrl.panel.innerHTML = `<div class="custom-options">${[...nativeEl.options].map((opt) => `<button type="button" class="custom-option${opt.value === nativeEl.value ? ' is-selected' : ''}" data-value="${escapeCustomUi(opt.value)}" ${opt.disabled ? 'disabled' : ''}>${escapeCustomUi(opt.textContent || '')}</button>`).join('')}</div>${noteHtml}`;
+      const selTitle = (ctrl.native.closest('.field')?.querySelector('label')?.textContent || ctrl.placeholder || '').trim();
+      ctrl.panel.innerHTML = `${selTitle ? `<div class="custom-panel-title">${escapeCustomUi(selTitle)}</div>` : ''}<div class="custom-options${isTimeSel ? ' time-cols' : ''}">${optionHtml}</div>${noteHtml}`;
       ctrl.panel.querySelectorAll('.custom-option').forEach((btn) => {
         btn.addEventListener('click', (event) => {
           event.preventDefault();
@@ -2697,6 +2767,7 @@ function initPageOwnedControls(configs){
           dispatchNativeChange(nativeEl);
           syncSelect(ctrl);
           closeAll();
+          advanceChain(ctrl);
         });
       });
     } else {
@@ -2714,6 +2785,13 @@ function initPageOwnedControls(configs){
     const firstWeekday = (viewDate.getDay() + 6) % 7;
     const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
     const todayIso = toIsoDate(new Date());
+    // Trip-range highlight: shade the days between pickup and return in both calendars
+    const isTripDate = ctrl.id === 'pickupDate' || ctrl.id === 'dropoffDate';
+    const rangeStart = isTripDate ? parseIsoDate((document.getElementById('pickupDate') || {}).value || '') : null;
+    const rangeEnd = isTripDate ? parseIsoDate((document.getElementById('dropoffDate') || {}).value || '') : null;
+    const rangeOtherIso = ctrl.id === 'pickupDate' ? (rangeEnd ? toIsoDate(rangeEnd) : '') : (ctrl.id === 'dropoffDate' && rangeStart ? toIsoDate(rangeStart) : '');
+    const panelTitle = (ctrl.native.closest('.field')?.querySelector('label')?.textContent || ctrl.placeholder || '').trim();
+    const panelTitleHtml = panelTitle ? `<div class="custom-panel-title">${escapeCustomUi(panelTitle)}</div>` : '';
     let daysHtml = '';
     for (let i = 0; i < firstWeekday; i += 1) daysHtml += '<button type="button" class="custom-day is-empty" disabled></button>';
     for (let day = 1; day <= daysInMonth; day += 1) {
@@ -2725,12 +2803,15 @@ function initPageOwnedControls(configs){
         'custom-day',
         iso === nativeEl.value ? 'is-selected' : '',
         iso === todayIso ? 'is-today' : '',
+        (rangeStart && rangeEnd && candidate > rangeStart && candidate < rangeEnd) ? 'is-range' : '',
+        iso === rangeOtherIso ? 'is-range-edge' : '',
         disabled ? 'is-disabled' : ''
       ].filter(Boolean).join(' ');
       daysHtml += `<button type="button" class="${cls}" data-date="${iso}" ${disabled ? 'disabled' : ''}>${day}</button>`;
     }
     const monthJump = `<div class="calendar-jump" data-jump="month"><button type="button" class="calendar-jump-trigger" data-open-jump="month">${MONTHS[viewDate.getMonth()]}</button><div class="calendar-jump-menu month-menu">${MONTHS.map((label, idx) => `<button type="button" class="calendar-jump-option${idx === viewDate.getMonth() ? ' is-selected' : ''}" data-jump-value="${idx}" data-jump-kind="month">${label}</button>`).join('')}</div></div>`;
     ctrl.panel.innerHTML = `
+      ${panelTitleHtml}
       <div class="custom-calendar-head">
         <button type="button" class="custom-calendar-nav" data-step="-1">‹</button>
         <div class="custom-calendar-center">${monthJump}<strong>${viewDate.getFullYear()}</strong></div>
@@ -2772,6 +2853,7 @@ function initPageOwnedControls(configs){
         dispatchNativeChange(nativeEl);
         syncDate(ctrl);
         closeAll();
+        advanceChain(ctrl);
       });
     });
   };
@@ -2782,6 +2864,35 @@ function initPageOwnedControls(configs){
     ctrl.trigger.disabled = nativeEl.disabled;
     ctrl.monthRef = parseIsoDate(nativeEl.value) || parseIsoDate(nativeEl.min) || new Date();
     if (ctrl.panel.classList.contains('open')) renderCalendar(ctrl);
+  };
+  // ── Guided picker flow: pickup date → pickup time → return date → return time ──
+  const PICKER_CHAIN = { pickupDate: 'pickupTime', pickupTime: 'dropoffDate', dropoffDate: 'dropoffTime' };
+  let chainArmed = false;
+  const openPicker = (ctrl) => {
+    closeAll(ctrl.id);
+    ctrl.wrapper.classList.add('open');
+    ctrl.panel.classList.add('open');
+    ctrl.trigger.setAttribute('aria-expanded', 'true');
+    if (ctrl.type === 'date') renderCalendar(ctrl);
+    else {
+      syncSelect(ctrl);
+      const sel = ctrl.panel.querySelector('.custom-option.is-selected');
+      if (sel) ctrl.panel.scrollTop = Math.max(0, sel.offsetTop - (ctrl.panel.clientHeight / 2) + (sel.offsetHeight / 2));
+    }
+  };
+  const advanceChain = (ctrl) => {
+    if (ctrl.id === 'pickupDate' || ctrl.id === 'dropoffDate') chainArmed = true;
+    if (ctrl.id === 'dropoffTime') { chainArmed = false; return; }
+    if (!chainArmed) return;
+    const nextCtrl = controls.get(PICKER_CHAIN[ctrl.id] || '');
+    if (!nextCtrl) return;
+    setTimeout(() => openPicker(nextCtrl), 140);
+  };
+  window.openPickerById = (id) => {
+    const ctrl = controls.get(id);
+    if (!ctrl) return;
+    try { ctrl.wrapper.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {}
+    openPicker(ctrl);
   };
   configs.forEach((config) => {
     const nativeEl = document.getElementById(config.id) || document.querySelector(config.selector || '');
@@ -2794,13 +2905,17 @@ function initPageOwnedControls(configs){
     ctrl.trigger.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (ctrl.panel.classList.contains('open')) { closeAll(); return; }
-      closeAll(ctrl.id);
-      ctrl.wrapper.classList.add('open');
-      ctrl.panel.classList.add('open');
-      ctrl.trigger.setAttribute('aria-expanded', 'true');
-      if (ctrl.type === 'date') renderCalendar(ctrl);
-      else syncSelect(ctrl);
+      if (ctrl.panel.classList.contains('open')) { chainArmed = false; closeAll(); return; }
+      openPicker(ctrl);
+    });
+    ctrl.panel.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      const opts = Array.from(ctrl.panel.querySelectorAll('.custom-option:not([disabled])'));
+      if (!opts.length) return;
+      event.preventDefault();
+      const idx = opts.indexOf(document.activeElement);
+      const next = event.key === 'ArrowDown' ? Math.min(opts.length - 1, idx + 1) : Math.max(0, idx - 1);
+      opts[next].focus();
     });
     nativeEl.addEventListener('change', () => {
       if (ctrl.type === 'date') syncDate(ctrl); else syncSelect(ctrl);
@@ -2808,13 +2923,13 @@ function initPageOwnedControls(configs){
     if (ctrl.type === 'date') syncDate(ctrl); else syncSelect(ctrl);
   });
   document.addEventListener('pointerdown', (event) => {
-    if (!eventInsideCustomPicker(event)) closeAll();
+    if (!eventInsideCustomPicker(event)) { chainArmed = false; closeAll(); }
 });
   document.addEventListener('click', (event) => {
-    if (!eventInsideCustomPicker(event)) closeAll();
+    if (!eventInsideCustomPicker(event)) { chainArmed = false; closeAll(); }
   });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeAll();
+    if (event.key === 'Escape') { chainArmed = false; closeAll(); }
   });
   window.refreshCustomControls = (ids) => {
     const allow = Array.isArray(ids) && ids.length ? new Set(ids) : null;

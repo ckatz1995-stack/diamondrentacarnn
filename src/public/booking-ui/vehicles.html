@@ -678,6 +678,56 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .price-box .amount{font-size:26px!important}
   .media-col{min-height:138px!important}
 }
+
+/* ── CARD V2: results-style layout (photo | info | price+action rail) ── */
+.v2card{padding:0!important;overflow:hidden}
+.v2-grid{display:grid;grid-template-columns:240px minmax(0,1fr) 240px;align-items:stretch}
+.v2-media{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(200,138,53,.16),rgba(224,168,72,.05));padding:14px;min-height:150px}
+.v2-media img{max-width:100%;max-height:140px;object-fit:contain;filter:drop-shadow(0 10px 18px rgba(60,30,0,.25))}
+.v2-info{padding:16px 18px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.v2-cat{align-self:flex-start;background:rgba(160,110,35,.12);border:1px solid rgba(160,110,35,.32);color:#7a5e38;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 11px}
+.v2-title{margin:0;font-size:22px;line-height:1.15;color:#1c1408;font-weight:900}
+.v2-similar{font-size:13px;color:#8a7048;font-weight:600;white-space:nowrap}
+.v2-info .spec-chips{margin-top:2px}
+.v2-fees{margin-top:2px;font-size:13px;color:#4a3820;max-width:420px}
+.v2-fees summary{cursor:pointer;font-weight:800;color:#a07828;list-style-position:inside}
+.v2-fees[open] summary{margin-bottom:4px}
+.v2-fee-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed rgba(160,110,35,.18)}
+.v2-buy{display:flex;flex-direction:column;gap:7px;padding:16px 18px;border-left:1px solid rgba(160,110,35,.18);background:rgba(160,110,35,.05)}
+.v2-price{font-size:30px;font-weight:950;color:#a07828;letter-spacing:-.02em;line-height:1}
+.v2-per{font-size:13px;font-weight:700;color:#8a7048;margin-left:4px}
+.v2-total{font-size:13.5px;color:#4a3820}
+.v2-total strong{font-size:16px;color:#1c1408}
+.v2-season{margin:0!important}
+.cta.v2-cta{height:48px!important;font-size:15px!important;width:100%!important;padding:0 16px!important;border-radius:12px!important;margin-top:auto}
+@media(max-width:900px){
+  .v2-grid{grid-template-columns:1fr}
+  .v2-media{min-height:118px;padding:10px}
+  .v2-media img{max-height:108px}
+  .v2-info{padding:12px 14px 6px}
+  .v2-title{font-size:19px}
+  .v2-buy{border-left:0;border-top:1px solid rgba(160,110,35,.18);padding:12px 14px}
+  .v2-price{font-size:26px}
+  .cta.v2-cta{height:50px!important}
+}
+/* Trust strip */
+.trust-strip{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 14px;padding:9px 18px;background:rgba(255,255,255,.26);border:1px solid rgba(160,110,35,.14);border-radius:14px;margin:4px 0 10px;font-size:12.5px;font-weight:800;color:#3d3020}
+.ts-item{white-space:nowrap}
+.ts-sep{color:rgba(120,90,40,.32);font-weight:400}
+/* Compact inline sort toolbar */
+.results-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:rgba(255,255,255,.26);border:1px solid rgba(160,110,35,.12);border-radius:12px;margin-bottom:10px}
+.results-count{font-size:13px;font-weight:800;color:#3d3020}
+.sort-inline-wrap{display:flex;align-items:center;gap:8px}
+.sort-lbl{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:#5a4830;white-space:nowrap}
+.sort-select-slim{height:34px;border-radius:9px;border:1px solid rgba(160,110,35,.18);background:rgba(255,255,255,.90);padding:0 10px;font-size:13px;font-weight:700;color:#2a1e0a;font-family:inherit}
+/* V2 extras: hidden season */
+.v2-season-hidden{visibility:hidden}
+/* V2 photo placeholder */
+.v2-no-img{display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:130px;font-size:56px;color:rgba(255,255,255,.30);line-height:1}
+/* V2 fees inside buy column */
+.v2-buy .v2-fees{width:100%;font-size:12.5px;color:#4a3820;margin-top:0}
+.v2-buy .v2-fees summary{color:#1e5c72;font-size:12px}
+@media(max-width:620px){.results-toolbar{flex-wrap:wrap;gap:8px}.sort-select-slim{flex:1}.trust-strip{font-size:12px;padding:8px 12px}}
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -714,8 +764,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .search-summary-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .search-edit-btn{background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));border:0;color:#2a1d09;font-size:13px;font-weight:900;padding:8px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:42px;font-family:inherit;box-shadow:0 8px 18px rgba(160,110,35,.18)}
 .search-edit-btn:hover{filter:brightness(1.04)}
-.search-form-panel{transition:max-height .3s ease,opacity .25s ease;overflow:hidden;max-height:520px;opacity:1}
-.search-form-panel.collapsed{max-height:0;opacity:0;pointer-events:none}
+.search-form-panel{transition:max-height .3s ease,opacity .25s ease;overflow:visible;max-height:1400px;opacity:1}
+.search-form-panel.collapsed{max-height:0;opacity:0;pointer-events:none;overflow:hidden}
 @media(max-width:767px){
   .search-summary-bar{font-size:13px;padding:10px 12px}
   .field input,.field select{font-size:16px}
@@ -751,6 +801,100 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 #vehicleList{transition:opacity .25s ease}
 #vehicleList.loading{opacity:0}
 #vehicleList.loaded{opacity:1}
+</style>
+<style>
+/* ═══ UX PASS: layout-only fixes — all colors untouched ═══ */
+/* Brand: logo beside the two text lines (was: name + city crammed on one line) */
+.brand{flex-direction:row!important;align-items:center!important;gap:10px!important}
+.brand-text{display:flex;flex-direction:column;gap:1px;min-width:0}
+/* Tablet header: brand left, compact phone right, nav centered below
+   (was: everything stacked center with a full-width phone pill) */
+@media(max-width:1024px){
+  .header-inner{flex-wrap:wrap!important;justify-content:space-between!important;row-gap:8px}
+  .brand{order:1}
+  .header-phone{order:2;width:auto!important;text-align:left!important;margin-left:auto}
+  .mbr-area{order:3}
+  .hamburger-btn{order:4}
+  .header-nav{order:5;width:100%;justify-content:center}
+}
+</style>
+<style>
+/* ═══ PICKER POLISH: animation, scrollbar, checkmark, time grid, badges ═══ */
+.custom-panel{border-radius:16px!important;box-shadow:0 18px 44px rgba(0,0,0,.20),0 4px 12px rgba(0,0,0,.10)!important;animation:pickerIn .15s ease}
+@keyframes pickerIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.custom-panel{animation:none}}
+.custom-panel{scrollbar-width:thin;scrollbar-color:rgba(120,90,40,.35) transparent}
+.custom-panel::-webkit-scrollbar{width:8px}
+.custom-panel::-webkit-scrollbar-thumb{background:rgba(120,90,40,.30);border-radius:8px}
+.custom-panel::-webkit-scrollbar-track{background:transparent}
+.custom-option{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px}
+.custom-option .opt-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.custom-option.is-selected::after{content:'✓';font-weight:900;color:var(--accent2,#2d6072);flex:0 0 auto}
+/* Time pickers: 3-column grid — whole list scannable at a glance */
+.custom-options.time-cols{grid-template-columns:repeat(3,minmax(0,1fr))}
+.custom-options.time-cols .custom-option{justify-content:center;text-align:center;padding:10px 4px;min-height:42px;gap:4px}
+.custom-options.time-cols .custom-option .opt-label{flex:0 0 auto;overflow:visible}
+.custom-options.time-cols .custom-option.is-selected::after{content:none}
+.custom-options.time-cols .custom-option.is-selected{box-shadow:0 4px 10px rgba(45,96,114,.30)}
+.opt-night{flex:0 0 auto;font-size:11px;line-height:1;opacity:.8}
+.opt-fee{flex:0 0 auto;font-size:12px;font-weight:800;color:#8a5a10;background:rgba(231,191,105,.30);border:1px solid rgba(160,110,35,.25);padding:2px 9px;border-radius:999px;white-space:nowrap}
+.custom-option.is-selected .opt-fee{background:rgba(255,255,255,.85)}
+/* Calendar: slightly larger targets + selected-day depth */
+.custom-day{min-height:42px}
+.custom-day.is-selected{box-shadow:0 4px 12px rgba(45,96,114,.28)}
+/* Guided flow: panel titles + trip-range shading */
+.custom-panel-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:rgba(60,45,22,.62);padding:2px 4px 8px;border-bottom:1px solid rgba(70,50,16,.08);margin-bottom:8px}
+.custom-day.is-range{background:rgba(63,116,138,.13)}
+.custom-day.is-range-edge{background:rgba(63,116,138,.30);color:#10394a}
+/* Trip summary chips (tap to edit) */
+.search-summary-text{display:flex;flex-wrap:wrap;gap:6px;align-items:center;white-space:normal!important;overflow:visible!important}
+.sum-chip{border:1px solid rgba(160,110,35,.22);background:rgba(255,255,255,.85);color:#2b2114;font-size:12.5px;font-weight:800;border-radius:999px;padding:6px 12px;cursor:pointer;font-family:inherit;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sum-chip:hover{border-color:var(--gold,#e7bf69);background:rgba(231,191,105,.18)}
+.sum-days{font-size:12px;font-weight:900;color:#6a5737;padding:0 4px}
+.trip-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 14px;background:rgba(255,255,255,.78);border:1px solid rgba(160,110,35,.14);border-radius:16px;margin-bottom:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.68)}
+.trip-strip .sum-chip{cursor:default}
+.trip-strip .trip-edit-link{margin-left:auto;border:0;background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));color:#2a1d09;font-size:12.5px;font-weight:900;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.trip-strip .trip-edit-link:hover{filter:brightness(1.05)}
+.custom-day:not(.is-disabled):not(.is-empty):hover{transform:scale(1.06)}
+@media(prefers-reduced-motion:reduce){.custom-day:hover{transform:none}}
+</style>
+<style>
+/* ═══ SEARCH SIDEBAR: collapsed trip editor docks left of the results (≥980px) ═══ */
+@media(min-width:980px){
+  .page{display:grid;grid-template-columns:310px minmax(0,1fr);gap:14px;align-items:start}
+  .page>*{grid-column:2;min-width:0}
+  .page>.results-toolbar{grid-column:1/-1;grid-row:1}
+  .page>.search-wrap{grid-column:1;grid-row:2/span 40;margin-bottom:0}
+  /* Sidebar form: single-column fields */
+  .search-grid,.search-options-grid{grid-template-columns:1fr!important}
+  .search-summary-bar{flex-wrap:wrap;gap:8px}
+  .search-summary-text{width:100%}
+  .search-edit-btn{width:100%;margin-top:2px}
+  .panel-footer{flex-direction:column;align-items:stretch}
+  .search-note{display:none}
+}
+/* Sidebar always expanded: no chips, no collapse */
+@media(min-width:980px){
+  .search-summary-bar{display:none!important}
+  .search-form-panel{max-height:none!important;opacity:1!important;overflow:visible!important;pointer-events:auto!important}
+}
+/* Narrower main column next to the sidebar: compact the card grid */
+@media(min-width:980px) and (max-width:1280px){
+  .v2-grid{grid-template-columns:170px minmax(0,1fr) 200px}
+  .v2-media img{max-height:108px}
+  .v2-title{font-size:19px}
+  .v2-price{font-size:26px}
+}
+</style>
+<style>
+/* ═══ FILTER LINE: dark teal toolbar + interactive category tabs ═══ */
+.results-toolbar{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border:1px solid rgba(231,191,105,.20)!important;box-shadow:0 10px 26px rgba(0,0,0,.18)!important;flex-wrap:wrap;gap:10px}
+.cat-tabs{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+.cat-tab{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#f3ead2;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 14px;cursor:pointer;font-family:inherit;letter-spacing:.04em;transition:background .15s ease,border-color .15s ease}
+.cat-tab:hover{background:rgba(231,191,105,.18);border-color:rgba(231,191,105,.40)}
+.cat-tab.is-active{background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));color:#2a1d09;border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.22)}
+.results-toolbar .sort-lbl{color:rgba(255,255,255,.62)!important}
+@media(max-width:620px){.cat-tab{padding:8px 12px;font-size:12px}}
 </style>
 </head>
 <body>
@@ -878,22 +1022,16 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div><!-- end search-form-panel -->
   </section>
 
-  <section class="filter-combined" aria-label="Ταξινόμηση αποτελεσμάτων">
-    <div class="filter-row">
-      <div class="filter-slot">
-        <p class="filter-title">Ταξινόμηση αποτελεσμάτων</p>
-        <select id="sortSelect">
-          <option value="priceAsc">Τιμή: Χαμηλότερη → Υψηλό</option>
-          <option value="priceDesc">Τιμή: Υψηλότερη → Χαμηλό</option>
-          <option value="nameAsc">Όνομα: Α → Ω</option>
-        </select>
-      </div>
+  <div class="results-toolbar">
+    <div class="cat-tabs" id="catTabs" role="tablist" aria-label="Φίλτρο κατηγορίας"></div>
+    <div class="sort-inline-wrap">
+      <span class="sort-lbl">Ταξινόμηση</span>
+      <select id="sortSelect" class="sort-select-slim">
+        <option value="priceAsc">Τιμή ↑</option>
+        <option value="priceDesc">Τιμή ↓</option>
+        <option value="nameAsc">Α → Ω</option>
+      </select>
     </div>
-  </section>
-
-  <div class="search-strip" id="searchStrip" hidden>
-    <span class="ss-txt" id="searchStripTxt"></span>
-    <button class="ss-edit" id="searchStripEdit" type="button">Αλλαγή</button>
   </div>
 
   <section class="list" id="list">
@@ -925,6 +1063,11 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     <button class="empty-state-btn" id="emptyStateModifyBtn" type="button">Τροποποίηση αναζήτησης</button>
   </div>
   </section>
+
+  <div class="search-strip" id="changeSearchRow">
+    <span class="ss-txt">Θέλεις άλλες ημερομηνίες ή τοποθεσία;</span>
+    <button class="ss-edit" id="changeSearchBtn" type="button">Αλλαγή αναζήτησης</button>
+  </div>
 </div>
 
 <footer class="footer">
@@ -1132,6 +1275,18 @@ function filterVehiclesByCategory(items, selectedCategory){
   if(!key || key === 'ALL' || key === 'DEFAULT') return [...items];
   return (items || []).filter((item) => categoryKeyOf(item) === key);
 }
+function renderCatTabs(items){
+  const box = document.getElementById('catTabs');
+  if(!box) return;
+  const cats = [...new Set((items || []).map(categoryKeyOf).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'el'));
+  const current = normalizeCategoryKey(categorySelect.value || 'all');
+  box.innerHTML = ['__ALL__', ...cats].map((key) => {
+    const isAll = key === '__ALL__';
+    const val = isAll ? 'all' : key;
+    const active = isAll ? (!current || current === 'ALL') : current === key;
+    return `<button type="button" class="cat-tab${active ? ' is-active' : ''}" data-cat="${escapeHtml(val)}" role="tab" aria-selected="${active ? 'true' : 'false'}">${isAll ? 'Όλες' : escapeHtml(key)}</button>`;
+  }).join('');
+}
 function syncCategoryOptions(items){
   const current = normalizeCategoryKey(categorySelect.value || pendingCategory || category || 'all');
   const categories = [...new Set((items || []).map(categoryKeyOf).filter(Boolean))];
@@ -1140,6 +1295,7 @@ function syncCategoryOptions(items){
   else categorySelect.value = 'all';
   categoryHint.textContent = `Επιλεγμένη κατηγορία: ${categorySelect.value === "all" ? "Όλες" : categorySelect.value}`;
   if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['category']);
+  renderCatTabs(items);
 }
 
 const storedSearch = safeRead(BOOKING_STORAGE_KEY) || safeRead(LEGACY_BOOKING_STORAGE_KEY) || {};
@@ -1183,20 +1339,6 @@ function clearQuotesPending(){
   clearTimeout(_quotesPendingTimer);
 }
 
-function updateSearchStrip(){
-  const strip = document.getElementById('searchStrip');
-  const txt = document.getElementById('searchStripTxt');
-  if(!strip || !txt) return;
-  const pd = document.getElementById('pickupDate')?.value || '';
-  const dd = document.getElementById('dropoffDate')?.value || '';
-  const pt = document.getElementById('pickupTime')?.value || '';
-  const dt = document.getElementById('dropoffTime')?.value || '';
-  const pl = document.getElementById('pickupLocation')?.value || '';
-  if(!pd || !dd){ strip.hidden = true; return; }
-  const fmt = (iso) => { const p = String(iso).split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : iso; };
-  txt.textContent = `${fmt(pd)} ${pt} → ${fmt(dd)} ${dt}${pl ? ` · ${pl}` : ''}`;
-  strip.hidden = false;
-}
 
 function parseSiteBaseFromUrl(value){
   try {
@@ -1533,8 +1675,16 @@ function render(){
   const nightExtra = nightRows.reduce((sum, item) => sum + item.amount, 0);
 
   // Resolve active season once for all cards
-  const _pickupDate = new Date(window.BookingState ? (BookingState.get('pickup') || '') : '');
+  const _pdElR = document.getElementById('pickupDate');
+  const _ptElR = document.getElementById('pickupTime');
+  const _pickupDate = _pdElR && _pdElR.value
+    ? new Date(`${_pdElR.value}T${(_ptElR && _ptElR.value) || '00:00'}:00`)
+    : new Date(window.BookingState ? (BookingState.get('pickup') || '') : '');
   const _activeSeason = (!isNaN(_pickupDate.getTime())) ? resolveSeason(_pickupDate) : null;
+
+  // Update result count display
+  const _rcEl = document.getElementById('resultMetaRow');
+  if (_rcEl) _rcEl.textContent = filtered.length + ' ' + (filtered.length === 1 ? 'κατηγορία' : 'κατηγορίες') + ' διαθέσιμες';
 
   // DIAMOND STATE: Read previously selected category for card highlight
   const bsSelectedCat = (window.BookingState ? BookingState.get('vehicleCategory') : null) || '';
@@ -1555,56 +1705,51 @@ function render(){
     const totalDisp = grandTotal > 0 ? fmtMoney(grandTotal) : (quotesLoading ? '<span class="price-skel"></span>' : '—');
     const specVal = (v) => { const s = String(v ?? '').trim(); return s && s !== '—' && s !== '-' ? s : ''; };
     const chips = [
-      specVal(specs.gearbox) ? `⚙️ ${escapeHtml(specVal(specs.gearbox))}` : '',
-      specVal(specs.fuel) ? `⛽ ${escapeHtml(specVal(specs.fuel))}` : '',
-      specVal(specs.seats) ? `👤 ${escapeHtml(specVal(specs.seats))} θέσεις` : '',
-      specVal(specs.bags || specs.luggage) ? `🧳 ${escapeHtml(specVal(specs.bags || specs.luggage))}` : '',
-      specVal(specs.doors) ? `🚪 ${escapeHtml(specVal(specs.doors))} πόρτες` : '',
-      String(specs.ac || '').trim() === 'Ναι' ? '❄️ A/C' : ''
+      specVal(specs.gearbox) ? escapeHtml(specVal(specs.gearbox)) : '',
+      specVal(specs.fuel) ? escapeHtml(specVal(specs.fuel)) : '',
+      specVal(specs.seats) ? escapeHtml(specVal(specs.seats)) + ' θέσεις' : '',
+      specVal(specs.bags || specs.luggage) ? escapeHtml(specVal(specs.bags || specs.luggage)) + ' βαλίτσες' : '',
+      specVal(specs.doors) ? escapeHtml(specVal(specs.doors)) + ' πόρτες' : '',
+      String(specs.ac || '').trim() === 'Ναι' ? 'A/C' : ''
     ].filter(Boolean).map((c) => `<span class="chip">${c}</span>`).join('');
-    const ctaLabel = grandTotal > 0
-      ? `${escapeHtml(selectionButtonLabel())} <span class="cta-total">— ${fmtMoney(grandTotal)}</span>`
-      : escapeHtml(selectionButtonLabel());
+    const ctaLabel = escapeHtml(selectionButtonLabel());
+    const rawName = String(vehicle.name || vehicle.title || vehicle.model || 'Όχημα');
+    const cleanName = catCode ? rawName.replace(new RegExp(`^${catCode}\\s*-\\s*`, 'i'), '').trim() || rawName : rawName;
+    const billDays = serverQuote ? (serverQuote.billableDays || days) : days;
+    const feeRows = serverQuote ? [
+      serverQuote.insuranceCost > 0 ? `<div class="v2-fee-row"><span>Ασφάλεια CDW</span><span>${fmtMoney(serverQuote.insuranceCost)}</span></div>` : '',
+      serverQuote.ageFee > 0 ? `<div class="v2-fee-row"><span>${ageLabel(ageGroup.value)}</span><span>${fmtMoney(serverQuote.ageFee)}</span></div>` : '',
+      serverQuote.nightFee > 0 ? `<div class="v2-fee-row"><span>Νυχτερινή χρέωση</span><span>${fmtMoney(serverQuote.nightFee)}</span></div>` : '',
+      serverQuote.locationFee > 0 ? `<div class="v2-fee-row"><span>Χρέωση τοποθεσιών</span><span>${fmtMoney(serverQuote.locationFee)}</span></div>` : ''
+    ].filter(Boolean).join('') : '';
+    const feesBlock = feeRows
+      ? `<details class="v2-fees"><summary>Ανάλυση χρέωσης</summary><div class="v2-fee-row"><span>Ενοικίαση ${billDays} × ${dailyDisp}</span><span>${serverQuote ? fmtMoney(serverQuote.baseCost || dailyPrice * billDays) : fmtMoney(baseTotal)}</span></div>${feeRows}</details>`
+      : '';
+    const serverSeasonLabel = serverQuote?.season?.label || serverQuote?.season?.name || '';
+    const displaySeasonLabel = serverSeasonLabel || (hasSeasonRate ? _activeSeason.label : '');
+    const imgSrc = escapeHtml(vehicle.image || '');
+    const imgEl = imgSrc
+      ? `<img src="${imgSrc}" alt="${escapeHtml(rawName)}" loading="lazy">`
+      : `<div class="v2-no-img">◆</div>`;
     return `
-      <article class="result-card${isSelected ? ' is-selected-card' : ''}">
-        <div class="result-main">
-          <div class="media-col">
-            <div class="vehicle-badge">${escapeHtml(vehicle.categoryLabel || vehicle.label || vehicle.category || "-")}</div>
-            <img class="vehicle-image" src="${escapeHtml(vehicle.image || "")}" alt="${escapeHtml(vehicle.name || vehicle.title || "Όχημα")}">
-          </div>
-          <div class="content-col">
-            <div class="head-row">
-              <div>
-                <h2 class="vehicle-title">${escapeHtml(vehicle.name || vehicle.title || vehicle.model || "Vehicle")} <span class="similar">ή παρόμοιο</span></h2>
-                <p class="vehicle-copy">${escapeHtml(copy)}</p>
-              </div>
-              <div class="price-box">
-                <span class="amount">${dailyDisp}</span>
-                <span class="sub">ανά ημέρα</span>
-                ${hasSeasonRate ? `<span class="season-badge">${escapeHtml(_activeSeason.label)}</span>` : ''}
-              </div>
-            </div>
+      <article class="result-card v2card${isSelected ? ' is-selected-card' : ''}">
+        <div class="v2-grid">
+          <div class="v2-media">${imgEl}</div>
+          <div class="v2-info">
+            <span class="v2-cat">Κατηγορία ${escapeHtml(catCode || '—')}</span>
+            <h2 class="v2-title">${escapeHtml(cleanName)}<span class="v2-similar"> ή παρόμοιο</span></h2>
             <div class="spec-chips">${chips || '<span class="chip">—</span>'}</div>
           </div>
-        </div>
-        <div class="result-bottom">
-          <div class="total-box">
-            <div class="total-stack">
-              ${hasSeasonRate ? `<div class="total-row season-row"><span class="k">Σεζόν</span><span class="v season-val">${escapeHtml(_activeSeason.label)}</span></div>` : ''}
-              <div class="total-row"><span class="k">Τιμή / ημέρα</span><span class="v">${dailyDisp}</span></div>
-              <div class="total-row"><span class="k">Ημέρες</span><span class="v">${serverQuote ? (serverQuote.billableDays || days) : days}</span></div>
-              ${serverQuote && serverQuote.insuranceCost > 0 ? `<div class="total-row"><span class="k">Ασφάλεια CDW</span><span class="v">${fmtMoney(serverQuote.insuranceCost)}</span></div>` : ''}
-              ${serverQuote && serverQuote.ageFee > 0 ? `<div class="total-row"><span class="k">${ageLabel(ageGroup.value)}</span><span class="v">${fmtMoney(serverQuote.ageFee)}</span></div>` : ''}
-              ${serverQuote && serverQuote.nightFee > 0 ? `<div class="total-row"><span class="k">Νυχτερινή χρέωση</span><span class="v">${fmtMoney(serverQuote.nightFee)}</span></div>` : ''}
-              ${serverQuote && serverQuote.locationFee > 0 ? `<div class=\"total-row\"><span class=\"k\">Χρέωση τοποθεσιών</span><span class=\"v\">${fmtMoney(serverQuote.locationFee)}</span></div>` : ''}
-              <div class=\"total-row grand\"><span class=\"k\">Σύνολο</span><span class=\"v\">${totalDisp}</span></div>
-            </div>
+          <div class="v2-buy">
+            <span class="season-badge v2-season${displaySeasonLabel ? '' : ' v2-season-hidden'}">${escapeHtml(displaySeasonLabel || '—')}</span>
+            <div class="v2-price">${dailyDisp}<span class="v2-per"> / ημέρα</span></div>
+            <div class="v2-total">Σύνολο <strong>${totalDisp}</strong> · ${billDays} ${billDays === 1 ? 'ημέρα' : 'ημέρες'}</div>
+            ${feesBlock}
+            <button class="cta v2-cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${ctaLabel}</button>
           </div>
-          <div class="card-footer"><button class="cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${ctaLabel}</button></div>
         </div>
       </article>`;
   }).join("");
-  updateSearchStrip();
   notifyHeight();
 }
 function setLoading(message){
@@ -1695,7 +1840,8 @@ window.addEventListener('message', (event) => {
   }
 });
 
-document.getElementById('searchStripEdit')?.addEventListener('click', () => {
+document.getElementById('changeSearchBtn')?.addEventListener('click', () => {
+  if (typeof window._openSearchPanel === 'function') window._openSearchPanel();
   try { parent.postMessage({ type: 'wix-scroll-top' }, '*'); } catch(e) {}
   try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
 });
@@ -1772,12 +1918,37 @@ function validateDateRange(){
 }
 sortSelect.addEventListener("change", () => { updateState(); render(); });
 ageGroup.addEventListener('change', () => { updateState(); render(); triggerServerQuotes(); });
+// Date guards: no past pickup dates; return date can never sit before pickup.
+function syncDateConstraints(bumpDropoff){
+  const pd = document.getElementById('pickupDate');
+  const dd = document.getElementById('dropoffDate');
+  if(!pd || !dd) return;
+  pd.min = toDateInput(new Date());
+  if(pd.value){
+    dd.min = pd.value;
+    if(bumpDropoff && dd.value && dd.value < pd.value){
+      const next = new Date(`${pd.value}T00:00:00`);
+      next.setDate(next.getDate() + 1);
+      dd.value = toDateInput(next);
+      if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['dropoffDate']);
+    }
+  }
+}
+syncDateConstraints(false);
 ['pickupDate','pickupTime','dropoffDate','dropoffTime','pickupLocation','dropoffLocation'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => { updateState(); validateDateRange(); render(); triggerServerQuotes(); });
+  document.getElementById(id).addEventListener('change', () => { if(id === 'pickupDate') syncDateConstraints(true); updateState(); validateDateRange(); render(); triggerServerQuotes(); });
+});
+document.getElementById('catTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.cat-tab');
+  if(!btn) return;
+  categorySelect.value = btn.dataset.cat || 'all';
+  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['category']);
+  categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
 });
 categorySelect.addEventListener("change", () => {
   try{ sessionStorage.setItem(CAT_RESTORE_KEY, categorySelect.value); }catch(_){}
   try{ localStorage.setItem(CAT_RESTORE_KEY, categorySelect.value); }catch(_){}
+  renderCatTabs(embeddedVehicleItems || []);
   updateState();
   if(Array.isArray(embeddedVehicleItems)){
     vehicles = filterVehiclesByCategory(embeddedVehicleItems, categorySelect.value);
@@ -1819,6 +1990,8 @@ function goBooking(vehicleId, vehicleCategoryCode){
 
   goTo(`${PAGE_ROUTES.options}?vehicle=${encodeURIComponent(vehicleId)}&pickup=${encodeURIComponent(payload.pickup)}&dropoff=${encodeURIComponent(payload.dropoff)}&pickupLocation=${encodeURIComponent(pickupLocation)}&dropoffLocation=${encodeURIComponent(dropoffLocation)}&category=${encodeURIComponent(extractCategoryCode(vehicleCategoryCode || categorySelect.value))}&age=${encodeURIComponent(ageGroup.value)}`);
 }
+// Category is picked via the toolbar tabs on this page — hide the duplicate sidebar field
+(function(){ try{ const f = document.getElementById('category').closest('.field'); if(f) f.style.display = 'none'; }catch(_){} })();
 initPageOwnedControls([
   { id:'pickupLocation', type:'select', placeholder:'Επιλογή τοποθεσίας' },
   { id:'pickupDate', type:'date', placeholder:'Επιλογή ημερομηνίας' },
@@ -1859,29 +2032,42 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
   }catch(_){}
 })();
 
-// DIAMOND: Compact search editor summary
+// DIAMOND: Compact search editor summary — chip per setting, tap a chip to edit it
+function fmtChipDate(iso){
+  var m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? (m[3] + '/' + m[2]) : (iso || 'ημ/νία');
+}
 function updateSearchSummaryBar(){
   try{
     var summaryText = document.getElementById('searchSummaryText');
     if(!summaryText) return;
-    var pl = document.getElementById('pickupLocation');
-    var dl = document.getElementById('dropoffLocation');
-    var pd = document.getElementById('pickupDate');
-    var pt = document.getElementById('pickupTime');
-    var dd = document.getElementById('dropoffDate');
-    var dt = document.getElementById('dropoffTime');
+    var val = function(id){ var el = document.getElementById(id); return el ? el.value : ''; };
+    var pl = val('pickupLocation') || 'Παραλαβή';
+    var dl = val('dropoffLocation') || 'Επιστροφή';
     var categoryEl = document.getElementById('category');
-    var ageEl = document.getElementById('ageGroup');
-    var days = typeof currentDays === 'function' ? currentDays() : '?';
-    var from = (pl && pl.value) ? pl.value : 'Παραλαβή';
-    var to = (dl && dl.value) ? dl.value : 'Επιστροφή';
-    var pickupWhen = ((pd && pd.value) ? pd.value : 'ημ/νία') + ((pt && pt.value) ? ' ' + pt.value : '');
-    var dropoffWhen = ((dd && dd.value) ? dd.value : 'ημ/νία') + ((dt && dt.value) ? ' ' + dt.value : '');
-    var categoryText = categoryEl ? categoryEl.options[categoryEl.selectedIndex]?.text || categoryEl.value : 'Όλες οι κατηγορίες';
-    var ageText = ageEl && ageEl.value ? ageEl.value : '23-69';
-    summaryText.textContent = from + ' · ' + pickupWhen + ' → ' + to + ' · ' + dropoffWhen + ' · ' + categoryText + ' · Ηλικία ' + ageText + ' · ' + days + ' ημέρες';
+    var categoryText = categoryEl ? (categoryEl.options[categoryEl.selectedIndex]?.text || categoryEl.value) : 'Όλες';
+    var days = typeof currentDays === 'function' ? currentDays() : '';
+    var chips = [
+      { id: 'pickupLocation', label: pl },
+      { id: 'pickupDate', label: fmtChipDate(val('pickupDate')) + ' ' + (val('pickupTime') || '') },
+      { id: 'dropoffLocation', label: dl },
+      { id: 'dropoffDate', label: fmtChipDate(val('dropoffDate')) + ' ' + (val('dropoffTime') || '') },
+      { id: 'category', label: categoryText },
+      { id: 'ageGroup', label: 'Ηλικία ' + (val('ageGroup') || '23-69') }
+    ];
+    summaryText.innerHTML = chips.map(function(c){
+      return '<button type="button" class="sum-chip" data-edit="' + c.id + '">' + escapeHtml(String(c.label).trim()) + '</button>';
+    }).join('') + (days ? '<span class="sum-days">' + days + ' ' + (days === 1 ? 'ημέρα' : 'ημέρες') + '</span>' : '');
   }catch(_){}
 }
+// Chip taps: expand the form and open the matching picker directly
+document.addEventListener('click', function(e){
+  var chip = e.target.closest('.sum-chip');
+  if(!chip) return;
+  if(typeof window._openSearchPanel === 'function') window._openSearchPanel();
+  var target = chip.dataset.edit;
+  setTimeout(function(){ if(typeof window.openPickerById === 'function') window.openPickerById(target); }, 320);
+});
 (function(){
   var editBtn = document.getElementById('searchEditBtn');
   var formPanel = document.getElementById('searchFormPanel');
@@ -1892,6 +2078,7 @@ function updateSearchSummaryBar(){
     editBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     updateSearchSummaryBar();
   }
+  window._openSearchPanel = function(){ setSearchPanel(true); };
   setSearchPanel(false);
   editBtn.addEventListener('click',function(){
     setSearchPanel(formPanel.classList.contains('collapsed'));
@@ -2015,12 +2202,24 @@ function initPageOwnedControls(configs){
     ctrl.trigger.textContent = triggerText;
     ctrl.trigger.classList.toggle('is-placeholder', !nativeEl.value);
     ctrl.trigger.disabled = nativeEl.disabled;
-    const baseSignature = [...nativeEl.options].map((opt) => `${opt.value}::${opt.textContent}::${opt.disabled?'1':'0'}`).join('||');
-    const signature = ctrl.flavor === 'time' ? `${baseSignature}##${pricingCatalog?.businessSettings?.operatingHoursLabel || ''}##${pricingCatalog?.businessSettings?.afterHoursNotice || ''}` : baseSignature;
+    const isTimeSel = ctrl.flavor === 'time' || /time$/i.test(ctrl.id || '');
+    const isLocSel = /location|point/i.test(ctrl.id || '');
+    const locKind = /^pickup/i.test(ctrl.id || '') ? 'pickup' : 'dropoff';
+    const noteHtml = isTimeSel && typeof getTimePickerMetaHtml === 'function' ? getTimePickerMetaHtml() : '';
+    const optionHtml = [...nativeEl.options].map((opt) => {
+      let badge = '';
+      if (isTimeSel && typeof isNightTime === 'function' && isNightTime(opt.value)) badge = '<span class="opt-night" title="Ισχύει νυχτερινή χρέωση">🌙</span>';
+      if (isLocSel && typeof locationFeeFor === 'function') {
+        const fee = Number(locationFeeFor(opt.value, locKind) || 0);
+        if (fee > 0) badge = `<span class="opt-fee">+${fee}€</span>`;
+      }
+      return `<button type="button" class="custom-option${opt.value === nativeEl.value ? ' is-selected' : ''}" data-value="${escapeCustomUi(opt.value)}" ${opt.disabled ? 'disabled' : ''}><span class="opt-label">${escapeCustomUi(opt.textContent || '')}</span>${badge}</button>`;
+    }).join('');
+    const signature = `${optionHtml}##${noteHtml}`;
     if (signature !== ctrl.signature) {
       ctrl.signature = signature;
-      const noteHtml = ctrl.flavor === 'time' ? getTimePickerMetaHtml() : '';
-      ctrl.panel.innerHTML = `<div class="custom-options">${[...nativeEl.options].map((opt) => `<button type="button" class="custom-option${opt.value === nativeEl.value ? ' is-selected' : ''}" data-value="${escapeCustomUi(opt.value)}" ${opt.disabled ? 'disabled' : ''}>${escapeCustomUi(opt.textContent || '')}</button>`).join('')}</div>${noteHtml}`;
+      const selTitle = (ctrl.native.closest('.field')?.querySelector('label')?.textContent || ctrl.placeholder || '').trim();
+      ctrl.panel.innerHTML = `${selTitle ? `<div class="custom-panel-title">${escapeCustomUi(selTitle)}</div>` : ''}<div class="custom-options${isTimeSel ? ' time-cols' : ''}">${optionHtml}</div>${noteHtml}`;
       ctrl.panel.querySelectorAll('.custom-option').forEach((btn) => {
         btn.addEventListener('click', (event) => {
           event.preventDefault();
@@ -2029,6 +2228,7 @@ function initPageOwnedControls(configs){
           dispatchNativeChange(nativeEl);
           syncSelect(ctrl);
           closeAll();
+          advanceChain(ctrl);
         });
       });
     } else {
@@ -2046,6 +2246,13 @@ function initPageOwnedControls(configs){
     const firstWeekday = (viewDate.getDay() + 6) % 7;
     const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
     const todayIso = toIsoDate(new Date());
+    // Trip-range highlight: shade the days between pickup and return in both calendars
+    const isTripDate = ctrl.id === 'pickupDate' || ctrl.id === 'dropoffDate';
+    const rangeStart = isTripDate ? parseIsoDate((document.getElementById('pickupDate') || {}).value || '') : null;
+    const rangeEnd = isTripDate ? parseIsoDate((document.getElementById('dropoffDate') || {}).value || '') : null;
+    const rangeOtherIso = ctrl.id === 'pickupDate' ? (rangeEnd ? toIsoDate(rangeEnd) : '') : (ctrl.id === 'dropoffDate' && rangeStart ? toIsoDate(rangeStart) : '');
+    const panelTitle = (ctrl.native.closest('.field')?.querySelector('label')?.textContent || ctrl.placeholder || '').trim();
+    const panelTitleHtml = panelTitle ? `<div class="custom-panel-title">${escapeCustomUi(panelTitle)}</div>` : '';
     let daysHtml = '';
     for (let i = 0; i < firstWeekday; i += 1) daysHtml += '<button type="button" class="custom-day is-empty" disabled></button>';
     for (let day = 1; day <= daysInMonth; day += 1) {
@@ -2057,12 +2264,15 @@ function initPageOwnedControls(configs){
         'custom-day',
         iso === nativeEl.value ? 'is-selected' : '',
         iso === todayIso ? 'is-today' : '',
+        (rangeStart && rangeEnd && candidate > rangeStart && candidate < rangeEnd) ? 'is-range' : '',
+        iso === rangeOtherIso ? 'is-range-edge' : '',
         disabled ? 'is-disabled' : ''
       ].filter(Boolean).join(' ');
       daysHtml += `<button type="button" class="${cls}" data-date="${iso}" ${disabled ? 'disabled' : ''}>${day}</button>`;
     }
     const monthJump = `<div class="calendar-jump" data-jump="month"><button type="button" class="calendar-jump-trigger" data-open-jump="month">${MONTHS[viewDate.getMonth()]}</button><div class="calendar-jump-menu month-menu">${MONTHS.map((label, idx) => `<button type="button" class="calendar-jump-option${idx === viewDate.getMonth() ? ' is-selected' : ''}" data-jump-value="${idx}" data-jump-kind="month">${label}</button>`).join('')}</div></div>`;
     ctrl.panel.innerHTML = `
+      ${panelTitleHtml}
       <div class="custom-calendar-head">
         <button type="button" class="custom-calendar-nav" data-step="-1">‹</button>
         <div class="custom-calendar-center">${monthJump}<strong>${viewDate.getFullYear()}</strong></div>
@@ -2104,6 +2314,7 @@ function initPageOwnedControls(configs){
         dispatchNativeChange(nativeEl);
         syncDate(ctrl);
         closeAll();
+        advanceChain(ctrl);
       });
     });
   };
@@ -2114,6 +2325,35 @@ function initPageOwnedControls(configs){
     ctrl.trigger.disabled = nativeEl.disabled;
     ctrl.monthRef = parseIsoDate(nativeEl.value) || parseIsoDate(nativeEl.min) || new Date();
     if (ctrl.panel.classList.contains('open')) renderCalendar(ctrl);
+  };
+  // ── Guided picker flow: pickup date → pickup time → return date → return time ──
+  const PICKER_CHAIN = { pickupDate: 'pickupTime', pickupTime: 'dropoffDate', dropoffDate: 'dropoffTime' };
+  let chainArmed = false;
+  const openPicker = (ctrl) => {
+    closeAll(ctrl.id);
+    ctrl.wrapper.classList.add('open');
+    ctrl.panel.classList.add('open');
+    ctrl.trigger.setAttribute('aria-expanded', 'true');
+    if (ctrl.type === 'date') renderCalendar(ctrl);
+    else {
+      syncSelect(ctrl);
+      const sel = ctrl.panel.querySelector('.custom-option.is-selected');
+      if (sel) ctrl.panel.scrollTop = Math.max(0, sel.offsetTop - (ctrl.panel.clientHeight / 2) + (sel.offsetHeight / 2));
+    }
+  };
+  const advanceChain = (ctrl) => {
+    if (ctrl.id === 'pickupDate' || ctrl.id === 'dropoffDate') chainArmed = true;
+    if (ctrl.id === 'dropoffTime') { chainArmed = false; return; }
+    if (!chainArmed) return;
+    const nextCtrl = controls.get(PICKER_CHAIN[ctrl.id] || '');
+    if (!nextCtrl) return;
+    setTimeout(() => openPicker(nextCtrl), 140);
+  };
+  window.openPickerById = (id) => {
+    const ctrl = controls.get(id);
+    if (!ctrl) return;
+    try { ctrl.wrapper.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {}
+    openPicker(ctrl);
   };
   configs.forEach((config) => {
     const nativeEl = document.getElementById(config.id) || document.querySelector(config.selector || '');
@@ -2126,13 +2366,17 @@ function initPageOwnedControls(configs){
     ctrl.trigger.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (ctrl.panel.classList.contains('open')) { closeAll(); return; }
-      closeAll(ctrl.id);
-      ctrl.wrapper.classList.add('open');
-      ctrl.panel.classList.add('open');
-      ctrl.trigger.setAttribute('aria-expanded', 'true');
-      if (ctrl.type === 'date') renderCalendar(ctrl);
-      else syncSelect(ctrl);
+      if (ctrl.panel.classList.contains('open')) { chainArmed = false; closeAll(); return; }
+      openPicker(ctrl);
+    });
+    ctrl.panel.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      const opts = Array.from(ctrl.panel.querySelectorAll('.custom-option:not([disabled])'));
+      if (!opts.length) return;
+      event.preventDefault();
+      const idx = opts.indexOf(document.activeElement);
+      const next = event.key === 'ArrowDown' ? Math.min(opts.length - 1, idx + 1) : Math.max(0, idx - 1);
+      opts[next].focus();
     });
     nativeEl.addEventListener('change', () => {
       if (ctrl.type === 'date') syncDate(ctrl); else syncSelect(ctrl);
@@ -2140,13 +2384,13 @@ function initPageOwnedControls(configs){
     if (ctrl.type === 'date') syncDate(ctrl); else syncSelect(ctrl);
   });
   document.addEventListener('pointerdown', (event) => {
-    if (!eventInsideCustomPicker(event)) closeAll();
+    if (!eventInsideCustomPicker(event)) { chainArmed = false; closeAll(); }
   });
   document.addEventListener('click', (event) => {
-    if (!eventInsideCustomPicker(event)) closeAll();
+    if (!eventInsideCustomPicker(event)) { chainArmed = false; closeAll(); }
   });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeAll();
+    if (event.key === 'Escape') { chainArmed = false; closeAll(); }
   });
   window.refreshCustomControls = (ids) => {
     const allow = Array.isArray(ids) && ids.length ? new Set(ids) : null;

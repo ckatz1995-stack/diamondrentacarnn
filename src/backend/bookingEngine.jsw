@@ -4,7 +4,7 @@ import { fetch as wixFetch } from 'wix-fetch';
 import { getSecret } from 'wix-secrets-backend';
 import { VAT_RATE } from 'backend/bookingConfig';
 import { notifyBookingSubmitted } from 'backend/notificationTriggers.jsw';
-import { getPricingCatalog, getFallbackCatalogSnapshot, computeAutomaticFees, resolveDynamicPricingRate } from 'backend/pricingCatalog.jsw';
+import { getPricingCatalog, getFallbackCatalogSnapshot, resolveDynamicPricingRate } from 'backend/pricingCatalog.jsw';
 import { buildPricingSnapshot } from 'backend/pricingSnapshot.js';
 import { computeBillableDaysDetailed } from 'backend/billableDays';
 
@@ -176,6 +176,45 @@ function normalizeCatalogArrays(catalog) {
     categoryRateRules: toArrayLike(catalog.categoryRateRules),
     feeRules: toArrayLike(catalog.feeRules),
     pickupLocations: toArrayLike(catalog.pickupLocations)
+  };
+}
+
+// Inline automatic fees — self-contained. Calling computeAutomaticFees across the
+// pricingCatalog module boundary corrupts the feeRules payload in production
+// (same failure mode that forced the inline season resolver), which made quotes
+// silently fall back to hardcoded amounts (16/15) instead of the admin rules.
+function inlineComputeAutomaticFees({ driverAge, pickupDateTime, dropoffDateTime, businessSettings, feeRules }) {
+  const rules = toArrayLike(feeRules).filter((rule) => rule && typeof rule === 'object' && rule.active !== false);
+  const settings = businessSettings || {};
+  const nightStart = toFiniteNumber(settings.nightStartHour, 22);
+  const nightEnd = toFiniteNumber(settings.nightEndHour, 8);
+  const nightAt = (date) => {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return false;
+    const { hour } = athensHour(date);
+    return nightStart > nightEnd ? (hour >= nightStart || hour < nightEnd) : (hour >= nightStart && hour < nightEnd);
+  };
+  const typeOf = (rule) => cleanText(rule.ruleType || rule.type);
+  const amountOf = (rule, fallback) => {
+    const amount = Number(rule?.amount ?? rule?.price);
+    return Number.isFinite(amount) ? amount : fallback;
+  };
+  const ageText = cleanText(driverAge);
+  const ageMatches = rules.filter((rule) => typeOf(rule) === 'ageRange' && cleanText(rule.audienceGroup || rule.group) === ageText);
+  const ageRule = ageMatches.find((rule) => rule._id) || ageMatches[0] || null;
+  const ageFee = ageRule ? amountOf(ageRule, deriveAgeFee(ageText)) : deriveAgeFee(ageText);
+  const findNight = (type) => rules.find((rule) => typeOf(rule) === type) || rules.find((rule) => typeOf(rule) === 'night') || null;
+  const pickupRule = findNight('nightPickup');
+  const dropoffRule = findNight('nightDropoff');
+  const pickupNight = nightAt(pickupDateTime) ? (pickupRule ? amountOf(pickupRule, 15) : 15) : 0;
+  const dropoffNight = nightAt(dropoffDateTime) ? (dropoffRule ? amountOf(dropoffRule, 15) : 15) : 0;
+  return {
+    ageFee: Number(Number(ageFee).toFixed(2)),
+    nightFee: Number((pickupNight + dropoffNight).toFixed(2)),
+    appliedRules: {
+      ageRule: ageRule ? { key: ageRule.key || '', label: ageRule.label || ageRule.title || '', amount: Number(ageFee) } : null,
+      pickupNight: pickupNight ? { key: pickupRule?.key || 'nightPickup', label: pickupRule?.label || pickupRule?.title || 'Νυχτερινή χρέωση παραλαβής', amount: pickupNight } : null,
+      dropoffNight: dropoffNight ? { key: dropoffRule?.key || 'nightDropoff', label: dropoffRule?.label || dropoffRule?.title || 'Νυχτερινή χρέωση επιστροφής', amount: dropoffNight } : null
+    }
   };
 }
 
@@ -734,7 +773,7 @@ export async function createBooking(data) {
 
         const computedBaseCost = Number((basePricePerDay * billableDays).toFixed(2));
         const computedInsuranceCost = Number((insuranceExtraPerDay * billableDays).toFixed(2));
-        const automaticFees = computeAutomaticFees({
+        const automaticFees = inlineComputeAutomaticFees({
           driverAge,
           pickupDateTime: pickup,
           dropoffDateTime: dropoff,
@@ -946,7 +985,8 @@ export async function computeQuote(data) {
         try { pricingCatalog = await getPricingCatalog({ scope: 'all' }); } catch (e) { pricingCatalog = getFallbackCatalogSnapshot(); }
         const rawShapes = {
             seasons: Array.isArray(pricingCatalog?.pricingSeasons) ? `array(${pricingCatalog.pricingSeasons.length})` : typeof pricingCatalog?.pricingSeasons,
-            rules: Array.isArray(pricingCatalog?.categoryRateRules) ? `array(${pricingCatalog.categoryRateRules.length})` : typeof pricingCatalog?.categoryRateRules
+            rules: Array.isArray(pricingCatalog?.categoryRateRules) ? `array(${pricingCatalog.categoryRateRules.length})` : typeof pricingCatalog?.categoryRateRules,
+            feeRules: Array.isArray(pricingCatalog?.feeRules) ? `array(${pricingCatalog.feeRules.length})` : typeof pricingCatalog?.feeRules
         };
         pricingCatalog = normalizeCatalogArrays(pricingCatalog);
         const vehicle = await wixData.get("VehiclesNew", vehicleId, { suppressAuth: true });
@@ -982,7 +1022,7 @@ export async function computeQuote(data) {
             computedExtrasTotal += Number((mode === 'perBooking' ? unitPrice : unitPrice * billableDays).toFixed(2));
         }
         const businessSettings = pricingCatalog?.businessSettings || {};
-        const automaticFees = computeAutomaticFees({ driverAge, pickupDateTime: pickup, dropoffDateTime: dropoff, businessSettings, feeRules: pricingCatalog?.feeRules || [] });
+        const automaticFees = inlineComputeAutomaticFees({ driverAge, pickupDateTime: pickup, dropoffDateTime: dropoff, businessSettings, feeRules: pricingCatalog?.feeRules || [] });
         const finalAgeFee = Number(toFiniteNumber(automaticFees?.ageFee, deriveAgeFee(driverAge)).toFixed(2));
         const finalNightFee = Number(toFiniteNumber(automaticFees?.nightFee, ((isNightShift(pickup) ? 15 : 0) + (isNightShift(dropoff) ? 15 : 0))).toFixed(2));
         const finalBaseCost = Number((basePricePerDay * billableDays).toFixed(2));
@@ -995,7 +1035,7 @@ export async function computeQuote(data) {
         const seasonInfo = dynamicPricing?.season ? { key: dynamicPricing.season.key, label: dynamicPricing.season.label } : null;
         const pickupPartsDbg = athensDateParts(pickup);
         const diagnostics = data?.debug ? {
-            engineBuild: 'inline-v3',
+            engineBuild: 'inline-v4-fees',
             rawShapes,
             moduleResolverSeasonKey,
             categoryCandidates,
