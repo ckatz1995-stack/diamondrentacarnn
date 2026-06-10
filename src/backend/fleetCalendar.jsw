@@ -229,7 +229,7 @@ function catCode(v) {
   s = String(s || "").trim();
   if (!s || isOpaqueCategoryId(s)) return "";
   // If it's like "A - Hyundai i10" or "A/..." => take first token
-  const m = s.match(/^([A-Za-z0-9Α-Ω]{1,4})/);
+  const m = s.match(/^([A-Za-z0-9Α-Ω]{1,4})\b/);
   const first = m ? m[1] : s;
   return String(first).replace("Χ","X").toUpperCase();
 }

@@ -710,9 +710,12 @@ function normalizePricingSeasonItem(payload = {}) {
 
 function normalizeCategoryRateRuleItem(payload = {}) {
   const safeId = cleanId(payload._id || payload.id);
+  // Key must encode the rule's scope (category+season+band), never the free-text label:
+  // labels repeat across rules, and upsertByKey deletes other rows sharing the same key.
+  const scopeKey = `${text(payload.categoryCode || payload.category || payload.Category)}_${text(payload.seasonKey || payload.season) || 'all'}_${Math.max(1, Math.floor(toNumber(payload.minDays, 1)))}_${Math.max(0, Math.floor(toNumber(payload.maxDays, 0)))}`;
   return {
     ...(safeId ? { _id: safeId } : {}),
-    key: slugKey(payload.key || payload.label || payload.title || `${payload.categoryCode || payload.category || ''}_${payload.seasonKey || ''}_${payload.minDays || ''}_${payload.maxDays || ''}`),
+    key: slugKey(payload.key || scopeKey),
     label: text(payload.label || payload.title || 'Rate rule'),
     description: text(payload.description),
     categoryCode: text(payload.categoryCode || payload.category || payload.Category).toUpperCase(),
