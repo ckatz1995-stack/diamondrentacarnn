@@ -1771,11 +1771,11 @@ function showCalcResult(q, pickup, dropoff, catCode) {
         const d = q.diagnostics;
         // Wix serialization can deliver arrays as plain objects — coerce defensively
         const asArr = (v) => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
-        const probeLines = asArr(d.seasonProbe).map(p => `  ${p.key}: raw ${p.rawStart}→${p.rawEnd} | parsed ${p.parsedStart || 'FAIL'}→${p.parsedEnd || 'FAIL'}${p.repeatYearly ? ' (yearly)' : ''}${p.active ? '' : ' [inactive]'} | ${p.matches ? 'MATCHES pickup' : 'no match'}`).join('\n');
         const ruleLines = asArr(d.rules).map(r => `  ${r.code || '(all)'} | ${r.season || 'all seasons'} | ${r.min}-${r.max || '∞'}d | ${r.price}${r.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
-        const seasonBlock = probeLines || asArr(d.seasons).map(s => `  ${s.key}: ${s.startDate} → ${s.endDate}${s.repeatYearly ? ' (yearly)' : ''}${s.active ? '' : ' [inactive]'}`).join('\n') || '  (none)';
+        const seasonBlock = asArr(d.seasons).map(s => `  ${s.key}: ${s.startDate} → ${s.endDate}${s.repeatYearly ? ' (yearly)' : ''}${s.active ? '' : ' [inactive]'}${s.inlineMatch !== undefined ? (s.inlineMatch ? ' | MATCHES pickup' : ' | no match') : ''}${s.startCodes ? ` | codes:[${s.startCodes}]` : ''}`).join('\n') || '  (none)';
         const shapeInfo = d.rawShapes ? ` · shapes: seasons=${d.rawShapes.seasons} rules=${d.rawShapes.rules}` : '';
-        dbgEl.textContent = `Engine ${d.engineBuild || 'OLD (pre-coerce) — wait for deploy and retry'}${shapeInfo}\nSaw — candidates: [${asArr(d.categoryCandidates).join(', ')}] · days: ${d.billableDays} · pickup: ${d.pickupParsed || '?'} · resolved season: ${d.resolvedSeasonKey || 'NONE'}\nSeason probe:\n${seasonBlock}\nRules in catalog:\n${ruleLines}`;
+        const moduleInfo = d.moduleResolverSeasonKey !== undefined ? ` · module resolver season: ${d.moduleResolverSeasonKey === null ? 'NONE' : d.moduleResolverSeasonKey}` : '';
+        dbgEl.textContent = `Engine ${d.engineBuild || 'OLD — wait for deploy and retry'}${shapeInfo}${moduleInfo}\nSaw — candidates: [${asArr(d.categoryCandidates).join(', ')}] · days: ${d.billableDays} · pickup: ${d.pickupParsed || '?'}${d.pickupAthens ? ` (Athens ${d.pickupAthens})` : ''} · resolved season: ${d.resolvedSeasonKey || 'NONE'}\nSeasons:\n${seasonBlock}\nRules in catalog:\n${ruleLines}`;
         dbgEl.style.display = 'block';
       } else {
         dbgEl.style.display = 'none';

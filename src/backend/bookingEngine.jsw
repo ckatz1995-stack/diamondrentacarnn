@@ -4,7 +4,7 @@ import { fetch as wixFetch } from 'wix-fetch';
 import { getSecret } from 'wix-secrets-backend';
 import { VAT_RATE } from 'backend/bookingConfig';
 import { notifyBookingSubmitted } from 'backend/notificationTriggers.jsw';
-import { getPricingCatalog, getFallbackCatalogSnapshot, computeAutomaticFees, resolveDynamicPricingRate, probeSeasonResolution } from 'backend/pricingCatalog.jsw';
+import { getPricingCatalog, getFallbackCatalogSnapshot, computeAutomaticFees, resolveDynamicPricingRate } from 'backend/pricingCatalog.jsw';
 import { buildPricingSnapshot } from 'backend/pricingSnapshot.js';
 import { computeBillableDaysDetailed } from 'backend/billableDays';
 
@@ -176,6 +176,106 @@ function normalizeCatalogArrays(catalog) {
     categoryRateRules: toArrayLike(catalog.categoryRateRules),
     feeRules: toArrayLike(catalog.feeRules),
     pickupLocations: toArrayLike(catalog.pickupLocations)
+  };
+}
+
+// ==========================
+// Inline dynamic pricing resolver (self-contained, no cross-module dependency)
+// Digits-only date parsing: immune to format (ISO / D-M-Y), invisible characters and timezones.
+// ==========================
+
+function inlineDateParts(value) {
+  const digits = String(value ?? '').match(/\d+/g) || [];
+  if (digits.length < 3) return null;
+  let y, m, d;
+  if (digits[0].length === 4) { y = +digits[0]; m = +digits[1]; d = +digits[2]; }
+  else if (digits[2].length === 4) { d = +digits[0]; m = +digits[1]; y = +digits[2]; }
+  else return null;
+  if (!y || !m || !d || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  return { y, m, d };
+}
+
+function athensDateParts(date) {
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: BUSINESS_TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
+  const get = (t) => Number((parts.find((p) => p.type === t) || {}).value || 0);
+  return { y: get('year'), m: get('month'), d: get('day') };
+}
+
+function inlineSeasonMatches(pickupParts, season) {
+  const s = inlineDateParts(season?.startDate || season?.start || season?.fromDate);
+  const e = inlineDateParts(season?.endDate || season?.end || season?.toDate);
+  if (!s || !e) return false;
+  const cv = pickupParts.m * 100 + pickupParts.d;
+  const sv = s.m * 100 + s.d;
+  const ev = e.m * 100 + e.d;
+  const repeat = season?.repeatYearly === true || String(season?.repeatYearly).toLowerCase() === 'true';
+  if (repeat) return sv <= ev ? (cv >= sv && cv <= ev) : (cv >= sv || cv <= ev);
+  const cFull = pickupParts.y * 10000 + cv;
+  const sFull = s.y * 10000 + sv;
+  const eFull = e.y * 10000 + ev;
+  return cFull >= sFull && cFull <= eFull;
+}
+
+function inlineFindSeason(seasons, pickupParts) {
+  const rows = toArrayLike(seasons).filter((row) => row && row.active !== false && inlineSeasonMatches(pickupParts, row));
+  rows.sort((a, b) => (toFiniteNumber(b?.priority, 0) - toFiniteNumber(a?.priority, 0)) || (toFiniteNumber(a?.sortOrder, 9999) - toFiniteNumber(b?.sortOrder, 9999)));
+  return rows[0] || null;
+}
+
+function inlineCodesMatch(ruleCode, candidate) {
+  const a = cleanText(ruleCode).toUpperCase();
+  const b = cleanText(candidate).toUpperCase();
+  if (!a || !b) return false;
+  return a === b || extractCategoryCode(a) === extractCategoryCode(b);
+}
+
+function inlineNormKey(value) {
+  return cleanText(value).replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase();
+}
+
+function inlineFindRule(rules, season, candidates, vehicleCategoryId, days) {
+  const seasonKey = inlineNormKey(season?.key || '');
+  const hits = toArrayLike(rules).filter((rule) => {
+    if (!rule || rule.active === false) return false;
+    const ruleCode = cleanText(rule.categoryCode || rule.category || '');
+    if (candidates.length && ruleCode && !candidates.some((c) => inlineCodesMatch(ruleCode, c))) return false;
+    if (!candidates.length && vehicleCategoryId && cleanText(rule.vehicleCategoryId) && cleanText(rule.vehicleCategoryId) !== vehicleCategoryId) return false;
+    const min = Math.max(1, Math.floor(toFiniteNumber(rule.minDays, 1)));
+    const max = Math.max(0, Math.floor(toFiniteNumber(rule.maxDays, 0)));
+    if (days < min) return false;
+    if (max > 0 && days > max) return false;
+    const ruleSeason = inlineNormKey(rule.seasonKey || '');
+    if (seasonKey) return !ruleSeason || ruleSeason === seasonKey;
+    return !ruleSeason;
+  });
+  hits.sort((a, b) => {
+    const sa = Number(inlineNormKey(a?.seasonKey || '') === seasonKey && seasonKey !== '');
+    const sb = Number(inlineNormKey(b?.seasonKey || '') === seasonKey && seasonKey !== '');
+    if (sa !== sb) return sb - sa;
+    const minA = Math.max(1, Math.floor(toFiniteNumber(a?.minDays, 1)));
+    const minB = Math.max(1, Math.floor(toFiniteNumber(b?.minDays, 1)));
+    if (minA !== minB) return minB - minA;
+    const maxA = Math.max(0, Math.floor(toFiniteNumber(a?.maxDays, 0))) || 999999;
+    const maxB = Math.max(0, Math.floor(toFiniteNumber(b?.maxDays, 0))) || 999999;
+    return (maxA - minA) - (maxB - minB);
+  });
+  return hits[0] || null;
+}
+
+function inlineResolveDynamicPricing({ catalog, categoryCandidates = [], vehicleCategoryId = '', billableDays = 1, pickupDateTime = null, fallbackPricePerDay = 0 }) {
+  const days = Math.max(1, Math.floor(toFiniteNumber(billableDays, 1)));
+  const candidates = toArrayLike(categoryCandidates).map((v) => cleanText(v)).filter(Boolean);
+  const pickupOk = pickupDateTime instanceof Date && !Number.isNaN(pickupDateTime.getTime());
+  const pickupParts = pickupOk ? athensDateParts(pickupDateTime) : null;
+  const season = pickupParts ? inlineFindSeason(catalog?.pricingSeasons, pickupParts) : null;
+  const rule = inlineFindRule(catalog?.categoryRateRules, season, candidates, cleanText(vehicleCategoryId), days);
+  const pricePerDay = rule ? toFiniteNumber(rule.pricePerDay, fallbackPricePerDay) : toFiniteNumber(fallbackPricePerDay, 0);
+  return {
+    pricePerDay,
+    source: rule ? 'dynamicRule' : 'vehicleBasePrice',
+    crossSeason: false,
+    season: season ? { key: season.key, label: season.label, startDate: season.startDate, endDate: season.endDate } : null,
+    rule: rule ? { key: rule.key, label: rule.label, minDays: rule.minDays, maxDays: rule.maxDays, seasonKey: rule.seasonKey, categoryCode: rule.categoryCode || '', pricePerDay: toFiniteNumber(rule.pricePerDay, 0) } : null
   };
 }
 
@@ -597,14 +697,12 @@ export async function createBooking(data) {
 
         const insuranceMap = pricingCatalog?.maps?.insurance || {};
         const extrasMap = pricingCatalog?.maps?.extras || {};
-        const dynamicPricing = resolveDynamicPricingRate({
-          categoryCode: resolvedCategoryCode,
-          categoryCandidates: [cleanText(rawCategoryId && rawCategoryId !== rawVehicleId ? rawCategoryId : ''), cleanText(category), cleanText(vehicle?.category), cleanText(vehicle?.Category), cleanText(vehicle?.categoryCode), cleanText(vehicle?.label), cleanText(vehicle?.title)].filter(Boolean),
+        const dynamicPricing = inlineResolveDynamicPricing({
+          catalog: pricingCatalog,
+          categoryCandidates: [resolvedCategoryCode, cleanText(rawCategoryId && rawCategoryId !== rawVehicleId ? rawCategoryId : ''), cleanText(category), cleanText(vehicle?.category), cleanText(vehicle?.Category), cleanText(vehicle?.categoryCode), cleanText(vehicle?.label), cleanText(vehicle?.title)].filter(Boolean),
           vehicleCategoryId: String(vehicleId),
           billableDays,
           pickupDateTime: pickup,
-          dropoffDateTime: dropoff,
-          catalog: pricingCatalog,
           fallbackPricePerDay: fallbackBasePricePerDay
         });
         const basePricePerDay = toFiniteNumber(dynamicPricing?.pricePerDay, fallbackBasePricePerDay);
@@ -862,7 +960,9 @@ export async function computeQuote(data) {
         const { billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1, graceMinutes, BUSINESS_TIMEZONE);
         const insuranceMap = pricingCatalog?.maps?.insurance || {};
         const extrasMap = pricingCatalog?.maps?.extras || {};
-        const dynamicPricing = resolveDynamicPricingRate({ categoryCode: resolvedCategoryCode, categoryCandidates, vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, dropoffDateTime: dropoff, catalog: pricingCatalog, fallbackPricePerDay: fallbackBasePricePerDay });
+        const dynamicPricing = inlineResolveDynamicPricing({ catalog: pricingCatalog, categoryCandidates: [resolvedCategoryCode, ...categoryCandidates], vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, fallbackPricePerDay: fallbackBasePricePerDay });
+        let moduleResolverSeasonKey = null;
+        try { moduleResolverSeasonKey = resolveDynamicPricingRate({ categoryCode: resolvedCategoryCode, categoryCandidates, vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, dropoffDateTime: dropoff, catalog: pricingCatalog, fallbackPricePerDay: fallbackBasePricePerDay })?.season?.key || null; } catch (e) { moduleResolverSeasonKey = `error:${e?.message || e}`; }
         const basePricePerDay = toFiniteNumber(dynamicPricing?.pricePerDay, fallbackBasePricePerDay);
         const pkg = cleanText(selectedPackage || 'cdw').toLowerCase();
         const quoteWarnings = [];
@@ -893,15 +993,26 @@ export async function computeQuote(data) {
         const finalLocationFee = Number((finalPickupLocationFee + finalDropoffLocationFee).toFixed(2));
         const totalPrice = Number((finalBaseCost + finalInsuranceCost + finalExtrasCost + finalAgeFee + finalNightFee + finalLocationFee).toFixed(2));
         const seasonInfo = dynamicPricing?.season ? { key: dynamicPricing.season.key, label: dynamicPricing.season.label } : null;
+        const pickupPartsDbg = athensDateParts(pickup);
         const diagnostics = data?.debug ? {
-            engineBuild: 'coerce-v2',
+            engineBuild: 'inline-v3',
             rawShapes,
+            moduleResolverSeasonKey,
             categoryCandidates,
             billableDays,
             pickupParsed: pickup.toISOString(),
+            pickupAthens: `${pickupPartsDbg.y}-${pickupPartsDbg.m}-${pickupPartsDbg.d}`,
             resolvedSeasonKey: dynamicPricing?.season?.key || null,
-            seasonProbe: probeSeasonResolution(pricingCatalog, pickup),
-            seasons: (pricingCatalog?.pricingSeasons || []).map((s) => ({ key: s.key, startDate: String(s.startDate || ''), endDate: String(s.endDate || ''), priority: s.priority, repeatYearly: s.repeatYearly === true, active: s.active !== false })),
+            seasons: (pricingCatalog?.pricingSeasons || []).map((s) => ({
+                key: s.key,
+                startDate: String(s.startDate || ''),
+                endDate: String(s.endDate || ''),
+                startCodes: Array.from(String(s.startDate || '')).map((ch) => ch.charCodeAt(0)).join(','),
+                priority: s.priority,
+                repeatYearly: s.repeatYearly === true,
+                active: s.active !== false,
+                inlineMatch: inlineSeasonMatches(pickupPartsDbg, s)
+            })),
             rules: (pricingCatalog?.categoryRateRules || []).map((r) => ({ code: String(r.categoryCode || ''), season: String(r.seasonKey || ''), min: r.minDays, max: r.maxDays, price: r.pricePerDay, active: r.active !== false }))
         } : undefined;
         return { success: true, totalPrice, basePricePerDay, billableDays, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee, season: seasonInfo, rule: dynamicPricing?.rule || null, warnings: quoteWarnings, ...(diagnostics ? { diagnostics } : {}) };
