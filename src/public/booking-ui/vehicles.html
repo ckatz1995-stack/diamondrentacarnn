@@ -818,6 +818,33 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .header-nav{order:5;width:100%;justify-content:center}
 }
 </style>
+<style>
+/* ═══ PICKER POLISH: animation, scrollbar, checkmark, time grid, badges ═══ */
+.custom-panel{border-radius:16px!important;box-shadow:0 18px 44px rgba(0,0,0,.20),0 4px 12px rgba(0,0,0,.10)!important;animation:pickerIn .15s ease}
+@keyframes pickerIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.custom-panel{animation:none}}
+.custom-panel{scrollbar-width:thin;scrollbar-color:rgba(120,90,40,.35) transparent}
+.custom-panel::-webkit-scrollbar{width:8px}
+.custom-panel::-webkit-scrollbar-thumb{background:rgba(120,90,40,.30);border-radius:8px}
+.custom-panel::-webkit-scrollbar-track{background:transparent}
+.custom-option{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px}
+.custom-option .opt-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.custom-option.is-selected::after{content:'✓';font-weight:900;color:var(--accent2,#2d6072);flex:0 0 auto}
+/* Time pickers: 3-column grid — whole list scannable at a glance */
+.custom-options.time-cols{grid-template-columns:repeat(3,minmax(0,1fr))}
+.custom-options.time-cols .custom-option{justify-content:center;text-align:center;padding:10px 4px;min-height:42px;gap:4px}
+.custom-options.time-cols .custom-option .opt-label{flex:0 0 auto;overflow:visible}
+.custom-options.time-cols .custom-option.is-selected::after{content:none}
+.custom-options.time-cols .custom-option.is-selected{box-shadow:0 4px 10px rgba(45,96,114,.30)}
+.opt-night{flex:0 0 auto;font-size:11px;line-height:1;opacity:.8}
+.opt-fee{flex:0 0 auto;font-size:12px;font-weight:800;color:#8a5a10;background:rgba(231,191,105,.30);border:1px solid rgba(160,110,35,.25);padding:2px 9px;border-radius:999px;white-space:nowrap}
+.custom-option.is-selected .opt-fee{background:rgba(255,255,255,.85)}
+/* Calendar: slightly larger targets + selected-day depth */
+.custom-day{min-height:42px}
+.custom-day.is-selected{box-shadow:0 4px 12px rgba(45,96,114,.28)}
+.custom-day:not(.is-disabled):not(.is-empty):hover{transform:scale(1.06)}
+@media(prefers-reduced-motion:reduce){.custom-day:hover{transform:none}}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -2096,12 +2123,23 @@ function initPageOwnedControls(configs){
     ctrl.trigger.textContent = triggerText;
     ctrl.trigger.classList.toggle('is-placeholder', !nativeEl.value);
     ctrl.trigger.disabled = nativeEl.disabled;
-    const baseSignature = [...nativeEl.options].map((opt) => `${opt.value}::${opt.textContent}::${opt.disabled?'1':'0'}`).join('||');
-    const signature = ctrl.flavor === 'time' ? `${baseSignature}##${pricingCatalog?.businessSettings?.operatingHoursLabel || ''}##${pricingCatalog?.businessSettings?.afterHoursNotice || ''}` : baseSignature;
+    const isTimeSel = ctrl.flavor === 'time' || /time$/i.test(ctrl.id || '');
+    const isLocSel = /location|point/i.test(ctrl.id || '');
+    const locKind = /^pickup/i.test(ctrl.id || '') ? 'pickup' : 'dropoff';
+    const noteHtml = isTimeSel && typeof getTimePickerMetaHtml === 'function' ? getTimePickerMetaHtml() : '';
+    const optionHtml = [...nativeEl.options].map((opt) => {
+      let badge = '';
+      if (isTimeSel && typeof isNightTime === 'function' && isNightTime(opt.value)) badge = '<span class="opt-night" title="Ισχύει νυχτερινή χρέωση">🌙</span>';
+      if (isLocSel && typeof locationFeeFor === 'function') {
+        const fee = Number(locationFeeFor(opt.value, locKind) || 0);
+        if (fee > 0) badge = `<span class="opt-fee">+${fee}€</span>`;
+      }
+      return `<button type="button" class="custom-option${opt.value === nativeEl.value ? ' is-selected' : ''}" data-value="${escapeCustomUi(opt.value)}" ${opt.disabled ? 'disabled' : ''}><span class="opt-label">${escapeCustomUi(opt.textContent || '')}</span>${badge}</button>`;
+    }).join('');
+    const signature = `${optionHtml}##${noteHtml}`;
     if (signature !== ctrl.signature) {
       ctrl.signature = signature;
-      const noteHtml = ctrl.flavor === 'time' ? getTimePickerMetaHtml() : '';
-      ctrl.panel.innerHTML = `<div class="custom-options">${[...nativeEl.options].map((opt) => `<button type="button" class="custom-option${opt.value === nativeEl.value ? ' is-selected' : ''}" data-value="${escapeCustomUi(opt.value)}" ${opt.disabled ? 'disabled' : ''}>${escapeCustomUi(opt.textContent || '')}</button>`).join('')}</div>${noteHtml}`;
+      ctrl.panel.innerHTML = `<div class="custom-options${isTimeSel ? ' time-cols' : ''}">${optionHtml}</div>${noteHtml}`;
       ctrl.panel.querySelectorAll('.custom-option').forEach((btn) => {
         btn.addEventListener('click', (event) => {
           event.preventDefault();
@@ -2219,6 +2257,15 @@ function initPageOwnedControls(configs){
         const sel = ctrl.panel.querySelector('.custom-option.is-selected');
         if (sel) ctrl.panel.scrollTop = Math.max(0, sel.offsetTop - (ctrl.panel.clientHeight / 2) + (sel.offsetHeight / 2));
       }
+    });
+    ctrl.panel.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      const opts = Array.from(ctrl.panel.querySelectorAll('.custom-option:not([disabled])'));
+      if (!opts.length) return;
+      event.preventDefault();
+      const idx = opts.indexOf(document.activeElement);
+      const next = event.key === 'ArrowDown' ? Math.min(opts.length - 1, idx + 1) : Math.max(0, idx - 1);
+      opts[next].focus();
     });
     nativeEl.addEventListener('change', () => {
       if (ctrl.type === 'date') syncDate(ctrl); else syncSelect(ctrl);
