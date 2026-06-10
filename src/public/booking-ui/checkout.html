@@ -442,6 +442,10 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 /* Calendar: slightly larger targets + selected-day depth */
 .custom-day{min-height:42px}
 .custom-day.is-selected{box-shadow:0 4px 12px rgba(45,96,114,.28)}
+/* Guided flow: panel titles + trip-range shading */
+.custom-panel-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:rgba(60,45,22,.62);padding:2px 4px 8px;border-bottom:1px solid rgba(70,50,16,.08);margin-bottom:8px}
+.custom-day.is-range{background:rgba(63,116,138,.13)}
+.custom-day.is-range-edge{background:rgba(63,116,138,.30);color:#10394a}
 .custom-day:not(.is-disabled):not(.is-empty):hover{transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){.custom-day:hover{transform:none}}
 </style>
@@ -1752,7 +1756,8 @@ function initPageOwnedControls(configs){
     const signature = `${optionHtml}##${noteHtml}`;
     if (signature !== ctrl.signature) {
       ctrl.signature = signature;
-      ctrl.panel.innerHTML = `<div class="custom-options${isTimeSel ? ' time-cols' : ''}">${optionHtml}</div>${noteHtml}`;
+      const selTitle = (ctrl.native.closest('.field')?.querySelector('label')?.textContent || ctrl.placeholder || '').trim();
+      ctrl.panel.innerHTML = `${selTitle ? `<div class="custom-panel-title">${escapeCustomUi(selTitle)}</div>` : ''}<div class="custom-options${isTimeSel ? ' time-cols' : ''}">${optionHtml}</div>${noteHtml}`;
       ctrl.panel.querySelectorAll('.custom-option').forEach((btn) => {
         btn.addEventListener('click', (event) => {
           event.preventDefault();
@@ -1761,6 +1766,7 @@ function initPageOwnedControls(configs){
           dispatchNativeChange(nativeEl);
           syncSelect(ctrl);
           closeAll();
+          advanceChain(ctrl);
         });
       });
     } else {
@@ -1779,6 +1785,13 @@ function initPageOwnedControls(configs){
     const firstWeekday = (viewDate.getDay() + 6) % 7;
     const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
     const todayIso = toIsoDate(new Date());
+    // Trip-range highlight: shade the days between pickup and return in both calendars
+    const isTripDate = ctrl.id === 'pickupDate' || ctrl.id === 'dropoffDate';
+    const rangeStart = isTripDate ? parseIsoDate((document.getElementById('pickupDate') || {}).value || '') : null;
+    const rangeEnd = isTripDate ? parseIsoDate((document.getElementById('dropoffDate') || {}).value || '') : null;
+    const rangeOtherIso = ctrl.id === 'pickupDate' ? (rangeEnd ? toIsoDate(rangeEnd) : '') : (ctrl.id === 'dropoffDate' && rangeStart ? toIsoDate(rangeStart) : '');
+    const panelTitle = (ctrl.native.closest('.field')?.querySelector('label')?.textContent || ctrl.placeholder || '').trim();
+    const panelTitleHtml = panelTitle ? `<div class="custom-panel-title">${escapeCustomUi(panelTitle)}</div>` : '';
     const isBirthDate = ctrl.id === 'checkoutDobProxy';
     let daysHtml = '';
     for (let i = 0; i < firstWeekday; i += 1) daysHtml += '<button type="button" class="custom-day is-empty" disabled></button>';
@@ -1791,6 +1804,8 @@ function initPageOwnedControls(configs){
         'custom-day',
         iso === nativeEl.value ? 'is-selected' : '',
         iso === todayIso ? 'is-today' : '',
+        (rangeStart && rangeEnd && candidate > rangeStart && candidate < rangeEnd) ? 'is-range' : '',
+        iso === rangeOtherIso ? 'is-range-edge' : '',
         disabled ? 'is-disabled' : ''
       ].filter(Boolean).join(' ');
       daysHtml += `<button type="button" class="${cls}" data-date="${iso}" ${disabled ? 'disabled' : ''}>${day}</button>`;
@@ -1800,6 +1815,7 @@ function initPageOwnedControls(configs){
     const yearJump = isBirthDate ? `<div class="calendar-jump" data-jump="year"><button type="button" class="calendar-jump-trigger" data-open-jump="year">${viewDate.getFullYear()}</button><div class="calendar-jump-menu year-menu">${Array.from({ length: maxYear - minYear + 1 }, (_, offset) => maxYear - offset).map((year) => `<button type="button" class="calendar-jump-option${year === viewDate.getFullYear() ? ' is-selected' : ''}" data-jump-value="${year}" data-jump-kind="year">${year}</button>`).join('')}</div></div>` : `<strong>${viewDate.getFullYear()}</strong>`;
     const metaHtml = isBirthDate ? `<div class="custom-calendar-meta">${monthJump}${yearJump}</div>` : '';
     ctrl.panel.innerHTML = `
+      ${panelTitleHtml}
       ${metaHtml}
       <div class="custom-calendar-head">
         <button type="button" class="custom-calendar-nav" data-step="-1">‹</button>
@@ -1851,6 +1867,7 @@ function initPageOwnedControls(configs){
         dispatchNativeChange(nativeEl);
         syncDate(ctrl);
         closeAll();
+        advanceChain(ctrl);
       });
     });
   };
@@ -1864,6 +1881,29 @@ function initPageOwnedControls(configs){
     ctrl.monthRef = parseIsoDate(nativeEl.value) || defaultRef;
     if (ctrl.panel.classList.contains('open')) renderCalendar(ctrl);
   };
+  // ── Guided picker flow: pickup date → pickup time → return date → return time ──
+  const PICKER_CHAIN = { pickupDate: 'pickupTime', pickupTime: 'dropoffDate', dropoffDate: 'dropoffTime' };
+  let chainArmed = false;
+  const openPicker = (ctrl) => {
+    closeAll(ctrl.id);
+    ctrl.wrapper.classList.add('open');
+    ctrl.panel.classList.add('open');
+    ctrl.trigger.setAttribute('aria-expanded', 'true');
+    if (ctrl.type === 'date') renderCalendar(ctrl);
+    else {
+      syncSelect(ctrl);
+      const sel = ctrl.panel.querySelector('.custom-option.is-selected');
+      if (sel) ctrl.panel.scrollTop = Math.max(0, sel.offsetTop - (ctrl.panel.clientHeight / 2) + (sel.offsetHeight / 2));
+    }
+  };
+  const advanceChain = (ctrl) => {
+    if (ctrl.id === 'pickupDate' || ctrl.id === 'dropoffDate') chainArmed = true;
+    if (ctrl.id === 'dropoffTime') { chainArmed = false; return; }
+    if (!chainArmed) return;
+    const nextCtrl = controls.get(PICKER_CHAIN[ctrl.id] || '');
+    if (!nextCtrl) return;
+    setTimeout(() => openPicker(nextCtrl), 140);
+  };
   configs.forEach((config) => {
     const nativeEl = document.getElementById(config.id) || document.querySelector(config.selector || '');
     if (!nativeEl || controls.has(config.id)) return;
@@ -1875,18 +1915,8 @@ function initPageOwnedControls(configs){
     ctrl.trigger.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (ctrl.panel.classList.contains('open')) { closeAll(); return; }
-      closeAll(ctrl.id);
-      ctrl.wrapper.classList.add('open');
-      ctrl.panel.classList.add('open');
-      ctrl.trigger.setAttribute('aria-expanded', 'true');
-      if (ctrl.type === 'date') renderCalendar(ctrl);
-      else {
-        syncSelect(ctrl);
-        // Bring the selected option into view (e.g. time lists open at 15:00, not 00:00)
-        const sel = ctrl.panel.querySelector('.custom-option.is-selected');
-        if (sel) ctrl.panel.scrollTop = Math.max(0, sel.offsetTop - (ctrl.panel.clientHeight / 2) + (sel.offsetHeight / 2));
-      }
+      if (ctrl.panel.classList.contains('open')) { chainArmed = false; closeAll(); return; }
+      openPicker(ctrl);
     });
     ctrl.panel.addEventListener('keydown', (event) => {
       if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
@@ -1903,13 +1933,13 @@ function initPageOwnedControls(configs){
     if (ctrl.type === 'date') syncDate(ctrl); else syncSelect(ctrl);
   });
   document.addEventListener('pointerdown', (event) => {
-    if (!eventInsideCustomPicker(event)) closeAll();
+    if (!eventInsideCustomPicker(event)) { chainArmed = false; closeAll(); }
   });
   document.addEventListener('click', (event) => {
-    if (!eventInsideCustomPicker(event)) closeAll();
+    if (!eventInsideCustomPicker(event)) { chainArmed = false; closeAll(); }
   });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeAll();
+    if (event.key === 'Escape') { chainArmed = false; closeAll(); }
   });
   window.refreshCustomControls = (ids) => {
     const allow = Array.isArray(ids) && ids.length ? new Set(ids) : null;
