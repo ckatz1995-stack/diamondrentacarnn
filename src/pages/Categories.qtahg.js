@@ -1,4 +1,5 @@
 import wixLocation from "wix-location";
+import wixWindow from "wix-window";
 import { getPublicPricingCatalog } from "backend/pricingCatalog.jsw";
 import { computeQuote, getFleetModelsPreview, getVehicleCategoriesCatalog } from "backend/bookingEngine";
 import { BRIDGE_TYPES, buildBookingContext, isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from "public/bridgeUtils";
@@ -174,6 +175,10 @@ function handleMessage(event) {
   }
   if (data.type === "request-server-quotes") {
     sendServerQuotes(data.requests);
+    return;
+  }
+  if (data.type === "wix-scroll-top") {
+    try { wixWindow.scrollTo(0, 0); } catch (err) {}
   }
 }
 

@@ -289,6 +289,16 @@ button:hover,.cta:hover,.header-phone:hover{
   font-size:14px;
   font-weight:800;
 }
+/* Compact spec chips — replaces the bulky spec grid */
+.spec-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.spec-chips .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(231,191,105,.10);border:1px solid rgba(231,191,105,.26);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;color:#f3ead2;white-space:nowrap;line-height:1.2}
+/* Quote loading shimmer */
+.price-skel{display:inline-block;width:88px;height:1em;border-radius:8px;vertical-align:middle;background:linear-gradient(90deg,rgba(255,255,255,.08) 25%,rgba(255,255,255,.24) 50%,rgba(255,255,255,.08) 75%);background-size:200% 100%;animation:skel-sh 1.2s linear infinite}
+@keyframes skel-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* Search summary strip above results */
+.search-strip{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 14px;border-radius:14px;background:rgba(20,14,4,.55);border:1px solid rgba(231,191,105,.22);color:#f3ead2;font-size:13.5px;font-weight:600}
+.search-strip .ss-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-strip .ss-edit{flex:none;background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1e0a;border:0;border-radius:999px;padding:7px 15px;font-weight:800;font-size:13px;cursor:pointer}
 .season-badge{
   display:inline-block;
   margin-top:6px;
@@ -407,7 +417,7 @@ button:hover,.cta:hover,.header-phone:hover{
 .total-box{padding:14px 16px}.total-row .k{font-size:13px}.total-row .v{font-size:18px}.total-row.grand .k{font-size:20px}.total-row.grand .v{font-size:34px}
 .cta{height:56px;font-size:18px}
 @media (max-width:1024px){.header-inner{flex-wrap:wrap;justify-content:center}.header-nav{order:3;width:100%;justify-content:center}.header-phone{width:100%;text-align:center}.search-grid,.search-options-grid{grid-template-columns:1fr 1fr}.filter-row{grid-template-columns:1fr}.result-main{grid-template-columns:1fr}.media-col{min-height:180px}.head-row{grid-template-columns:1fr}.price-box{text-align:left}.spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.search-options-grid,.filter-row,.spec-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.content-col{padding:14px}.vehicle-title{font-size:28px}.total-row.grand .v{font-size:30px}.cta{height:54px;font-size:17px}}
+@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.search-options-grid,.filter-row,.spec-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.content-col{padding:12px 14px}.vehicle-title{font-size:21px}.vehicle-copy{display:none}.media-col{min-height:138px;padding:10px}.price-box .amount{font-size:26px}.total-box{padding:10px 14px}.total-stack{gap:4px}.total-row .k{font-size:12.5px}.total-row .v{font-size:15px}.total-row.grand .k{font-size:16px}.total-row.grand .v{font-size:25px}.cta{height:52px;font-size:16px}.result-bottom{padding:0 12px 12px}}
 
 
 @media (max-width:760px){.page{width:min(var(--container), calc(100vw - 8px))}.footer-grid{grid-template-columns:1fr}.footer-bottom{padding:0 16px 18px}}
@@ -656,6 +666,18 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .search-wrap,.filter-combined,.result-card,.empty-card{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .cta{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
 .is-selected-card{outline:2.5px solid var(--gold,#e7bf69)!important;box-shadow:0 0 0 4px rgba(231,191,105,.18),0 22px 54px rgba(0,0,0,.20)!important}
+
+/* ── UX PASS: chips, skeleton tint, summary strip, mobile compaction (theme-aware) ── */
+.spec-chips .chip{background:rgba(160,110,35,.08)!important;border:1px solid rgba(160,110,35,.28)!important;color:#4a3820!important}
+.price-skel{background:linear-gradient(90deg,rgba(160,110,35,.12) 25%,rgba(160,110,35,.30) 50%,rgba(160,110,35,.12) 75%)!important;background-size:200% 100%!important}
+.search-strip{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.22)!important;color:#4a3820!important;box-shadow:0 8px 24px rgba(90,48,0,.14)!important}
+.search-strip .ss-edit{background:linear-gradient(135deg,#c88a35,#e0a848)!important;color:#1a0e04!important}
+.cta .cta-total{font-weight:900}
+@media (max-width:620px){
+  .cta{height:54px!important;font-size:16.5px!important}
+  .price-box .amount{font-size:26px!important}
+  .media-col{min-height:138px!important}
+}
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -868,6 +890,11 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
       </div>
     </div>
   </section>
+
+  <div class="search-strip" id="searchStrip" hidden>
+    <span class="ss-txt" id="searchStripTxt"></span>
+    <button class="ss-edit" id="searchStripEdit" type="button">Αλλαγή</button>
+  </div>
 
   <section class="list" id="list">
   <!-- DIAMOND LOADING: Skeleton cards — shown while loading -->
@@ -1143,6 +1170,33 @@ let vehiclesMeta = { displayMode: 'categories', modelsSource: 'fleet' };
 let embeddedVehicleItems = safeRead(VEHICLE_CATEGORIES_STORAGE_KEY, null);
 let vehicleServerQuotes = {};
 let _quotesDebounceTimer = null;
+let _quotesPending = false;
+let _quotesPendingTimer = null;
+
+function markQuotesPending(){
+  _quotesPending = true;
+  clearTimeout(_quotesPendingTimer);
+  _quotesPendingTimer = setTimeout(() => { if(_quotesPending){ _quotesPending = false; if(Array.isArray(vehicles) && vehicles.length) render(); } }, 12000);
+}
+function clearQuotesPending(){
+  _quotesPending = false;
+  clearTimeout(_quotesPendingTimer);
+}
+
+function updateSearchStrip(){
+  const strip = document.getElementById('searchStrip');
+  const txt = document.getElementById('searchStripTxt');
+  if(!strip || !txt) return;
+  const pd = document.getElementById('pickupDate')?.value || '';
+  const dd = document.getElementById('dropoffDate')?.value || '';
+  const pt = document.getElementById('pickupTime')?.value || '';
+  const dt = document.getElementById('dropoffTime')?.value || '';
+  const pl = document.getElementById('pickupLocation')?.value || '';
+  if(!pd || !dd){ strip.hidden = true; return; }
+  const fmt = (iso) => { const p = String(iso).split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : iso; };
+  txt.textContent = `${fmt(pd)} ${pt} → ${fmt(dd)} ${dt}${pl ? ` · ${pl}` : ''}`;
+  strip.hidden = false;
+}
 
 function parseSiteBaseFromUrl(value){
   try {
@@ -1188,6 +1242,7 @@ async function scheduleServerQuotes(){
     requests.push({ vehicleId: id, categoryId: catRaw, category: catRaw, pickupDateTime: pickup, dropoffDateTime: dropoff, selectedPackage: 'cdw', selectedExtras: [], driverAge: ageVal, pickuppoint: pickupLoc, dropoffpoint: dropoffLoc });
   });
   if(!requests.length) return;
+  markQuotesPending();
   if(isEmbedded()){
     // Embedded: quotes go through the Wix page bridge (backend RPC) — immune to cross-origin issues.
     try { parent.postMessage({ type: 'request-server-quotes', requests }, '*'); } catch(e) {}
@@ -1205,10 +1260,9 @@ async function scheduleServerQuotes(){
       if(data?.success) newQuotes[req.vehicleId] = data;
     }catch(e){}
   }));
-  if(Object.keys(newQuotes).length){
-    vehicleServerQuotes = { ...vehicleServerQuotes, ...newQuotes };
-    if(Array.isArray(vehicles) && vehicles.length) render();
-  }
+  clearQuotesPending();
+  if(Object.keys(newQuotes).length) vehicleServerQuotes = { ...vehicleServerQuotes, ...newQuotes };
+  if(Array.isArray(vehicles) && vehicles.length) render();
 }
 
 async function fetchRealCatalog(){
@@ -1496,8 +1550,21 @@ function render(){
     const isSelected = bsSelectedCat && catCode === bsSelectedCat;
     const specs = vehicle.specs || {};
     const copy = cardCopy(vehicle);
-    const dailyDisp = dailyPrice > 0 ? fmtMoney(dailyPrice) : '—';
-    const totalDisp = grandTotal > 0 ? fmtMoney(grandTotal) : '—';
+    const quotesLoading = _quotesPending && !serverQuote;
+    const dailyDisp = dailyPrice > 0 ? fmtMoney(dailyPrice) : (quotesLoading ? '<span class="price-skel"></span>' : '—');
+    const totalDisp = grandTotal > 0 ? fmtMoney(grandTotal) : (quotesLoading ? '<span class="price-skel"></span>' : '—');
+    const specVal = (v) => { const s = String(v ?? '').trim(); return s && s !== '—' && s !== '-' ? s : ''; };
+    const chips = [
+      specVal(specs.gearbox) ? `⚙️ ${escapeHtml(specVal(specs.gearbox))}` : '',
+      specVal(specs.fuel) ? `⛽ ${escapeHtml(specVal(specs.fuel))}` : '',
+      specVal(specs.seats) ? `👤 ${escapeHtml(specVal(specs.seats))} θέσεις` : '',
+      specVal(specs.bags || specs.luggage) ? `🧳 ${escapeHtml(specVal(specs.bags || specs.luggage))}` : '',
+      specVal(specs.doors) ? `🚪 ${escapeHtml(specVal(specs.doors))} πόρτες` : '',
+      String(specs.ac || '').trim() === 'Ναι' ? '❄️ A/C' : ''
+    ].filter(Boolean).map((c) => `<span class="chip">${c}</span>`).join('');
+    const ctaLabel = grandTotal > 0
+      ? `${escapeHtml(selectionButtonLabel())} <span class="cta-total">— ${fmtMoney(grandTotal)}</span>`
+      : escapeHtml(selectionButtonLabel());
     return `
       <article class="result-card${isSelected ? ' is-selected-card' : ''}">
         <div class="result-main">
@@ -1517,14 +1584,7 @@ function render(){
                 ${hasSeasonRate ? `<span class="season-badge">${escapeHtml(_activeSeason.label)}</span>` : ''}
               </div>
             </div>
-            <div class="spec-grid">
-              <div class="spec"><span class="k">Κιβώτιο</span><span class="v">${escapeHtml(specs.gearbox || "—")}</span></div>
-              <div class="spec"><span class="k">Καύσιμο</span><span class="v">${escapeHtml(specs.fuel || "—")}</span></div>
-              <div class="spec"><span class="k">Θέσεις</span><span class="v">${escapeHtml(specs.seats || "—")}</span></div>
-              <div class="spec"><span class="k">Βαλίτσες</span><span class="v">${escapeHtml(specs.bags || specs.luggage || "—")}</span></div>
-              <div class="spec"><span class="k">A/C</span><span class="v">${escapeHtml(specs.ac || "—")}</span></div>
-              <div class="spec"><span class="k">Πόρτες</span><span class="v">${escapeHtml(specs.doors || "—")}</span></div>
-            </div>
+            <div class="spec-chips">${chips || '<span class="chip">—</span>'}</div>
           </div>
         </div>
         <div class="result-bottom">
@@ -1540,10 +1600,11 @@ function render(){
               <div class=\"total-row grand\"><span class=\"k\">Σύνολο</span><span class=\"v\">${totalDisp}</span></div>
             </div>
           </div>
-          <div class="card-footer"><button class="cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${escapeHtml(selectionButtonLabel())}</button></div>
+          <div class="card-footer"><button class="cta" type="button" data-vehicle-id="${escapeHtml(vehicle.vehicleCategoryId || vehicle.id || '')}" data-category-code="${escapeHtml(extractCategoryCode(vehicle.categoryCode || vehicle.label || vehicle.category || categorySelect.value || category || ''))}">${ctaLabel}</button></div>
         </div>
       </article>`;
   }).join("");
+  updateSearchStrip();
   notifyHeight();
 }
 function setLoading(message){
@@ -1627,12 +1688,16 @@ window.addEventListener('message', (event) => {
     return;
   }
   if(data.type === 'server-quotes-data'){
+    clearQuotesPending();
     const quotes = data.quotes && typeof data.quotes === 'object' ? data.quotes : {};
-    if(Object.keys(quotes).length){
-      vehicleServerQuotes = { ...vehicleServerQuotes, ...quotes };
-      if(Array.isArray(vehicles) && vehicles.length) render();
-    }
+    if(Object.keys(quotes).length) vehicleServerQuotes = { ...vehicleServerQuotes, ...quotes };
+    if(Array.isArray(vehicles) && vehicles.length) render();
   }
+});
+
+document.getElementById('searchStripEdit')?.addEventListener('click', () => {
+  try { parent.postMessage({ type: 'wix-scroll-top' }, '*'); } catch(e) {}
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
 });
 
 async function loadVehicles(){
