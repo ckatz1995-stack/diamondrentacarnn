@@ -846,6 +846,10 @@ export async function computeQuote(data) {
         if (!pickup || !dropoff || Number.isNaN(pickup.getTime()) || Number.isNaN(dropoff.getTime()) || dropoff <= pickup) return { success: false, message: 'Invalid dates' };
         let pricingCatalog;
         try { pricingCatalog = await getPricingCatalog({ scope: 'all' }); } catch (e) { pricingCatalog = getFallbackCatalogSnapshot(); }
+        const rawShapes = {
+            seasons: Array.isArray(pricingCatalog?.pricingSeasons) ? `array(${pricingCatalog.pricingSeasons.length})` : typeof pricingCatalog?.pricingSeasons,
+            rules: Array.isArray(pricingCatalog?.categoryRateRules) ? `array(${pricingCatalog.categoryRateRules.length})` : typeof pricingCatalog?.categoryRateRules
+        };
         pricingCatalog = normalizeCatalogArrays(pricingCatalog);
         const vehicle = await wixData.get("VehiclesNew", vehicleId, { suppressAuth: true });
         const catalogHasRules = Array.isArray(pricingCatalog?.categoryRateRules) && pricingCatalog.categoryRateRules.length > 0;
@@ -890,6 +894,8 @@ export async function computeQuote(data) {
         const totalPrice = Number((finalBaseCost + finalInsuranceCost + finalExtrasCost + finalAgeFee + finalNightFee + finalLocationFee).toFixed(2));
         const seasonInfo = dynamicPricing?.season ? { key: dynamicPricing.season.key, label: dynamicPricing.season.label } : null;
         const diagnostics = data?.debug ? {
+            engineBuild: 'coerce-v2',
+            rawShapes,
             categoryCandidates,
             billableDays,
             pickupParsed: pickup.toISOString(),
