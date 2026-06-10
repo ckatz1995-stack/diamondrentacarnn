@@ -295,10 +295,6 @@ button:hover,.cta:hover,.header-phone:hover{
 /* Quote loading shimmer */
 .price-skel{display:inline-block;width:88px;height:1em;border-radius:8px;vertical-align:middle;background:linear-gradient(90deg,rgba(255,255,255,.08) 25%,rgba(255,255,255,.24) 50%,rgba(255,255,255,.08) 75%);background-size:200% 100%;animation:skel-sh 1.2s linear infinite}
 @keyframes skel-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
-/* Search summary strip above results */
-.search-strip{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 14px;border-radius:14px;background:rgba(20,14,4,.55);border:1px solid rgba(231,191,105,.22);color:#f3ead2;font-size:13.5px;font-weight:600}
-.search-strip .ss-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.search-strip .ss-edit{flex:none;background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1e0a;border:0;border-radius:999px;padding:7px 15px;font-weight:800;font-size:13px;cursor:pointer}
 .season-badge{
   display:inline-block;
   margin-top:6px;
@@ -670,8 +666,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 /* ── UX PASS: chips, skeleton tint, summary strip, mobile compaction (theme-aware) ── */
 .spec-chips .chip{background:rgba(160,110,35,.08)!important;border:1px solid rgba(160,110,35,.28)!important;color:#4a3820!important}
 .price-skel{background:linear-gradient(90deg,rgba(160,110,35,.12) 25%,rgba(160,110,35,.30) 50%,rgba(160,110,35,.12) 75%)!important;background-size:200% 100%!important}
-.search-strip{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.22)!important;color:#4a3820!important;box-shadow:0 8px 24px rgba(90,48,0,.14)!important}
-.search-strip .ss-edit{background:linear-gradient(135deg,#c88a35,#e0a848)!important;color:#1a0e04!important}
+
 .cta .cta-total{font-weight:900}
 @media (max-width:620px){
   .cta{height:54px!important;font-size:16.5px!important}
@@ -864,7 +859,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .page{display:grid;grid-template-columns:310px minmax(0,1fr);gap:14px;align-items:start}
   .page>*{grid-column:2;min-width:0}
   .page>.results-toolbar{grid-column:1/-1;grid-row:1}
-  .page>.search-wrap{grid-column:1;grid-row:2/span 40;margin-bottom:0}
+  .page>.search-wrap{grid-column:1;grid-row:2;align-self:start;margin-bottom:0}
+  .page>.results-col{grid-column:2;grid-row:2;min-width:0}
   /* Sidebar form: single-column fields */
   .search-grid,.search-options-grid{grid-template-columns:1fr!important}
   .search-summary-bar{flex-wrap:wrap;gap:8px}
@@ -941,10 +937,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 <div class="booking-progress"><div class="bp-inner"><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Αναζήτηση</span></div><div class="bp-connector done"></div><div class="bp-step active"><div class="bp-dot">2</div><span class="bp-label">Οχήματα</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">3</div><span class="bp-label">Extras</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">4</div><span class="bp-label">Ολοκλήρωση</span></div></div></div>
 
 <div class="page">
-  <!-- DIAMOND LOADING: No-data guard -->
-  <div class="no-data-banner" id="noDataBanner">
-    Ξεκινήστε την αναζήτησή σας από την <a href="/">αρχική σελίδα</a>.
-  </div>
   <section class="search-wrap panel">
     <!-- Compact edit summary: customers can adjust search without returning home -->
     <div class="search-summary-bar" id="searchSummaryBar">
@@ -1034,39 +1026,40 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div>
   </div>
 
-  <section class="list" id="list">
-  <!-- DIAMOND LOADING: Skeleton cards — shown while loading -->
-  <div class="skeleton-list active" id="skeletonList">
-    <div class="skeleton-card">
-      <div class="skeleton-row h-big w-full"></div>
-      <div class="skeleton-row w-60"></div>
-      <div class="skeleton-row w-40"></div>
-      <div class="skeleton-row w-full"></div>
+  <div class="results-col">
+    <!-- DIAMOND LOADING: No-data guard -->
+    <div class="no-data-banner" id="noDataBanner">
+      Ξεκινήστε την αναζήτησή σας από την <a href="/">αρχική σελίδα</a>.
     </div>
-    <div class="skeleton-card">
-      <div class="skeleton-row h-big w-full"></div>
-      <div class="skeleton-row w-60"></div>
-      <div class="skeleton-row w-40"></div>
-      <div class="skeleton-row w-full"></div>
+    <section class="list" id="list">
+    <!-- DIAMOND LOADING: Skeleton cards — shown while loading -->
+    <div class="skeleton-list active" id="skeletonList">
+      <div class="skeleton-card">
+        <div class="skeleton-row h-big w-full"></div>
+        <div class="skeleton-row w-60"></div>
+        <div class="skeleton-row w-40"></div>
+        <div class="skeleton-row w-full"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton-row h-big w-full"></div>
+        <div class="skeleton-row w-60"></div>
+        <div class="skeleton-row w-40"></div>
+        <div class="skeleton-row w-full"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton-row h-big w-full"></div>
+        <div class="skeleton-row w-60"></div>
+        <div class="skeleton-row w-40"></div>
+      </div>
     </div>
-    <div class="skeleton-card">
-      <div class="skeleton-row h-big w-full"></div>
-      <div class="skeleton-row w-60"></div>
-      <div class="skeleton-row w-40"></div>
+    <!-- DIAMOND LOADING: Empty state -->
+    <div class="empty-state-panel" id="emptyStatePanel">
+      <div class="empty-state-icon">🚗</div>
+      <h2 class="empty-state-title">Δεν βρέθηκαν διαθέσιμα οχήματα</h2>
+      <p class="empty-state-sub">Δοκιμάστε διαφορετικές ημερομηνίες ή επιλέξτε άλλη κατηγορία.</p>
+      <button class="empty-state-btn" id="emptyStateModifyBtn" type="button">Τροποποίηση αναζήτησης</button>
     </div>
-  </div>
-  <!-- DIAMOND LOADING: Empty state -->
-  <div class="empty-state-panel" id="emptyStatePanel">
-    <div class="empty-state-icon">🚗</div>
-    <h2 class="empty-state-title">Δεν βρέθηκαν διαθέσιμα οχήματα</h2>
-    <p class="empty-state-sub">Δοκιμάστε διαφορετικές ημερομηνίες ή επιλέξτε άλλη κατηγορία.</p>
-    <button class="empty-state-btn" id="emptyStateModifyBtn" type="button">Τροποποίηση αναζήτησης</button>
-  </div>
-  </section>
-
-  <div class="search-strip" id="changeSearchRow">
-    <span class="ss-txt">Θέλεις άλλες ημερομηνίες ή τοποθεσία;</span>
-    <button class="ss-edit" id="changeSearchBtn" type="button">Αλλαγή αναζήτησης</button>
+    </section>
   </div>
 </div>
 
@@ -1840,11 +1833,6 @@ window.addEventListener('message', (event) => {
   }
 });
 
-document.getElementById('changeSearchBtn')?.addEventListener('click', () => {
-  if (typeof window._openSearchPanel === 'function') window._openSearchPanel();
-  try { parent.postMessage({ type: 'wix-scroll-top' }, '*'); } catch(e) {}
-  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
-});
 
 async function loadVehicles(){
   if(isEmbedded()){
