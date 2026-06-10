@@ -1032,7 +1032,7 @@ bindRouteLinks();
 
     function normalizeKey(value){ return String(value || '').trim().toLowerCase(); }
     function parseDateOnly(value){
-      const raw = String(value || '').trim();
+      const raw = String(value || '').replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g, '').trim();
       if(!raw) return null;
       const dmy = raw.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})$/);
       if(dmy){ const d = new Date(Number(dmy[3]), Number(dmy[2])-1, Number(dmy[1])); return Number.isNaN(d.getTime()) ? null : d; }

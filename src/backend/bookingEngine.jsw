@@ -4,7 +4,7 @@ import { fetch as wixFetch } from 'wix-fetch';
 import { getSecret } from 'wix-secrets-backend';
 import { VAT_RATE } from 'backend/bookingConfig';
 import { notifyBookingSubmitted } from 'backend/notificationTriggers.jsw';
-import { getPricingCatalog, getFallbackCatalogSnapshot, computeAutomaticFees, resolveDynamicPricingRate } from 'backend/pricingCatalog.jsw';
+import { getPricingCatalog, getFallbackCatalogSnapshot, computeAutomaticFees, resolveDynamicPricingRate, probeSeasonResolution } from 'backend/pricingCatalog.jsw';
 import { buildPricingSnapshot } from 'backend/pricingSnapshot.js';
 import { computeBillableDaysDetailed } from 'backend/billableDays';
 
@@ -872,7 +872,9 @@ export async function computeQuote(data) {
         const diagnostics = data?.debug ? {
             categoryCandidates,
             billableDays,
+            pickupParsed: pickup.toISOString(),
             resolvedSeasonKey: dynamicPricing?.season?.key || null,
+            seasonProbe: probeSeasonResolution(pricingCatalog, pickup),
             seasons: (pricingCatalog?.pricingSeasons || []).map((s) => ({ key: s.key, startDate: String(s.startDate || ''), endDate: String(s.endDate || ''), priority: s.priority, repeatYearly: s.repeatYearly === true, active: s.active !== false })),
             rules: (pricingCatalog?.categoryRateRules || []).map((r) => ({ code: String(r.categoryCode || ''), season: String(r.seasonKey || ''), min: r.minDays, max: r.maxDays, price: r.pricePerDay, active: r.active !== false }))
         } : undefined;
