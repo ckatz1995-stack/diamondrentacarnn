@@ -872,6 +872,11 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .panel-footer{flex-direction:column;align-items:stretch}
   .search-note{display:none}
 }
+/* Sidebar always expanded: no chips, no collapse */
+@media(min-width:980px){
+  .search-summary-bar{display:none!important}
+  .search-form-panel{max-height:none!important;opacity:1!important;overflow:visible!important;pointer-events:auto!important}
+}
 /* Narrower main column next to the sidebar: compact the card grid */
 @media(min-width:980px) and (max-width:1280px){
   .v2-grid{grid-template-columns:170px minmax(0,1fr) 200px}
@@ -879,6 +884,16 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .v2-title{font-size:19px}
   .v2-price{font-size:26px}
 }
+</style>
+<style>
+/* ═══ FILTER LINE: dark teal toolbar + interactive category tabs ═══ */
+.results-toolbar{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border:1px solid rgba(231,191,105,.20)!important;box-shadow:0 10px 26px rgba(0,0,0,.18)!important;flex-wrap:wrap;gap:10px}
+.cat-tabs{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+.cat-tab{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#f3ead2;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 14px;cursor:pointer;font-family:inherit;letter-spacing:.04em;transition:background .15s ease,border-color .15s ease}
+.cat-tab:hover{background:rgba(231,191,105,.18);border-color:rgba(231,191,105,.40)}
+.cat-tab.is-active{background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));color:#2a1d09;border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.22)}
+.results-toolbar .sort-lbl{color:rgba(255,255,255,.62)!important}
+@media(max-width:620px){.cat-tab{padding:8px 12px;font-size:12px}}
 </style>
 </head>
 <body>
@@ -1006,16 +1021,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div><!-- end search-form-panel -->
   </section>
 
-  <div class="trust-strip">
-    <span class="ts-item">✓ Διαφανής τιμολόγηση</span>
-    <span class="ts-sep" aria-hidden="true">·</span>
-    <span class="ts-item">✓ Προσωπική εξυπηρέτηση</span>
-    <span class="ts-sep" aria-hidden="true">·</span>
-    <span class="ts-item">✓ Γρήγορη απάντηση στο αίτημά σας</span>
-  </div>
-
   <div class="results-toolbar">
-    <span class="results-count" id="resultMetaRow"></span>
+    <div class="cat-tabs" id="catTabs" role="tablist" aria-label="Φίλτρο κατηγορίας"></div>
     <div class="sort-inline-wrap">
       <span class="sort-lbl">Ταξινόμηση</span>
       <select id="sortSelect" class="sort-select-slim">
@@ -1267,6 +1274,18 @@ function filterVehiclesByCategory(items, selectedCategory){
   if(!key || key === 'ALL' || key === 'DEFAULT') return [...items];
   return (items || []).filter((item) => categoryKeyOf(item) === key);
 }
+function renderCatTabs(items){
+  const box = document.getElementById('catTabs');
+  if(!box) return;
+  const cats = [...new Set((items || []).map(categoryKeyOf).filter(Boolean))];
+  const current = normalizeCategoryKey(categorySelect.value || 'all');
+  box.innerHTML = ['__ALL__', ...cats].map((key) => {
+    const isAll = key === '__ALL__';
+    const val = isAll ? 'all' : key;
+    const active = isAll ? (!current || current === 'ALL') : current === key;
+    return `<button type="button" class="cat-tab${active ? ' is-active' : ''}" data-cat="${escapeHtml(val)}" role="tab" aria-selected="${active ? 'true' : 'false'}">${isAll ? 'Όλες' : escapeHtml(key)}</button>`;
+  }).join('');
+}
 function syncCategoryOptions(items){
   const current = normalizeCategoryKey(categorySelect.value || pendingCategory || category || 'all');
   const categories = [...new Set((items || []).map(categoryKeyOf).filter(Boolean))];
@@ -1275,6 +1294,7 @@ function syncCategoryOptions(items){
   else categorySelect.value = 'all';
   categoryHint.textContent = `Επιλεγμένη κατηγορία: ${categorySelect.value === "all" ? "Όλες" : categorySelect.value}`;
   if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['category']);
+  renderCatTabs(items);
 }
 
 const storedSearch = safeRead(BOOKING_STORAGE_KEY) || safeRead(LEGACY_BOOKING_STORAGE_KEY) || {};
@@ -1917,9 +1937,17 @@ syncDateConstraints(false);
 ['pickupDate','pickupTime','dropoffDate','dropoffTime','pickupLocation','dropoffLocation'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => { if(id === 'pickupDate') syncDateConstraints(true); updateState(); validateDateRange(); render(); triggerServerQuotes(); });
 });
+document.getElementById('catTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.cat-tab');
+  if(!btn) return;
+  categorySelect.value = btn.dataset.cat || 'all';
+  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['category']);
+  categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+});
 categorySelect.addEventListener("change", () => {
   try{ sessionStorage.setItem(CAT_RESTORE_KEY, categorySelect.value); }catch(_){}
   try{ localStorage.setItem(CAT_RESTORE_KEY, categorySelect.value); }catch(_){}
+  renderCatTabs(embeddedVehicleItems || []);
   updateState();
   if(Array.isArray(embeddedVehicleItems)){
     vehicles = filterVehiclesByCategory(embeddedVehicleItems, categorySelect.value);
@@ -1961,6 +1989,8 @@ function goBooking(vehicleId, vehicleCategoryCode){
 
   goTo(`${PAGE_ROUTES.options}?vehicle=${encodeURIComponent(vehicleId)}&pickup=${encodeURIComponent(payload.pickup)}&dropoff=${encodeURIComponent(payload.dropoff)}&pickupLocation=${encodeURIComponent(pickupLocation)}&dropoffLocation=${encodeURIComponent(dropoffLocation)}&category=${encodeURIComponent(extractCategoryCode(vehicleCategoryCode || categorySelect.value))}&age=${encodeURIComponent(ageGroup.value)}`);
 }
+// Category is picked via the toolbar tabs on this page — hide the duplicate sidebar field
+(function(){ try{ const f = document.getElementById('category').closest('.field'); if(f) f.style.display = 'none'; }catch(_){} })();
 initPageOwnedControls([
   { id:'pickupLocation', type:'select', placeholder:'Επιλογή τοποθεσίας' },
   { id:'pickupDate', type:'date', placeholder:'Επιλογή ημερομηνίας' },
