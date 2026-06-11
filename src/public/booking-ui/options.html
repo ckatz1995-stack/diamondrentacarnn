@@ -745,6 +745,23 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .model-note{font-size:10.5px;color:#8a7048;font-weight:700}
 .model-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
 @media(max-width:560px){.models-grid{grid-template-columns:repeat(2,1fr)!important}}
+
+/* ── Models strip: dark teal bar between progress and page ── */
+.models-strip{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99));border-bottom:1px solid rgba(231,191,105,.22);box-shadow:0 4px 18px rgba(0,0,0,.16);padding:0 16px}
+.models-strip-inner{display:flex;align-items:center;gap:12px;width:min(var(--container),calc(100vw - 24px));margin:0 auto;padding:9px 0;flex-wrap:wrap;min-height:44px}
+.models-strip-label{font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.52);white-space:nowrap;flex:0 0 auto}
+.models-strip-sep{width:1px;height:16px;background:rgba(255,255,255,.16);flex:0 0 auto}
+.models-strip-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.models-strip-chip{font-size:12.5px;font-weight:800;border-radius:999px;padding:5px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#f3ead2;letter-spacing:.04em;white-space:nowrap}
+.models-strip-chip.is-current{background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1d09;border-color:transparent;box-shadow:0 3px 10px rgba(0,0,0,.22)}
+@media(max-width:560px){.models-strip-label,.models-strip-sep{display:none}}
+
+/* ── Summary sidebar: stretch to fill the main content height ── */
+.opts-layout{align-items:stretch!important}
+.opts-aside{align-self:stretch!important}
+.opts-aside .summary-card{height:100%!important;display:flex!important;flex-direction:column!important;box-sizing:border-box!important}
+.summary-rows{flex:1 1 auto!important;margin-bottom:0!important}
+.summary-action{margin-top:auto!important;padding-top:14px!important}
 </style>
 </head>
 <body>
@@ -790,6 +807,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 @media(max-width:400px){.bp-label{display:none}.bp-connector{min-width:12px}}
 </style>
 <div class="booking-progress"><div class="bp-inner"><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Αναζήτηση</span></div><div class="bp-connector done"></div><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Οχήματα</span></div><div class="bp-connector done"></div><div class="bp-step active"><div class="bp-dot">3</div><span class="bp-label">Extras</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">4</div><span class="bp-label">Ολοκλήρωση</span></div></div></div>
+
+  <!-- Vehicle models strip: dark teal bar pinned right below the step bar -->
+  <div id="modelsStrip" class="models-strip" hidden>
+    <div class="models-strip-inner">
+      <span class="models-strip-label" id="modelsStripLabel">Κατηγορία Α</span>
+      <div class="models-strip-sep" aria-hidden="true"></div>
+      <div class="models-strip-chips" id="modelsStripChips"></div>
+    </div>
+  </div>
 
   <!-- DIAMOND MOBILE: Fixed bottom summary bar -->
   <div class="mobile-summary-bar" id="mobileSummaryBar">
@@ -898,22 +924,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
       </div>
     </section>
 
-    <!-- Reference info only — lives below the two decision steps so it never interrupts the flow -->
-    <section class="models-card">
-      <details id="modelsDetails">
-        <summary>
-          <div class="models-head">
-            <strong>Μοντέλα που ανήκουν στην κατηγορία</strong>
-            <span>Ο πελάτης επιλέγει κατηγορία οχημάτων και όχι συγκεκριμένο αυτοκίνητο. Άνοιξε εδώ για να δεις ενδεικτικά μοντέλα και υλικό μέσα / έξω.</span>
-          </div>
-          <div class="models-toggle" id="modelsToggleText">Άνοιγμα προβολής μοντέλων</div>
-        </summary>
-        <div class="models-inner">
-          <div class="models-banner" id="modelsBanner">Η κατηγορία A περιλαμβάνει ενδεικτικά Hyundai i10, Fiat Panda και VW Up!. Η τελική παράδοση εξαρτάται από τη διαθεσιμότητα της στιγμής.</div>
-          <div class="models-grid" id="modelsGrid"></div>
-        </div>
-      </details>
-    </section>
     </div><aside class="opts-aside">
 
     <section class="summary-card">
@@ -1928,8 +1938,26 @@ async function renderModels(category){
     if(names.length) banner.textContent = `Η κατηγορία ${category} περιλαμβάνει ενδεικτικά ${names.join(', ')} κ.α. Η τελική παράδοση εξαρτάται από τη διαθεσιμότητα.`;
   }
 
+  // Populate the top models strip
+  (function(){
+    const strip = document.getElementById('modelsStrip');
+    const chipsEl = document.getElementById('modelsStripChips');
+    const labelEl = document.getElementById('modelsStripLabel');
+    if(!strip || !chipsEl) return;
+    const catBadge = document.getElementById('categoryBadge');
+    const catCode = (catBadge && catBadge.textContent.trim()) || category || 'Α';
+    if(labelEl) labelEl.textContent = `Κατηγορία ${catCode} · μοντέλα`;
+    const names = items.map(m => (m.model || m.name || '').trim()).filter(Boolean);
+    if(names.length){
+      chipsEl.innerHTML = names.map((n,i) =>
+        `<span class="models-strip-chip${i===0?' is-current':''}">${escapeHtml(n)}</span>`
+      ).join('');
+      strip.removeAttribute('hidden');
+    }
+  })();
+
   const grid = document.getElementById('modelsGrid');
-  if(!grid) return;
+  if(!grid) return; // grid removed from DOM — strip above is the sole display
 
   if(!items.length){
     grid.innerHTML = '<p style="color:#8a7048;font-size:14px;padding:8px 0">Δεν βρέθηκαν μοντέλα για αυτή την κατηγορία.</p>';
@@ -2094,7 +2122,7 @@ async function loadVehicle(){
 
     const details = document.getElementById('modelsDetails');
     const toggleText = document.getElementById('modelsToggleText');
-    details.addEventListener('toggle', () => {
+    if(details && toggleText) details.addEventListener('toggle', () => {
       toggleText.textContent = details.open ? 'Απόκρυψη προβολής μοντέλων' : 'Άνοιγμα προβολής μοντέλων';
     });
 
