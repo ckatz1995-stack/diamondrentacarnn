@@ -1630,6 +1630,19 @@ function lookupFeeRule(ruleType, audienceGroup = ''){
     || rules.find((rule) => String(rule?.ruleType || '').trim() === String(ruleType || '').trim())
     || null;
 }
+// Exact-match age fee for picker pills: no cross-group fallback, so 23-69 never inherits the 19-22 amount
+function ageFeeFor(group){
+  const rules = Array.isArray(pricingCatalog?.feeRules) ? pricingCatalog.feeRules : [];
+  const target = String(group || '').trim().toLowerCase();
+  if(!target) return 0;
+  const hit = rules.find((rule) => rule && rule.active !== false
+    && String(rule.ruleType || rule.type || '').trim().toLowerCase() === 'agerange'
+    && String(rule.audienceGroup || rule.group || '').trim().toLowerCase() === target);
+  if(hit) return Number(hit.amount || 0);
+  if(target === '19-22') return 16;
+  if(target === '70+') return 10;
+  return 0;
+}
 function normalizeKey(value){ return String(value || '').trim().toLowerCase(); }
 function parseDateOnly(value){
   const raw = String(value || '').replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g, '').trim();
@@ -2351,6 +2364,7 @@ function initPageOwnedControls(configs){
     ctrl.trigger.disabled = nativeEl.disabled;
     const isTimeSel = ctrl.flavor === 'time' || /time$/i.test(ctrl.id || '');
     const isLocSel = /location|point/i.test(ctrl.id || '');
+    const isAgeSel = /age/i.test(ctrl.id || '');
     const locKind = /^pickup/i.test(ctrl.id || '') ? 'pickup' : 'dropoff';
     const noteHtml = isTimeSel && typeof getTimePickerMetaHtml === 'function' ? getTimePickerMetaHtml() : '';
     const optionHtml = [...nativeEl.options].map((opt) => {
@@ -2359,6 +2373,10 @@ function initPageOwnedControls(configs){
       if (isNight) badge = '<span class="opt-night" title="Ισχύει νυχτερινή χρέωση">🌙</span>';
       if (isLocSel && typeof locationFeeFor === 'function') {
         const fee = Number(locationFeeFor(opt.value, locKind) || 0);
+        if (fee > 0) badge = `<span class="opt-fee">+${fee}€</span>`;
+      }
+      if (isAgeSel && typeof ageFeeFor === 'function') {
+        const fee = Number(ageFeeFor(opt.value) || 0);
         if (fee > 0) badge = `<span class="opt-fee">+${fee}€</span>`;
       }
       return `<button type="button" class="custom-option${opt.value === nativeEl.value ? ' is-selected' : ''}${isNight ? ' is-night-slot' : ''}" data-value="${escapeCustomUi(opt.value)}" ${opt.disabled ? 'disabled' : ''}><span class="opt-label">${escapeCustomUi(opt.textContent || '')}</span>${badge}</button>`;
