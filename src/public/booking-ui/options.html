@@ -629,6 +629,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .extra-item.active .item-price span,.extra-item:has(input:checked) .item-price span{color:rgba(255,255,255,.60)!important}
 .extra-item.active .item-detail,.extra-item:has(input:checked) .item-detail{color:rgba(255,255,255,.68)!important}
 .extras-note{font-size:11.5px!important;color:#7a6446!important;margin-top:10px!important;padding:10px 12px!important;background:rgba(160,110,35,.06)!important;border-radius:10px!important;border:1px solid rgba(160,110,35,.12)!important}
+#tripStrip{display:none!important}
+.summary-change-btn{width:100%!important;margin-bottom:10px!important;padding:8px 12px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important;background:rgba(255,255,255,.07)!important;color:rgba(255,255,255,.78)!important;font-size:12px!important;font-weight:800!important;cursor:pointer!important;font-family:inherit!important;transition:background .15s!important;text-align:center!important}
+.summary-change-btn:hover{background:rgba(255,255,255,.14)!important;color:#fff!important}
 
 /* ── Insurance items (only shown on mobile if JS re-enables list) ── */
 .insurance-item{background:rgba(255,255,255,.66)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;padding:10px 13px!important;min-height:0!important;transition:border-color .15s,box-shadow .15s!important}
@@ -890,6 +893,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
         </div>
         <div class="summary-days"><span id="summaryDays">8</span> <span id="summaryDaysLbl">ημέρες</span></div>
       </div>
+      <button type="button" id="summaryChangeBtn" class="summary-change-btn">✏️ Αλλαγή αναζήτησης</button>
       <div class="summary-rows">
         <div class="row">
           <span>Ενοικίαση <small id="rateLabel" style="opacity:.6;font-size:.8em;margin-left:4px"></small><span id="seasonBadge" hidden style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;background:#f59e0b;color:#fff;font-size:.72em;font-weight:600;letter-spacing:.03em;vertical-align:middle"></span></span>
@@ -1070,6 +1074,12 @@ function bindRouteLinks(root = document){
   });
 }
 bindRouteLinks();
+(function(){
+  var btn = document.getElementById('summaryChangeBtn');
+  if(btn) btn.addEventListener('click', function(){
+    try{ parent.postMessage({type:'wix-booking-nav',path:'/categories'},'*'); } catch(_){ location.assign('/categories'); }
+  });
+})();
 
     function safeRead(key){
       for(const store of [sessionStorage, localStorage]){
@@ -1239,16 +1249,73 @@ bindRouteLinks();
         </label>`;
       }).join('');
 
+      // Sync compare-column prices and feature lists from catalog
+      insurancePlans.forEach(function(plan){
+        var col = document.querySelector('.ins-col[data-pick="' + plan.key + '"]');
+        if(!col) return;
+        var priceEl = col.querySelector('.ins-p');
+        if(priceEl){
+          var price = Number(plan.pricePerDay || 0);
+          priceEl.innerHTML = (price === 0 ? '0€' : '+' + price.toLocaleString('el-GR', {minimumFractionDigits:0}) + '€') + '<small>/ημέρα</small>';
+        }
+        // Update feature list if catalog provides features array
+        if(Array.isArray(plan.features) && plan.features.length){
+          var feats = col.querySelector('.ins-feats');
+          if(feats) feats.innerHTML = plan.features.map(function(f){ return '<li>' + f + '</li>'; }).join('');
+        }
+        // Update ins-name if label provided
+        var nameEl = col.querySelector('.ins-name');
+        if(nameEl && plan.label) nameEl.textContent = plan.label;
+      });
+      // Mark recommended column
+      document.querySelectorAll('.ins-col').forEach(function(c){ c.classList.remove('ins-rec'); });
+      var recPlan = insurancePlans.find(function(p){ return p.recommended; });
+      if(!recPlan && insurancePlans.length >= 2) recPlan = insurancePlans[1]; // default: 2nd plan
+      if(recPlan){
+        var recCol = document.querySelector('.ins-col[data-pick="' + recPlan.key + '"]');
+        if(recCol) recCol.classList.add('ins-rec');
+      }
+
       extrasList.innerHTML = extraServices.map((item) => {
-        const checked = selectedExtrasKeys.has(item.key);
-        const suffix = item.billingMode === 'perBooking' ? ' / κράτηση' : ' / ημέρα';
-        return `<label class="extra-item ${checked ? 'active' : ''}">
-          <input type="checkbox" class="extraInput" value="${escapeHtml(item.price)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" ${checked ? 'checked' : ''}>
-          <div class="item-content">
-            <div class="item-head"><strong class="item-title">${escapeHtml(item.label)}</strong><div class="item-price">${formatMoney(item.price)}<span>${suffix.trim()}</span></div></div>
-            <small class="item-detail">${escapeHtml(item.description || 'Προαιρετική επιπλέον παροχή για την κράτησή σου.')}</small>
-          </div>
-        </label>`;
+        const suffix = item.billingMode === 'perBooking' ? '/ κράτηση' : '/ ημέρα';
+        const maxQty = Number(item.maxQty || 1);
+        const savedQty = (() => {
+          try {
+            const bsExtras = Array.isArray(window.BookingState?.get('selectedExtras')) ? window.BookingState.get('selectedExtras') : [];
+            const match = bsExtras.find(x => (x.key || x.name) === item.key);
+            return match ? Math.min(Number(match.qty || (match.key ? 1 : 0)), maxQty) : 0;
+          } catch(_){ return 0; }
+        })();
+        const initQty = selectedExtrasKeys.has(item.key) ? (savedQty || 1) : savedQty;
+        if(maxQty > 1){
+          // Quantity item
+          return `<div class="extra-item extra-qty-item ${initQty > 0 ? 'active' : ''}" data-key="${escapeHtml(item.key)}" data-price="${escapeHtml(item.price)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-max="${maxQty}">
+            <div class="extra-qty-info">
+              <strong class="item-title">${escapeHtml(item.label)}</strong>
+              ${item.description ? `<span class="item-detail">${escapeHtml(item.description)}</span>` : ''}
+            </div>
+            <div class="extra-qty-right">
+              <div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div>
+              <div class="qty-stepper">
+                <button type="button" class="qty-btn qty-minus" aria-label="Αφαίρεση">−</button>
+                <span class="qty-val">${initQty}</span>
+                <button type="button" class="qty-btn qty-plus" aria-label="Προσθήκη">+</button>
+              </div>
+            </div>
+            <input type="hidden" class="extraInput" value="${escapeHtml(item.price)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-qty="${initQty}">
+          </div>`;
+        } else {
+          // Toggle item
+          const checked = initQty > 0;
+          return `<label class="extra-item extra-toggle-item ${checked ? 'active' : ''}">
+            <input type="checkbox" class="extraInput" value="${escapeHtml(item.price)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-qty="1" ${checked ? 'checked' : ''}>
+            <div class="extra-toggle-info">
+              <strong class="item-title">${escapeHtml(item.label)}</strong>
+              ${item.description ? `<span class="item-detail">${escapeHtml(item.description)}</span>` : ''}
+            </div>
+            <div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div>
+          </label>`;
+        }
       }).join('');
 
       bindChoiceInputs();
