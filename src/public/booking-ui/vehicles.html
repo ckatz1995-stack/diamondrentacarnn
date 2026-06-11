@@ -295,10 +295,6 @@ button:hover,.cta:hover,.header-phone:hover{
 /* Quote loading shimmer */
 .price-skel{display:inline-block;width:88px;height:1em;border-radius:8px;vertical-align:middle;background:linear-gradient(90deg,rgba(255,255,255,.08) 25%,rgba(255,255,255,.24) 50%,rgba(255,255,255,.08) 75%);background-size:200% 100%;animation:skel-sh 1.2s linear infinite}
 @keyframes skel-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
-/* Search summary strip above results */
-.search-strip{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 14px;border-radius:14px;background:rgba(20,14,4,.55);border:1px solid rgba(231,191,105,.22);color:#f3ead2;font-size:13.5px;font-weight:600}
-.search-strip .ss-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.search-strip .ss-edit{flex:none;background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1e0a;border:0;border-radius:999px;padding:7px 15px;font-weight:800;font-size:13px;cursor:pointer}
 .season-badge{
   display:inline-block;
   margin-top:6px;
@@ -670,8 +666,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 /* ── UX PASS: chips, skeleton tint, summary strip, mobile compaction (theme-aware) ── */
 .spec-chips .chip{background:rgba(160,110,35,.08)!important;border:1px solid rgba(160,110,35,.28)!important;color:#4a3820!important}
 .price-skel{background:linear-gradient(90deg,rgba(160,110,35,.12) 25%,rgba(160,110,35,.30) 50%,rgba(160,110,35,.12) 75%)!important;background-size:200% 100%!important}
-.search-strip{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.22)!important;color:#4a3820!important;box-shadow:0 8px 24px rgba(90,48,0,.14)!important}
-.search-strip .ss-edit{background:linear-gradient(135deg,#c88a35,#e0a848)!important;color:#1a0e04!important}
+
 .cta .cta-total{font-weight:900}
 @media (max-width:620px){
   .cta{height:54px!important;font-size:16.5px!important}
@@ -689,6 +684,14 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .v2-title{margin:0;font-size:22px;line-height:1.15;color:#1c1408;font-weight:900}
 .v2-similar{font-size:13px;color:#8a7048;font-weight:600;white-space:nowrap}
 .v2-info .spec-chips{margin-top:2px}
+.v2-perks{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;font-size:12.5px;color:#5a4528;font-weight:600}
+.v2-perks li{display:flex;align-items:center;gap:6px;min-width:0}
+.v2-perks li::before{content:"✓";flex:none;width:16px;height:16px;border-radius:50%;background:rgba(160,110,35,.14);color:#a07828;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center}
+@media(max-width:520px){.v2-perks{grid-template-columns:1fr}}
+.night-hint{margin-top:5px;font-size:12px;font-weight:700;color:#7a5410;background:rgba(231,191,105,.22);border:1px solid rgba(160,110,35,.30);border-radius:8px;padding:5px 9px;line-height:1.3}
+.v2card{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+.v2card:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(60,30,0,.20)}
+.v2card:active{transform:translateY(-1px)}
 .v2-fees{margin-top:2px;font-size:13px;color:#4a3820;max-width:420px}
 .v2-fees summary{cursor:pointer;font-weight:800;color:#a07828;list-style-position:inside}
 .v2-fees[open] summary{margin-bottom:4px}
@@ -859,12 +862,148 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 @media(prefers-reduced-motion:reduce){.custom-day:hover{transform:none}}
 </style>
 <style>
+/* ═══ PICKER UPGRADE: premium warm gold theme ═══ */
+
+/* Animation: slide up from below (panels appear below their trigger) */
+@keyframes pickerIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Trigger — refined premium input */
+.custom-trigger{
+  background:#fff!important;
+  border:1.5px solid rgba(160,110,35,.22)!important;
+  border-radius:14px!important;
+  box-shadow:0 2px 8px rgba(90,48,0,.08),inset 0 1px 0 rgba(255,255,255,.9)!important;
+  transition:border-color .16s ease,box-shadow .16s ease,background .16s ease!important;
+  min-height:52px!important;
+  font-size:15px!important;
+}
+.custom-trigger::after{
+  content:'⌄'!important;
+  color:#a07828!important;
+  font-size:20px!important;
+  line-height:1!important;
+  transition:transform .2s ease!important;
+  margin-top:-2px!important;
+}
+.custom-picker.open .custom-trigger,
+.custom-trigger[aria-expanded="true"]{
+  border-color:#e7bf69!important;
+  box-shadow:0 0 0 3px rgba(231,191,105,.25),0 2px 8px rgba(90,48,0,.10)!important;
+  background:#fffdf5!important;
+}
+.custom-picker.open .custom-trigger::after{transform:rotate(180deg)!important}
+.custom-trigger.is-placeholder{color:rgba(90,60,20,.55)!important}
+
+/* Panel — premium warm cream with depth */
+.custom-panel{
+  background:#fdf8ef!important;
+  border:1.5px solid rgba(160,110,35,.22)!important;
+  border-radius:18px!important;
+  box-shadow:0 24px 56px rgba(60,30,0,.26),0 8px 20px rgba(60,30,0,.14),inset 0 1px 0 rgba(255,240,160,.18)!important;
+  padding:14px!important;
+}
+
+/* Panel title */
+.custom-panel-title{
+  font-size:10.5px!important;
+  font-weight:900!important;
+  letter-spacing:.10em!important;
+  color:#a07828!important;
+  border-bottom:1px solid rgba(160,110,35,.18)!important;
+  padding-bottom:9px!important;
+  margin-bottom:10px!important;
+}
+
+/* Options */
+.custom-option{
+  background:rgba(255,248,225,.70)!important;
+  border-radius:11px!important;
+  color:#1c1408!important;
+}
+.custom-option:hover,.custom-option:focus-visible{
+  background:rgba(231,191,105,.32)!important;
+  outline:none!important;
+}
+.custom-option.is-selected{
+  background:linear-gradient(135deg,#e7bf69,#c88a35)!important;
+  color:#1a0e04!important;
+  box-shadow:0 4px 12px rgba(160,80,0,.22)!important;
+}
+.custom-option.is-selected::after{color:#1a0e04!important;opacity:.8!important}
+.opt-fee{
+  background:rgba(231,191,105,.30)!important;
+  border-color:rgba(160,110,35,.32)!important;
+  color:#7a5410!important;
+}
+.custom-option.is-selected .opt-fee{background:rgba(255,255,255,.55)!important;color:#1a0e04!important}
+
+/* Time grid: night slots get a subtle dark tint */
+.custom-options.time-cols .custom-option.is-night-slot{background:rgba(20,40,60,.07)!important;color:#2a1d0f!important}
+.custom-options.time-cols .custom-option.is-selected{
+  background:linear-gradient(135deg,#e7bf69,#c88a35)!important;
+  color:#1a0e04!important;
+  box-shadow:0 4px 12px rgba(160,80,0,.22)!important;
+}
+
+/* Calendar nav + jump */
+.calendar-jump-trigger{background:rgba(231,191,105,.20)!important;border-color:rgba(160,110,35,.22)!important;color:#4a3820!important}
+.calendar-jump-trigger:hover{background:rgba(231,191,105,.38)!important}
+.calendar-jump-menu{background:#fdf8ef!important;border-color:rgba(160,110,35,.22)!important;box-shadow:0 16px 34px rgba(60,30,0,.22)!important}
+.calendar-jump-option{background:rgba(255,248,225,.70)!important;color:#1c1408!important}
+.calendar-jump-option.is-selected{background:rgba(231,191,105,.40)!important;color:#7a5410!important}
+.custom-calendar-nav{background:rgba(231,191,105,.20)!important;border-color:rgba(160,110,35,.22)!important;color:#4a3820!important}
+.custom-calendar-nav:hover{background:rgba(231,191,105,.40)!important}
+
+/* Calendar days */
+.custom-calendar-weekdays span{color:#a07828!important;letter-spacing:.04em!important}
+.custom-calendar-head strong{color:#3a2a0e!important}
+.custom-day{background:rgba(255,248,225,.70)!important;color:#1c1408!important;border-radius:10px!important}
+.custom-day:not(.is-disabled):not(.is-empty):hover{background:rgba(231,191,105,.40)!important;transform:scale(1.06)!important}
+.custom-day.is-today{box-shadow:inset 0 0 0 2px #e7bf69!important;color:#a07828!important;font-weight:900!important}
+.custom-day.is-selected{
+  background:linear-gradient(135deg,#e7bf69,#c88a35)!important;
+  color:#1a0e04!important;
+  font-weight:900!important;
+  box-shadow:0 4px 14px rgba(160,80,0,.28)!important;
+}
+/* Trip range: warm amber */
+.custom-day.is-range{background:rgba(231,191,105,.22)!important;color:#5a3c10!important}
+.custom-day.is-range-edge{background:rgba(231,191,105,.48)!important;color:#3a2008!important}
+.custom-day.is-disabled{background:rgba(0,0,0,.04)!important;color:rgba(60,45,22,.30)!important}
+.custom-day.is-empty{background:transparent!important}
+
+/* Panel note / footer */
+.custom-panel-note strong{color:#4a3816!important}
+.custom-panel-note small{color:rgba(74,56,22,.72)!important}
+.custom-panel-note{border-top-color:rgba(160,110,35,.14)!important}
+
+/* Sort picker: compact for the dark toolbar, panel anchors right */
+.sort-inline-wrap .custom-picker{width:auto;min-width:128px}
+.sort-inline-wrap .custom-trigger{min-height:38px!important;font-size:13.5px!important;padding:0 12px!important;border-radius:10px!important;gap:8px!important}
+.sort-inline-wrap .custom-panel{left:auto;right:0;min-width:180px}
+
+/* Card media: subtle zoom on hover, follows the clickable-card lift */
+.v2-media{overflow:hidden}
+.v2-media img{transition:transform .28s ease}
+.v2card:hover .v2-media img{transform:scale(1.07)}
+@media(prefers-reduced-motion:reduce){.v2card:hover .v2-media img{transform:none}}
+
+/* Empty state: matches the premium card design */
+.empty-state-panel{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12)!important;border-radius:22px!important;padding:48px 24px!important}
+.empty-state-icon{font-size:30px!important;width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#e7bf69,#f6e19f);display:flex;align-items:center;justify-content:center;color:#3a2c16;opacity:1!important;box-shadow:0 8px 20px rgba(90,48,0,.22);margin-bottom:16px!important}
+.empty-state-title{color:#1c1408!important}
+.empty-state-sub{color:#7a5e38!important}
+.empty-state-btn{background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;color:#2a1e0a!important;font-weight:900!important;border-radius:14px!important;box-shadow:0 8px 20px rgba(90,48,0,.20)!important}
+.empty-state-btn:hover{opacity:1!important;filter:brightness(1.05)}
+</style>
+<style>
 /* ═══ SEARCH SIDEBAR: collapsed trip editor docks left of the results (≥980px) ═══ */
 @media(min-width:980px){
   .page{display:grid;grid-template-columns:310px minmax(0,1fr);gap:14px;align-items:start}
   .page>*{grid-column:2;min-width:0}
   .page>.results-toolbar{grid-column:1/-1;grid-row:1}
-  .page>.search-wrap{grid-column:1;grid-row:2/span 40;margin-bottom:0}
+  .page>.search-wrap{grid-column:1;grid-row:2;align-self:start;position:sticky;top:12px;margin-bottom:0}
+  .page>.results-col{grid-column:2;grid-row:2;min-width:0}
   /* Sidebar form: single-column fields */
   .search-grid,.search-options-grid{grid-template-columns:1fr!important}
   .search-summary-bar{flex-wrap:wrap;gap:8px}
@@ -941,10 +1080,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 <div class="booking-progress"><div class="bp-inner"><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Αναζήτηση</span></div><div class="bp-connector done"></div><div class="bp-step active"><div class="bp-dot">2</div><span class="bp-label">Οχήματα</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">3</div><span class="bp-label">Extras</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">4</div><span class="bp-label">Ολοκλήρωση</span></div></div></div>
 
 <div class="page">
-  <!-- DIAMOND LOADING: No-data guard -->
-  <div class="no-data-banner" id="noDataBanner">
-    Ξεκινήστε την αναζήτησή σας από την <a href="/">αρχική σελίδα</a>.
-  </div>
   <section class="search-wrap panel">
     <!-- Compact edit summary: customers can adjust search without returning home -->
     <div class="search-summary-bar" id="searchSummaryBar">
@@ -972,6 +1107,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           <div class="field">
             <label>Ώρα παραλαβής</label>
             <select id="pickupTime" class="time-select" required></select>
+            <div class="night-hint" id="pickupNightHint" hidden></div>
           </div>
 
           <div class="field">
@@ -991,6 +1127,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           <div class="field">
             <label>Ώρα επιστροφής</label>
             <select id="dropoffTime" class="time-select" required></select>
+            <div class="night-hint" id="dropoffNightHint" hidden></div>
           </div>
         </div>
         <div class="search-options-grid">
@@ -1034,39 +1171,40 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div>
   </div>
 
-  <section class="list" id="list">
-  <!-- DIAMOND LOADING: Skeleton cards — shown while loading -->
-  <div class="skeleton-list active" id="skeletonList">
-    <div class="skeleton-card">
-      <div class="skeleton-row h-big w-full"></div>
-      <div class="skeleton-row w-60"></div>
-      <div class="skeleton-row w-40"></div>
-      <div class="skeleton-row w-full"></div>
+  <div class="results-col">
+    <!-- DIAMOND LOADING: No-data guard -->
+    <div class="no-data-banner" id="noDataBanner">
+      Ξεκινήστε την αναζήτησή σας από την <a href="/">αρχική σελίδα</a>.
     </div>
-    <div class="skeleton-card">
-      <div class="skeleton-row h-big w-full"></div>
-      <div class="skeleton-row w-60"></div>
-      <div class="skeleton-row w-40"></div>
-      <div class="skeleton-row w-full"></div>
+    <section class="list" id="list">
+    <!-- DIAMOND LOADING: Skeleton cards — shown while loading -->
+    <div class="skeleton-list active" id="skeletonList">
+      <div class="skeleton-card">
+        <div class="skeleton-row h-big w-full"></div>
+        <div class="skeleton-row w-60"></div>
+        <div class="skeleton-row w-40"></div>
+        <div class="skeleton-row w-full"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton-row h-big w-full"></div>
+        <div class="skeleton-row w-60"></div>
+        <div class="skeleton-row w-40"></div>
+        <div class="skeleton-row w-full"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton-row h-big w-full"></div>
+        <div class="skeleton-row w-60"></div>
+        <div class="skeleton-row w-40"></div>
+      </div>
     </div>
-    <div class="skeleton-card">
-      <div class="skeleton-row h-big w-full"></div>
-      <div class="skeleton-row w-60"></div>
-      <div class="skeleton-row w-40"></div>
+    <!-- DIAMOND LOADING: Empty state -->
+    <div class="empty-state-panel" id="emptyStatePanel">
+      <div class="empty-state-icon">◆</div>
+      <h2 class="empty-state-title">Δεν βρέθηκαν διαθέσιμα οχήματα</h2>
+      <p class="empty-state-sub">Δοκιμάστε διαφορετικές ημερομηνίες ή επιλέξτε άλλη κατηγορία.</p>
+      <button class="empty-state-btn" id="emptyStateModifyBtn" type="button">Τροποποίηση αναζήτησης</button>
     </div>
-  </div>
-  <!-- DIAMOND LOADING: Empty state -->
-  <div class="empty-state-panel" id="emptyStatePanel">
-    <div class="empty-state-icon">🚗</div>
-    <h2 class="empty-state-title">Δεν βρέθηκαν διαθέσιμα οχήματα</h2>
-    <p class="empty-state-sub">Δοκιμάστε διαφορετικές ημερομηνίες ή επιλέξτε άλλη κατηγορία.</p>
-    <button class="empty-state-btn" id="emptyStateModifyBtn" type="button">Τροποποίηση αναζήτησης</button>
-  </div>
-  </section>
-
-  <div class="search-strip" id="changeSearchRow">
-    <span class="ss-txt">Θέλεις άλλες ημερομηνίες ή τοποθεσία;</span>
-    <button class="ss-edit" id="changeSearchBtn" type="button">Αλλαγή αναζήτησης</button>
+    </section>
   </div>
 </div>
 
@@ -1420,6 +1558,7 @@ async function fetchRealCatalog(){
     populateLocationSelectsFromCatalog();
     populateAgeSelectFromCatalog();
     applyBusinessIdentity();
+    if(typeof updateNightHints === 'function') updateNightHints();
     if(Array.isArray(vehicles) && vehicles.length) render();
   }catch(e){}
 }
@@ -1477,7 +1616,15 @@ let lastBookingContext = { pickup, dropoff, pickupLocation, dropoffLocation, cat
 let requestTimers = [];
 let missingDataTimer = null;
 const list = document.getElementById("list");
-list.addEventListener('click', (e) => { const btn = e.target.closest('button.cta[data-vehicle-id]'); if (!btn) return; goBooking(btn.dataset.vehicleId, btn.dataset.categoryCode); });
+list.addEventListener('click', (e) => {
+  const btn = e.target.closest('button.cta[data-vehicle-id]');
+  if (btn) { goBooking(btn.dataset.vehicleId, btn.dataset.categoryCode); return; }
+  // Whole card acts as the CTA — except interactive bits like the fee breakdown toggle
+  if (e.target.closest('details,summary,a,button,select,input')) return;
+  const card = e.target.closest('.v2card');
+  const cta = card && card.querySelector('button.cta[data-vehicle-id]');
+  if (cta) goBooking(cta.dataset.vehicleId, cta.dataset.categoryCode);
+});
 const sortSelect = document.getElementById("sortSelect");
 const categorySelect = document.getElementById("category");
 const ageGroup = document.getElementById('ageGroup');
@@ -1501,6 +1648,19 @@ function lookupFeeRule(ruleType, audienceGroup = ''){
   return rules.find((rule) => String(rule?.ruleType || '').trim() === String(ruleType || '').trim() && String(rule?.audienceGroup || '').trim() === String(audienceGroup || '').trim())
     || rules.find((rule) => String(rule?.ruleType || '').trim() === String(ruleType || '').trim())
     || null;
+}
+// Exact-match age fee for picker pills: no cross-group fallback, so 23-69 never inherits the 19-22 amount
+function ageFeeFor(group){
+  const rules = Array.isArray(pricingCatalog?.feeRules) ? pricingCatalog.feeRules : [];
+  const target = String(group || '').trim().toLowerCase();
+  if(!target) return 0;
+  const hit = rules.find((rule) => rule && rule.active !== false
+    && String(rule.ruleType || rule.type || '').trim().toLowerCase() === 'agerange'
+    && String(rule.audienceGroup || rule.group || '').trim().toLowerCase() === target);
+  if(hit) return Number(hit.amount || 0);
+  if(target === '19-22') return 16;
+  if(target === '70+') return 10;
+  return 0;
 }
 function normalizeKey(value){ return String(value || '').trim().toLowerCase(); }
 function parseDateOnly(value){
@@ -1636,6 +1796,7 @@ function applyBookingContext(query){
   if(nextAge) ageGroup.value = nextAge;
   if(nextCategory) pendingCategory = nextCategory;
   if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['pickupLocation','pickupDate','pickupTime','dropoffLocation','dropoffDate','dropoffTime','ageGroup']);
+  updateNightHints();
 }
 
 function currentDays(){
@@ -1723,7 +1884,7 @@ function render(){
       serverQuote.locationFee > 0 ? `<div class="v2-fee-row"><span>Χρέωση τοποθεσιών</span><span>${fmtMoney(serverQuote.locationFee)}</span></div>` : ''
     ].filter(Boolean).join('') : '';
     const feesBlock = feeRows
-      ? `<details class="v2-fees"><summary>Ανάλυση χρέωσης</summary><div class="v2-fee-row"><span>Ενοικίαση ${billDays} × ${dailyDisp}</span><span>${serverQuote ? fmtMoney(serverQuote.baseCost || dailyPrice * billDays) : fmtMoney(baseTotal)}</span></div>${feeRows}</details>`
+      ? `<details class="v2-fees" open><summary>Ανάλυση χρέωσης</summary><div class="v2-fee-row"><span>Ενοικίαση ${billDays} × ${dailyDisp}</span><span>${serverQuote ? fmtMoney(serverQuote.baseCost || dailyPrice * billDays) : fmtMoney(baseTotal)}</span></div>${feeRows}</details>`
       : '';
     const serverSeasonLabel = serverQuote?.season?.label || serverQuote?.season?.name || '';
     const displaySeasonLabel = serverSeasonLabel || (hasSeasonRate ? _activeSeason.label : '');
@@ -1739,6 +1900,12 @@ function render(){
             <span class="v2-cat">Κατηγορία ${escapeHtml(catCode || '—')}</span>
             <h2 class="v2-title">${escapeHtml(cleanName)}<span class="v2-similar"> ή παρόμοιο</span></h2>
             <div class="spec-chips">${chips || '<span class="chip">—</span>'}</div>
+            <ul class="v2-perks">
+              <li>Απεριόριστα χιλιόμετρα</li>
+              <li>Βασική ασφάλεια CDW</li>
+              <li>24/7 οδική βοήθεια</li>
+              <li>Προσωπική επιβεβαίωση κράτησης</li>
+            </ul>
           </div>
           <div class="v2-buy">
             <span class="season-badge v2-season${displaySeasonLabel ? '' : ' v2-season-hidden'}">${escapeHtml(displaySeasonLabel || '—')}</span>
@@ -1809,6 +1976,7 @@ window.addEventListener('message', (event) => {
       populateAgeSelectFromCatalog();
       applyBookingContext(lastBookingContext || {});
       applyBusinessIdentity();
+      if(typeof updateNightHints === 'function') updateNightHints();
       if(Array.isArray(embeddedVehicleItems)) {
         vehicles = filterVehiclesByCategory(embeddedVehicleItems, categorySelect.value || pendingCategory || category);
         render();
@@ -1840,11 +2008,6 @@ window.addEventListener('message', (event) => {
   }
 });
 
-document.getElementById('changeSearchBtn')?.addEventListener('click', () => {
-  if (typeof window._openSearchPanel === 'function') window._openSearchPanel();
-  try { parent.postMessage({ type: 'wix-scroll-top' }, '*'); } catch(e) {}
-  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
-});
 
 async function loadVehicles(){
   if(isEmbedded()){
@@ -1935,8 +2098,24 @@ function syncDateConstraints(bumpDropoff){
   }
 }
 syncDateConstraints(false);
+// Night-fee transparency: surface the surcharge right under the time field
+function updateNightHints(){
+  [['pickupTime','pickupNightHint','nightPickup'],['dropoffTime','dropoffNightHint','nightDropoff']].forEach(([selId, hintId, ruleType]) => {
+    const sel = document.getElementById(selId);
+    const hint = document.getElementById(hintId);
+    if(!sel || !hint) return;
+    if(isNightTime(sel.value)){
+      const meta = nightRuleMeta(ruleType, 'Νυχτερινή χρέωση');
+      hint.textContent = `🌙 Νυχτερινή χρέωση +${fmtMoney(meta.amount)}`;
+      hint.hidden = false;
+    } else {
+      hint.hidden = true;
+    }
+  });
+}
+updateNightHints();
 ['pickupDate','pickupTime','dropoffDate','dropoffTime','pickupLocation','dropoffLocation'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => { if(id === 'pickupDate') syncDateConstraints(true); updateState(); validateDateRange(); render(); triggerServerQuotes(); });
+  document.getElementById(id).addEventListener('change', () => { if(id === 'pickupDate') syncDateConstraints(true); updateState(); validateDateRange(); updateNightHints(); render(); triggerServerQuotes(); });
 });
 document.getElementById('catTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.cat-tab');
@@ -2204,16 +2383,22 @@ function initPageOwnedControls(configs){
     ctrl.trigger.disabled = nativeEl.disabled;
     const isTimeSel = ctrl.flavor === 'time' || /time$/i.test(ctrl.id || '');
     const isLocSel = /location|point/i.test(ctrl.id || '');
+    const isAgeSel = /age/i.test(ctrl.id || '');
     const locKind = /^pickup/i.test(ctrl.id || '') ? 'pickup' : 'dropoff';
     const noteHtml = isTimeSel && typeof getTimePickerMetaHtml === 'function' ? getTimePickerMetaHtml() : '';
     const optionHtml = [...nativeEl.options].map((opt) => {
       let badge = '';
-      if (isTimeSel && typeof isNightTime === 'function' && isNightTime(opt.value)) badge = '<span class="opt-night" title="Ισχύει νυχτερινή χρέωση">🌙</span>';
+      const isNight = isTimeSel && typeof isNightTime === 'function' && isNightTime(opt.value);
+      if (isNight) badge = '<span class="opt-night" title="Ισχύει νυχτερινή χρέωση">🌙</span>';
       if (isLocSel && typeof locationFeeFor === 'function') {
         const fee = Number(locationFeeFor(opt.value, locKind) || 0);
         if (fee > 0) badge = `<span class="opt-fee">+${fee}€</span>`;
       }
-      return `<button type="button" class="custom-option${opt.value === nativeEl.value ? ' is-selected' : ''}" data-value="${escapeCustomUi(opt.value)}" ${opt.disabled ? 'disabled' : ''}><span class="opt-label">${escapeCustomUi(opt.textContent || '')}</span>${badge}</button>`;
+      if (isAgeSel && typeof ageFeeFor === 'function') {
+        const fee = Number(ageFeeFor(opt.value) || 0);
+        if (fee > 0) badge = `<span class="opt-fee">+${fee}€</span>`;
+      }
+      return `<button type="button" class="custom-option${opt.value === nativeEl.value ? ' is-selected' : ''}${isNight ? ' is-night-slot' : ''}" data-value="${escapeCustomUi(opt.value)}" ${opt.disabled ? 'disabled' : ''}><span class="opt-label">${escapeCustomUi(opt.textContent || '')}</span>${badge}</button>`;
     }).join('');
     const signature = `${optionHtml}##${noteHtml}`;
     if (signature !== ctrl.signature) {
