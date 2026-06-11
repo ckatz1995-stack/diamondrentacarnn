@@ -976,6 +976,25 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .custom-panel-note strong{color:#4a3816!important}
 .custom-panel-note small{color:rgba(74,56,22,.72)!important}
 .custom-panel-note{border-top-color:rgba(160,110,35,.14)!important}
+
+/* Sort picker: compact for the dark toolbar, panel anchors right */
+.sort-inline-wrap .custom-picker{width:auto;min-width:128px}
+.sort-inline-wrap .custom-trigger{min-height:38px!important;font-size:13.5px!important;padding:0 12px!important;border-radius:10px!important;gap:8px!important}
+.sort-inline-wrap .custom-panel{left:auto;right:0;min-width:180px}
+
+/* Card media: subtle zoom on hover, follows the clickable-card lift */
+.v2-media{overflow:hidden}
+.v2-media img{transition:transform .28s ease}
+.v2card:hover .v2-media img{transform:scale(1.07)}
+@media(prefers-reduced-motion:reduce){.v2card:hover .v2-media img{transform:none}}
+
+/* Empty state: matches the premium card design */
+.empty-state-panel{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12)!important;border-radius:22px!important;padding:48px 24px!important}
+.empty-state-icon{font-size:30px!important;width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#e7bf69,#f6e19f);display:flex;align-items:center;justify-content:center;color:#3a2c16;opacity:1!important;box-shadow:0 8px 20px rgba(90,48,0,.22);margin-bottom:16px!important}
+.empty-state-title{color:#1c1408!important}
+.empty-state-sub{color:#7a5e38!important}
+.empty-state-btn{background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;color:#2a1e0a!important;font-weight:900!important;border-radius:14px!important;box-shadow:0 8px 20px rgba(90,48,0,.20)!important}
+.empty-state-btn:hover{opacity:1!important;filter:brightness(1.05)}
 </style>
 <style>
 /* ═══ SEARCH SIDEBAR: collapsed trip editor docks left of the results (≥980px) ═══ */
@@ -1180,7 +1199,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
     </div>
     <!-- DIAMOND LOADING: Empty state -->
     <div class="empty-state-panel" id="emptyStatePanel">
-      <div class="empty-state-icon">🚗</div>
+      <div class="empty-state-icon">◆</div>
       <h2 class="empty-state-title">Δεν βρέθηκαν διαθέσιμα οχήματα</h2>
       <p class="empty-state-sub">Δοκιμάστε διαφορετικές ημερομηνίες ή επιλέξτε άλλη κατηγορία.</p>
       <button class="empty-state-btn" id="emptyStateModifyBtn" type="button">Τροποποίηση αναζήτησης</button>
