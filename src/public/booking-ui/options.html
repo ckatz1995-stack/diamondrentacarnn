@@ -556,9 +556,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 
 /* ── Hero: 2-col compact layout (dates live in trip strip + summary) ── */
 .hero-grid{grid-template-columns:250px 1fr!important;align-items:stretch!important}
-.vehicle-media{background:radial-gradient(circle at 40% 30%,rgba(255,255,255,.55),transparent 50%),linear-gradient(160deg,rgba(235,218,175,.90),rgba(210,180,120,.80))!important;min-height:180px!important;padding:18px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}
-.vehicle-media img{max-width:100%!important;max-height:150px!important;object-fit:contain!important;filter:drop-shadow(0 10px 20px rgba(60,30,0,.22))!important;transition:transform .28s ease;display:block}
-.hero-card:hover .vehicle-media img{transform:scale(1.05)}
+.vehicle-media{background:radial-gradient(ellipse at 55% 40%,rgba(255,255,255,.80),transparent 60%),linear-gradient(170deg,rgba(250,244,228,.96),rgba(240,228,195,.84))!important;min-height:190px!important;padding:20px 16px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}
+.vehicle-media img{max-width:90%!important;max-height:155px!important;object-fit:contain!important;filter:drop-shadow(0 12px 22px rgba(40,20,0,.20))!important;transition:transform .28s ease;display:block}
+.hero-card:hover .vehicle-media img{transform:scale(1.06)}
 .cat-badge{position:absolute!important;left:12px!important;top:12px!important;width:auto!important;min-width:34px!important;height:30px!important;padding:0 11px!important;font-size:13px!important;font-weight:900!important;letter-spacing:.04em!important;background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;color:#2a1e0a!important;border:none!important;border-radius:999px!important;box-shadow:0 4px 12px rgba(60,30,0,.24)!important;display:flex!important;align-items:center!important;justify-content:center!important}
 .vehicle-main{padding:18px 22px 16px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
 .vehicle-main h1{margin:0!important;font-size:clamp(20px,2.4vw,27px)!important;color:#1c1408!important;letter-spacing:-.03em!important;line-height:1.12!important}
@@ -587,7 +587,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .choices-header{padding:16px 22px 13px!important;border-bottom:1px solid rgba(160,110,35,.14)!important}
 .choices-header h2{font-size:20px!important;letter-spacing:-.02em!important;color:#1c1408!important;margin:0!important}
 .insurance-link{color:#a07828!important;border-bottom-color:rgba(160,110,35,.28)!important;font-size:12px!important}
-.choices-grid{padding:14px 16px 16px!important;gap:14px!important;grid-template-columns:.95fr 1.05fr!important}
+.choices-grid{padding:14px 16px 16px!important;gap:14px!important;grid-template-columns:.85fr 1.15fr!important}
 .choice-subpanel{background:rgba(255,255,255,.30)!important;border:1px solid rgba(160,110,35,.12)!important;border-radius:18px!important;box-shadow:none!important;padding:14px 13px 13px!important}
 .choice-subpanel-header{border-bottom:1px solid rgba(160,110,35,.12)!important;margin-bottom:11px!important;padding-bottom:9px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important}
 .section-title{font-size:15px!important;color:#1c1408!important;letter-spacing:-.01em!important}
@@ -598,7 +598,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .ins-compare{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important;margin-bottom:0!important;padding-top:8px}
 .ins-col{border:2px solid rgba(160,110,35,.16)!important;background:rgba(255,255,255,.70)!important;border-radius:15px!important;padding:14px 12px 12px!important;gap:6px!important;min-height:148px;transition:border-color .15s,background .15s,box-shadow .15s!important}
 .ins-col:hover{border-color:rgba(160,110,35,.38)!important;background:rgba(255,255,255,.92)!important;box-shadow:0 6px 18px rgba(60,30,0,.10)!important}
-.ins-rec{border-color:rgba(160,110,35,.36)!important;background:rgba(253,248,239,.80)!important}
+/* Recommended column: warm gold tint + stronger border so it stands out when nothing is selected */
+.ins-rec{border-color:rgba(160,110,35,.48)!important;background:linear-gradient(160deg,rgba(255,248,220,.95),rgba(253,243,205,.88))!important;box-shadow:0 4px 14px rgba(160,110,35,.14)!important}
 /* Floating badge — keeps all three columns the same height */
 .ins-badge{position:absolute!important;top:-10px!important;right:10px!important;margin:0!important;font-size:9.5px!important;padding:3px 9px!important;font-weight:900!important;background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;border:none!important;color:#2a1e0a!important;box-shadow:0 3px 8px rgba(60,30,0,.22)!important}
 .ins-name{font-size:15px!important;font-weight:900!important;color:#1c1408!important}
@@ -612,20 +613,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .ins-col.is-active .ins-feats li{color:rgba(255,255,255,.78)!important}
 
 /* ── Extras: single-column clean items ── */
-.extras-list{display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
-.extra-item{background:rgba(255,255,255,.66)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;padding:10px 13px!important;min-height:0!important;grid-template-columns:20px minmax(0,1fr)!important;gap:11px!important;align-items:center!important;transition:border-color .15s,box-shadow .15s,transform .15s!important}
-.extra-item:hover{border-color:rgba(160,110,35,.34)!important;transform:translateY(-1px)!important;box-shadow:0 6px 16px rgba(60,30,0,.10)!important}
-.extra-item input[type="checkbox"]{accent-color:#c88a35;width:18px!important;height:18px!important}
-.extra-item .item-title{font-size:13.5px!important;font-weight:800!important;color:#1c1408!important}
-.extra-item .item-detail{font-size:11.5px!important;color:#7a6446!important}
-.extra-item .item-price{font-size:13.5px!important;color:#a07828!important;font-weight:900!important}
-.extra-item .item-price span{font-size:10px!important;color:#8a7048!important}
-.extra-item.active{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border:1px solid rgba(231,191,105,.40)!important;box-shadow:0 8px 20px rgba(0,0,0,.20)!important}
-.extra-item.active .item-title{color:#f6e19f!important}
-.extra-item.active .item-price{color:#f6e19f!important}
-.extra-item.active .item-price span{color:rgba(255,255,255,.60)!important}
-.extra-item.active .item-detail{color:rgba(255,255,255,.70)!important}
-.extras-note{font-size:11.5px!important;color:#7a6446!important;margin-top:10px!important}
+.extras-list{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+.extra-item{background:rgba(255,255,255,.72)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;padding:12px 14px!important;min-height:0!important;display:grid!important;grid-template-columns:20px minmax(0,1fr) auto!important;gap:12px!important;align-items:center!important;transition:border-color .15s,box-shadow .15s,background .15s!important}
+.extra-item:hover{border-color:rgba(160,110,35,.32)!important;box-shadow:0 4px 14px rgba(60,30,0,.09)!important;background:rgba(255,255,255,.92)!important}
+.extra-item input[type="checkbox"]{accent-color:#c88a35;width:18px!important;height:18px!important;cursor:pointer;margin:0!important}
+.extra-item .item-content{display:flex!important;flex-direction:column!important;gap:1px!important;min-width:0!important}
+.extra-item .item-head{display:contents!important}
+.extra-item .item-title{font-size:13.5px!important;font-weight:800!important;color:#1c1408!important;line-height:1.2!important}
+.extra-item .item-detail{font-size:11.5px!important;color:#7a6446!important;line-height:1.35!important}
+.extra-item .item-price{text-align:right!important;white-space:nowrap!important;font-size:14px!important;color:#a07828!important;font-weight:900!important;line-height:1.2!important}
+.extra-item .item-price span{display:block!important;font-size:10px!important;color:#8a7048!important;font-weight:700!important}
+.extra-item.active,.extra-item:has(input:checked){background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border:1px solid rgba(231,191,105,.40)!important;box-shadow:0 8px 20px rgba(0,0,0,.20)!important}
+.extra-item.active .item-title,.extra-item:has(input:checked) .item-title{color:#f6e19f!important}
+.extra-item.active .item-price,.extra-item:has(input:checked) .item-price{color:#f6e19f!important}
+.extra-item.active .item-price span,.extra-item:has(input:checked) .item-price span{color:rgba(255,255,255,.60)!important}
+.extra-item.active .item-detail,.extra-item:has(input:checked) .item-detail{color:rgba(255,255,255,.68)!important}
+.extras-note{font-size:11.5px!important;color:#7a6446!important;margin-top:10px!important;padding:10px 12px!important;background:rgba(160,110,35,.06)!important;border-radius:10px!important;border:1px solid rgba(160,110,35,.12)!important}
 
 /* ── Insurance items (only shown on mobile if JS re-enables list) ── */
 .insurance-item{background:rgba(255,255,255,.66)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;padding:10px 13px!important;min-height:0!important;transition:border-color .15s,box-shadow .15s!important}
@@ -1683,13 +1686,14 @@ async function fetchFleetModels(categoryCode, vehicleId){
     }
 
     function renderFacts(specs){
-      // Compact spec chips — same visual language as the vehicles results cards
+      const ok = (v) => v && String(v).trim() && String(v).trim() !== '-' && String(v).trim() !== '0';
       const chips = [
-        specs?.gearbox, specs?.fuel,
-        specs?.seats ? `${specs.seats} θέσεις` : null,
-        specs?.bags ? `${specs.bags} βαλίτσες` : null,
-        (specs?.ac && String(specs.ac).toLowerCase() !== 'όχι' && String(specs.ac).toLowerCase() !== 'no') ? 'A/C' : null,
-        specs?.doors ? `${specs.doors} πόρτες` : null
+        ok(specs?.gearbox) ? specs.gearbox : null,
+        ok(specs?.fuel)    ? specs.fuel    : null,
+        ok(specs?.seats)   ? `${specs.seats} θέσεις`   : null,
+        ok(specs?.bags)    ? `${specs.bags} βαλίτσες`  : null,
+        (ok(specs?.ac) && String(specs.ac).toLowerCase() !== 'όχι' && String(specs.ac).toLowerCase() !== 'no') ? 'A/C' : null,
+        ok(specs?.doors)   ? `${specs.doors} πόρτες`   : null,
       ].filter(Boolean);
       document.getElementById('facts').innerHTML =
         chips.map((c) => `<span class="spec-chip">${escapeHtml(c)}</span>`).join('');
