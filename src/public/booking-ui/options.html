@@ -612,43 +612,42 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .ins-col.is-active .ins-p{color:#f6e19f!important}
 .ins-col.is-active .ins-feats li{color:rgba(255,255,255,.78)!important}
 
-/* ── Extras: single-column clean items ── */
-.extras-list{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
-.extra-item{background:rgba(255,255,255,.72)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;padding:12px 14px!important;min-height:0!important;display:grid!important;grid-template-columns:20px minmax(0,1fr) auto!important;gap:12px!important;align-items:center!important;transition:border-color .15s,box-shadow .15s,background .15s!important}
-.extra-item:hover{border-color:rgba(160,110,35,.32)!important;box-shadow:0 4px 14px rgba(60,30,0,.09)!important;background:rgba(255,255,255,.92)!important}
-.extra-item input[type="checkbox"]{accent-color:#c88a35;width:18px!important;height:18px!important;cursor:pointer;margin:0!important}
-.extra-item .item-content{display:flex!important;flex-direction:column!important;gap:1px!important;min-width:0!important}
-.extra-item .item-head{display:contents!important}
-.extra-item .item-title{font-size:13.5px!important;font-weight:800!important;color:#1c1408!important;line-height:1.2!important}
-.extra-item .item-detail{font-size:11.5px!important;color:#7a6446!important;line-height:1.35!important}
-.extra-item .item-price{text-align:right!important;white-space:nowrap!important;font-size:14px!important;color:#a07828!important;font-weight:900!important;line-height:1.2!important}
-.extra-item .item-price span{display:block!important;font-size:10px!important;color:#8a7048!important;font-weight:700!important}
-.extra-item.active,.extra-item:has(input:checked){background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border:1px solid rgba(231,191,105,.40)!important;box-shadow:0 8px 20px rgba(0,0,0,.20)!important}
-.extra-item.active .item-title,.extra-item:has(input:checked) .item-title{color:#f6e19f!important}
-.extra-item.active .item-price,.extra-item:has(input:checked) .item-price{color:#f6e19f!important}
-.extra-item.active .item-price span,.extra-item:has(input:checked) .item-price span{color:rgba(255,255,255,.60)!important}
-.extra-item.active .item-detail,.extra-item:has(input:checked) .item-detail{color:rgba(255,255,255,.68)!important}
+/* ── Extras: premium icon cards (2-col grid, parity with insurance columns) ── */
+.extras-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+.extra-item{position:relative!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;padding:13px 13px 12px!important;min-height:0!important;background:rgba(255,255,255,.72)!important;border:1.5px solid rgba(160,110,35,.16)!important;border-radius:16px!important;transition:border-color .15s,background .15s,box-shadow .15s!important}
+.extra-item:hover{border-color:rgba(160,110,35,.36)!important;background:rgba(255,255,255,.94)!important;box-shadow:0 6px 18px rgba(60,30,0,.10)!important}
+.xc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.xc-icon{width:34px;height:34px;border-radius:10px;background:rgba(160,110,35,.10);border:1px solid rgba(160,110,35,.18);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.extra-item .item-price{text-align:right!important;white-space:nowrap!important;font-size:15px!important;color:#a07828!important;font-weight:950!important;line-height:1.15!important}
+.extra-item .item-price span{display:block!important;font-size:9.5px!important;color:#8a7048!important;font-weight:700!important}
+.extra-item .item-title{font-size:13.5px!important;font-weight:900!important;color:#1c1408!important;line-height:1.2!important}
+.extra-item .item-detail{font-size:11px!important;color:#7a6446!important;line-height:1.35!important;font-weight:700!important;flex:1}
+/* toggle: hidden checkbox + add-pill */
+.extra-toggle-item{cursor:pointer!important}
+.extra-toggle-item input{position:absolute!important;opacity:0!important;pointer-events:none!important;width:0!important;height:0!important;margin:0!important}
+.xc-add{display:flex;align-items:center;justify-content:center;gap:6px;height:34px;border-radius:10px;border:1.5px solid rgba(160,110,35,.34);background:rgba(255,255,255,.65);color:#7a5e38;font-size:12.5px;font-weight:900;margin-top:auto;transition:background .15s,color .15s,border-color .15s}
+.xc-add::after{content:"Προσθήκη"}
+.extra-toggle-item:hover .xc-add{background:rgba(231,191,105,.18)}
+/* qty stepper */
+.qty-stepper{display:flex;align-items:center;justify-content:space-between;height:34px;border:1.5px solid rgba(160,110,35,.30);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.85);margin-top:auto}
+.qty-btn{width:38px;height:100%;border:none;background:none;cursor:pointer;font-size:17px;font-weight:900;color:#a07828;display:flex;align-items:center;justify-content:center;transition:background .12s;padding:0;font-family:inherit}
+.qty-btn:hover:not([disabled]){background:rgba(160,110,35,.12)}
+.qty-btn[disabled]{color:rgba(160,110,35,.26);cursor:not-allowed}
+.qty-val{flex:1;text-align:center;font-size:14.5px;font-weight:900;color:#1c1408}
+/* active: dark teal, matches insurance selection */
+.extra-item.active{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border-color:rgba(231,191,105,.55)!important;box-shadow:0 8px 22px rgba(0,0,0,.22)!important}
+.extra-item.active .xc-icon{background:rgba(231,191,105,.16);border-color:rgba(231,191,105,.30)}
+.extra-item.active .item-title{color:#f6e19f!important}
+.extra-item.active .item-detail{color:rgba(255,255,255,.66)!important}
+.extra-item.active .item-price{color:#f6e19f!important}
+.extra-item.active .item-price span{color:rgba(255,255,255,.55)!important}
+.extra-item.active .xc-add{background:linear-gradient(135deg,#e7bf69,#f6e19f);border-color:transparent;color:#2a1e0a}
+.extra-item.active .xc-add::after{content:"✓ Προστέθηκε"}
+.extra-item.active .qty-stepper{background:rgba(255,255,255,.10);border-color:rgba(231,191,105,.40)}
+.extra-item.active .qty-btn{color:#f6e19f}
+.extra-item.active .qty-val{color:#fff}
 .extras-note{font-size:11.5px!important;color:#7a6446!important;margin-top:10px!important;padding:10px 12px!important;background:rgba(160,110,35,.06)!important;border-radius:10px!important;border:1px solid rgba(160,110,35,.12)!important}
-/* ── Extras: quantity items ── */
-.extra-qty-item{display:grid!important;grid-template-columns:1fr auto!important;gap:10px 14px!important;align-items:center!important;padding:12px 14px!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;cursor:default!important;transition:border-color .15s,background .15s!important}
-.extra-qty-item:hover{border-color:rgba(160,110,35,.28)!important;background:rgba(255,255,255,.88)!important}
-.extra-qty-item.active{background:rgba(231,191,105,.10)!important;border-color:rgba(160,110,35,.36)!important}
-.extra-qty-info{min-width:0}
-.extra-qty-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
-.qty-stepper{display:flex;align-items:center;gap:0;border:1.5px solid rgba(160,110,35,.28);border-radius:999px;overflow:hidden;background:#fff}
-.qty-btn{width:30px;height:30px;border:none;background:none;cursor:pointer;font-size:16px;font-weight:900;color:#a07828;display:flex;align-items:center;justify-content:center;transition:background .12s;padding:0;font-family:inherit}
-.qty-btn:hover:not([disabled]){background:rgba(160,110,35,.10)}
-.qty-btn[disabled]{color:rgba(160,110,35,.30);cursor:not-allowed}
-.qty-val{min-width:28px;text-align:center;font-size:15px;font-weight:900;color:#1c1408}
-/* ── Extras: toggle items ── */
-.extra-toggle-item{display:grid!important;grid-template-columns:20px 1fr auto!important;gap:12px!important;align-items:center!important;padding:12px 14px!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;cursor:pointer!important;transition:border-color .15s,background .15s!important}
-.extra-toggle-item:hover{border-color:rgba(160,110,35,.28)!important;background:rgba(255,255,255,.88)!important}
-.extra-toggle-item.active{background:linear-gradient(160deg,rgba(26,50,60,.96),rgba(20,40,48,.99))!important;border-color:rgba(231,191,105,.40)!important}
-.extra-toggle-item.active .item-title{color:#f6e19f!important}
-.extra-toggle-item.active .item-detail{color:rgba(255,255,255,.65)!important}
-.extra-toggle-item.active .item-price{color:#f6e19f!important}
-.extra-toggle-item.active .item-price span{color:rgba(255,255,255,.55)!important}
-.extra-toggle-info{min-width:0;display:flex;flex-direction:column;gap:2px}
+@media(max-width:560px){.extras-list{grid-template-columns:1fr!important}}
 #tripStrip{display:none!important}
 .summary-change-btn{width:100%!important;margin-bottom:10px!important;padding:8px 12px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important;background:rgba(255,255,255,.07)!important;color:rgba(255,255,255,.78)!important;font-size:12px!important;font-weight:800!important;cursor:pointer!important;font-family:inherit!important;transition:background .15s!important;text-align:center!important}
 .summary-change-btn:hover{background:rgba(255,255,255,.14)!important;color:#fff!important}
@@ -1304,10 +1303,25 @@ bindRouteLinks();
         const d = String(item.description || '').trim();
         return (!d || d === '.' || d === '-' || d === '—') ? '' : d;
       }
+      // Icon per extra type. TODO multi-tenant: icon should be selectable per-extra in admin settings.
+      function extraIcon(item){
+        const k = String(item.key || '').toLowerCase();
+        const l = String(item.label || '').toLowerCase();
+        if(k === 'baby' || /βρεφικ/.test(l)) return '👶';
+        if(k === 'child' || /παιδικ/.test(l)) return '🧒';
+        if(k === 'booster' || /booster/.test(l)) return '🪑';
+        if(k === 'gps' || /gps|πλοήγη|πλοηγη/.test(l)) return '🧭';
+        if(k === 'seconddriver' || /οδηγ/.test(l)) return '👥';
+        if(/χιον|αλυσίδ|αλυσιδ/.test(l)) return '❄️';
+        if(/κινητ|βάση|βαση/.test(l)) return '📱';
+        if(/wifi|internet/.test(l)) return '📶';
+        return '✚';
+      }
       extrasList.innerHTML = extraServices.map((item) => {
         const suffix = item.billingMode === 'perBooking' ? '/ κράτηση' : '/ ημέρα';
         const maxQty = inferMaxQty(item);
         const desc = cleanDesc(item);
+        const icon = extraIcon(item);
         const savedQty = (() => {
           try {
             const bsExtras = Array.isArray(window.BookingState?.get('selectedExtras')) ? window.BookingState.get('selectedExtras') : [];
@@ -1317,32 +1331,27 @@ bindRouteLinks();
         })();
         const initQty = selectedExtrasKeys.has(item.key) ? (savedQty || 1) : savedQty;
         if(maxQty > 1){
-          // Quantity item
+          // Quantity card — stepper at the bottom
           return `<div class="extra-item extra-qty-item ${initQty > 0 ? 'active' : ''}" data-key="${escapeHtml(item.key)}" data-price="${escapeHtml(item.price)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-max="${maxQty}">
-            <div class="extra-qty-info">
-              <strong class="item-title">${escapeHtml(item.label)}</strong>
-              ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
-            </div>
-            <div class="extra-qty-right">
-              <div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div>
-              <div class="qty-stepper">
-                <button type="button" class="qty-btn qty-minus" aria-label="Αφαίρεση">−</button>
-                <span class="qty-val">${initQty}</span>
-                <button type="button" class="qty-btn qty-plus" aria-label="Προσθήκη">+</button>
-              </div>
+            <div class="xc-top"><span class="xc-icon">${icon}</span><div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div></div>
+            <strong class="item-title">${escapeHtml(item.label)}</strong>
+            ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
+            <div class="qty-stepper">
+              <button type="button" class="qty-btn qty-minus" aria-label="Αφαίρεση">−</button>
+              <span class="qty-val">${initQty}</span>
+              <button type="button" class="qty-btn qty-plus" aria-label="Προσθήκη">+</button>
             </div>
             <input type="hidden" class="extraInput" value="${escapeHtml(item.price)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-qty="${initQty}">
           </div>`;
         } else {
-          // Toggle item
+          // Toggle card — add-pill at the bottom
           const checked = initQty > 0;
           return `<label class="extra-item extra-toggle-item ${checked ? 'active' : ''}">
             <input type="checkbox" class="extraInput" value="${escapeHtml(item.price)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-qty="1" ${checked ? 'checked' : ''}>
-            <div class="extra-toggle-info">
-              <strong class="item-title">${escapeHtml(item.label)}</strong>
-              ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
-            </div>
-            <div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div>
+            <div class="xc-top"><span class="xc-icon">${icon}</span><div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div></div>
+            <strong class="item-title">${escapeHtml(item.label)}</strong>
+            ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
+            <span class="xc-add" aria-hidden="true"></span>
           </label>`;
         }
       }).join('');
