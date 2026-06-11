@@ -888,28 +888,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
             <h3 class="section-title">Extras</h3>
             <span class="extras-note" style="margin-top:0">Προαιρετικές προσθήκες ανά κράτηση ή ανά ημέρα.</span>
           </div>
-          <div class="extras-list" id="extrasList">
-            <label class="extra-item">
-              <input type="checkbox" class="extraInput" value="5" data-key="baby" data-label="Βρεφικό κάθισμα">
-              <div class="item-content"><div class="item-head"><strong class="item-title">Βρεφικό κάθισμα</strong><div class="item-price">5,00€<span>/ ημέρα</span></div></div><small class="item-detail">Άνετη και ασφαλής λύση για πολύ μικρές ηλικίες.</small></div>
-            </label>
-            <label class="extra-item">
-              <input type="checkbox" class="extraInput" value="5" data-key="child" data-label="Παιδικό κάθισμα">
-              <div class="item-content"><div class="item-head"><strong class="item-title">Παιδικό κάθισμα</strong><div class="item-price">5,00€<span>/ ημέρα</span></div></div><small class="item-detail">Πρακτική επιλογή για ταξίδια με παιδιά και σωστή ασφάλιση.</small></div>
-            </label>
-            <label class="extra-item">
-              <input type="checkbox" class="extraInput" value="7" data-key="booster" data-label="Booster">
-              <div class="item-content"><div class="item-head"><strong class="item-title">Booster</strong><div class="item-price">7,00€<span>/ ημέρα</span></div></div><small class="item-detail">Συμπληρωματική επιλογή για μεγαλύτερα παιδιά.</small></div>
-            </label>
-            <label class="extra-item">
-              <input type="checkbox" class="extraInput" value="7" data-key="secondDriver" data-label="Δεύτερος οδηγός">
-              <div class="item-content"><div class="item-head"><strong class="item-title">Δεύτερος οδηγός</strong><div class="item-price">7,00€<span>/ ημέρα</span></div></div><small class="item-detail">Για πιο άνετη κατανομή της οδήγησης κατά τη διάρκεια της ενοικίασης.</small></div>
-            </label>
-            <label class="extra-item">
-              <input type="checkbox" class="extraInput" value="8" data-key="gps" data-label="GPS">
-              <div class="item-content"><div class="item-head"><strong class="item-title">GPS</strong><div class="item-price">8,00€<span>/ ημέρα</span></div></div><small class="item-detail">Πλοήγηση για πιο εύκολες μετακινήσεις χωρίς επιπλέον εφαρμογές.</small></div>
-            </label>
-          </div>
+          <!-- Items are rendered by renderPricingChoices() from the pricing catalog -->
+          <div class="extras-list" id="extrasList"></div>
           <div class="extras-note">Το επασφάλιστρο ηλικίας και οι νυχτερινές χρεώσεις υπολογίζονται αυτόματα στη σύνοψη. Δεν επιλέγονται από εδώ.</div>
         </div>
       </div>
@@ -1308,9 +1288,26 @@ bindRouteLinks();
         if(recCol) recCol.classList.add('ins-rec');
       }
 
+      // maxQty: from catalog when provided; otherwise inferred — child seats are the
+      // classic multi-quantity rental extra (a family may need 2-3).
+      // TODO multi-tenant: maxQty should be editable per-extra in admin settings.
+      function inferMaxQty(item){
+        const explicit = Number(item.maxQty);
+        if(Number.isFinite(explicit) && explicit > 0) return explicit;
+        const key = String(item.key || '').toLowerCase();
+        const label = String(item.label || '').toLowerCase();
+        if(['baby','child','booster'].includes(key)) return 3;
+        if(/κάθισμα|καθισμα|booster|seat/.test(label)) return 3;
+        return 1;
+      }
+      function cleanDesc(item){
+        const d = String(item.description || '').trim();
+        return (!d || d === '.' || d === '-' || d === '—') ? '' : d;
+      }
       extrasList.innerHTML = extraServices.map((item) => {
         const suffix = item.billingMode === 'perBooking' ? '/ κράτηση' : '/ ημέρα';
-        const maxQty = Number(item.maxQty || 1);
+        const maxQty = inferMaxQty(item);
+        const desc = cleanDesc(item);
         const savedQty = (() => {
           try {
             const bsExtras = Array.isArray(window.BookingState?.get('selectedExtras')) ? window.BookingState.get('selectedExtras') : [];
@@ -1324,7 +1321,7 @@ bindRouteLinks();
           return `<div class="extra-item extra-qty-item ${initQty > 0 ? 'active' : ''}" data-key="${escapeHtml(item.key)}" data-price="${escapeHtml(item.price)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-max="${maxQty}">
             <div class="extra-qty-info">
               <strong class="item-title">${escapeHtml(item.label)}</strong>
-              ${item.description ? `<span class="item-detail">${escapeHtml(item.description)}</span>` : ''}
+              ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
             </div>
             <div class="extra-qty-right">
               <div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div>
@@ -1343,7 +1340,7 @@ bindRouteLinks();
             <input type="checkbox" class="extraInput" value="${escapeHtml(item.price)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-qty="1" ${checked ? 'checked' : ''}>
             <div class="extra-toggle-info">
               <strong class="item-title">${escapeHtml(item.label)}</strong>
-              ${item.description ? `<span class="item-detail">${escapeHtml(item.description)}</span>` : ''}
+              ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
             </div>
             <div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div>
           </label>`;
@@ -1613,7 +1610,13 @@ async function fetchFleetModels(categoryCode, vehicleId){
 
     function applyCardStates(){
       document.querySelectorAll('.insurance-item').forEach(item => item.classList.toggle('active', item.querySelector('input').checked));
-      document.querySelectorAll('.extra-item').forEach(item => item.classList.toggle('active', item.querySelector('input').checked));
+      document.querySelectorAll('.extra-item').forEach(item => {
+        const input = item.querySelector('input');
+        if(!input) return;
+        // qty items use a hidden input — active state comes from data-qty, not checked
+        const isOn = input.type === 'checkbox' ? input.checked : Number(input.dataset.qty || 0) > 0;
+        item.classList.toggle('active', isOn);
+      });
     }
     function selectedInsurance(){ return document.querySelector('input[name="insurance"]:checked'); }
     function selectedExtras(){
