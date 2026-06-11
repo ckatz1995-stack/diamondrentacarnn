@@ -684,6 +684,14 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .v2-title{margin:0;font-size:22px;line-height:1.15;color:#1c1408;font-weight:900}
 .v2-similar{font-size:13px;color:#8a7048;font-weight:600;white-space:nowrap}
 .v2-info .spec-chips{margin-top:2px}
+.v2-perks{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;font-size:12.5px;color:#5a4528;font-weight:600}
+.v2-perks li{display:flex;align-items:center;gap:6px;min-width:0}
+.v2-perks li::before{content:"✓";flex:none;width:16px;height:16px;border-radius:50%;background:rgba(160,110,35,.14);color:#a07828;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center}
+@media(max-width:520px){.v2-perks{grid-template-columns:1fr}}
+.night-hint{margin-top:5px;font-size:12px;font-weight:700;color:#7a5410;background:rgba(231,191,105,.22);border:1px solid rgba(160,110,35,.30);border-radius:8px;padding:5px 9px;line-height:1.3}
+.v2card{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+.v2card:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(60,30,0,.20)}
+.v2card:active{transform:translateY(-1px)}
 .v2-fees{margin-top:2px;font-size:13px;color:#4a3820;max-width:420px}
 .v2-fees summary{cursor:pointer;font-weight:800;color:#a07828;list-style-position:inside}
 .v2-fees[open] summary{margin-bottom:4px}
@@ -859,7 +867,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .page{display:grid;grid-template-columns:310px minmax(0,1fr);gap:14px;align-items:start}
   .page>*{grid-column:2;min-width:0}
   .page>.results-toolbar{grid-column:1/-1;grid-row:1}
-  .page>.search-wrap{grid-column:1;grid-row:2;align-self:start;margin-bottom:0}
+  .page>.search-wrap{grid-column:1;grid-row:2;align-self:start;position:sticky;top:12px;margin-bottom:0}
   .page>.results-col{grid-column:2;grid-row:2;min-width:0}
   /* Sidebar form: single-column fields */
   .search-grid,.search-options-grid{grid-template-columns:1fr!important}
@@ -964,6 +972,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           <div class="field">
             <label>Ώρα παραλαβής</label>
             <select id="pickupTime" class="time-select" required></select>
+            <div class="night-hint" id="pickupNightHint" hidden></div>
           </div>
 
           <div class="field">
@@ -983,6 +992,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           <div class="field">
             <label>Ώρα επιστροφής</label>
             <select id="dropoffTime" class="time-select" required></select>
+            <div class="night-hint" id="dropoffNightHint" hidden></div>
           </div>
         </div>
         <div class="search-options-grid">
@@ -1413,6 +1423,7 @@ async function fetchRealCatalog(){
     populateLocationSelectsFromCatalog();
     populateAgeSelectFromCatalog();
     applyBusinessIdentity();
+    if(typeof updateNightHints === 'function') updateNightHints();
     if(Array.isArray(vehicles) && vehicles.length) render();
   }catch(e){}
 }
@@ -1470,7 +1481,15 @@ let lastBookingContext = { pickup, dropoff, pickupLocation, dropoffLocation, cat
 let requestTimers = [];
 let missingDataTimer = null;
 const list = document.getElementById("list");
-list.addEventListener('click', (e) => { const btn = e.target.closest('button.cta[data-vehicle-id]'); if (!btn) return; goBooking(btn.dataset.vehicleId, btn.dataset.categoryCode); });
+list.addEventListener('click', (e) => {
+  const btn = e.target.closest('button.cta[data-vehicle-id]');
+  if (btn) { goBooking(btn.dataset.vehicleId, btn.dataset.categoryCode); return; }
+  // Whole card acts as the CTA — except interactive bits like the fee breakdown toggle
+  if (e.target.closest('details,summary,a,button,select,input')) return;
+  const card = e.target.closest('.v2card');
+  const cta = card && card.querySelector('button.cta[data-vehicle-id]');
+  if (cta) goBooking(cta.dataset.vehicleId, cta.dataset.categoryCode);
+});
 const sortSelect = document.getElementById("sortSelect");
 const categorySelect = document.getElementById("category");
 const ageGroup = document.getElementById('ageGroup');
@@ -1629,6 +1648,7 @@ function applyBookingContext(query){
   if(nextAge) ageGroup.value = nextAge;
   if(nextCategory) pendingCategory = nextCategory;
   if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['pickupLocation','pickupDate','pickupTime','dropoffLocation','dropoffDate','dropoffTime','ageGroup']);
+  updateNightHints();
 }
 
 function currentDays(){
@@ -1716,7 +1736,7 @@ function render(){
       serverQuote.locationFee > 0 ? `<div class="v2-fee-row"><span>Χρέωση τοποθεσιών</span><span>${fmtMoney(serverQuote.locationFee)}</span></div>` : ''
     ].filter(Boolean).join('') : '';
     const feesBlock = feeRows
-      ? `<details class="v2-fees"><summary>Ανάλυση χρέωσης</summary><div class="v2-fee-row"><span>Ενοικίαση ${billDays} × ${dailyDisp}</span><span>${serverQuote ? fmtMoney(serverQuote.baseCost || dailyPrice * billDays) : fmtMoney(baseTotal)}</span></div>${feeRows}</details>`
+      ? `<details class="v2-fees" open><summary>Ανάλυση χρέωσης</summary><div class="v2-fee-row"><span>Ενοικίαση ${billDays} × ${dailyDisp}</span><span>${serverQuote ? fmtMoney(serverQuote.baseCost || dailyPrice * billDays) : fmtMoney(baseTotal)}</span></div>${feeRows}</details>`
       : '';
     const serverSeasonLabel = serverQuote?.season?.label || serverQuote?.season?.name || '';
     const displaySeasonLabel = serverSeasonLabel || (hasSeasonRate ? _activeSeason.label : '');
@@ -1732,6 +1752,12 @@ function render(){
             <span class="v2-cat">Κατηγορία ${escapeHtml(catCode || '—')}</span>
             <h2 class="v2-title">${escapeHtml(cleanName)}<span class="v2-similar"> ή παρόμοιο</span></h2>
             <div class="spec-chips">${chips || '<span class="chip">—</span>'}</div>
+            <ul class="v2-perks">
+              <li>Απεριόριστα χιλιόμετρα</li>
+              <li>Βασική ασφάλεια CDW</li>
+              <li>24/7 οδική βοήθεια</li>
+              <li>Προσωπική επιβεβαίωση κράτησης</li>
+            </ul>
           </div>
           <div class="v2-buy">
             <span class="season-badge v2-season${displaySeasonLabel ? '' : ' v2-season-hidden'}">${escapeHtml(displaySeasonLabel || '—')}</span>
@@ -1802,6 +1828,7 @@ window.addEventListener('message', (event) => {
       populateAgeSelectFromCatalog();
       applyBookingContext(lastBookingContext || {});
       applyBusinessIdentity();
+      if(typeof updateNightHints === 'function') updateNightHints();
       if(Array.isArray(embeddedVehicleItems)) {
         vehicles = filterVehiclesByCategory(embeddedVehicleItems, categorySelect.value || pendingCategory || category);
         render();
@@ -1923,8 +1950,24 @@ function syncDateConstraints(bumpDropoff){
   }
 }
 syncDateConstraints(false);
+// Night-fee transparency: surface the surcharge right under the time field
+function updateNightHints(){
+  [['pickupTime','pickupNightHint','nightPickup'],['dropoffTime','dropoffNightHint','nightDropoff']].forEach(([selId, hintId, ruleType]) => {
+    const sel = document.getElementById(selId);
+    const hint = document.getElementById(hintId);
+    if(!sel || !hint) return;
+    if(isNightTime(sel.value)){
+      const meta = nightRuleMeta(ruleType, 'Νυχτερινή χρέωση');
+      hint.textContent = `🌙 Νυχτερινή χρέωση +${fmtMoney(meta.amount)}`;
+      hint.hidden = false;
+    } else {
+      hint.hidden = true;
+    }
+  });
+}
+updateNightHints();
 ['pickupDate','pickupTime','dropoffDate','dropoffTime','pickupLocation','dropoffLocation'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => { if(id === 'pickupDate') syncDateConstraints(true); updateState(); validateDateRange(); render(); triggerServerQuotes(); });
+  document.getElementById(id).addEventListener('change', () => { if(id === 'pickupDate') syncDateConstraints(true); updateState(); validateDateRange(); updateNightHints(); render(); triggerServerQuotes(); });
 });
 document.getElementById('catTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.cat-tab');
