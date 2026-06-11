@@ -629,6 +629,26 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .extra-item.active .item-price span,.extra-item:has(input:checked) .item-price span{color:rgba(255,255,255,.60)!important}
 .extra-item.active .item-detail,.extra-item:has(input:checked) .item-detail{color:rgba(255,255,255,.68)!important}
 .extras-note{font-size:11.5px!important;color:#7a6446!important;margin-top:10px!important;padding:10px 12px!important;background:rgba(160,110,35,.06)!important;border-radius:10px!important;border:1px solid rgba(160,110,35,.12)!important}
+/* ── Extras: quantity items ── */
+.extra-qty-item{display:grid!important;grid-template-columns:1fr auto!important;gap:10px 14px!important;align-items:center!important;padding:12px 14px!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;cursor:default!important;transition:border-color .15s,background .15s!important}
+.extra-qty-item:hover{border-color:rgba(160,110,35,.28)!important;background:rgba(255,255,255,.88)!important}
+.extra-qty-item.active{background:rgba(231,191,105,.10)!important;border-color:rgba(160,110,35,.36)!important}
+.extra-qty-info{min-width:0}
+.extra-qty-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.qty-stepper{display:flex;align-items:center;gap:0;border:1.5px solid rgba(160,110,35,.28);border-radius:999px;overflow:hidden;background:#fff}
+.qty-btn{width:30px;height:30px;border:none;background:none;cursor:pointer;font-size:16px;font-weight:900;color:#a07828;display:flex;align-items:center;justify-content:center;transition:background .12s;padding:0;font-family:inherit}
+.qty-btn:hover:not([disabled]){background:rgba(160,110,35,.10)}
+.qty-btn[disabled]{color:rgba(160,110,35,.30);cursor:not-allowed}
+.qty-val{min-width:28px;text-align:center;font-size:15px;font-weight:900;color:#1c1408}
+/* ── Extras: toggle items ── */
+.extra-toggle-item{display:grid!important;grid-template-columns:20px 1fr auto!important;gap:12px!important;align-items:center!important;padding:12px 14px!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;cursor:pointer!important;transition:border-color .15s,background .15s!important}
+.extra-toggle-item:hover{border-color:rgba(160,110,35,.28)!important;background:rgba(255,255,255,.88)!important}
+.extra-toggle-item.active{background:linear-gradient(160deg,rgba(26,50,60,.96),rgba(20,40,48,.99))!important;border-color:rgba(231,191,105,.40)!important}
+.extra-toggle-item.active .item-title{color:#f6e19f!important}
+.extra-toggle-item.active .item-detail{color:rgba(255,255,255,.65)!important}
+.extra-toggle-item.active .item-price{color:#f6e19f!important}
+.extra-toggle-item.active .item-price span{color:rgba(255,255,255,.55)!important}
+.extra-toggle-info{min-width:0;display:flex;flex-direction:column;gap:2px}
 #tripStrip{display:none!important}
 .summary-change-btn{width:100%!important;margin-bottom:10px!important;padding:8px 12px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important;background:rgba(255,255,255,.07)!important;color:rgba(255,255,255,.78)!important;font-size:12px!important;font-weight:800!important;cursor:pointer!important;font-family:inherit!important;transition:background .15s!important;text-align:center!important}
 .summary-change-btn:hover{background:rgba(255,255,255,.14)!important;color:#fff!important}
@@ -679,6 +699,18 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
   .ins-badge{top:-8px!important;right:8px!important}
   .ins-feats{display:none!important}
 }
+/* ── Models: clean photo + info cards ── */
+.models-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
+.model-card{background:rgba(255,255,255,.62)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:16px!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;gap:0!important;padding:0!important;transition:box-shadow .16s,border-color .16s!important}
+.model-card:hover{border-color:rgba(160,110,35,.30)!important;box-shadow:0 6px 20px rgba(60,30,0,.10)!important}
+.model-photo-wrap{width:100%;height:130px;background:radial-gradient(ellipse at 50% 30%,rgba(255,255,255,.70),transparent 60%),linear-gradient(160deg,rgba(250,244,228,.96),rgba(238,222,184,.84));display:flex;align-items:center;justify-content:center;overflow:hidden}
+.model-photo{max-width:90%;max-height:120px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(40,20,0,.16))}
+.model-photo-placeholder{font-size:48px;opacity:.30}
+.model-info{padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.model-name{font-size:15px;font-weight:900;color:#1c1408;line-height:1.2}
+.model-note{font-size:11.5px;color:#8a7048;font-weight:700}
+.model-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+@media(max-width:560px){.models-grid{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
@@ -1108,11 +1140,11 @@ bindRouteLinks();
           { key:'full', label:'FULL', description:'Πιο ολοκληρωμένη κάλυψη με χρέωση 20,00€ ανά ημέρα.', pricePerDay:20, billingMode:'perDay' }
         ],
         extraServices: [
-          { key:'baby', label:'Βρεφικό κάθισμα', description:'Άνετη και ασφαλής λύση για πολύ μικρές ηλικίες.', price:5, billingMode:'perDay' },
-          { key:'child', label:'Παιδικό κάθισμα', description:'Πρακτική επιλογή για ταξίδια με παιδιά και σωστή ασφάλιση.', price:5, billingMode:'perDay' },
-          { key:'booster', label:'Booster', description:'Συμπληρωματική επιλογή για μεγαλύτερα παιδιά.', price:5, billingMode:'perDay' },
-          { key:'secondDriver', label:'Δεύτερος οδηγός', description:'Για πιο άνετη κατανομή της οδήγησης κατά τη διάρκεια της ενοικίασης.', price:7, billingMode:'perDay' },
-          { key:'gps', label:'GPS', description:'Πλοήγηση για πιο εύκολες μετακινήσεις χωρίς επιπλέον εφαρμογές.', price:8, billingMode:'perDay' }
+          { key:'baby', label:'Βρεφικό κάθισμα', description:'Άνετη και ασφαλής λύση για πολύ μικρές ηλικίες.', price:5, billingMode:'perDay', maxQty:3 },
+          { key:'child', label:'Παιδικό κάθισμα', description:'Πρακτική επιλογή για ταξίδια με παιδιά και σωστή ασφάλιση.', price:5, billingMode:'perDay', maxQty:3 },
+          { key:'booster', label:'Booster', description:'Συμπληρωματική επιλογή για μεγαλύτερα παιδιά.', price:5, billingMode:'perDay', maxQty:3 },
+          { key:'secondDriver', label:'Δεύτερος οδηγός', description:'Για πιο άνετη κατανομή της οδήγησης κατά τη διάρκεια της ενοικίασης.', price:7, billingMode:'perDay', maxQty:1 },
+          { key:'gps', label:'GPS', description:'Πλοήγηση για πιο εύκολες μετακινήσεις χωρίς επιπλέον εφαρμογές.', price:8, billingMode:'perDay', maxQty:1 }
         ],
         feeRules: [
           { key:'youngDriver19to22', label:'Επασφάλιστρο ηλικίας (19-22)', ruleType:'ageRange', audienceGroup:'19-22', amount:16 },
@@ -1317,6 +1349,28 @@ bindRouteLinks();
           </label>`;
         }
       }).join('');
+
+      // Wire quantity steppers
+      extrasList.querySelectorAll('.extra-qty-item').forEach(function(item){
+        var minus = item.querySelector('.qty-minus');
+        var plus = item.querySelector('.qty-plus');
+        var valEl = item.querySelector('.qty-val');
+        var hidden = item.querySelector('.extraInput');
+        var max = Number(item.dataset.max || 1);
+        function update(n){
+          n = Math.max(0, Math.min(n, max));
+          valEl.textContent = n;
+          hidden.dataset.qty = n;
+          if(n > 0){ hidden.value = item.dataset.price; item.classList.add('active'); }
+          else { hidden.value = '0'; item.classList.remove('active'); }
+          minus.disabled = (n <= 0);
+          plus.disabled = (n >= max);
+          hidden.dispatchEvent(new Event('change', {bubbles:true}));
+        }
+        update(Number(hidden.dataset.qty || 0));
+        minus.addEventListener('click', function(){ update(Number(valEl.textContent) - 1); });
+        plus.addEventListener('click', function(){ update(Number(valEl.textContent) + 1); });
+      });
 
       bindChoiceInputs();
 
@@ -1562,7 +1616,12 @@ async function fetchFleetModels(categoryCode, vehicleId){
       document.querySelectorAll('.extra-item').forEach(item => item.classList.toggle('active', item.querySelector('input').checked));
     }
     function selectedInsurance(){ return document.querySelector('input[name="insurance"]:checked'); }
-    function selectedExtras(){ return [...document.querySelectorAll('.extraInput:checked')]; }
+    function selectedExtras(){
+      return Array.from(document.querySelectorAll('.extraInput')).filter(function(el){
+        if(el.type === 'checkbox') return el.checked;
+        return Number(el.dataset.qty || 0) > 0;
+      });
+    }
 
     function updateTotals(){
       if(!vehicle) return;
@@ -1575,8 +1634,9 @@ async function fetchFleetModels(categoryCode, vehicleId){
       const insuranceTotal = Number(insuranceInput?.value || 0) * days;
       const extrasTotal = selectedExtras().reduce((sum, el) => {
         const amount = Number(el.value || 0);
+        const qty = Number(el.dataset.qty || 1);
         const mode = String(el.dataset.mode || 'perDay');
-        return sum + (mode === 'perBooking' ? amount : amount * days);
+        return sum + (mode === 'perBooking' ? amount * qty : amount * qty * days);
       }, 0);
       const ageFee = ageFeeFor(state.age);
       const pickupNight = nightFeeFor(state.pickup, 'nightPickup');
@@ -1818,67 +1878,46 @@ async function renderModels(category){
     items = fallbackGroup.items.map(item => ({
       model: item.model,
       note: item.note,
-      photos: (Array.isArray(item.photos) && item.photos.length ? item.photos : categoryFallbackPhotos)
+      photos: categoryFallbackPhotos.length ? [categoryFallbackPhotos[0]] : [],
+      specs: item.specs
     }));
-  } else {
-    items = items.map(item => {
-      const model = titleCaseModel(item.model || item.name || '');
-      const fallbackPhotos = fallbackPhotosForModel(model);
-      const categoryFallbackPhotos = currentCategoryFallbackPhotos();
-      return {
-        model,
-        note: item.note || noteForModel(model),
-        photos: (Array.isArray(item.photos) && item.photos.length ? item.photos : (fallbackPhotos.length ? fallbackPhotos : categoryFallbackPhotos)).filter(Boolean)
-      };
-    });
-  }
-  if(!items.length){
-    const known = new Set(items.map(x => normalizeModelKey(x.model)));
-    (fallbackGroup.items || []).forEach(item => {
-      const key = normalizeModelKey(item.model);
-      if(!known.has(key)) items.push({ model:item.model, note:item.note, photos:item.photos });
-    });
   }
 
-  const modelNames = items.map(item => item.model);
-  const categoryLabel = fleetData.category || category;
-  const banner = modelNames.length
-    ? `Η κατηγορία ${escapeHtml(categoryLabel)} περιλαμβάνει ενδεικτικά ${modelNames.join(', ')}. Κλείνεις κατηγορία και όχι συγκεκριμένο όχημα. Η τελική παράδοση εξαρτάται από τη διαθεσιμότητα.`
-    : (fallbackGroup.banner || `Η κατηγορία ${escapeHtml(categoryLabel)} περιλαμβάνει ενδεικτικά μοντέλα της ίδιας κατηγορίας. Κλείνεις κατηγορία και όχι συγκεκριμένο όχημα.`);
-  document.getElementById('modelsBanner').textContent = banner;
+  const banner = document.getElementById('modelsBanner');
+  if(banner){
+    const names = items.slice(0,3).map(m => m.model || m.name).filter(Boolean);
+    if(names.length) banner.textContent = `Η κατηγορία ${category} περιλαμβάνει ενδεικτικά ${names.join(', ')} κ.α. Η τελική παράδοση εξαρτάται από τη διαθεσιμότητα.`;
+  }
 
   const grid = document.getElementById('modelsGrid');
-  grid.innerHTML = items.map((model, idx) => `
-    <article class="model-card" data-model-card="${idx}">
-      <div class="model-top">
-        <div>
-          <strong>${escapeHtml(model.model)}</strong>
-          <small>${escapeHtml(model.note || noteForModel(model.model))}</small>
-        </div>
-        <div class="model-chip">${escapeHtml(categoryLabel)} κατηγορία</div>
-      </div>
-      <div class="album-stage">
-        ${createSlideHTML(model, 'front')}
-        ${createSlideHTML(model, 'side')}
-        ${createSlideHTML(model, 'interior')}
-      </div>
-      <div class="album-controls">
-        <button type="button" data-slide="front">Μπροστά</button>
-        <button type="button" data-slide="side">Πλάι</button>
-        <button type="button" data-slide="interior">Μέσα</button>
-      </div>
-      <div class="album-note">Παρουσίαση μοντέλων από το Fleet CMS της κατηγορίας, ώστε να είναι σαφές ότι η κράτηση αφορά κατηγορία και όχι συγκεκριμένο όχημα.</div>
-    </article>
-  `).join('');
+  if(!grid) return;
 
-  grid.querySelectorAll('.model-card').forEach(card => {
-    const activate = (type) => {
-      card.querySelectorAll('.album-slide').forEach(slide => slide.classList.toggle('active', slide.dataset.type === type));
-      card.querySelectorAll('.album-controls button').forEach(btn => btn.classList.toggle('active', btn.dataset.slide === type));
-    };
-    activate('front');
-    card.querySelectorAll('.album-controls button').forEach(btn => btn.addEventListener('click', () => activate(btn.dataset.slide)));
-  });
+  if(!items.length){
+    grid.innerHTML = '<p style="color:#8a7048;font-size:14px;padding:8px 0">Δεν βρέθηκαν μοντέλα για αυτή την κατηγορία.</p>';
+    return;
+  }
+
+  grid.innerHTML = items.map(m => {
+    const name = escapeHtml(m.model || m.name || 'Μοντέλο');
+    const note = escapeHtml(m.note || '');
+    const photo = (Array.isArray(m.photos) ? m.photos[0] : m.image) || '';
+    const specs = m.specs || {};
+    const specsHtml = [specs.gearbox, specs.fuel, specs.seats ? `${specs.seats} θέσεις` : null]
+      .filter(v => v && String(v) !== '-')
+      .map(v => `<span class="model-chip">${escapeHtml(v)}</span>`).join('');
+    return `<div class="model-card">
+      <div class="model-photo-wrap">
+        ${photo
+          ? `<img src="${escapeHtml(photo)}" alt="${name}" class="model-photo" loading="lazy">`
+          : `<div class="model-photo-placeholder">🚗</div>`}
+      </div>
+      <div class="model-info">
+        <strong class="model-name">${name}</strong>
+        ${note ? `<span class="model-note">${note}</span>` : ''}
+        ${specsHtml ? `<div class="model-chips">${specsHtml}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 
@@ -1945,7 +1984,8 @@ async function loadVehicle(){
         label: el.dataset.label,
         price: Number(el.value || 0),
         pricePerDay: Number(el.value || 0),
-        mode: el.dataset.mode || 'perDay'
+        mode: el.dataset.mode || 'perDay',
+        qty: Number(el.dataset.qty || 1)
       }));
       const payload = {
         ...state,
@@ -2124,7 +2164,7 @@ function notifyHeight(){
     var total = gt.textContent || '';
     if(mobileTotal) mobileTotal.textContent = total;
     var hasAmount = total && total !== '—';
-    if(desktopContinue) desktopContinue.textContent = hasAmount ? ('Συνέχεια — ' + total + ' →') : 'Συνέχεια →';
+    if(desktopContinue) desktopContinue.textContent = 'Συνέχεια →';
     if(mobileContinue) mobileContinue.textContent = hasAmount ? (total + ' →') : 'Συνέχεια →';
   }
 
