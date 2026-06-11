@@ -727,18 +727,19 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
   .ins-badge{top:-9px!important;right:10px!important}
   .extra-item .item-detail{display:none!important}
 }
-/* ── Models: clean photo + info cards ── */
-.models-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
-.model-card{background:rgba(255,255,255,.62)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:16px!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;gap:0!important;padding:0!important;transition:box-shadow .16s,border-color .16s!important}
-.model-card:hover{border-color:rgba(160,110,35,.30)!important;box-shadow:0 6px 20px rgba(60,30,0,.10)!important}
-.model-photo-wrap{width:100%;height:130px;background:radial-gradient(ellipse at 50% 30%,rgba(255,255,255,.70),transparent 60%),linear-gradient(160deg,rgba(250,244,228,.96),rgba(238,222,184,.84));display:flex;align-items:center;justify-content:center;overflow:hidden}
-.model-photo{max-width:90%;max-height:120px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(40,20,0,.16))}
-.model-photo-placeholder{font-size:48px;opacity:.30}
-.model-info{padding:12px 14px;display:flex;flex-direction:column;gap:4px}
-.model-name{font-size:15px;font-weight:900;color:#1c1408;line-height:1.2}
-.model-note{font-size:11.5px;color:#8a7048;font-weight:700}
-.model-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-@media(max-width:560px){.models-grid{grid-template-columns:1fr!important}}
+/* ── Models: compact photo + info cards ── */
+.models-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(185px,1fr))!important;gap:10px!important}
+.model-card{background:rgba(255,255,255,.62)!important;border:1px solid rgba(160,110,35,.14)!important;border-radius:14px!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;gap:0!important;padding:0!important;transition:box-shadow .16s,border-color .16s!important}
+.model-card:hover{border-color:rgba(160,110,35,.30)!important;box-shadow:0 6px 18px rgba(60,30,0,.10)!important}
+.model-photo-wrap{width:100%;height:92px;background:radial-gradient(ellipse at 50% 30%,rgba(255,255,255,.70),transparent 60%),linear-gradient(160deg,rgba(250,244,228,.96),rgba(238,222,184,.84));display:flex;align-items:center;justify-content:center;overflow:hidden}
+.model-photo{max-width:88%;max-height:84px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(40,20,0,.16))}
+.model-photo-placeholder{display:flex;align-items:center;justify-content:center;color:rgba(160,110,35,.34)}
+.model-photo-placeholder svg{width:54px;height:34px}
+.model-info{padding:9px 12px 11px;display:flex;flex-direction:column;gap:3px}
+.model-name{font-size:13px;font-weight:900;color:#1c1408;line-height:1.2}
+.model-note{font-size:10.5px;color:#8a7048;font-weight:700}
+.model-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+@media(max-width:560px){.models-grid{grid-template-columns:repeat(2,1fr)!important}}
 </style>
 </head>
 <body>
@@ -1941,7 +1942,7 @@ async function renderModels(category){
       <div class="model-photo-wrap">
         ${photo
           ? `<img src="${escapeHtml(photo)}" alt="${name}" class="model-photo" loading="lazy">`
-          : `<div class="model-photo-placeholder">🚗</div>`}
+          : `<div class="model-photo-placeholder" aria-hidden="true"><svg viewBox="0 0 64 40" fill="currentColor"><path d="M10 26c0-1.5.6-4.2 1.6-5.8l3.1-5.2C16 13 18 12 20 12h22c2 0 4 1 5.3 3l3.1 5.2c1 1.6 1.6 4.3 1.6 5.8v5a2 2 0 0 1-2 2h-2.1a5 5 0 0 1-9.8 0H25.9a5 5 0 0 1-9.8 0H14a2 2 0 0 1-2-2v-3zm8.4-6h27.2l-2.5-4.2c-.6-1-1.7-1.8-2.9-1.8H21.8c-1.2 0-2.3.8-2.9 1.8L16.4 20h2zm2.6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm26 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg></div>`}
       </div>
       <div class="model-info">
         <strong class="model-name">${name}</strong>
