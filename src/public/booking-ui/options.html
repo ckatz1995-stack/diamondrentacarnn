@@ -747,14 +747,29 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 @media(max-width:560px){.models-grid{grid-template-columns:repeat(2,1fr)!important}}
 
 /* ── Models strip: dark teal bar between progress and page ── */
-.models-strip{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99));border-bottom:1px solid rgba(231,191,105,.22);box-shadow:0 4px 18px rgba(0,0,0,.16);padding:0 16px}
+.models-strip{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99));border-bottom:1px solid rgba(231,191,105,.20);box-shadow:0 10px 26px rgba(0,0,0,.18);padding:0 16px}
 .models-strip-inner{display:flex;align-items:center;gap:12px;width:min(var(--container),calc(100vw - 24px));margin:0 auto;padding:9px 0;flex-wrap:wrap;min-height:44px}
 .models-strip-label{font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.52);white-space:nowrap;flex:0 0 auto}
 .models-strip-sep{width:1px;height:16px;background:rgba(255,255,255,.16);flex:0 0 auto}
 .models-strip-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.models-strip-chip{font-size:12.5px;font-weight:800;border-radius:999px;padding:5px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#f3ead2;letter-spacing:.04em;white-space:nowrap}
-.models-strip-chip.is-current{background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1d09;border-color:transparent;box-shadow:0 3px 10px rgba(0,0,0,.22)}
+/* chip buttons — exact match to vehicles page .cat-tab */
+.models-strip-chip{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#f3ead2;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 14px;cursor:pointer;font-family:inherit;letter-spacing:.04em;white-space:nowrap;transition:background .15s ease,border-color .15s ease;-webkit-appearance:none;appearance:none}
+.models-strip-chip:hover{background:rgba(231,191,105,.18);border-color:rgba(231,191,105,.40)}
+.models-strip-chip.is-active{background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1d09;border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.22)}
 @media(max-width:560px){.models-strip-label,.models-strip-sep{display:none}}
+/* ── Models expand panel (slides open below the chips row) ── */
+.models-strip-panel{width:min(var(--container),calc(100vw - 24px));margin:0 auto;padding:14px 0 18px;border-top:1px solid rgba(255,255,255,.10);display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.models-strip-panel[hidden]{display:none!important}
+.msp-photo{flex:0 0 200px;max-width:200px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.06);border:1px solid rgba(231,191,105,.18);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
+.msp-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.msp-photo-placeholder{display:flex;align-items:center;justify-content:center;color:rgba(231,191,105,.35);width:100%;height:100%}
+.msp-photo-placeholder svg{width:64px;height:40px}
+.msp-info{flex:1;min-width:160px;display:flex;flex-direction:column;gap:6px}
+.msp-name{font-size:15px;font-weight:900;color:#f3ead2;letter-spacing:.02em;line-height:1.2}
+.msp-note{font-size:11.5px;color:rgba(231,191,105,.72);font-weight:700}
+.msp-specs{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.msp-spec{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);color:#f3ead2;letter-spacing:.04em}
+@media(max-width:560px){.msp-photo{flex:0 0 100%;max-width:100%}}
 
 /* ── Summary sidebar: stretch to fill the main content height ── */
 .opts-layout{align-items:stretch!important}
@@ -813,8 +828,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
     <div class="models-strip-inner">
       <span class="models-strip-label" id="modelsStripLabel">Κατηγορία Α</span>
       <div class="models-strip-sep" aria-hidden="true"></div>
-      <div class="models-strip-chips" id="modelsStripChips"></div>
+      <div class="models-strip-chips" id="modelsStripChips" role="tablist" aria-label="Μοντέλα κατηγορίας"></div>
     </div>
+    <div class="models-strip-panel" id="modelsStripPanel" hidden aria-live="polite"></div>
   </div>
 
   <!-- DIAMOND MOBILE: Fixed bottom summary bar -->
@@ -1938,22 +1954,76 @@ async function renderModels(category){
     if(names.length) banner.textContent = `Η κατηγορία ${category} περιλαμβάνει ενδεικτικά ${names.join(', ')} κ.α. Η τελική παράδοση εξαρτάται από τη διαθεσιμότητα.`;
   }
 
-  // Populate the top models strip
+  // Populate the top models strip with clickable buttons (like vehicles page cat-tabs)
   (function(){
     const strip = document.getElementById('modelsStrip');
     const chipsEl = document.getElementById('modelsStripChips');
     const labelEl = document.getElementById('modelsStripLabel');
+    const panel = document.getElementById('modelsStripPanel');
     if(!strip || !chipsEl) return;
     const catBadge = document.getElementById('categoryBadge');
     const catCode = (catBadge && catBadge.textContent.trim()) || category || 'Α';
     if(labelEl) labelEl.textContent = `Κατηγορία ${catCode} · μοντέλα`;
-    const names = items.map(m => (m.model || m.name || '').trim()).filter(Boolean);
-    if(names.length){
-      chipsEl.innerHTML = names.map((n,i) =>
-        `<span class="models-strip-chip${i===0?' is-current':''}">${escapeHtml(n)}</span>`
-      ).join('');
-      strip.removeAttribute('hidden');
+
+    const namedItems = items.filter(m => (m.model || m.name || '').trim());
+    if(!namedItems.length) return;
+
+    let activeIndex = -1;
+
+    function showPanel(idx){
+      if(!panel) return;
+      const m = namedItems[idx];
+      const photo = (Array.isArray(m.photos) ? m.photos[0] : m.image) || '';
+      const name = m.model || m.name || 'Μοντέλο';
+      const specs = m.specs || {};
+      const specsHtml = [specs.gearbox, specs.fuel, specs.seats ? `${specs.seats} θέσεις` : null, specs.ac ? 'A/C' : null, specs.engine || null]
+        .filter(v => v && String(v) !== '-')
+        .map(v => `<span class="msp-spec">${escapeHtml(String(v))}</span>`).join('');
+      const photoHtml = photo
+        ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" loading="lazy">`
+        : `<div class="msp-photo-placeholder"><svg viewBox="0 0 64 40" fill="currentColor"><path d="M10 26c0-1.5.6-4.2 1.6-5.8l3.1-5.2C16 13 18 12 20 12h22c2 0 4 1 5.3 3l3.1 5.2c1 1.6 1.6 4.3 1.6 5.8v5a2 2 0 0 1-2 2h-2.1a5 5 0 0 1-9.8 0H25.9a5 5 0 0 1-9.8 0H14a2 2 0 0 1-2-2v-3zm8.4-6h27.2l-2.5-4.2c-.6-1-1.7-1.8-2.9-1.8H21.8c-1.2 0-2.3.8-2.9 1.8L16.4 20h2zm2.6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm26 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg></div>`;
+      panel.innerHTML = `<div class="msp-photo">${photoHtml}</div>
+        <div class="msp-info">
+          <span class="msp-name">${escapeHtml(name)}</span>
+          ${m.note ? `<span class="msp-note">${escapeHtml(m.note)}</span>` : ''}
+          ${specsHtml ? `<div class="msp-specs">${specsHtml}</div>` : ''}
+        </div>`;
+      panel.removeAttribute('hidden');
     }
+
+    function hidePanel(){
+      if(panel) panel.setAttribute('hidden', '');
+    }
+
+    chipsEl.innerHTML = namedItems.map((m, i) => {
+      const n = escapeHtml((m.model || m.name || '').trim());
+      return `<button type="button" class="models-strip-chip" data-idx="${i}" role="tab" aria-selected="false">${n}</button>`;
+    }).join('');
+
+    chipsEl.querySelectorAll('.models-strip-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        if(activeIndex === idx){
+          // second click on same chip — collapse
+          activeIndex = -1;
+          btn.classList.remove('is-active');
+          btn.setAttribute('aria-selected', 'false');
+          hidePanel();
+          return;
+        }
+        // deactivate previous
+        chipsEl.querySelectorAll('.models-strip-chip').forEach(b => {
+          b.classList.remove('is-active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        activeIndex = idx;
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-selected', 'true');
+        showPanel(idx);
+      });
+    });
+
+    strip.removeAttribute('hidden');
   })();
 
   const grid = document.getElementById('modelsGrid');
