@@ -584,55 +584,56 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 
 /* ── Insurance & Extras cards: standalone full-width sections ── */
 .insurance-card,.extras-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;border-radius:24px!important;box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important;overflow:visible!important;margin-bottom:14px!important}
-.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:20px 22px 0}
+.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:15px 20px 0}
 .section-head-left{display:flex;flex-direction:column;gap:1px}
-.step-tag{display:inline-block;background:linear-gradient(135deg,rgba(160,110,35,.14),rgba(160,110,35,.07));border:1px solid rgba(160,110,35,.26);color:#7a5e38;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:999px;margin-bottom:7px;width:fit-content}
-.section-h2{margin:0;font-size:22px;font-weight:900;color:#1c1408;letter-spacing:-.02em;line-height:1.15}
-.section-sub{margin:5px 0 0;font-size:13px;color:#8a7048;font-weight:700;line-height:1.45}
+.step-tag{display:inline-block;background:linear-gradient(135deg,rgba(160,110,35,.14),rgba(160,110,35,.07));border:1px solid rgba(160,110,35,.26);color:#7a5e38;font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-bottom:6px;width:fit-content}
+.section-h2{margin:0;font-size:17px;font-weight:900;color:#1c1408;letter-spacing:-.02em;line-height:1.15}
+.section-sub{margin:3px 0 0;font-size:12px;color:#8a7048;font-weight:700;line-height:1.4}
 .ins-policy-link{color:#a07828;font-size:13px;font-weight:900;text-decoration:none;white-space:nowrap;padding-top:6px;border-bottom:1px solid rgba(160,110,35,.30);line-height:1.4;flex-shrink:0;transition:color .15s}
 .ins-policy-link:hover{color:#5a3c10}
 
 /* ── Insurance compare: full-width 3-col ── */
 /* Hide the duplicate radio-list; ins-col buttons drive the radios via JS */
 #insuranceList{display:none!important}
-.ins-compare-wrap{padding:16px 20px 22px}
-.ins-compare{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:14px!important;margin:0!important;padding:0!important}
-.ins-col{position:relative!important;display:flex!important;flex-direction:column!important;gap:9px!important;padding:20px 18px 18px!important;border-radius:18px!important;border:2px solid rgba(160,110,35,.16)!important;background:rgba(255,255,255,.72)!important;cursor:pointer!important;text-align:left!important;font:inherit!important;width:100%!important;min-height:200px!important;transition:border-color .15s,background .15s,box-shadow .15s!important}
-.ins-col:hover{border-color:rgba(160,110,35,.40)!important;background:rgba(255,255,255,.96)!important;box-shadow:0 8px 22px rgba(60,30,0,.12)!important;transform:translateY(-2px)!important}
-.ins-rec{border-color:rgba(160,110,35,.50)!important;background:linear-gradient(160deg,rgba(255,249,224,.96),rgba(253,244,208,.90))!important;box-shadow:0 6px 18px rgba(160,110,35,.16)!important}
-.ins-badge{position:absolute!important;top:-11px!important;right:14px!important;margin:0!important;font-size:9.5px!important;padding:4px 11px!important;font-weight:900!important;background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;border:none!important;color:#2a1e0a!important;box-shadow:0 3px 10px rgba(60,30,0,.24)!important;border-radius:999px!important;display:inline-block!important;letter-spacing:.04em!important}
-.ins-name{font-size:20px!important;font-weight:900!important;color:#1c1408!important;letter-spacing:-.01em!important;display:block!important}
-.ins-p{font-size:30px!important;font-weight:950!important;color:#a07828!important;letter-spacing:-.03em!important;line-height:1!important;display:block!important;margin-top:2px!important}
-.ins-p small{font-size:12px!important;opacity:.72!important;font-weight:800!important;margin-left:3px!important}
-.ins-feats{margin:auto 0 0!important;padding:0!important;list-style:none!important;display:grid!important;gap:6px!important;padding-top:10px!important;border-top:1px solid rgba(160,110,35,.12)!important}
-.ins-feats li{font-size:12px!important;font-weight:700!important;color:#5b4829!important;line-height:1.35!important}
+.ins-compare-wrap{padding:14px 20px 18px}
+.ins-compare{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:12px!important;margin:0!important;padding:0!important}
+.ins-col{position:relative!important;display:flex!important;flex-direction:column!important;gap:6px!important;padding:14px 16px 13px!important;border-radius:15px!important;border:2px solid rgba(160,110,35,.16)!important;background:rgba(255,255,255,.72)!important;cursor:pointer!important;text-align:left!important;font:inherit!important;width:100%!important;min-height:0!important;transition:border-color .15s,background .15s,box-shadow .15s!important}
+.ins-col:hover{border-color:rgba(160,110,35,.40)!important;background:rgba(255,255,255,.96)!important;box-shadow:0 6px 16px rgba(60,30,0,.12)!important}
+.ins-rec{border-color:rgba(160,110,35,.50)!important;background:linear-gradient(160deg,rgba(255,249,224,.96),rgba(253,244,208,.90))!important;box-shadow:0 4px 14px rgba(160,110,35,.14)!important}
+.ins-badge{position:absolute!important;top:-10px!important;right:12px!important;margin:0!important;font-size:9px!important;padding:3px 10px!important;font-weight:900!important;background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;border:none!important;color:#2a1e0a!important;box-shadow:0 3px 10px rgba(60,30,0,.24)!important;border-radius:999px!important;display:inline-block!important;letter-spacing:.04em!important}
+.ins-top-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.ins-name{font-size:15px!important;font-weight:900!important;color:#1c1408!important;letter-spacing:-.01em!important;display:block!important}
+.ins-p{font-size:19px!important;font-weight:950!important;color:#a07828!important;letter-spacing:-.02em!important;line-height:1!important;display:block!important;margin-top:0!important}
+.ins-p small{font-size:10.5px!important;opacity:.72!important;font-weight:800!important;margin-left:2px!important}
+.ins-feats{margin:2px 0 0!important;padding:7px 0 0!important;list-style:none!important;display:grid!important;gap:4px!important;border-top:1px solid rgba(160,110,35,.12)!important}
+.ins-feats li{font-size:11px!important;font-weight:700!important;color:#5b4829!important;line-height:1.3!important}
 .ins-col.is-active{border-color:rgba(231,191,105,.70)!important;background:linear-gradient(160deg,rgba(26,50,60,.96),rgba(20,40,48,1))!important;box-shadow:0 12px 32px rgba(0,0,0,.30),0 0 0 1px rgba(231,191,105,.28)!important;color:#fff!important;transform:translateY(-2px)!important}
 .ins-col.is-active .ins-name{color:#f6e19f!important}
 .ins-col.is-active .ins-p{color:#f6e19f!important}
 .ins-col.is-active .ins-feats{border-top-color:rgba(231,191,105,.20)!important}
 .ins-col.is-active .ins-feats li{color:rgba(255,255,255,.80)!important}
 
-/* ── Extras card: full-width 3-col grid ── */
-.extras-body{padding:16px 20px 22px}
-.extras-list{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
-.extra-item{position:relative!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;padding:14px 14px 13px!important;min-height:0!important;background:rgba(255,255,255,.72)!important;border:1.5px solid rgba(160,110,35,.16)!important;border-radius:16px!important;transition:border-color .15s,background .15s,box-shadow .15s!important}
-.extra-item:hover{border-color:rgba(160,110,35,.38)!important;background:rgba(255,255,255,.96)!important;box-shadow:0 6px 18px rgba(60,30,0,.10)!important}
-.xc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.xc-icon{width:36px;height:36px;border-radius:11px;background:rgba(160,110,35,.10);border:1px solid rgba(160,110,35,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
-.extra-item .item-price{text-align:right!important;white-space:nowrap!important;font-size:15px!important;color:#a07828!important;font-weight:950!important;line-height:1.15!important}
-.extra-item .item-price span{display:block!important;font-size:9.5px!important;color:#8a7048!important;font-weight:700!important}
-.extra-item .item-title{font-size:13.5px!important;font-weight:900!important;color:#1c1408!important;line-height:1.2!important}
-.extra-item .item-detail{font-size:11px!important;color:#7a6446!important;line-height:1.35!important;font-weight:700!important;flex:1}
+/* ── Extras card: compact horizontal rows, 2-col grid ── */
+.extras-body{padding:14px 20px 18px}
+.extras-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+.extra-item{position:relative!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:11px!important;padding:10px 12px!important;min-height:0!important;background:rgba(255,255,255,.72)!important;border:1.5px solid rgba(160,110,35,.16)!important;border-radius:13px!important;transition:border-color .15s,background .15s,box-shadow .15s!important}
+.extra-item:hover{border-color:rgba(160,110,35,.38)!important;background:rgba(255,255,255,.96)!important;box-shadow:0 4px 14px rgba(60,30,0,.10)!important}
+.xc-icon{width:34px;height:34px;border-radius:10px;background:rgba(160,110,35,.10);border:1px solid rgba(160,110,35,.18);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.xc-mid{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.extra-item .item-price{text-align:right!important;white-space:nowrap!important;font-size:13.5px!important;color:#a07828!important;font-weight:950!important;line-height:1.1!important;flex:none!important}
+.extra-item .item-price span{display:block!important;font-size:9px!important;color:#8a7048!important;font-weight:700!important}
+.extra-item .item-title{font-size:13px!important;font-weight:900!important;color:#1c1408!important;line-height:1.2!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.extra-item .item-detail{font-size:10.5px!important;color:#7a6446!important;line-height:1.3!important;font-weight:700!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
 .extra-toggle-item{cursor:pointer!important}
 .extra-toggle-item input{position:absolute!important;opacity:0!important;pointer-events:none!important;width:0!important;height:0!important;margin:0!important}
-.xc-add{display:flex;align-items:center;justify-content:center;gap:6px;height:34px;border-radius:10px;border:1.5px solid rgba(160,110,35,.34);background:rgba(255,255,255,.65);color:#7a5e38;font-size:12.5px;font-weight:900;margin-top:auto;transition:background .15s,color .15s,border-color .15s}
+.xc-add{display:flex;align-items:center;justify-content:center;gap:5px;height:32px;width:108px;flex:none;border-radius:9px;border:1.5px solid rgba(160,110,35,.34);background:rgba(255,255,255,.65);color:#7a5e38;font-size:11.5px;font-weight:900;transition:background .15s,color .15s,border-color .15s}
 .xc-add::after{content:"Προσθήκη"}
 .extra-toggle-item:hover .xc-add{background:rgba(231,191,105,.18)}
-.qty-stepper{display:flex;align-items:center;justify-content:space-between;height:34px;border:1.5px solid rgba(160,110,35,.30);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.85);margin-top:auto}
-.qty-btn{width:38px;height:100%;border:none;background:none;cursor:pointer;font-size:17px;font-weight:900;color:#a07828;display:flex;align-items:center;justify-content:center;transition:background .12s;padding:0;font-family:inherit}
+.qty-stepper{display:flex;align-items:center;justify-content:space-between;height:32px;width:108px;flex:none;border:1.5px solid rgba(160,110,35,.30);border-radius:9px;overflow:hidden;background:rgba(255,255,255,.85)}
+.qty-btn{width:34px;height:100%;border:none;background:none;cursor:pointer;font-size:16px;font-weight:900;color:#a07828;display:flex;align-items:center;justify-content:center;transition:background .12s;padding:0;font-family:inherit}
 .qty-btn:hover:not([disabled]){background:rgba(160,110,35,.12)}
 .qty-btn[disabled]{color:rgba(160,110,35,.26);cursor:not-allowed}
-.qty-val{flex:1;text-align:center;font-size:14.5px;font-weight:900;color:#1c1408}
+.qty-val{flex:1;text-align:center;font-size:13.5px;font-weight:900;color:#1c1408}
 .extra-item.active{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border-color:rgba(231,191,105,.55)!important;box-shadow:0 8px 22px rgba(0,0,0,.22)!important}
 .extra-item.active .xc-icon{background:rgba(231,191,105,.16);border-color:rgba(231,191,105,.30)}
 .extra-item.active .item-title{color:#f6e19f!important}
@@ -682,22 +683,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
   .vehicle-media{min-height:160px!important}
   .vehicle-media img{max-height:130px!important}
 }
-@media(max-width:860px){
+@media(max-width:900px){
   .hero-grid{grid-template-columns:1fr!important}
   .vehicle-media{min-height:170px!important}
-  .extras-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  .section-head{flex-direction:column;gap:10px;align-items:flex-start}
+  .extras-list{grid-template-columns:1fr!important}
+  .section-head{flex-direction:column;gap:8px;align-items:flex-start}
 }
 @media(max-width:620px){
   .ins-compare{grid-template-columns:1fr!important}
-  .ins-col{min-height:auto!important}
-  .ins-feats{padding-top:8px!important}
-  .extras-list{grid-template-columns:1fr!important}
+  .ins-feats{padding-top:6px!important}
 }
 @media(max-width:480px){
-  .ins-compare-wrap,.extras-body{padding:12px 14px 16px!important}
-  .section-head{padding:16px 14px 0!important}
+  .ins-compare-wrap,.extras-body{padding:12px 14px 14px!important}
+  .section-head{padding:13px 14px 0!important}
   .ins-badge{top:-9px!important;right:10px!important}
+  .extra-item .item-detail{display:none!important}
 }
 /* ── Models: clean photo + info cards ── */
 .models-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
@@ -822,19 +822,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
       <div class="ins-compare-wrap">
         <div class="ins-compare">
           <button class="ins-col" data-pick="cdw" type="button">
-            <span class="ins-name">CDW</span>
-            <span class="ins-p">0€<small>/ημέρα</small></span>
+            <span class="ins-top-row"><span class="ins-name">CDW</span><span class="ins-p">0€<small>/ημέρα</small></span></span>
             <ul class="ins-feats"><li>✓ Βασική κάλυψη ζημιών</li><li>✓ Κλοπή</li><li>— Franchise ισχύει</li></ul>
           </button>
           <button class="ins-col ins-rec" data-pick="scdw" type="button">
             <span class="ins-badge">⭐ Προτεινόμενο</span>
-            <span class="ins-name">SCDW</span>
-            <span class="ins-p">+12€<small>/ημέρα</small></span>
+            <span class="ins-top-row"><span class="ins-name">SCDW</span><span class="ins-p">+12€<small>/ημέρα</small></span></span>
             <ul class="ins-feats"><li>✓ Μειωμένη ευθύνη</li><li>✓ Κλοπή</li><li>✓ Μικρότερο franchise</li></ul>
           </button>
           <button class="ins-col" data-pick="full" type="button">
-            <span class="ins-name">FULL</span>
-            <span class="ins-p">+20€<small>/ημέρα</small></span>
+            <span class="ins-top-row"><span class="ins-name">FULL</span><span class="ins-p">+20€<small>/ημέρα</small></span></span>
             <ul class="ins-feats"><li>✓ Πλήρης κάλυψη</li><li>✓ Κλοπή</li><li>✓ Μηδενικό franchise</li></ul>
           </button>
         </div>
@@ -1316,11 +1313,14 @@ bindRouteLinks();
         })();
         const initQty = selectedExtrasKeys.has(item.key) ? (savedQty || 1) : savedQty;
         if(maxQty > 1){
-          // Quantity card — stepper at the bottom
+          // Quantity row — compact horizontal: icon | text | price | stepper
           return `<div class="extra-item extra-qty-item ${initQty > 0 ? 'active' : ''}" data-key="${escapeHtml(item.key)}" data-price="${escapeHtml(item.price)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-max="${maxQty}">
-            <div class="xc-top"><span class="xc-icon">${icon}</span><div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div></div>
-            <strong class="item-title">${escapeHtml(item.label)}</strong>
-            ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
+            <span class="xc-icon">${icon}</span>
+            <div class="xc-mid">
+              <strong class="item-title">${escapeHtml(item.label)}</strong>
+              ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
+            </div>
+            <div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div>
             <div class="qty-stepper">
               <button type="button" class="qty-btn qty-minus" aria-label="Αφαίρεση">−</button>
               <span class="qty-val">${initQty}</span>
@@ -1329,13 +1329,16 @@ bindRouteLinks();
             <input type="hidden" class="extraInput" value="${escapeHtml(item.price)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-qty="${initQty}">
           </div>`;
         } else {
-          // Toggle card — add-pill at the bottom
+          // Toggle row — compact horizontal: icon | text | price | add-pill
           const checked = initQty > 0;
           return `<label class="extra-item extra-toggle-item ${checked ? 'active' : ''}">
             <input type="checkbox" class="extraInput" value="${escapeHtml(item.price)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="${escapeHtml(item.billingMode || 'perDay')}" data-qty="1" ${checked ? 'checked' : ''}>
-            <div class="xc-top"><span class="xc-icon">${icon}</span><div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div></div>
-            <strong class="item-title">${escapeHtml(item.label)}</strong>
-            ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
+            <span class="xc-icon">${icon}</span>
+            <div class="xc-mid">
+              <strong class="item-title">${escapeHtml(item.label)}</strong>
+              ${desc ? `<span class="item-detail">${escapeHtml(desc)}</span>` : ''}
+            </div>
+            <div class="item-price">${formatMoney(item.price)}<span>${suffix}</span></div>
             <span class="xc-add" aria-hidden="true"></span>
           </label>`;
         }
