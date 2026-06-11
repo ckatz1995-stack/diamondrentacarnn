@@ -546,32 +546,36 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid rgba(160,110,35,.65)!important}
 
 /* ── Cards ── */
-.hero-card,.models-card{background:linear-gradient(180deg,rgba(244,233,200,.98),rgba(228,205,145,.98))!important;border:1px solid rgba(160,110,35,.20)!important;border-radius:24px!important;box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important;overflow:hidden!important}
+.hero-card,.models-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;border-radius:24px!important;box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important;overflow:hidden!important}
 .hero-card{margin-bottom:14px!important}
 .models-card{margin-bottom:14px!important}
+/* opts-main is a grid with its own gap — kill per-card margins so spacing is single-source */
+.opts-main>section{margin-bottom:0!important}
+.opts-main{gap:14px!important}
 
 /* ── Progress strip: attach dark teal to the header ── */
 .booking-progress{background:linear-gradient(180deg,rgba(20,40,48,.99),rgba(26,50,60,.96))!important;border-bottom:1px solid rgba(231,191,105,.14)!important;box-shadow:0 4px 18px rgba(0,0,0,.18)!important}
 
 /* ── Hero: 2-col compact layout (dates live in trip strip + summary) ── */
-.hero-grid{grid-template-columns:250px 1fr!important;align-items:stretch!important}
-.vehicle-media{background:radial-gradient(ellipse at 55% 40%,rgba(255,255,255,.80),transparent 60%),linear-gradient(170deg,rgba(250,244,228,.96),rgba(240,228,195,.84))!important;min-height:190px!important;padding:20px 16px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}
-.vehicle-media img{max-width:90%!important;max-height:155px!important;object-fit:contain!important;filter:drop-shadow(0 12px 22px rgba(40,20,0,.20))!important;transition:transform .28s ease;display:block}
+.hero-grid{grid-template-columns:220px 1fr!important;align-items:stretch!important}
+.vehicle-media{background:radial-gradient(ellipse at 55% 40%,rgba(255,255,255,.80),transparent 60%),linear-gradient(170deg,rgba(250,244,228,.96),rgba(240,228,195,.84))!important;min-height:150px!important;padding:16px 14px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}
+.vehicle-media img{max-width:90%!important;max-height:122px!important;object-fit:contain!important;filter:drop-shadow(0 12px 22px rgba(40,20,0,.20))!important;transition:transform .28s ease;display:block}
 .hero-card:hover .vehicle-media img{transform:scale(1.06)}
 .cat-badge{position:absolute!important;left:12px!important;top:12px!important;width:auto!important;min-width:34px!important;height:30px!important;padding:0 11px!important;font-size:13px!important;font-weight:900!important;letter-spacing:.04em!important;background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;color:#2a1e0a!important;border:none!important;border-radius:999px!important;box-shadow:0 4px 12px rgba(60,30,0,.24)!important;display:flex!important;align-items:center!important;justify-content:center!important}
-.vehicle-main{padding:20px 24px 18px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
-.vehicle-main h1{margin:0!important;font-size:clamp(22px,2.6vw,30px)!important;color:#1c1408!important;letter-spacing:-.03em!important;line-height:1.1!important}
+.vehicle-main{padding:14px 22px 14px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
+.vehicle-main h1{margin:0!important;font-size:clamp(20px,2.3vw,26px)!important;color:#1c1408!important;letter-spacing:-.03em!important;line-height:1.1!important}
 .similar{font-size:11px!important;font-weight:800!important;color:#8a7048!important;margin-bottom:0!important;background:rgba(160,110,35,.09);border:1px solid rgba(160,110,35,.20);border-radius:999px;padding:3px 11px}
 .title-line{align-items:center!important;gap:11px!important;position:relative!important;padding-bottom:11px!important}
 .title-line::after{content:"";position:absolute;left:0;bottom:0;width:46px;height:3px;border-radius:2px;background:linear-gradient(90deg,#e7bf69,#f6e19f)}
 .facts{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin-top:13px!important}
 .spec-chip{display:inline-flex;align-items:center;background:rgba(160,110,35,.08);border:1px solid rgba(160,110,35,.26);color:#4a3820;font-size:12.5px;font-weight:800;border-radius:999px;padding:6px 14px;white-space:nowrap}
-.hero-perks{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;font-size:12.5px;color:#5a4528;font-weight:700}
+.hero-perks{list-style:none;margin:11px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 14px;font-size:12px;color:#5a4528;font-weight:700}
 .hero-perks li{display:flex;align-items:center;gap:7px;min-width:0}
 .hero-perks li::before{content:"✓";flex:none;width:17px;height:17px;border-radius:50%;background:linear-gradient(135deg,rgba(231,191,105,.40),rgba(246,225,159,.30));border:1px solid rgba(160,110,35,.24);color:#8a6a28;font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center}
 @media(max-width:520px){.hero-perks{grid-template-columns:1fr}}
 
-/* ── Models accordion: clean premium bar ── */
+/* ── Models accordion: quiet reference bar (sits below the decision steps) ── */
+.models-card{background:rgba(253,248,239,.80)!important;box-shadow:0 6px 20px rgba(90,48,0,.12)!important}
 .models-card details summary{padding:14px 20px!important;gap:14px!important}
 .models-head{gap:3px!important}
 .models-head strong{font-size:14px!important;color:#1c1408!important;font-weight:900!important}
@@ -585,7 +589,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .album-controls button.active{background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;border:none!important;color:#2a1e0a!important}
 
 /* ── Insurance & Extras cards: standalone full-width sections ── */
-.insurance-card,.extras-card{background:linear-gradient(180deg,rgba(244,233,200,.98),rgba(228,205,145,.98))!important;border:1px solid rgba(160,110,35,.20)!important;border-radius:24px!important;box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important;overflow:visible!important;margin-bottom:14px!important}
+.insurance-card,.extras-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;border-radius:24px!important;box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important;overflow:visible!important;margin-bottom:14px!important}
 .section-head{display:flex;align-items:flex-start;gap:13px;padding:20px 22px 0}
 .sec-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1e0a;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 4px 10px rgba(60,30,0,.20);margin-top:1px}
 .section-head-left{display:flex;flex-direction:column;gap:1px;flex:1 1 auto;min-width:0}
@@ -598,16 +602,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 /* Hide the duplicate radio-list; ins-col buttons drive the radios via JS */
 #insuranceList{display:none!important}
 .ins-compare-wrap{padding:18px 22px 20px}
-.ins-compare{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:14px!important;margin:0!important;padding:6px 0 0!important;align-items:stretch!important}
-.ins-col{position:relative!important;display:flex!important;flex-direction:column!important;gap:7px!important;padding:18px 18px 14px!important;border-radius:16px!important;border:1.5px solid rgba(160,110,35,.18)!important;background:rgba(252,248,232,.96)!important;cursor:pointer!important;text-align:left!important;font:inherit!important;width:100%!important;min-height:0!important;transition:border-color .18s,background .18s,box-shadow .18s,transform .18s!important}
+.ins-compare{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:14px!important;margin:0!important;padding:14px 0 0!important;align-items:stretch!important}
+.ins-col{position:relative!important;display:flex!important;flex-direction:column!important;gap:7px!important;padding:18px 18px 14px!important;border-radius:16px!important;border:1.5px solid rgba(160,110,35,.18)!important;background:rgba(255,255,255,.80)!important;cursor:pointer!important;text-align:left!important;font:inherit!important;width:100%!important;min-height:0!important;transition:border-color .18s,background .18s,box-shadow .18s,transform .18s!important}
 /* tier accent bar */
 .ins-col::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;border-radius:16px 16px 0 0;background:rgba(160,110,35,.22)}
 .ins-rec::before{background:linear-gradient(90deg,#e7bf69,#f6e19f)!important}
 .ins-col[data-pick="full"]::before{background:linear-gradient(90deg,rgba(26,50,60,.85),rgba(53,106,130,.85))}
 .ins-col:hover{border-color:rgba(160,110,35,.42)!important;background:rgba(255,255,255,.98)!important;box-shadow:0 10px 26px rgba(60,30,0,.14)!important;transform:translateY(-3px)!important}
-/* recommended: elevated by default */
-.ins-rec{border-color:rgba(160,110,35,.46)!important;background:linear-gradient(165deg,rgba(244,233,200,.99),rgba(228,205,145,.96))!important;box-shadow:0 12px 30px rgba(120,75,10,.18)!important;transform:translateY(-5px)!important}
-.ins-rec:hover{transform:translateY(-7px)!important}
+/* recommended: stronger border + glow, same baseline as siblings (no offset) */
+.ins-rec{border-color:rgba(160,110,35,.50)!important;background:linear-gradient(165deg,rgba(255,250,230,.98),rgba(253,244,210,.92))!important;box-shadow:0 0 0 3px rgba(231,191,105,.20),0 10px 26px rgba(120,75,10,.16)!important}
+.ins-rec:hover{transform:translateY(-3px)!important}
 .ins-badge{position:absolute!important;top:-11px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;margin:0!important;font-size:9.5px!important;padding:4px 13px!important;font-weight:900!important;background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;border:none!important;color:#2a1e0a!important;box-shadow:0 4px 12px rgba(60,30,0,.26)!important;border-radius:999px!important;display:inline-block!important;letter-spacing:.06em!important;text-transform:uppercase!important;white-space:nowrap!important}
 .ins-tier{display:block;font-size:9.5px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#a07828;margin-top:2px}
 .ins-top-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
@@ -627,46 +631,39 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .ins-col.is-active .ins-feats{border-top-color:rgba(231,191,105,.20)!important}
 .ins-col.is-active .ins-feats li{color:rgba(255,255,255,.84)!important}
 
-/* ── Extras card: vehicle-page-style product cards ── */
+/* ── Extras card: compact horizontal-row product cards ── */
 .extras-body{padding:16px 22px 20px}
-/* 2-col card grid — each extra is its own vehicle-card-style card */
-.extras-list{display:grid!important;grid-template-columns:1fr 1fr!important;gap:12px!important;border:none!important;border-radius:0!important;overflow:visible!important;background:transparent!important}
-/* Card: icon col | info col | price+action col (3-area grid) */
-.extra-item{position:relative!important;display:grid!important;grid-template-areas:"icon info price" "icon info action"!important;grid-template-columns:76px 1fr 108px!important;grid-template-rows:auto auto!important;gap:0!important;padding:0!important;border-radius:22px!important;border:1.5px solid rgba(160,110,35,.18)!important;background:linear-gradient(180deg,rgba(244,233,200,.98),rgba(228,205,145,.98))!important;box-shadow:0 4px 16px rgba(60,30,0,.08),0 1px 3px rgba(60,30,0,.05)!important;overflow:hidden!important;min-height:88px!important;transition:transform .18s ease,box-shadow .18s ease,border-color .18s!important}
-.extra-item:hover{transform:translateY(-2px)!important;box-shadow:0 8px 24px rgba(60,30,0,.14)!important;border-color:rgba(160,110,35,.30)!important}
-/* Icon column — amber photo-column style, spans both rows */
-.xc-icon{grid-area:icon!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:26px!important;background:linear-gradient(135deg,rgba(200,138,53,.22),rgba(224,168,72,.06))!important;border-right:1px solid rgba(160,110,35,.14)!important;border-radius:0!important;width:auto!important;height:auto!important;min-height:0!important}
-/* Info column — name + description, spans both rows */
-.xc-mid{grid-area:info!important;display:flex!important;flex-direction:column!important;justify-content:center!important;gap:3px!important;padding:13px 13px!important;min-width:0!important;flex:none!important}
-/* Price — top of right rail */
-.extra-item .item-price{grid-area:price!important;padding:13px 12px 5px!important;text-align:right!important;font-size:16px!important;font-weight:950!important;color:#a07828!important;line-height:1.1!important;white-space:nowrap!important;background:rgba(160,110,35,.04)!important;border-left:1px solid rgba(160,110,35,.12)!important;min-width:0!important;flex:none!important}
-.extra-item .item-price span{display:block!important;font-size:9px!important;color:#8a7048!important;font-weight:700!important;margin-top:2px!important}
-.extra-item .item-title{font-size:13px!important;font-weight:900!important;color:#1c1408!important;line-height:1.25!important}
+.extras-list{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))!important;gap:10px!important;border:none!important;border-radius:0!important;overflow:visible!important;background:transparent!important}
+.extra-item{position:relative!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:12px!important;padding:12px 14px!important;min-height:0!important;border-radius:16px!important;border:1.5px solid rgba(160,110,35,.18)!important;background:rgba(255,255,255,.80)!important;box-shadow:0 3px 12px rgba(60,30,0,.07)!important;overflow:visible!important;transition:transform .16s,box-shadow .16s,border-color .16s!important}
+.extra-item:hover{transform:translateY(-2px)!important;box-shadow:0 8px 20px rgba(60,30,0,.13)!important;border-color:rgba(160,110,35,.32)!important;background:rgba(255,255,255,.95)!important}
+.xc-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(231,191,105,.32),rgba(246,225,159,.16));border:1px solid rgba(160,110,35,.20);display:flex;align-items:center;justify-content:center;font-size:21px;flex:none}
+.xc-mid{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px;justify-content:center}
+.extra-item .item-price{flex:none!important;text-align:right!important;white-space:nowrap!important;font-size:15.5px!important;color:#a07828!important;font-weight:950!important;line-height:1.1!important;min-width:58px!important;background:none!important;border:none!important;padding:0!important}
+.extra-item .item-price span{display:block!important;font-size:9.5px!important;color:#8a7048!important;font-weight:700!important;margin-top:2px!important}
+.extra-item .item-title{font-size:13.5px!important;font-weight:900!important;color:#1c1408!important;line-height:1.25!important}
 .extra-item .item-detail{font-size:11px!important;color:#8a7048!important;line-height:1.3!important;font-weight:700!important}
 .extra-toggle-item{cursor:pointer!important}
 .extra-toggle-item input{position:absolute!important;opacity:0!important;pointer-events:none!important;width:0!important;height:0!important;margin:0!important}
-/* Add button — bottom of right rail */
-.xc-add{grid-area:action!important;display:flex!important;align-items:center!important;justify-content:center!important;height:auto!important;width:auto!important;border-radius:0!important;border:none!important;border-left:1px solid rgba(160,110,35,.12)!important;border-top:1px solid rgba(160,110,35,.10)!important;background:rgba(160,110,35,.06)!important;color:#7a5e38!important;font-size:11px!important;font-weight:900!important;padding:5px 12px 13px!important;letter-spacing:.03em;transition:background .15s,color .15s!important}
-.xc-add::after{content:"+ Προσθήκη"!important}
-.extra-toggle-item:hover .xc-add{background:rgba(231,191,105,.24)!important;color:#3a2208!important}
-/* Qty stepper — bottom of right rail */
-.qty-stepper{grid-area:action!important;display:flex!important;align-items:center!important;justify-content:space-between!important;width:auto!important;height:auto!important;border:none!important;border-left:1px solid rgba(160,110,35,.12)!important;border-top:1px solid rgba(160,110,35,.10)!important;border-radius:0!important;overflow:visible!important;background:rgba(160,110,35,.06)!important;padding:5px 10px 12px!important}
-.qty-btn{width:30px;height:30px;border:none;background:rgba(255,255,255,.72);border-radius:8px;cursor:pointer;font-size:16px;font-weight:900;color:#a07828;display:flex;align-items:center;justify-content:center;transition:background .12s;padding:0;font-family:inherit;box-shadow:0 2px 5px rgba(60,30,0,.10)}
-.qty-btn:hover:not([disabled]){background:rgba(231,191,105,.44)}
-.qty-btn[disabled]{color:rgba(160,110,35,.28);cursor:not-allowed;box-shadow:none;background:transparent}
-.qty-val{flex:1;text-align:center;font-size:13px;font-weight:900;color:#1c1408;min-width:22px}
-/* Active: dark teal with gold border glow */
-.extra-item.active{border-color:rgba(231,191,105,.55)!important;background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;box-shadow:0 0 0 2px rgba(231,191,105,.24),0 10px 28px rgba(0,0,0,.28)!important}
-.extra-item.active .xc-icon{background:rgba(231,191,105,.10)!important;border-right-color:rgba(231,191,105,.18)!important}
+.xc-add{display:flex;align-items:center;justify-content:center;height:34px;width:106px;flex:none;border-radius:10px;border:1.5px solid rgba(160,110,35,.34);background:rgba(255,255,255,.65);color:#7a5e38;font-size:11.5px;font-weight:900;transition:background .15s,color .15s,border-color .15s}
+.xc-add::after{content:"+ Προσθήκη"}
+.extra-toggle-item:hover .xc-add{background:rgba(231,191,105,.22);color:#3a2208}
+.qty-stepper{display:flex;align-items:center;justify-content:space-between;height:34px;width:106px;flex:none;border:1.5px solid rgba(160,110,35,.30);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.85)}
+.qty-btn{width:32px;height:100%;border:none;background:none;cursor:pointer;font-size:16px;font-weight:900;color:#a07828;display:flex;align-items:center;justify-content:center;transition:background .12s;padding:0;font-family:inherit}
+.qty-btn:hover:not([disabled]){background:rgba(160,110,35,.12)}
+.qty-btn[disabled]{color:rgba(160,110,35,.28);cursor:not-allowed}
+.qty-val{flex:1;text-align:center;font-size:13px;font-weight:900;color:#1c1408}
+/* Active: dark teal card with gold ring */
+.extra-item.active{border-color:rgba(231,191,105,.60)!important;background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;box-shadow:0 8px 22px rgba(0,0,0,.26)!important}
+.extra-item.active .xc-icon{background:rgba(231,191,105,.14);border-color:rgba(231,191,105,.30)}
 .extra-item.active .item-title{color:#f6e19f!important}
-.extra-item.active .item-detail{color:rgba(255,255,255,.52)!important}
-.extra-item.active .item-price{color:#f6e19f!important;background:rgba(255,255,255,.04)!important;border-left-color:rgba(231,191,105,.14)!important}
-.extra-item.active .item-price span{color:rgba(255,255,255,.46)!important}
-.extra-item.active .xc-add{background:rgba(231,191,105,.12)!important;border-left-color:rgba(231,191,105,.18)!important;border-top-color:rgba(231,191,105,.12)!important;color:#f6e19f!important}
-.extra-item.active .xc-add::after{content:"✓ Προστέθηκε"!important}
-.extra-item.active .qty-stepper{background:rgba(255,255,255,.05)!important;border-left-color:rgba(231,191,105,.16)!important;border-top-color:rgba(231,191,105,.10)!important}
-.extra-item.active .qty-btn{color:#f6e19f!important;background:rgba(255,255,255,.10)!important;box-shadow:none}
-.extra-item.active .qty-val{color:#fff!important}
+.extra-item.active .item-detail{color:rgba(255,255,255,.55)!important}
+.extra-item.active .item-price{color:#f6e19f!important}
+.extra-item.active .item-price span{color:rgba(255,255,255,.50)!important}
+.extra-item.active .xc-add{background:linear-gradient(135deg,#e7bf69,#f6e19f);border-color:transparent;color:#2a1e0a}
+.extra-item.active .xc-add::after{content:"✓ Προστέθηκε"}
+.extra-item.active .qty-stepper{background:rgba(255,255,255,.10);border-color:rgba(231,191,105,.40)}
+.extra-item.active .qty-btn{color:#f6e19f}
+.extra-item.active .qty-val{color:#fff}
 .extras-note{font-size:11.5px!important;color:#7a6446!important;margin-top:13px!important;padding:10px 14px!important;background:rgba(160,110,35,.06)!important;border-radius:10px!important;border:1px solid rgba(160,110,35,.12)!important;line-height:1.5!important}
 #tripStrip{display:none!important}
 .summary-change-btn{width:100%!important;margin-bottom:10px!important;padding:8px 12px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important;background:rgba(255,255,255,.07)!important;color:rgba(255,255,255,.78)!important;font-size:12px!important;font-weight:800!important;cursor:pointer!important;font-family:inherit!important;transition:background .15s!important;text-align:center!important}
@@ -719,7 +716,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
   .ins-rec:hover{transform:translateY(-2px)!important}
   .ins-col::after{margin-top:8px}
   .extras-body{padding:14px 16px 18px!important}
-  .extras-list{grid-template-columns:1fr!important}
 }
 @media(max-width:480px){
   .ins-compare-wrap{padding:12px 14px 16px!important}
@@ -731,11 +727,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 @media(max-width:480px){
   .ins-compare-wrap,.extras-body{padding:12px 14px 14px!important}
   .section-head{padding:13px 14px 0!important}
-  .ins-badge{top:-9px!important;right:10px!important}
-  .extra-item{grid-template-columns:60px 1fr 90px!important}
-  .xc-icon{font-size:22px!important}
-  .extra-item .item-price{font-size:14px!important;padding:11px 10px 4px!important}
-  .xc-add,.qty-stepper{padding:4px 8px 11px!important}
+  .ins-badge{top:-9px!important}
+  .xc-icon{width:38px;height:38px;font-size:18px}
+  .xc-add,.qty-stepper{width:96px}
   .extra-item .item-detail{display:none!important}
 }
 /* ── Models: compact photo + info cards ── */
@@ -834,22 +828,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
       </div>
     </section>
 
-    <section class="models-card">
-      <details id="modelsDetails">
-        <summary>
-          <div class="models-head">
-            <strong>Μοντέλα που ανήκουν στην κατηγορία</strong>
-            <span>Ο πελάτης επιλέγει κατηγορία οχημάτων και όχι συγκεκριμένο αυτοκίνητο. Άνοιξε εδώ για να δεις ενδεικτικά μοντέλα και υλικό μέσα / έξω.</span>
-          </div>
-          <div class="models-toggle" id="modelsToggleText">Άνοιγμα προβολής μοντέλων</div>
-        </summary>
-        <div class="models-inner">
-          <div class="models-banner" id="modelsBanner">Η κατηγορία A περιλαμβάνει ενδεικτικά Hyundai i10, Fiat Panda και VW Up!. Η τελική παράδοση εξαρτάται από τη διαθεσιμότητα της στιγμής.</div>
-          <div class="models-grid" id="modelsGrid"></div>
-        </div>
-      </details>
-    </section>
-
     <section class="insurance-card">
       <div class="section-head">
         <div class="sec-num">1</div>
@@ -918,6 +896,23 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
         <div class="extras-list" id="extrasList"></div>
         <div class="extras-note">Το επασφάλιστρο ηλικίας και οι νυχτερινές χρεώσεις υπολογίζονται αυτόματα στη σύνοψη. Δεν επιλέγονται από εδώ.</div>
       </div>
+    </section>
+
+    <!-- Reference info only — lives below the two decision steps so it never interrupts the flow -->
+    <section class="models-card">
+      <details id="modelsDetails">
+        <summary>
+          <div class="models-head">
+            <strong>Μοντέλα που ανήκουν στην κατηγορία</strong>
+            <span>Ο πελάτης επιλέγει κατηγορία οχημάτων και όχι συγκεκριμένο αυτοκίνητο. Άνοιξε εδώ για να δεις ενδεικτικά μοντέλα και υλικό μέσα / έξω.</span>
+          </div>
+          <div class="models-toggle" id="modelsToggleText">Άνοιγμα προβολής μοντέλων</div>
+        </summary>
+        <div class="models-inner">
+          <div class="models-banner" id="modelsBanner">Η κατηγορία A περιλαμβάνει ενδεικτικά Hyundai i10, Fiat Panda και VW Up!. Η τελική παράδοση εξαρτάται από τη διαθεσιμότητα της στιγμής.</div>
+          <div class="models-grid" id="modelsGrid"></div>
+        </div>
+      </details>
     </section>
     </div><aside class="opts-aside">
 
@@ -2198,7 +2193,7 @@ function notifyHeight(){
   // Relocate the strip right under the extras list so the total is visible while choosing
   try {
     var extrasList = document.getElementById('extrasList');
-    var host = extrasList ? extrasList.closest('.choice-subpanel') : null;
+    var host = extrasList ? extrasList.closest('.extras-card') : null;
     if(bar && host && host.parentNode) host.parentNode.insertBefore(bar, host.nextSibling);
   } catch(_){}
 
