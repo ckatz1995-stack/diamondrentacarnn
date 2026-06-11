@@ -348,7 +348,7 @@ body{overflow-x:hidden}
 .payline .amount{color:#f6e19f!important}
 .continue-btn{background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;color:#2a1e0a!important;font-weight:900!important;border-radius:20px!important;box-shadow:0 14px 34px rgba(0,0,0,.30)!important}
 .models-toggle{background:rgba(255,255,255,.72)!important;border-color:rgba(80,56,22,.16)!important}
-.insurance-item:hover,.extra-item:hover{border-color:rgba(63,116,138,.28)!important}
+.insurance-item:hover,.extra-item:hover{border-color:rgba(160,110,35,.28)!important}
 
 
 /* ── PROFESSIONAL CLEAN REDESIGN ── */
@@ -385,6 +385,14 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .hero-card,.models-card,.choices-card{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 .cat-badge{box-shadow:0 4px 14px rgba(90,48,0,.20)!important}
 .continue-btn{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
+
+/* ── VEHICLE IMAGE ZOOM ── */
+.vehicle-media{overflow:hidden;border-radius:24px}
+.vehicle-media img{transition:transform .28s ease;display:block;width:100%;height:100%;object-fit:contain}
+.hero-card:hover .vehicle-media img{transform:scale(1.06)}
+
+/* ── INS-COL ACTIVE: dark teal active stays, price color override ── */
+.ins-col.is-active .ins-p{color:#f6e19f!important}
 </style>
 <script>
 /* DIAMOND STATE: BookingState utility — shared across all booking-ui pages */
@@ -709,15 +717,15 @@ html,body{overflow-x:hidden!important}
 <style>
 .ins-compare{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
 .ins-col{position:relative;display:flex;flex-direction:column;gap:7px;padding:14px 12px;border-radius:18px;border:2px solid rgba(80,56,22,.12);background:rgba(255,255,255,.42);cursor:pointer;text-align:left;font:inherit;transition:border-color .15s,background .15s;width:100%}
-.ins-col:hover{border-color:rgba(63,116,138,.35);background:rgba(255,255,255,.65)}
+.ins-col:hover{border-color:rgba(160,110,35,.28);background:rgba(253,248,239,.90)}
 .ins-col.is-active{border-color:rgba(231,191,105,.60)!important;background:linear-gradient(160deg,rgba(26,50,60,.94),rgba(20,40,48,.98))!important;color:#fff}
 .ins-col.is-active .ins-feats li{color:rgba(255,255,255,.80)}
 .ins-col.is-active .ins-p{color:#f6e19f}
 .ins-col.is-active .ins-badge{background:rgba(231,191,105,.20);border-color:rgba(231,191,105,.40);color:#f6e19f}
-.ins-rec{border-color:rgba(63,116,138,.28)!important}
+.ins-rec{border-color:rgba(160,110,35,.32)!important}
 .ins-badge{display:inline-block;background:rgba(231,191,105,.20);border:1px solid rgba(231,191,105,.38);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:900;color:#8a6a28;letter-spacing:.04em;margin-bottom:2px}
 .ins-name{font-size:17px;font-weight:950;letter-spacing:-.01em}
-.ins-p{font-size:21px;font-weight:950;letter-spacing:-.03em;color:#2d6072}
+.ins-p{font-size:21px;font-weight:950;letter-spacing:-.03em;color:#a07828}
 .ins-p small{font-size:11px;font-weight:800;opacity:.72;margin-left:2px}
 .ins-feats{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:4px}
 .ins-feats li{font-size:11.5px;font-weight:700;color:#5b4829}
