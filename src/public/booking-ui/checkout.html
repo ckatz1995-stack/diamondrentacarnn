@@ -52,7 +52,7 @@ button:hover,.btn:hover,.header-phone:hover{transform:translateY(-1px)}
 .top-price{text-align:right;color:#2f6275;font-weight:950;white-space:nowrap}
 .top-price span{display:block;font-size:22px;line-height:1}
 .top-price small{display:block;color:var(--muted);font-size:12px;font-weight:800;margin-top:2px}
-.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .meta{background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.72);border-radius:16px;padding:11px 14px}
 .meta .k{display:block;color:#7a6040;text-transform:uppercase;font-size:10px;font-weight:900;letter-spacing:.09em;margin-bottom:5px}
 .meta .v{font-size:13px;font-weight:800;line-height:1.35;color:#1e1609}
@@ -606,7 +606,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         <div class="summary-head">
           <div>
             <h1 id="vehicleName">Όχημα</h1>
-            <div class="summary-sub" id="vehicleSubtitle">ή παρόμοιο</div>
+            <div class="summary-sub">ή παρόμοιο · <span id="durationText">-</span></div>
           </div>
           <div class="top-price">
             <span id="topPricePerDay">0,00€</span>
@@ -616,7 +616,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         <div class="meta-grid">
           <div class="meta"><span class="k">Παραλαβή</span><span class="v" id="pickupText">-</span></div>
           <div class="meta"><span class="k">Επιστροφή</span><span class="v" id="dropoffText">-</span></div>
-          <div class="meta"><span class="k">Διάρκεια</span><span class="v" id="durationText">-</span></div>
           <div class="meta"><span class="k">Ασφάλεια</span><span class="v" id="insuranceText">-</span></div>
           <div class="meta"><span class="k">Extras</span><span class="v" id="extrasText">Χωρίς extras</span></div>
         </div>
@@ -1329,7 +1328,6 @@ function renderVehicle(v){
   vehicleImg.src = v.image || '';
   vehicleImg.alt = vehicleHeading;
   document.getElementById('vehicleName').textContent = vehicleHeading;
-  document.getElementById('vehicleSubtitle').textContent = 'ή παρόμοιο';
   document.getElementById('topPricePerDay').textContent = formatMoney(Number(totals.basePricePerDay || v.price || 0));
   state.category = categoryCode || state.category;
   document.getElementById('pickupText').textContent = `${state.pickupLocation} • ${fmtDateTime(state.pickup)}`;
