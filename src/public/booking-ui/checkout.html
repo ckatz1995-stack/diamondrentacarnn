@@ -52,7 +52,7 @@ button:hover,.btn:hover,.header-phone:hover{transform:translateY(-1px)}
 .top-price{min-width:132px;text-align:right;color:#2f6275;font-weight:950;font-size:18px}
 .top-price span{display:block;font-size:16px}
 .top-price small{display:block;color:#5e4e31;font-size:12px;font-weight:800}
-.meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .meta{background:rgba(255,255,255,.45);border-radius:14px;padding:10px 12px;min-height:72px}
 .meta .k{display:block;color:#776342;text-transform:uppercase;font-size:10px;font-weight:900;letter-spacing:.08em;margin-bottom:4px}
 .meta .v{font-size:13px;font-weight:800;line-height:1.3;color:#2d2416}
@@ -87,7 +87,16 @@ button:hover,.btn:hover,.header-phone:hover{transform:translateY(-1px)}
 .choice small{display:block;color:var(--muted);font-size:13px;font-weight:700;margin-top:4px;line-height:1.42}
 .toggle-content{display:none;margin-top:12px}.toggle-content.active{display:block}
 .helper-note{background:rgba(255,255,255,.42);border-radius:16px;padding:12px 14px;color:#56472e;font-weight:700;font-size:13px;line-height:1.42}
+.extra-fields-toggle{margin-top:14px;border-top:1px solid rgba(84,60,22,.10);padding-top:12px}
+.extra-fields-toggle summary{font-size:12px;font-weight:800;color:#7a5e38;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:4px 0}
+.extra-fields-toggle summary::-webkit-details-marker{display:none}
+.extra-fields-toggle summary::before{content:'＋';font-size:14px;font-weight:900;transition:transform .18s}
+.extra-fields-toggle[open] summary::before{content:'－'}
+.opt-badge{background:rgba(160,110,35,.12);color:#7a5e38;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:800;letter-spacing:.05em}
+.extra-fields-grid{margin-top:12px}
 .check-row{display:flex;align-items:flex-start;gap:10px;margin:14px 0 0;font-weight:800;color:#332613}
+.trust-strip{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;padding:10px 0 6px;font-size:12.5px;font-weight:800;color:#5e4520;opacity:.82}
+@media(max-width:620px){.trust-strip{gap:6px 12px;font-size:12px}}
 .actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px}
 .btn{height:52px;border:0;border-radius:16px;padding:0 20px;font-size:17px;font-weight:900;cursor:pointer}
 .btn-back{background:rgba(255,255,255,.58);color:#4a3819;border:1px solid rgba(0,0,0,.06);min-width:180px}
@@ -538,7 +547,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
       <a href="/rental-terms">Όροι ενοικίασης</a>
       <a href="/booking">Ολοκλήρωση</a>
     </nav>
-    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Μενού" aria-expanded="false">☰</button>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Μενού" aria-expanded="false" aria-controls="mobileNav">☰</button>
     <a class="header-phone" href="tel:+302310000000"><span aria-hidden="true">📞</span><span class="header-phone-label">+30 2310 000 000</span></a>
   </div>
   <nav class="mobile-nav" id="mobileNav" aria-label="Κύρια πλοήγηση">
@@ -593,6 +602,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         <div class="meta-grid">
           <div class="meta"><span class="k">Παραλαβή</span><span class="v" id="pickupText">-</span></div>
           <div class="meta"><span class="k">Επιστροφή</span><span class="v" id="dropoffText">-</span></div>
+          <div class="meta"><span class="k">Διάρκεια</span><span class="v" id="durationText">-</span></div>
           <div class="meta"><span class="k">Ασφάλεια</span><span class="v" id="insuranceText">-</span></div>
           <div class="meta"><span class="k">Extras</span><span class="v" id="extrasText">Χωρίς extras</span></div>
         </div>
@@ -622,18 +632,23 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           <div class="grid">
             <div class="field"><label id="lbl-firstName">Όνομα <span class="req">*</span></label><input id="firstName" name="firstName" type="text" required autocomplete="given-name"><span class="field-error" id="err-firstName"></span></div>
             <div class="field"><label id="lbl-lastName">Επώνυμο <span class="req">*</span></label><input id="lastName" name="lastName" type="text" required autocomplete="family-name"><span class="field-error" id="err-lastName"></span></div>
-            <div class="field"><label id="lbl-dob">Ημερομηνία γέννησης</label><input id="dob" name="dob" type="date" autocomplete="bday"><span class="field-error" id="err-dob"></span></div>
-            <div class="field"><label id="lbl-phone">Τηλέφωνο <span class="req">*</span></label><input id="phone" name="phone" type="tel" required autocomplete="tel"><span class="field-error" id="err-phone"></span></div>
-            <div class="field"><label id="lbl-email">Email <span class="req">*</span></label><input id="email" name="email" type="email" required autocomplete="email"><span class="field-error" id="err-email"></span></div>
-            <div class="field"><label>Χώρα</label><input name="country" type="text" autocomplete="country-name"></div>
-            <div class="field"><label>Διεύθυνση</label><input name="address" type="text" autocomplete="street-address"></div>
-            <div class="field"><label>Πόλη κατοικίας</label><input name="city" type="text" autocomplete="address-level2"></div>
-            <div class="field"><label>Τ.Κ.</label><input name="billingZip" type="text" autocomplete="postal-code"></div>
+            <div class="field"><label id="lbl-phone">Τηλέφωνο <span class="req">*</span></label><input id="phone" name="phone" type="tel" required autocomplete="tel" placeholder="+30 69XX XXX XXX"><span class="field-error" id="err-phone"></span></div>
+            <div class="field"><label id="lbl-email">Email <span class="req">*</span></label><input id="email" name="email" type="email" required autocomplete="email" placeholder="example@email.com"><span class="field-error" id="err-email"></span></div>
+            <div class="field"><label id="lbl-dob">Ημ. γέννησης</label><input id="dob" name="dob" type="date" autocomplete="bday"><span class="field-error" id="err-dob"></span></div>
             <div class="field" id="flightNumberField"><label id="flightNumberLabel">Αριθμός πτήσης</label><input id="flightNumber" name="flightNumber" type="text"><span class="field-error" id="err-flightNumber"></span></div>
             <div class="field" id="originCityField"><label id="originCityLabel">Πόλη άφιξης</label><input name="originCity" type="text" placeholder="π.χ. Αθήνα"></div>
             <div class="field" id="dropoffInfoField" style="display:none"><label id="dropoffInfoLabel">Πτήση Επιστροφής</label><input name="dropoffInfo" type="text"></div>
-            <div class="field full"><label>Σχόλια</label><textarea name="comments" placeholder="Αν έχεις σχόλια για παραλαβή, πτήση ή κάτι σχετικό, γράψε τα εδώ."></textarea></div>
+            <div class="field full"><label>Σχόλια / Παρατηρήσεις</label><textarea name="comments" placeholder="Ώρα άφιξης, ειδικές ανάγκες, οτιδήποτε θέλεις να γνωρίζουμε..."></textarea></div>
           </div>
+          <details class="extra-fields-toggle">
+            <summary>Προαιρετικά στοιχεία διεύθυνσης <span class="opt-badge">προαιρετικό</span></summary>
+            <div class="grid extra-fields-grid">
+              <div class="field"><label>Χώρα</label><input name="country" type="text" autocomplete="country-name"></div>
+              <div class="field"><label>Πόλη κατοικίας</label><input name="city" type="text" autocomplete="address-level2"></div>
+              <div class="field"><label>Τ.Κ.</label><input name="billingZip" type="text" autocomplete="postal-code"></div>
+              <div class="field full"><label>Διεύθυνση</label><input name="address" type="text" autocomplete="street-address"></div>
+            </div>
+          </details>
         </div>
 
         <div class="form-card">
@@ -646,7 +661,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
             </div>
             <div class="toggle-content" id="invoiceFields"><div class="grid-4"><div class="field"><label id="lbl-companyName">Επωνυμία επιχείρησης <span class="req">*</span></label><input id="companyName" name="companyName" type="text"><span class="field-error" id="err-companyName"></span></div><div class="field"><label>Επάγγελμα / δραστηριότητα</label><input name="profession" type="text"></div><div class="field"><label id="lbl-vatNumber">Α.Φ.Μ. <span class="req">*</span></label><input id="vatNumber" name="vatNumber" type="text"><span class="field-error" id="err-vatNumber"></span></div><div class="field"><label>Δ.Ο.Υ.</label><input name="taxOffice" type="text"></div><div class="field"><label>Διεύθυνση / έδρα</label><input name="billingAddress" type="text"></div><div class="field"><label>Πόλη</label><input name="companyCity" type="text"></div><div class="field"><label>Τ.Κ.</label><input name="companyZip" type="text"></div><div class="field"><label>Τηλέφωνο έδρας</label><input name="companyPhone" type="text"></div><div class="field"><label>Email εταιρίας</label><input name="companyEmail" type="email"></div></div></div>
           </div>
-          <div class="helper-note">Με την αποστολή του αιτήματος δεν γίνεται καμία χρέωση. Θα λάβετε επιβεβαίωση με όλα τα στοιχεία της κράτησής σας.</div>
           <label class="check-row"><input type="checkbox" id="termsCheck" required><span>Έχω διαβάσει και αποδέχομαι τους <a href="/rental-terms" target="_blank" rel="noopener" id="termsLink">όρους ενοικίασης</a> και την πολιτική απορρήτου.</span></label><span class="field-error" id="err-terms"></span>
           <div id="submitError" role="alert" style="display:none;margin:12px 0 0;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:11px 14px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.4"></div>
           <div id="submitTimeoutError" role="alert">
@@ -654,10 +668,14 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
             <br>
             <button class="retry-btn" id="retryBtn" type="button">Δοκιμάστε ξανά</button>
           </div>
-          <p style="text-align:center;font-size:13px;font-weight:700;color:#6a5739;background:rgba(255,255,255,.42);border-radius:12px;padding:9px 14px;margin:0 0 10px">Θα επιβεβαιώσουμε εντός 2 ωρών από την υποβολή.</p>
+          <div class="trust-strip">
+            <span>🔒 Ασφαλής υποβολή</span>
+            <span>💳 Χωρίς χρέωση τώρα</span>
+            <span>✅ Επιβεβαίωση εντός 2 ωρών</span>
+          </div>
           <div class="actions">
-            <button class="btn btn-back" type="button">Πίσω</button>
-            <button class="btn btn-submit" type="submit">Αποστολή αιτήματος</button>
+            <button class="btn btn-back" type="button">← Πίσω</button>
+            <button class="btn btn-submit" type="submit">Αποστολή αιτήματος →</button>
           </div>
         </div>
       </div>
@@ -679,7 +697,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
       <div class="footer-logo-mark">◆</div>
       <strong>DIAMOND<br>Rent A Car</strong>
       <span>Thessaloniki</span>
-      <p>Επαγγελματική εμπειρία ενοικίασης οχήματος με καθαρή ροή κράτησης, ξεκάθαρη τιμολόγηση και προσωπική επιβεβαίωση πριν την τελική ολοκλήρωση.</p>
+      <p id="footerTagline">Επαγγελματική εμπειρία ενοικίασης οχήματος με καθαρή ροή κράτησης, ξεκάθαρη τιμολόγηση και προσωπική επιβεβαίωση πριν την τελική ολοκλήρωση.</p>
     </div>
     <div class="footer-col">
       <h5>Υπηρεσίες</h5>
@@ -914,6 +932,8 @@ function applyBusinessIdentity(){
   if (footerBottomSpan) footerBottomSpan.textContent = `© ${companyName} · ${companyCity} · ${footerNote}`;
   const introTagline = document.querySelector('.intro-tagline');
   if (introTagline && companyTagline) introTagline.textContent = companyTagline;
+  const footerTagline = document.getElementById('footerTagline');
+  if (footerTagline && companyTagline) footerTagline.textContent = companyTagline;
   const waBtn = document.getElementById('waFloat');
   if (waBtn) { const waPhone = companyPhone.replace(/\s+/g, '').replace(/^\+/, ''); waBtn.href = `https://wa.me/${waPhone}`; }
 }
@@ -1283,6 +1303,7 @@ function renderVehicle(v){
   state.category = categoryCode || state.category;
   document.getElementById('pickupText').textContent = `${state.pickupLocation} • ${fmtDateTime(state.pickup)}`;
   document.getElementById('dropoffText').textContent = `${state.dropoffLocation} • ${fmtDateTime(state.dropoff)}`;
+  document.getElementById('durationText').textContent = `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`;
   const insLabel = state.insurance || 'CDW';
   document.getElementById('insuranceText').textContent = Number.isFinite(state.insuranceExcess)
     ? `${insLabel} · Excess ${state.insuranceExcess > 0 ? formatMoney(state.insuranceExcess) : '0€'}`
@@ -1624,11 +1645,11 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
         phone: (fd.get('companyPhone') || '').toString().trim(),
         companyEmail: (fd.get('companyEmail') || '').toString().trim(),
         vatInclusive: true,
-        vatRate: 0.24
+        vatRate: Number(getBusinessSettings().vatRate ?? 0.24)
       } : {
         invoiceType: 'receipt',
         vatInclusive: true,
-        vatRate: 0.24
+        vatRate: Number(getBusinessSettings().vatRate ?? 0.24)
       }
     };
 
