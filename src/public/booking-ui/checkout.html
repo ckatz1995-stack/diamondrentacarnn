@@ -324,13 +324,25 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 .top-price{color:#2e6172!important}
 .top-price span{color:#2e6172!important}
 .top-price small{color:rgba(46,97,114,.60)!important}
-.analysis-line.big strong{color:#2e6172!important}
-.analysis-box{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
-.analysis-line{color:#1c1408!important;border-bottom-color:rgba(160,110,35,.12)!important}
+/* ── Sidebar panels: dark navy premium (same language as options page) ── */
+.analysis-box,.invoice-box,.sidebar-submit{background:linear-gradient(160deg,rgba(20,40,48,.99),rgba(14,30,36,1))!important;border:1px solid rgba(231,191,105,.14)!important;border-top:3px solid rgba(231,191,105,.36)!important;box-shadow:0 26px 60px rgba(0,0,0,.32)!important}
+.analysis-box h3{color:#f6e19f!important}
+.analysis-line{color:rgba(255,255,255,.80)!important;border-bottom-color:rgba(255,255,255,.08)!important}
+.analysis-line.big{border-top-color:rgba(231,191,105,.26)!important}
+.analysis-line.big strong{color:#f6e19f!important}
+.fee-tip{background:rgba(255,255,255,.12)!important;color:rgba(255,255,255,.70)!important}
+.invoice-box .card-title{color:#f6e19f!important;border-bottom-color:rgba(255,255,255,.10)!important}
+.choice{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.10)!important;color:rgba(255,255,255,.88)!important}
+.choice small{color:rgba(255,255,255,.52)!important}
+.choice:has(input:checked){background:rgba(231,191,105,.14)!important;border-color:rgba(231,191,105,.40)!important;color:#f6e19f!important}
+.check-row{color:rgba(255,255,255,.82)!important}
+.check-row a{color:#f6e19f!important}
+.trust-strip{color:rgba(255,255,255,.46)!important}
+.btn-back{background:rgba(255,255,255,.07)!important;border-color:rgba(255,255,255,.14)!important;color:rgba(255,255,255,.70)!important}
+.btn-back:hover{background:rgba(255,255,255,.14)!important}
+/* ── Form panels: warm cream ── */
 .form-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
 .section{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
-.invoice-box{background:rgba(160,110,35,.06)!important;border:1px solid rgba(160,110,35,.14)!important}
-.sidebar-submit{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
 .helper-note{background:rgba(160,110,35,.07)!important;border:1px solid rgba(160,110,35,.14)!important}
 .card-title{color:#1c1408!important;border-bottom-color:rgba(160,110,35,.14)!important}
 .section-title{color:#1c1408!important}
@@ -338,7 +350,7 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 
 /* ── WARM AMBER BODY ── */
 html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
-.summary-shell,.form-card,.section,.analysis-box,.sidebar-submit{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
+.summary-shell,.form-card,.section{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -1215,6 +1227,14 @@ function toDateInputValue(value){
 
 const storedSearch = safeRead(BOOKING_STORAGE_KEY) || safeRead('diamond_booking_search_v1') || {};
 const storedOptions = safeRead(OPTIONS_STORAGE_KEY) || {};
+// Persist a {key→qty} map so quantities survive a page refresh (sessionStorage
+// persists within the tab session, but may be gone in a new tab from a copied URL).
+(function(){
+  if(!Array.isArray(storedOptions?.extras) || !storedOptions.extras.length) return;
+  const map = {};
+  storedOptions.extras.forEach(x => { if(x && x.key) map[x.key] = Math.max(1, Number(x.qty||1)||1); });
+  try{ sessionStorage.setItem('diamond-extras-qty', JSON.stringify(map)); }catch(_){}
+})();
 const storedDays = Number(storedOptions?.days || diffDays(storedOptions?.pickup, storedOptions?.dropoff) || 1);
 
 function storedExtrasFallbackTotal() {
@@ -1235,6 +1255,12 @@ function extrasServerPayload(){
   const stored = Array.isArray(storedOptions?.extras) ? storedOptions.extras : [];
   const qtyByKey = {};
   stored.forEach((x) => { if (x && x.key) qtyByKey[x.key] = Math.max(1, Number(x.qty || 1) || 1); });
+  if(!stored.length){
+    try{
+      const cached = JSON.parse(sessionStorage.getItem('diamond-extras-qty') || 'null');
+      if(cached && typeof cached === 'object') Object.assign(qtyByKey, cached);
+    }catch(_){}
+  }
   const keys = Array.isArray(state.extrasKeys) ? state.extrasKeys : [];
   return keys.map((key) => ({ key, qty: qtyByKey[key] || 1 }));
 }
@@ -1834,6 +1860,7 @@ window.addEventListener('message', (event) => {
   }
 });
 embeddedContext = safeRead(BOOKING_CONTEXT_STORAGE_KEY) || embeddedContext;
+syncTermsLink(); // re-resolve now that cached context may be available
 requestEmbeddedData();
 
 
