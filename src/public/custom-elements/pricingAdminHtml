@@ -687,6 +687,7 @@ input.err,select.err,textarea.err{border-color:var(--danger)!important;box-shado
 </div>
 
 <div class="toast" id="toastContainer"></div>
+<input type="file" id="catPhotoFileInput" accept="image/jpeg,image/png,image/webp" style="display:none">
 <script>
 'use strict';
 // ── STATE ─────────────────────────────────────────────────────────────────
@@ -702,6 +703,9 @@ const state = {
   bulkSel: {},   // tableKey → Set of selected _id strings
   tableSort: {}  // tableKey → { col, dir }
 };
+
+// ── CATEGORY PHOTO UPLOAD STATE ──────────────────────────────────────────
+let catPhotoData = null; // { base64, fileName, mimeType, previewUrl }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -805,6 +809,53 @@ function setBusy(flag) {
   state.busy = flag;
   el('busyBar')?.classList.toggle('show', flag);
   document.querySelectorAll('.btn.primary').forEach(b => { if(!b.dataset.allowBusy) b.disabled = flag; });
+}
+
+// ── CATEGORY PHOTO UPLOAD ─────────────────────────────────────────────────
+function downscaleCatImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read the file.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Not a valid image file.'));
+      img.onload = () => {
+        const MAX = 1600;
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (w > MAX || h > MAX) { const r = Math.min(MAX / w, MAX / h); w = Math.round(w * r); h = Math.round(h * r); }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+el('catPhotoFileInput')?.addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  if (!/^image\//.test(file.type)) { setCatPhotoStatus('Please choose an image file.', 'err'); return; }
+  setCatPhotoStatus('Processing…', '');
+  try {
+    const dataUrl = await downscaleCatImage(file);
+    catPhotoData = { base64: dataUrl, fileName: file.name || 'category.jpg', mimeType: 'image/jpeg', previewUrl: dataUrl };
+    const preview = el('catPhotoPreview');
+    if (preview) preview.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover">`;
+    setCatPhotoStatus('Photo ready — will be saved with the category.', 'ok');
+  } catch (err) {
+    setCatPhotoStatus(err && err.message ? err.message : 'Upload failed.', 'err');
+  }
+});
+
+function setCatPhotoStatus(msg, cls) {
+  const el2 = el('catPhotoStatus');
+  if (!el2) return;
+  el2.textContent = msg;
+  el2.style.color = cls === 'err' ? 'var(--danger)' : cls === 'ok' ? 'var(--good)' : 'var(--muted)';
 }
 
 // Surface any uncaught error as a toast — silent failures are undebuggable for staff
@@ -2099,12 +2150,23 @@ function bindCrudButtons() {
 
 // ── ENTITY MODALS ─────────────────────────────────────────────────────────
 function openCatModal(id='') {
+  catPhotoData = null; // reset any previously selected photo
   const item = id ? (state.snapshot?.vehicleCategories||[]).find(x=>x._id===id)||{} : {};
+  const existingPhotoUrl = item.imageUrl || '';
+  const photoPreviewHtml = existingPhotoUrl
+    ? `<img src="${esc(existingPhotoUrl)}" style="width:100%;height:100%;object-fit:cover">`
+    : `<span style="font:600 11px var(--f);color:var(--muted)">No photo yet — click Choose to upload</span>`;
   const body =
     msec('🚗','Basics',
       mr2(mfld('Title *',minp('title',item.title,'text','Economy'),'Customer-facing class name'),
           mfld('Category code *',minp('category',item.category,'text','ECO'),'Short uppercase code'))
       + mfld('Description',mta('description',item.description,'Shown on the vehicle selection page')))
+    + msec('📷','Category photo',
+      `<div id="catPhotoPreview" style="width:100%;aspect-ratio:16/10;background:var(--surface);border:1.5px dashed var(--line2);border-radius:var(--r);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:10px">${photoPreviewHtml}</div>`
+      + `<div style="display:flex;gap:10px;align-items:center">`
+      + `<button type="button" class="btn sm" id="catPhotoPickBtn" data-allow-busy="1">📷 Choose photo</button>`
+      + `<span id="catPhotoStatus" style="font:600 11px var(--f);color:var(--muted)"></span>`
+      + `</div>`)
     + msec('⚙️','Specifications',
       mr2(mfld('Seats',minp('seats',item.seats,'text','5')),
           mfld('Doors',minp('doors',item.doors,'text','4')))
@@ -2122,9 +2184,15 @@ function openCatModal(id='') {
     post('upsertVehicleCategory',{ _id:id||undefined, title:mv('title'), category:mv('category').toUpperCase(),
       seats:mv('seats'), doors:mv('doors'), luggage:mv('luggage'),
       transmission:mv('transmission'), fuelType:mv('fuelType'), airCondition:mc('airCondition'),
-      description:mv('description'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible') });
+      description:mv('description'), sortOrder:mn('sortOrder'), active:mc('active'), publicVisible:mc('publicVisible'),
+      ...(catPhotoData ? { photoBase64:catPhotoData.base64, photoFileName:catPhotoData.fileName, photoMimeType:catPhotoData.mimeType } : {}) });
+    catPhotoData = null;
     closeModal();
   }, null, { eyebrow:'Fleet', subtitle:'Vehicle class shown to customers during booking', saveLabel:id?'Save category':'Create category' });
+  // Wire the photo pick button after the modal DOM is rendered
+  setTimeout(() => {
+    el('catPhotoPickBtn')?.addEventListener('click', () => el('catPhotoFileInput')?.click());
+  }, 50);
 }
 
 function openVehModal(id='') {

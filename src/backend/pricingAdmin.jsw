@@ -1,4 +1,5 @@
 import wixData from 'wix-data';
+import { mediaManager } from 'wix-media-backend';
 import { PRICING_COLLECTIONS, clearPricingCatalogCache, getFallbackCatalogSnapshot, getPricingCatalog } from 'backend/pricingCatalog.jsw';
 import { requireStaffAccess } from 'backend/staffAccess.jsw';
 import { getVehicleCategoriesCatalog } from 'backend/bookingEngine';
@@ -658,11 +659,33 @@ export async function upsertVehicleCategory({ authToken, payload = {} } = {}){
   if (normalized._id) previous = await queryFirstByField(VEHICLE_CATEGORIES_COLLECTION, '_id', normalized._id);
   if (!previous) previous = await findVehicleCategoryByCategoryCode(normalized.category);
 
-  // Preserve the existing Wix image when the admin form doesn't send one
-  // (the category edit form has no image uploader, so image is always '' from the payload).
-  const imageToKeep = normalized.image || (previous ? (previous.image || previous.imageUrl) : '');
+  // Upload category photo if base64 data was sent from the admin form
+  const photoBase64 = text(payload.photoBase64).replace(/^data:[^;]+;base64,/, '');
+  const photoMimeType = /^image\/(jpe?g|png|webp)$/i.test(text(payload.photoMimeType)) ? text(payload.photoMimeType).toLowerCase() : '';
+  const photoFileName = text(payload.photoFileName);
+  let uploadedPhotoUrl = '';
+  if (photoBase64 && photoMimeType) {
+    try {
+      const buffer = Buffer.from(photoBase64, 'base64');
+      if (buffer.length > 0 && buffer.length <= 8 * 1024 * 1024) {
+        const ext = photoMimeType === 'image/png' ? 'png' : (photoMimeType === 'image/webp' ? 'webp' : 'jpg');
+        const safeName = (photoFileName.replace(/[^A-Za-z0-9._-]/g, '_') || `category.${ext}`).replace(/\.(\w+)?$/, '') + `.${ext}`;
+        const uploadName = `cat_${normalized.category}_${Date.now()}_${safeName}`;
+        const fileInfo = await mediaManager.upload('/category-photos', buffer, uploadName, {
+          mediaOptions: { mimeType: photoMimeType, mediaType: 'image' },
+          metadataOptions: { isPrivate: false, isVisitorUpload: false }
+        });
+        uploadedPhotoUrl = text(fileInfo?.fileUrl || fileInfo?.url || '');
+      }
+    } catch (photoErr) {
+      console.warn('Category photo upload failed', photoErr?.message || String(photoErr));
+    }
+  }
+
+  // Preserve the existing Wix image when no new photo was uploaded.
   // Keep the plain-URL mirror (imageUrl) in sync so the public catalog can read
   // a photo from either field even if one was wiped.
+  const imageToKeep = uploadedPhotoUrl || normalized.image || (previous ? (previous.image || previous.imageUrl) : '');
   const imageUrlToKeep = vehicleCategoryImageUrl(imageToKeep) || (previous ? (previous.imageUrl || '') : '');
   const saveRow = previous
     ? { ...previous, ...normalized, _id: previous._id, image: imageToKeep, imageUrl: imageUrlToKeep }
