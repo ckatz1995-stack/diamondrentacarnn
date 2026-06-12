@@ -39,71 +39,85 @@ button:hover,.btn:hover,.header-phone:hover{transform:translateY(-1px)}
 @media (max-width:860px){.header-inner{flex-wrap:wrap}.header-nav{order:3;width:100%}}
 @media (max-width:620px){.page{padding:12px 10px 30px}.header-inner{padding:10px 12px}.brand-text strong{font-size:16px}.header-phone{width:100%;text-align:center}}
 
-.summary-shell,.section{background:linear-gradient(180deg,var(--shell),var(--shell-2));border:1px solid var(--line);border-radius:var(--radius-xl);box-shadow:var(--soft)}
-.summary-shell{padding:0;overflow:hidden;margin-bottom:18px}
-.summary-grid{display:grid;grid-template-columns:210px 1fr 280px;align-items:stretch}
-.vehicle-visual{background:radial-gradient(circle at 50% 16%, rgba(255,255,255,.30), transparent 42%),linear-gradient(180deg,#d9c28d,#c4a35f);padding:14px;display:flex;align-items:center;justify-content:center;position:relative;min-height:192px}
-.vehicle-badge{position:absolute;top:16px;left:16px;width:42px;height:42px;border-radius:999px;background:#f7f7f5;color:#507182;display:grid;place-items:center;font-weight:900;box-shadow:0 8px 18px rgba(0,0,0,.08)}
-.vehicle-visual img{width:100%;max-width:170px;max-height:112px;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(45,28,6,.18))}
-.summary-main{padding:14px 16px 14px;display:flex;flex-direction:column;gap:10px}
+/* ── SUMMARY CARD ── */
+.summary-shell{background:linear-gradient(180deg,var(--shell),var(--shell-2));border:1px solid var(--line);border-radius:var(--radius-xl);box-shadow:var(--soft);padding:0;overflow:hidden;margin-bottom:0}
+.summary-grid{display:grid;grid-template-columns:220px 1fr;align-items:stretch}
+.vehicle-visual{background:radial-gradient(circle at 50% 20%,rgba(255,255,255,.35),transparent 50%),linear-gradient(160deg,#d9c28d,#b8924a);padding:20px 16px;display:flex;align-items:center;justify-content:center;position:relative;min-height:200px}
+.vehicle-badge{position:absolute;top:14px;left:14px;width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.92);color:#3f748a;display:grid;place-items:center;font-weight:900;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,.14)}
+.vehicle-visual img{width:100%;max-width:180px;max-height:120px;object-fit:contain;filter:drop-shadow(0 12px 18px rgba(45,28,6,.22))}
+.summary-main{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
 .summary-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
-.summary-head h1{margin:0;font-size:clamp(24px,2.4vw,36px);line-height:.94;letter-spacing:-.04em}
-.summary-sub{color:var(--muted);font-size:14px;font-weight:800;margin-top:2px}
-.top-price{min-width:132px;text-align:right;color:#2f6275;font-weight:950;font-size:18px}
-.top-price span{display:block;font-size:16px}
-.top-price small{display:block;color:#5e4e31;font-size:12px;font-weight:800}
+.summary-head h1{margin:0;font-size:clamp(22px,2.2vw,34px);line-height:.96;letter-spacing:-.04em}
+.summary-sub{color:var(--muted);font-size:13px;font-weight:700;margin-top:3px}
+.top-price{text-align:right;color:#2f6275;font-weight:950;white-space:nowrap}
+.top-price span{display:block;font-size:22px;line-height:1}
+.top-price small{display:block;color:var(--muted);font-size:12px;font-weight:800;margin-top:2px}
 .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.meta{background:rgba(255,255,255,.45);border-radius:14px;padding:10px 12px;min-height:72px}
-.meta .k{display:block;color:#776342;text-transform:uppercase;font-size:10px;font-weight:900;letter-spacing:.08em;margin-bottom:4px}
-.meta .v{font-size:13px;font-weight:800;line-height:1.3;color:#2d2416}
-.analysis-box{background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff;padding:14px;border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:8px}
-.analysis-box h3{margin:0;font-size:18px;line-height:1}
-.analysis-line{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.10);font-weight:800;font-size:13px}
+.meta{background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.72);border-radius:16px;padding:11px 14px}
+.meta .k{display:block;color:#7a6040;text-transform:uppercase;font-size:10px;font-weight:900;letter-spacing:.09em;margin-bottom:5px}
+.meta .v{font-size:13px;font-weight:800;line-height:1.35;color:#1e1609}
+/* ── CHECKOUT LAYOUT: 2-column with sticky sidebar ── */
+.checkout-layout{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;margin-top:18px}
+.checkout-main{display:flex;flex-direction:column;gap:0}
+.checkout-sidebar{position:sticky;top:70px;display:flex;flex-direction:column;gap:12px}
+/* ── SECTION / FORM ── */
+.section{background:linear-gradient(180deg,var(--shell),var(--shell-2));border:1px solid var(--line);border-radius:var(--radius-xl);box-shadow:var(--soft);padding:20px 22px 24px}
+.section-title{margin:0 0 4px;font-size:24px;line-height:1;letter-spacing:-.03em}
+.section-sub{margin:0 0 16px;color:var(--muted);font-size:13px;font-weight:700;line-height:1.45}
+.form-card{background:rgba(255,255,255,.30);border:1px solid rgba(255,255,255,.64);border-radius:20px;padding:18px 18px 20px}
+.card-title{margin:0 0 14px;font-size:17px;font-weight:900;letter-spacing:-.02em;padding-bottom:12px;border-bottom:1px solid rgba(84,60,22,.10)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#6a5234;padding-left:2px}
+.field label .req{color:#b83c2e;font-size:10px;margin-left:2px}
+.req-legend{margin:0 0 14px;font-size:12px;color:#8a6a42;font-weight:700}
+.field input,.field textarea{width:100%;border-radius:14px;border:1.5px solid rgba(84,60,22,.14);background:rgba(255,255,255,.88);padding:0 14px;color:#1e1609;font-size:15px;transition:border-color .18s,box-shadow .18s}
+.field input{height:52px}
+.field input:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(63,116,138,.14);outline:none}
+.field textarea{min-height:100px;resize:vertical;padding:12px 14px}
+.field.full{grid-column:1/-1}
+/* ── SIDEBAR PRICE CARD ── */
+.analysis-box{background:linear-gradient(180deg,var(--shell),var(--shell-2));border:1px solid var(--line);border-radius:20px;box-shadow:var(--soft);padding:18px 20px;display:flex;flex-direction:column;gap:0}
+.analysis-box h3{margin:0 0 12px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.10em;color:var(--muted)}
+.analysis-accordion-btn{display:none}
+.analysis-line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(84,60,22,.10);font-weight:700;font-size:13.5px;color:var(--text)}
 .analysis-line:last-of-type{border-bottom:none}
-.analysis-line.big{margin-top:auto;padding-top:10px;border-top:1px solid rgba(255,255,255,.18);font-size:15px}
-.analysis-line.big strong{font-size:28px;line-height:.95}
-.fee-tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.22);font-size:9px;font-style:normal;cursor:default;flex-shrink:0;position:relative;vertical-align:middle}
+.analysis-line.big{padding-top:14px;border-top:2px solid rgba(84,60,22,.14);border-bottom:none;font-size:15px;font-weight:800;margin-top:4px}
+.analysis-line.big strong{font-size:32px;font-weight:950;line-height:.95;color:var(--accent2)}
+.fee-tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:rgba(84,60,22,.12);font-size:9px;font-style:normal;cursor:default;flex-shrink:0;position:relative;vertical-align:middle}
 .fee-tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;font-size:11px;font-weight:600;line-height:1.45;padding:7px 10px;border-radius:8px;white-space:normal;width:200px;text-align:left;pointer-events:none;opacity:0;transition:opacity .18s;z-index:20;box-shadow:0 4px 12px rgba(0,0,0,.3)}
 .fee-tip:hover::after,.fee-tip:focus::after{opacity:1}
-.section{padding:14px 14px 16px;margin-bottom:16px}
-.section-title{margin:0 0 6px;font-size:22px;line-height:1}
-.section-sub{margin:0 0 10px;color:var(--muted);font-size:13px;font-weight:700;line-height:1.42}
-.form-shell{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;align-items:start}
-.form-card{background:rgba(255,255,255,.28);border:1px solid rgba(0,0,0,.04);border-radius:18px;padding:12px}
-.card-title{margin:0 0 10px;font-size:16px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#5e4e31;padding-left:4px}
-.field label .req{color:#b83c2e;font-size:10px;margin-left:1px}
-.req-legend{margin:0 0 12px;font-size:11px;color:#8a6a42;font-weight:700}
-.field input,.field textarea{width:100%;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.82);padding:12px;color:#241b11}
-.field input{height:48px}
-.field textarea{min-height:96px;resize:vertical}
-.field.full{grid-column:1/-1}
-.invoice-box{background:rgba(255,255,255,.32);border:1px solid rgba(0,0,0,.04);border-radius:18px;padding:12px}
-.invoice-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.choice{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.44);border:1px solid rgba(0,0,0,.05);border-radius:14px;padding:12px;font-weight:800}
-.choice small{display:block;color:var(--muted);font-size:13px;font-weight:700;margin-top:4px;line-height:1.42}
-.toggle-content{display:none;margin-top:12px}.toggle-content.active{display:block}
-.helper-note{background:rgba(255,255,255,.42);border-radius:16px;padding:12px 14px;color:#56472e;font-weight:700;font-size:13px;line-height:1.42}
-.extra-fields-toggle{margin-top:14px;border-top:1px solid rgba(84,60,22,.10);padding-top:12px}
-.extra-fields-toggle summary{font-size:12px;font-weight:800;color:#7a5e38;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:4px 0}
+/* ── SIDEBAR INVOICE ── */
+.invoice-box{background:rgba(255,255,255,.30);border:1px solid rgba(255,255,255,.64);border-radius:20px;padding:18px}
+.invoice-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0}
+.choice{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.52);border:1.5px solid transparent;border-radius:14px;padding:12px;font-weight:800;cursor:pointer;transition:border-color .18s,background .18s}
+.choice:has(input:checked){background:rgba(63,116,138,.08);border-color:rgba(63,116,138,.36)}
+.choice small{display:block;color:var(--muted);font-size:12px;font-weight:700;margin-top:4px;line-height:1.4}
+.toggle-content{display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(84,60,22,.10)}.toggle-content.active{display:block}
+/* ── SIDEBAR SUBMIT AREA ── */
+.sidebar-submit{display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,var(--shell),var(--shell-2));border:1px solid var(--line);border-radius:20px;box-shadow:var(--soft);padding:18px 20px}
+.check-row{display:flex;align-items:flex-start;gap:10px;font-weight:800;color:#332613;font-size:13.5px;line-height:1.42}
+.check-row a{color:var(--accent2);text-decoration:underline;text-underline-offset:2px}
+.trust-strip{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;padding:8px 0 4px;font-size:12px;font-weight:800;color:var(--muted)}
+.btn-back{width:100%;height:46px;border:1.5px solid rgba(84,60,22,.18);background:rgba(255,255,255,.52);color:#4a3819;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;transition:background .18s}
+.btn-back:hover{background:rgba(255,255,255,.78)}
+.btn-submit{width:100%;height:62px;border:0;border-radius:18px;font-size:18px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#c88a35,#e0a848);color:#1a0e04;box-shadow:0 10px 28px rgba(150,90,0,.32);letter-spacing:-.01em;transition:filter .18s,box-shadow .18s}
+.btn-submit:hover{filter:brightness(1.06);box-shadow:0 14px 36px rgba(150,90,0,.40)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;filter:none}
+/* ── HELPER / EXTRA FIELDS ── */
+.helper-note{background:rgba(255,255,255,.42);border-radius:14px;padding:11px 14px;color:#56472e;font-weight:700;font-size:13px;line-height:1.42}
+.extra-fields-toggle{margin-top:16px;border-top:1px solid rgba(84,60,22,.10);padding-top:12px}
+.extra-fields-toggle summary{font-size:12px;font-weight:800;color:#7a5e38;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:4px 0;user-select:none}
 .extra-fields-toggle summary::-webkit-details-marker{display:none}
 .extra-fields-toggle summary::before{content:'＋';font-size:14px;font-weight:900;transition:transform .18s}
 .extra-fields-toggle[open] summary::before{content:'－'}
 .opt-badge{background:rgba(160,110,35,.12);color:#7a5e38;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:800;letter-spacing:.05em}
 .extra-fields-grid{margin-top:12px}
-.check-row{display:flex;align-items:flex-start;gap:10px;margin:14px 0 0;font-weight:800;color:#332613}
-.trust-strip{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;padding:10px 0 6px;font-size:12.5px;font-weight:800;color:#5e4520;opacity:.82}
-@media(max-width:620px){.trust-strip{gap:6px 12px;font-size:12px}}
-.actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px}
-.btn{height:52px;border:0;border-radius:16px;padding:0 20px;font-size:17px;font-weight:900;cursor:pointer}
-.btn-back{background:rgba(255,255,255,.58);color:#4a3819;border:1px solid rgba(0,0,0,.06);min-width:180px}
-.btn-submit{background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff;min-width:260px;box-shadow:0 10px 24px rgba(38,82,97,.22)}
-@media (max-width:1160px){.summary-grid{grid-template-columns:240px 1fr 290px}.meta-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:980px){.summary-grid{grid-template-columns:190px 1fr 250px}.analysis-box{border-left:1px solid rgba(255,255,255,.06);border-top:none}.form-shell{grid-template-columns:1fr}.grid,.grid-4{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:620px){.summary-shell,.section{border-radius:24px}.summary-grid{grid-template-columns:1fr}.summary-main{padding:14px}.summary-head{flex-direction:column}.top-price{text-align:left}.meta-grid,.grid,.grid-4,.invoice-choices{grid-template-columns:1fr}.actions,.btn{width:100%}.section{padding:12px 10px 14px}.form-card,.invoice-box{padding:10px}.field input{height:46px}.field textarea{min-height:88px;max-width:100%}.choice{padding:10px}.helper-note{padding:10px 12px}}
+/* ── RESPONSIVE ── */
+@media (max-width:1160px){.checkout-layout{grid-template-columns:1fr 340px}.meta-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:860px){.checkout-layout{grid-template-columns:1fr}.checkout-sidebar{position:static}.summary-grid{grid-template-columns:180px 1fr}}
+@media (max-width:620px){.summary-shell{border-radius:24px}.section{border-radius:24px;padding:16px 14px 20px}.summary-grid{grid-template-columns:1fr}.vehicle-visual{min-height:160px}.summary-main{padding:16px}.summary-head{flex-direction:column;gap:8px}.top-price{text-align:left}.meta-grid,.grid,.grid-4,.invoice-choices{grid-template-columns:1fr}.form-card,.invoice-box,.sidebar-submit,.analysis-box{padding:14px}.field input{height:48px}.field textarea{min-height:88px}.choice{padding:10px}.grid-4{grid-template-columns:repeat(2,1fr)}}
 
 .footer{margin-top:18px;background:linear-gradient(180deg,rgba(118,84,37,.78),rgba(104,74,32,.86));border:1px solid rgba(255,255,255,.08);border-radius:26px;box-shadow:0 12px 24px rgba(33,20,6,.12);overflow:hidden}
 .footer-grid{display:grid;grid-template-columns:1.15fr .85fr .85fr;gap:18px;padding:22px}
@@ -310,21 +324,21 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 .top-price{color:#a07828!important}
 .top-price span{color:#a07828!important}
 .top-price small{color:rgba(160,110,35,.70)!important}
-.analysis-line.big strong{color:#e0a848!important}
-.form-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;box-shadow:0 24px 64px rgba(0,0,0,.52),0 4px 16px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,240,190,.06)!important}
-.section{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;box-shadow:0 24px 64px rgba(0,0,0,.52),0 4px 16px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,240,190,.06)!important}
-.invoice-box{background:rgba(160,110,35,.07)!important;border:1px solid rgba(160,110,35,.14)!important}
+.analysis-line.big strong{color:#2e6172!important}
+.analysis-box{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
+.analysis-line{color:#1c1408!important;border-bottom-color:rgba(160,110,35,.12)!important}
+.form-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
+.section{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
+.invoice-box{background:rgba(160,110,35,.06)!important;border:1px solid rgba(160,110,35,.14)!important}
+.sidebar-submit{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
 .helper-note{background:rgba(160,110,35,.07)!important;border:1px solid rgba(160,110,35,.14)!important}
-.card-title{color:#1c1408!important}
+.card-title{color:#1c1408!important;border-bottom-color:rgba(160,110,35,.14)!important}
 .section-title{color:#1c1408!important}
-.btn-submit{background:linear-gradient(135deg,#c88a35,#e0a848)!important;color:#1a0e04!important;font-weight:900!important;box-shadow:0 12px 32px rgba(0,0,0,.38)!important;width:100%!important;height:72px!important;font-size:20px!important;border-radius:18px!important}
-.btn-back{background:rgba(160,110,35,.10)!important;border:1px solid rgba(160,110,35,.18)!important;color:#4a3820!important}
 
 
 /* ── WARM AMBER BODY ── */
 html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
-.summary-shell,.form-card,.section{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
-.btn-submit{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
+.summary-shell,.form-card,.section,.analysis-box,.sidebar-submit{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -607,79 +621,96 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
           <div class="meta"><span class="k">Extras</span><span class="v" id="extrasText">Χωρίς extras</span></div>
         </div>
       </div>
-      <div class="analysis-box" id="analysisBox">
-        <h3>Οικονομική ανάλυση</h3>
-        <button class="analysis-accordion-btn" id="analysisAccordionBtn" type="button">▼ Εμφάνιση ανάλυσης κόστους</button>
-        <div class="analysis-line"><span id="baseCostLabel">Βασική χρέωση</span><span id="baseCost">0,00€</span></div>
-        <div class="analysis-line" id="insuranceRow"><span>Ασφάλεια</span><span id="insuranceCost">0,00€</span></div>
-        <div class="analysis-line" id="extrasRow"><span>Extras</span><span id="extrasCost">0,00€</span></div>
-        <div class="analysis-line" id="locationFeeRow" hidden><span id="locationFeeLabel">Χρέωση τοποθεσιών</span><span id="locationFeeCost">0,00€</span></div>
-        <div class="analysis-line" id="ageFeeRow" hidden><span style="display:inline-flex;align-items:center;gap:4px"><span id="ageFeeLabel">Επασφάλιστρο ηλικίας</span><span class="fee-tip" tabindex="0" data-tip="Επιπλέον χρέωση για οδηγούς κάτω των 25 ή άνω των 70 ετών.">ℹ</span></span><span id="ageFeeCost">0,00€</span></div>
-        <div class="analysis-line" id="nightFeeRow" hidden><span style="display:inline-flex;align-items:center;gap:4px"><span id="nightFeeLabel">Νυχτερινή χρέωση</span><span class="fee-tip" tabindex="0" data-tip="Χρέωση για παραλαβή ή επιστροφή μεταξύ 22:00–08:00.">ℹ</span></span><span id="nightFeeCost">0,00€</span></div>
-        <div class="analysis-line big"><span>Τελικό σύνολο</span><strong id="grandTotal" aria-live="polite">0,00€</strong></div>
-      </div>
     </div>
   </section>
 
   <form id="checkoutForm">
-    <section class="section">
-      <h2 class="section-title">Στοιχεία οδηγού</h2>
-      <p class="section-sub">Συμπλήρωσε τα βασικά στοιχεία για να ολοκληρωθεί σωστά η αποστολή του αιτήματος κράτησης.</p>
-      <p class="req-legend"><span class="req">*</span> Υποχρεωτικό πεδίο</p>
-      <div class="form-shell">
-        <div class="form-card">
-          <h3 class="card-title">Στοιχεία επικοινωνίας</h3>
-          <div class="grid">
-            <div class="field"><label id="lbl-firstName">Όνομα <span class="req">*</span></label><input id="firstName" name="firstName" type="text" required autocomplete="given-name"><span class="field-error" id="err-firstName"></span></div>
-            <div class="field"><label id="lbl-lastName">Επώνυμο <span class="req">*</span></label><input id="lastName" name="lastName" type="text" required autocomplete="family-name"><span class="field-error" id="err-lastName"></span></div>
-            <div class="field"><label id="lbl-phone">Τηλέφωνο <span class="req">*</span></label><input id="phone" name="phone" type="tel" required autocomplete="tel" placeholder="+30 69XX XXX XXX"><span class="field-error" id="err-phone"></span></div>
-            <div class="field"><label id="lbl-email">Email <span class="req">*</span></label><input id="email" name="email" type="email" required autocomplete="email" placeholder="example@email.com"><span class="field-error" id="err-email"></span></div>
-            <div class="field"><label id="lbl-dob">Ημ. γέννησης</label><input id="dob" name="dob" type="date" autocomplete="bday"><span class="field-error" id="err-dob"></span></div>
-            <div class="field" id="flightNumberField"><label id="flightNumberLabel">Αριθμός πτήσης</label><input id="flightNumber" name="flightNumber" type="text"><span class="field-error" id="err-flightNumber"></span></div>
-            <div class="field" id="originCityField"><label id="originCityLabel">Πόλη άφιξης</label><input name="originCity" type="text" placeholder="π.χ. Αθήνα"></div>
-            <div class="field" id="dropoffInfoField" style="display:none"><label id="dropoffInfoLabel">Πτήση Επιστροφής</label><input name="dropoffInfo" type="text"></div>
-            <div class="field full"><label>Σχόλια / Παρατηρήσεις</label><textarea name="comments" placeholder="Ώρα άφιξης, ειδικές ανάγκες, οτιδήποτε θέλεις να γνωρίζουμε..."></textarea></div>
-          </div>
-          <details class="extra-fields-toggle">
-            <summary>Προαιρετικά στοιχεία διεύθυνσης <span class="opt-badge">προαιρετικό</span></summary>
-            <div class="grid extra-fields-grid">
-              <div class="field"><label>Χώρα</label><input name="country" type="text" autocomplete="country-name"></div>
-              <div class="field"><label>Πόλη κατοικίας</label><input name="city" type="text" autocomplete="address-level2"></div>
-              <div class="field"><label>Τ.Κ.</label><input name="billingZip" type="text" autocomplete="postal-code"></div>
-              <div class="field full"><label>Διεύθυνση</label><input name="address" type="text" autocomplete="street-address"></div>
+    <div class="checkout-layout">
+
+      <!-- LEFT: Driver details form -->
+      <div class="checkout-main">
+        <section class="section">
+          <h2 class="section-title">Στοιχεία οδηγού</h2>
+          <p class="section-sub">Συμπλήρωσε τα στοιχεία σου για να ολοκληρωθεί η αποστολή του αιτήματος κράτησης. <span class="req">*</span> Υποχρεωτικό.</p>
+          <div class="form-card">
+            <h3 class="card-title">Στοιχεία επικοινωνίας</h3>
+            <div class="grid">
+              <div class="field"><label id="lbl-firstName">Όνομα <span class="req">*</span></label><input id="firstName" name="firstName" type="text" required autocomplete="given-name"><span class="field-error" id="err-firstName"></span></div>
+              <div class="field"><label id="lbl-lastName">Επώνυμο <span class="req">*</span></label><input id="lastName" name="lastName" type="text" required autocomplete="family-name"><span class="field-error" id="err-lastName"></span></div>
+              <div class="field"><label id="lbl-phone">Τηλέφωνο <span class="req">*</span></label><input id="phone" name="phone" type="tel" required autocomplete="tel" placeholder="+30 69XX XXX XXX"><span class="field-error" id="err-phone"></span></div>
+              <div class="field"><label id="lbl-email">Email <span class="req">*</span></label><input id="email" name="email" type="email" required autocomplete="email" placeholder="example@email.com"><span class="field-error" id="err-email"></span></div>
+              <div class="field"><label id="lbl-dob">Ημ. γέννησης</label><input id="dob" name="dob" type="date" autocomplete="bday"><span class="field-error" id="err-dob"></span></div>
+              <div class="field" id="flightNumberField" style="display:none"><label id="flightNumberLabel">Αριθμός πτήσης</label><input id="flightNumber" name="flightNumber" type="text"><span class="field-error" id="err-flightNumber"></span></div>
+              <div class="field" id="originCityField" style="display:none"><label id="originCityLabel">Πόλη άφιξης</label><input name="originCity" type="text" placeholder="π.χ. Αθήνα"></div>
+              <div class="field" id="dropoffInfoField" style="display:none"><label id="dropoffInfoLabel">Πτήση Επιστροφής</label><input name="dropoffInfo" type="text"></div>
+              <div class="field full"><label>Σχόλια / Παρατηρήσεις</label><textarea name="comments" placeholder="Ώρα άφιξης, ειδικές ανάγκες, οτιδήποτε θέλεις να γνωρίζουμε..."></textarea></div>
             </div>
-          </details>
+            <details class="extra-fields-toggle">
+              <summary>Προαιρετικά στοιχεία διεύθυνσης <span class="opt-badge">προαιρετικό</span></summary>
+              <div class="grid extra-fields-grid">
+                <div class="field"><label>Χώρα</label><input name="country" type="text" autocomplete="country-name"></div>
+                <div class="field"><label>Πόλη κατοικίας</label><input name="city" type="text" autocomplete="address-level2"></div>
+                <div class="field"><label>Τ.Κ.</label><input name="billingZip" type="text" autocomplete="postal-code"></div>
+                <div class="field full"><label>Διεύθυνση</label><input name="address" type="text" autocomplete="street-address"></div>
+              </div>
+            </details>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT: Sticky sidebar — price + invoice + submit -->
+      <aside class="checkout-sidebar">
+
+        <!-- Price breakdown -->
+        <div class="analysis-box" id="analysisBox">
+          <h3>Κόστος κράτησης</h3>
+          <div class="analysis-line"><span id="baseCostLabel">Βασική χρέωση</span><span id="baseCost">0,00€</span></div>
+          <div class="analysis-line" id="insuranceRow"><span>Ασφάλεια</span><span id="insuranceCost">0,00€</span></div>
+          <div class="analysis-line" id="extrasRow"><span>Extras</span><span id="extrasCost">0,00€</span></div>
+          <div class="analysis-line" id="locationFeeRow" hidden><span id="locationFeeLabel">Χρέωση τοποθεσιών</span><span id="locationFeeCost">0,00€</span></div>
+          <div class="analysis-line" id="ageFeeRow" hidden><span style="display:inline-flex;align-items:center;gap:4px"><span id="ageFeeLabel">Επασφάλιστρο ηλικίας</span><span class="fee-tip" tabindex="0" data-tip="Επιπλέον χρέωση για οδηγούς κάτω των 25 ή άνω των 70 ετών.">ℹ</span></span><span id="ageFeeCost">0,00€</span></div>
+          <div class="analysis-line" id="nightFeeRow" hidden><span style="display:inline-flex;align-items:center;gap:4px"><span id="nightFeeLabel">Νυχτερινή χρέωση</span><span class="fee-tip" tabindex="0" data-tip="Χρέωση για παραλαβή ή επιστροφή μεταξύ 22:00–08:00.">ℹ</span></span><span id="nightFeeCost">0,00€</span></div>
+          <div class="analysis-line big"><span>Τελικό σύνολο</span><strong id="grandTotal" aria-live="polite">—</strong></div>
         </div>
 
-        <div class="form-card">
-          <h3 class="card-title">Τιμολόγιο</h3>
-          <p class="section-sub" style="margin-top:0">Επίλεξε αν θέλεις απλή απόδειξη ή τιμολόγιο. Αν διαλέξεις τιμολόγιο, εμφανίζονται αυτόματα τα εταιρικά πεδία.</p>
-          <div class="invoice-box">
-            <div class="invoice-choices">
-              <label class="choice"><input type="radio" name="docType" value="receipt" checked><div>Απόδειξη<small>Χωρίς επιπλέον εταιρικά στοιχεία.</small></div></label>
-              <label class="choice"><input type="radio" name="docType" value="invoice"><div>Τιμολόγιο<small>Εμφάνιση εταιρικών στοιχείων για έκδοση τιμολογίου.</small></div></label>
+        <!-- Invoice type -->
+        <div class="invoice-box">
+          <h3 class="card-title" style="font-size:15px;margin-bottom:12px">Τύπος παραστατικού</h3>
+          <div class="invoice-choices">
+            <label class="choice"><input type="radio" name="docType" value="receipt" checked><div>Απόδειξη<small>Χωρίς εταιρικά στοιχεία.</small></div></label>
+            <label class="choice"><input type="radio" name="docType" value="invoice"><div>Τιμολόγιο<small>Για επιχειρήσεις.</small></div></label>
+          </div>
+          <div class="toggle-content" id="invoiceFields">
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+              <div class="field"><label id="lbl-companyName">Επωνυμία <span class="req">*</span></label><input id="companyName" name="companyName" type="text"><span class="field-error" id="err-companyName"></span></div>
+              <div class="field"><label id="lbl-vatNumber">Α.Φ.Μ. <span class="req">*</span></label><input id="vatNumber" name="vatNumber" type="text"><span class="field-error" id="err-vatNumber"></span></div>
+              <div class="field"><label>Δ.Ο.Υ.</label><input name="taxOffice" type="text"></div>
+              <div class="field"><label>Επάγγελμα</label><input name="profession" type="text"></div>
+              <div class="field full"><label>Διεύθυνση έδρας</label><input name="billingAddress" type="text"></div>
+              <div class="field"><label>Πόλη</label><input name="companyCity" type="text"></div>
+              <div class="field"><label>Τ.Κ.</label><input name="companyZip" type="text"></div>
+              <div class="field full"><label>Email εταιρίας</label><input name="companyEmail" type="email"></div>
             </div>
-            <div class="toggle-content" id="invoiceFields"><div class="grid-4"><div class="field"><label id="lbl-companyName">Επωνυμία επιχείρησης <span class="req">*</span></label><input id="companyName" name="companyName" type="text"><span class="field-error" id="err-companyName"></span></div><div class="field"><label>Επάγγελμα / δραστηριότητα</label><input name="profession" type="text"></div><div class="field"><label id="lbl-vatNumber">Α.Φ.Μ. <span class="req">*</span></label><input id="vatNumber" name="vatNumber" type="text"><span class="field-error" id="err-vatNumber"></span></div><div class="field"><label>Δ.Ο.Υ.</label><input name="taxOffice" type="text"></div><div class="field"><label>Διεύθυνση / έδρα</label><input name="billingAddress" type="text"></div><div class="field"><label>Πόλη</label><input name="companyCity" type="text"></div><div class="field"><label>Τ.Κ.</label><input name="companyZip" type="text"></div><div class="field"><label>Τηλέφωνο έδρας</label><input name="companyPhone" type="text"></div><div class="field"><label>Email εταιρίας</label><input name="companyEmail" type="email"></div></div></div>
           </div>
-          <label class="check-row"><input type="checkbox" id="termsCheck" required><span>Έχω διαβάσει και αποδέχομαι τους <a href="/rental-terms" target="_blank" rel="noopener" id="termsLink">όρους ενοικίασης</a> και την πολιτική απορρήτου.</span></label><span class="field-error" id="err-terms"></span>
-          <div id="submitError" role="alert" style="display:none;margin:12px 0 0;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:11px 14px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.4"></div>
-          <div id="submitTimeoutError" role="alert">
-            <span id="submitTimeoutMsg"></span>
-            <br>
-            <button class="retry-btn" id="retryBtn" type="button">Δοκιμάστε ξανά</button>
-          </div>
+        </div>
+
+        <!-- Terms + submit -->
+        <div class="sidebar-submit">
+          <label class="check-row"><input type="checkbox" id="termsCheck" required><span>Αποδέχομαι τους <a href="/rental-terms" target="_blank" rel="noopener" id="termsLink">όρους ενοικίασης</a> και την πολιτική απορρήτου.</span></label>
+          <span class="field-error" id="err-terms"></span>
+          <div id="submitError" role="alert" style="display:none;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:11px 14px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.4"></div>
+          <div id="submitTimeoutError" role="alert"><span id="submitTimeoutMsg"></span><br><button class="retry-btn" id="retryBtn" type="button">Δοκιμάστε ξανά</button></div>
           <div class="trust-strip">
             <span>🔒 Ασφαλής υποβολή</span>
             <span>💳 Χωρίς χρέωση τώρα</span>
             <span>✅ Επιβεβαίωση εντός 2 ωρών</span>
           </div>
-          <div class="actions">
-            <button class="btn btn-back" type="button">← Πίσω</button>
-            <button class="btn btn-submit" type="submit">Αποστολή αιτήματος →</button>
-          </div>
+          <button class="btn-submit" type="submit">Αποστολή αιτήματος →</button>
+          <button class="btn-back" type="button">← Πίσω στις επιλογές</button>
         </div>
-      </div>
-    </section>
+
+      </aside>
+    </div>
   </form>
 
 <div id="submitOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:1000;align-items:center;justify-content:center;flex-direction:column;backdrop-filter:blur(2px)">
@@ -2151,31 +2182,6 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
   });
 })();
 
-// DIAMOND MOBILE: Cost analysis accordion on mobile
-(function(){
-  var btn = document.getElementById('analysisAccordionBtn');
-  var box = document.getElementById('analysisBox');
-  if(!btn||!box) return;
-  function syncAccordion(){
-    if(window.innerWidth < 768){
-      btn.style.display = 'flex';
-      if(!box.classList.contains('expanded')){
-        btn.textContent = '▼ Εμφάνιση ανάλυσης κόστους';
-      } else {
-        btn.textContent = '▲ Απόκρυψη ανάλυσης';
-      }
-    } else {
-      btn.style.display = 'none';
-      box.classList.add('expanded');
-    }
-  }
-  btn.addEventListener('click', function(){
-    box.classList.toggle('expanded');
-    syncAccordion();
-  });
-  window.addEventListener('resize', syncAccordion);
-  syncAccordion();
-})();
 
 // DIAMOND MOBILE: Hamburger menu toggle
 (function(){
