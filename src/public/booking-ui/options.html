@@ -746,9 +746,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .model-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
 @media(max-width:560px){.models-grid{grid-template-columns:repeat(2,1fr)!important}}
 
-/* ── Models strip: dark teal bar between progress and page ── */
-.models-strip{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99));border-bottom:1px solid rgba(231,191,105,.20);box-shadow:0 10px 26px rgba(0,0,0,.18);padding:0 16px}
-.models-strip-inner{display:flex;align-items:center;gap:12px;width:min(var(--container),calc(100vw - 24px));margin:0 auto;padding:9px 0;flex-wrap:wrap;min-height:44px}
+/* ── Models toolbar: rounded dark teal card inside the page, same as vehicles .results-toolbar ── */
+.models-strip{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99));border:1px solid rgba(231,191,105,.20);border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.18);padding:9px 14px;margin-bottom:12px}
+.models-strip-inner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:30px}
 .models-strip-label{font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.52);white-space:nowrap;flex:0 0 auto}
 .models-strip-sep{width:1px;height:16px;background:rgba(255,255,255,.16);flex:0 0 auto}
 .models-strip-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -758,7 +758,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .models-strip-chip.is-active{background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1d09;border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.22)}
 @media(max-width:560px){.models-strip-label,.models-strip-sep{display:none}}
 /* ── Models expand panel (slides open below the chips row) ── */
-.models-strip-panel{width:min(var(--container),calc(100vw - 24px));margin:0 auto;padding:14px 0 18px;border-top:1px solid rgba(255,255,255,.10);display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.models-strip-panel{margin-top:9px;padding-top:12px;border-top:1px solid rgba(255,255,255,.10);display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
 .models-strip-panel[hidden]{display:none!important}
 .msp-photo{flex:0 0 200px;max-width:200px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.06);border:1px solid rgba(231,191,105,.18);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
 .msp-photo img{width:100%;height:100%;object-fit:cover;display:block}
@@ -823,16 +823,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 </style>
 <div class="booking-progress"><div class="bp-inner"><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Αναζήτηση</span></div><div class="bp-connector done"></div><div class="bp-step done"><div class="bp-dot">✓</div><span class="bp-label">Οχήματα</span></div><div class="bp-connector done"></div><div class="bp-step active"><div class="bp-dot">3</div><span class="bp-label">Extras</span></div><div class="bp-connector"></div><div class="bp-step"><div class="bp-dot">4</div><span class="bp-label">Ολοκλήρωση</span></div></div></div>
 
-  <!-- Vehicle models strip: dark teal bar pinned right below the step bar -->
-  <div id="modelsStrip" class="models-strip" hidden>
-    <div class="models-strip-inner">
-      <span class="models-strip-label" id="modelsStripLabel">Κατηγορία Α</span>
-      <div class="models-strip-sep" aria-hidden="true"></div>
-      <div class="models-strip-chips" id="modelsStripChips" role="tablist" aria-label="Μοντέλα κατηγορίας"></div>
-    </div>
-    <div class="models-strip-panel" id="modelsStripPanel" hidden aria-live="polite"></div>
-  </div>
-
   <!-- DIAMOND MOBILE: Fixed bottom summary bar -->
   <div class="mobile-summary-bar" id="mobileSummaryBar">
     <div class="mobile-summary-inner">
@@ -851,6 +841,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
       Παρακαλώ επιλέξτε πρώτα ένα <a href="/categories">όχημα</a>.
     </div>
     <div class="trip-strip" id="tripStrip" hidden></div>
+
+    <!-- Vehicle models toolbar: rounded dark teal card, same as vehicles page category tabs -->
+    <div id="modelsStrip" class="models-strip" hidden>
+      <div class="models-strip-inner">
+        <span class="models-strip-label" id="modelsStripLabel">Κατηγορία Α</span>
+        <div class="models-strip-sep" aria-hidden="true"></div>
+        <div class="models-strip-chips" id="modelsStripChips" role="tablist" aria-label="Μοντέλα κατηγορίας"></div>
+      </div>
+      <div class="models-strip-panel" id="modelsStripPanel" hidden aria-live="polite"></div>
+    </div>
+
     <div class="opts-layout"><div class="opts-main">
     <section class="hero-card">
       <div class="hero-grid">
