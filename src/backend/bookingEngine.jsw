@@ -384,10 +384,14 @@ function uniqueImageList(values = []) {
   return Array.from(new Set((Array.isArray(values) ? values : []).filter(Boolean))).slice(0, 3);
 }
 
+function looksLikeFleetRecordId(value) {
+  const s = String(value || '').trim();
+  return /^[0-9a-f]{8}-[0-9a-f-]{12,}$/i.test(s) || /^[0-9a-f]{16,}$/i.test(s);
+}
 function deriveFleetCategoryCode(raw) {
   if (!raw) return '';
   if (typeof raw === 'object') {
-    const candidates = [raw.category, raw.Category, raw.code, raw.key, raw.label, raw.title, raw.name, raw.value, raw._id];
+    const candidates = [raw.category, raw.Category, raw.code, raw.key, raw.label, raw.title, raw.name, raw.value];
     for (const value of candidates) {
       const resolved = deriveFleetCategoryCode(value);
       if (resolved) return resolved;
@@ -395,8 +399,8 @@ function deriveFleetCategoryCode(raw) {
     return '';
   }
   const textValue = cleanText(raw);
-  if (!textValue) return '';
-  const dashPrefix = textValue.match(/^([A-Za-z0-9]+)\s*-/);
+  if (!textValue || looksLikeFleetRecordId(textValue)) return '';
+  const dashPrefix = textValue.match(/^([A-Za-z0-9]{1,10})\s*[-–]/);
   if (dashPrefix) return String(dashPrefix[1]).toUpperCase();
   if (/^[A-Za-z0-9]{1,10}$/.test(textValue)) return textValue.toUpperCase();
   const prefix = textValue.match(/^([A-Za-z0-9]{1,10})\b/);
@@ -572,11 +576,19 @@ export async function getFleetModelsPreview({ vehicleId, categoryCode } = {}) {
   const vehiclesRes = await wixData.query('VehiclesNew').limit(1000).find({ suppressAuth: true }).catch(() => ({ items: [] }));
   const activeVehicleRows = (vehiclesRes.items || []).filter((item) => isVehicleCategoryActive(item));
   const vehicleByCode = new Map();
+  const categoryCodeById = new Map();
   for (const row of activeVehicleRows) {
-    const code = cleanText(row.category || row.Category || '').toUpperCase();
+    const code = cleanText(row.category || row.Category || '').toUpperCase()
+      || deriveFleetCategoryCode(row.title || row.Title || '');
     if (code && !vehicleByCode.has(code)) vehicleByCode.set(code, row);
+    if (row._id && code) categoryCodeById.set(String(row._id), code);
   }
   if (!vehicleItem && resolvedCategoryCode) vehicleItem = vehicleByCode.get(cleanText(resolvedCategoryCode).toUpperCase()) || null;
+  const resolveCategoryByRecordId = (raw) => {
+    if (!raw) return '';
+    const id = typeof raw === 'object' ? String(raw?._id || raw?.id || '') : cleanText(raw);
+    return (id && categoryCodeById.get(id)) || '';
+  };
 
   let query = wixData.query('FleetNew').limit(1000);
   try { query = query.include('Category'); } catch (err) {}
@@ -589,8 +601,16 @@ export async function getFleetModelsPreview({ vehicleId, categoryCode } = {}) {
 
   const grouped = new Map();
   for (const entry of (res.items || [])) {
-    const entryCategoryCode = deriveFleetCategoryCode(entry?.Category) || deriveFleetCategoryCode(entry?.category) || deriveFleetCategoryCode(entry?.categoryCode) || deriveFleetCategoryCode(entry?.categoryId);
-    if (resolvedCategoryCode && entryCategoryCode && entryCategoryCode !== cleanText(resolvedCategoryCode).toUpperCase()) continue;
+    const entryCategoryCode =
+      deriveFleetCategoryCode(entry?.Category) ||
+      deriveFleetCategoryCode(entry?.category) ||
+      deriveFleetCategoryCode(entry?.categoryCode) ||
+      resolveCategoryByRecordId(entry?.categoryId) ||
+      resolveCategoryByRecordId(entry?.Category) ||
+      resolveCategoryByRecordId(entry?.category);
+    // Strict: when a category is requested, drop entries whose category does
+    // not match — including unresolved ones (they used to leak everywhere).
+    if (resolvedCategoryCode && entryCategoryCode !== cleanText(resolvedCategoryCode).toUpperCase()) continue;
     const isActive = (entry?.active ?? entry?.Active ?? true) !== false;
     if (!isActive) continue;
     const model = cleanText(entry.model || entry.Model || entry.title || entry.Title || '');
@@ -599,7 +619,11 @@ export async function getFleetModelsPreview({ vehicleId, categoryCode } = {}) {
     const matchedVehicle = vehicleByCode.get(entryCategoryCode) || vehicleItem || null;
     const matchedCategoryCode = entryCategoryCode || cleanText(matchedVehicle?.category || matchedVehicle?.Category || resolvedCategoryCode || '');
     const matchedCategoryLabel = buildVehicleCategoryDisplayName(matchedCategoryCode, matchedVehicle?.title || matchedVehicle?.Title || '');
+    const slotFront = toImageArray(entry?.photoFront)[0] || '';
+    const slotSide  = toImageArray(entry?.photoSide)[0]  || '';
+    const slotBack  = toImageArray(entry?.photoBack)[0]  || '';
     const photos = uniqueImageList([
+      slotFront, slotSide, slotBack,
       ...toImageArray(entry?.photos),
       ...toImageArray(entry?.Photos),
       ...toImageArray(entry?.gallery),
@@ -634,6 +658,7 @@ export async function getFleetModelsPreview({ vehicleId, categoryCode } = {}) {
         categoryLabel: matchedCategoryLabel,
         image: photos[0] || '',
         photos,
+        photoSlots: { front: slotFront, side: slotSide, back: slotBack },
         note: `Ενδεικτικό μοντέλο${matchedCategoryLabel ? ` · ${matchedCategoryLabel}` : ''}`,
         specs
       });
@@ -641,6 +666,10 @@ export async function getFleetModelsPreview({ vehicleId, categoryCode } = {}) {
       const current = grouped.get(key);
       current.photos = uniqueImageList([...(current.photos || []), ...photos]);
       if (!current.image && current.photos[0]) current.image = current.photos[0];
+      const slots = current.photoSlots || (current.photoSlots = { front:'', side:'', back:'' });
+      if (!slots.front && slotFront) slots.front = slotFront;
+      if (!slots.side  && slotSide)  slots.side  = slotSide;
+      if (!slots.back  && slotBack)  slots.back  = slotBack;
       if (!current.id && matchedVehicle?._id) current.id = String(matchedVehicle._id);
       if (!current.vehicleCategoryId && matchedVehicle?._id) current.vehicleCategoryId = String(matchedVehicle._id);
       if (!current.categoryCode && matchedCategoryCode) current.categoryCode = matchedCategoryCode;

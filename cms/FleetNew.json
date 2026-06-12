@@ -23,6 +23,9 @@
     { "key": "mileage",              "displayName": "Mileage",                 "type": "Number",  "required": false },
     { "key": "notes",                "displayName": "Notes",                   "type": "LongText","required": false, "description": "Internal notes — not shown to customers" },
     { "key": "image",               "displayName": "Image",                   "type": "Image",   "required": false, "description": "Primary photo of this vehicle (front view). Used in the booking options page model gallery." },
-    { "key": "photos",              "displayName": "Photos",                  "type": "Gallery", "required": false, "description": "Up to 3 photos per vehicle (front, side, back). Displayed as a gallery in the booking flow. If only 1 photo is uploaded it is shown as the primary photo." }
+    { "key": "photos",              "displayName": "Photos",                  "type": "Gallery", "required": false, "description": "Up to 3 photos per vehicle (front, side, back). Displayed as a gallery in the booking flow. If only 1 photo is uploaded it is shown as the primary photo." },
+    { "key": "photoFront",          "displayName": "Photo Front",             "type": "Text",    "required": false, "description": "Front photo URL (wix:image or https). Managed from the backroom Vehicle Card photo uploader." },
+    { "key": "photoSide",           "displayName": "Photo Side",              "type": "Text",    "required": false, "description": "Side photo URL (wix:image or https). Managed from the backroom Vehicle Card photo uploader." },
+    { "key": "photoBack",           "displayName": "Photo Back",              "type": "Text",    "required": false, "description": "Back photo URL (wix:image or https). Managed from the backroom Vehicle Card photo uploader." }
   ]
 }

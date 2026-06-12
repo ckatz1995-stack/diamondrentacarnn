@@ -1993,7 +1993,15 @@ async function renderModels(category){
       if(!panel) return;
       const m = namedItems[idx];
       const name = m.model || m.name || 'Μοντέλο';
-      const photos = Array.isArray(m.photos) ? m.photos.filter(Boolean) : (m.image ? [m.image] : []);
+      const list = Array.isArray(m.photos) ? m.photos.filter(Boolean) : (m.image ? [m.image] : []);
+      // Prefer explicit front/side/back slots (uploaded from the backroom);
+      // fall back to the generic photo list positionally.
+      const slots = m.photoSlots || {};
+      const photos = [
+        slots.front || list[0] || '',
+        slots.side  || list[1] || '',
+        slots.back  || list[2] || ''
+      ];
       const specs = m.specs || {};
 
       const specsHtml = [
@@ -2005,17 +2013,18 @@ async function renderModels(category){
       ].filter(v => v && String(v) !== '-')
        .map(v => `<span class="msp-spec">${escapeHtml(String(v))}</span>`).join('');
 
-      const mainSrc = photos[0] || '';
+      const mainSrc = photos.find(Boolean) || '';
       const mainContent = mainSrc
         ? `<img src="${escapeHtml(mainSrc)}" alt="${escapeHtml(name)}" loading="lazy">`
         : `<div class="msp-main-placeholder">${CAR_SVG}</div>`;
 
+      const firstIdx = Math.max(0, photos.findIndex(Boolean));
       const thumbsHtml = THUMB_LABELS.map((label, i) => {
         const src = photos[i] || '';
         const thumbImg = src
           ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(label)}" loading="lazy">`
           : `<div class="msp-thumb-placeholder">${CAR_SVG}</div>`;
-        return `<button type="button" class="msp-thumb${i===0?' is-active':''}" data-src="${escapeHtml(src)}" data-label="${escapeHtml(label)}">
+        return `<button type="button" class="msp-thumb${i===firstIdx?' is-active':''}" data-src="${escapeHtml(src)}" data-label="${escapeHtml(label)}">
           <span class="msp-thumb-img">${thumbImg}</span>
           <span class="msp-thumb-label">${escapeHtml(label)}</span>
         </button>`;

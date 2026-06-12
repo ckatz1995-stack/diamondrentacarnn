@@ -131,6 +131,10 @@ function modelCategoryFallback(model){
   };
   return map[key] || "";
 }
+function looksLikeRecordId(value){
+  const s = String(value || "").trim();
+  return /^[0-9a-f]{8}-[0-9a-f-]{12,}$/i.test(s) || /^[0-9a-f]{16,}$/i.test(s);
+}
 function deriveCategoryCode(raw){
   const tryValue = (val) => {
     if (!val) return "";
@@ -143,10 +147,13 @@ function deriveCategoryCode(raw){
       return "";
     }
     const s = String(val).trim();
-    if (!s) return "";
-    if (/^[A-Z]{1,3}$/.test(s)) return s;
-    const m = s.match(/^([A-Z]{1,3})\b/);
-    if (m) return m[1];
+    if (!s || looksLikeRecordId(s)) return "";
+    // "AAUTO - Hyundai i10 automatic" → "AAUTO"
+    const dashPrefix = s.match(/^([A-Za-z0-9]{1,10})\s*[-–]/);
+    if (dashPrefix) return dashPrefix[1].toUpperCase();
+    if (/^[A-Za-z0-9]{1,10}$/.test(s)) return s.toUpperCase();
+    const m = s.match(/^([A-Za-z0-9]{1,10})\b/);
+    if (m) return m[1].toUpperCase();
     return "";
   };
   return tryValue(raw);
@@ -156,19 +163,30 @@ export async function get_fleet_models(request){
     const vehicleId = String(request.query?.vehicleId || "").trim();
     const requestedCategory = String(request.query?.category || "").trim().toUpperCase();
 
+    // Map VehiclesNew _id → category code so FleetNew rows that store a
+    // categoryId (or a reference) resolve to the right category code.
+    const categoryIdMap = new Map();
     let vehicleCategory = "";
-    if (vehicleId) {
-      try {
-        const vehicle = await wixData.get("VehiclesNew", vehicleId, { suppressAuth: true });
-        vehicleCategory = String(vehicle?.category || vehicle?.Category || "").trim().toUpperCase();
-      } catch (err) {}
-    }
+    try {
+      const vehiclesRes = await wixData.query("VehiclesNew").limit(1000).find({ suppressAuth: true });
+      for (const v of (vehiclesRes.items || [])) {
+        const code = deriveCategoryCode(v?.category || v?.Category) || deriveCategoryCode(v?.title || v?.Title);
+        if (v?._id && code) categoryIdMap.set(String(v._id), code);
+        if (vehicleId && String(v._id) === vehicleId) vehicleCategory = code || "";
+      }
+    } catch (err) {}
     const targetCategory = requestedCategory || vehicleCategory;
 
     let query = wixData.query("FleetNew").limit(1000);
     try { query = query.include("Category"); } catch (err) {}
     const res = await query.find({ suppressAuth: true });
     const rawItems = res.items || [];
+
+    const resolveCategoryById = (raw) => {
+      if (!raw) return "";
+      const id = typeof raw === "object" ? String(raw?._id || raw?.id || "") : String(raw).trim();
+      return (id && categoryIdMap.get(id)) || "";
+    };
 
     const grouped = new Map();
     for (const item of rawItems) {
@@ -182,11 +200,23 @@ export async function get_fleet_models(request){
         deriveCategoryCode(item?.Category) ||
         deriveCategoryCode(item?.category) ||
         deriveCategoryCode(item?.categoryCode) ||
+        resolveCategoryById(item?.categoryId) ||
+        resolveCategoryById(item?.Category) ||
+        resolveCategoryById(item?.category) ||
         modelCategoryFallback(model);
 
-      if (targetCategory && inferredCategory && inferredCategory !== targetCategory) continue;
+      // Strict: when a category is requested, skip items whose category does
+      // not match — including items whose category could not be resolved.
+      // (Previously unresolved items leaked into EVERY category.)
+      if (targetCategory && inferredCategory !== targetCategory) continue;
+
+      // Slot photos uploaded from the backroom vehicle card (front/side/back)
+      const slotFront = toImageUrl(item?.photoFront || "");
+      const slotSide  = toImageUrl(item?.photoSide  || "");
+      const slotBack  = toImageUrl(item?.photoBack  || "");
 
       const photos = [
+        slotFront, slotSide, slotBack,
         ...toImageArray(item?.photos),
         ...toImageArray(item?.Photos),
         ...toImageArray(item?.gallery),
@@ -232,6 +262,7 @@ export async function get_fleet_models(request){
           model,
           note: "",
           photos: Array.from(new Set(photos)).slice(0, 3),
+          photoSlots: { front: slotFront, side: slotSide, back: slotBack },
           specs,
           category: inferredCategory || targetCategory || ""
         });
@@ -241,12 +272,17 @@ export async function get_fleet_models(request){
         if (!current.category && inferredCategory) current.category = inferredCategory;
         // merge specs only if not already set
         if(!current.specs || !Object.keys(current.specs).length) current.specs = specs;
+        // fill empty photo slots from this plate's slot photos
+        const slots = current.photoSlots || (current.photoSlots = { front:"", side:"", back:"" });
+        if(!slots.front && slotFront) slots.front = slotFront;
+        if(!slots.side  && slotSide)  slots.side  = slotSide;
+        if(!slots.back  && slotBack)  slots.back  = slotBack;
       }
     }
 
     let items = Array.from(grouped.values()).sort((a,b) => a.model.localeCompare(b.model, "el"));
     if (targetCategory) {
-      items = items.filter(item => !item.category || item.category === targetCategory);
+      items = items.filter(item => item.category === targetCategory);
     }
 
     return respond({ success:true, category: targetCategory || "", items });
