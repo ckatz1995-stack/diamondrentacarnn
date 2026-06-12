@@ -197,8 +197,8 @@ button:hover,.cta:hover,.header-phone:hover{
   margin-top:6px;
   padding:2px 9px;
   border-radius:20px;
-  background:#f59e0b;
-  color:#fff;
+  background:linear-gradient(135deg,#e7bf69,#c88a35);
+  color:#1a0e04;
   font-size:.72em;
   font-weight:700;
   letter-spacing:.03em;
@@ -807,6 +807,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .cat-tab:hover{background:rgba(231,191,105,.18);border-color:rgba(231,191,105,.40)}
 .cat-tab.is-active{background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));color:#2a1d09;border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.22)}
 .results-toolbar .sort-lbl{color:rgba(255,255,255,.62)!important}
+.results-toolbar .results-count{color:rgba(255,255,255,.72)!important}
 @media(max-width:620px){.cat-tab{padding:8px 12px;font-size:12px}}
 </style>
 </head>
@@ -846,7 +847,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .bp-step.done .bp-label{color:rgba(255,255,255,.72)}
 .bp-step.active .bp-dot{background:#e7bf69;border-color:#f6e19f;color:#4a3816;box-shadow:0 0 0 3px rgba(231,191,105,.28)}
 .bp-step.active .bp-label{color:#fff;font-weight:900}
-.bp-connector.done{background:rgba(255,255,255,.38)}
+.bp-connector.done{background:rgba(231,191,105,.50)}
 @media(max-width:400px){.bp-label{display:none}.bp-connector{min-width:12px}}
 .date-range-error{display:none;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.28);border-radius:10px;padding:10px 14px;color:#b83c2e;font-size:13px;font-weight:700;margin:8px 0 4px}
 .date-range-error.visible{display:block}
@@ -936,6 +937,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   <div class="results-toolbar">
     <div class="cat-tabs" id="catTabs" role="tablist" aria-label="Φίλτρο κατηγορίας"></div>
     <div class="sort-inline-wrap">
+      <span id="resultMetaRow" class="results-count" aria-live="polite"></span>
       <span class="sort-lbl">Ταξινόμηση</span>
       <select id="sortSelect" class="sort-select-slim">
         <option value="priceAsc">Τιμή ↑</option>
@@ -946,6 +948,15 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   </div>
 
   <div class="results-col">
+    <div class="trust-strip">
+      <span class="ts-item">✓ Απεριόριστα χιλιόμετρα</span>
+      <span class="ts-sep">·</span>
+      <span class="ts-item">✓ Βασική ασφάλεια CDW</span>
+      <span class="ts-sep">·</span>
+      <span class="ts-item">✓ Επιβεβαίωση εντός 2 ωρών</span>
+      <span class="ts-sep">·</span>
+      <span class="ts-item">✓ Προσωπική εξυπηρέτηση</span>
+    </div>
     <!-- DIAMOND LOADING: No-data guard -->
     <div class="no-data-banner" id="noDataBanner">
       Ξεκινήστε την αναζήτησή σας από την <a href="/">αρχική σελίδα</a>.
