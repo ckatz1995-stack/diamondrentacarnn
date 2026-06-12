@@ -77,11 +77,14 @@ function normalizeFleet(item = {}, category = null){
   };
 }
 function normalizeCategory(item = {}){
+  // Field fallbacks: VehiclesNew rows managed from account settings use
+  // category (code) / title / price instead of the legacy categoryCode /
+  // categoryLabel / basePricePerDay names.
   return {
     categoryRecordId: txt(item.categoryRecordId || item._id),
-    categoryCode: txt(item.categoryCode),
-    categoryLabel: txt(item.categoryLabel),
-    basePricePerDay: num(item.basePricePerDay),
+    categoryCode: txt(item.categoryCode || deriveCatCode(item.category || item.Category)),
+    categoryLabel: txt(item.categoryLabel || item.displayTitle || item.title || item.Title),
+    basePricePerDay: num(item.basePricePerDay ?? item.price),
     active: bool(item.active),
     status: txt(item.status),
     image: txt(item.image),
@@ -91,7 +94,7 @@ function normalizeCategory(item = {}){
     seats: txt(item.seats),
     doors: txt(item.doors),
     airCondition: bool(item.airCondition),
-    luggageSmall: txt(item.luggageSmall),
+    luggageSmall: txt(item.luggageSmall || item.luggage),
     luggageLarge: txt(item.luggageLarge)
   };
 }
@@ -112,15 +115,6 @@ function compareDateDesc(a,b){
   const ad = new Date(a || 0).getTime() || 0;
   const bd = new Date(b || 0).getTime() || 0;
   return bd - ad;
-}
-
-async function firstSuccessful(items = [], fn){
-  let lastErr = null;
-  for (const item of items) {
-    try { return await fn(item); } catch (err) { lastErr = err; }
-  }
-  if (lastErr) throw lastErr;
-  return null;
 }
 
 async function findManyByField(collectionNames = [], field, values = []){
@@ -182,6 +176,41 @@ async function findBookingsByIds(ids = []){
   return map;
 }
 
+// Find the VehiclesNew category row for a fleet record. Tries the categoryId by
+// _id / legacy categoryRecordId, then matches the category code against the
+// `category`, `categoryCode` or title fields — VehiclesNew rows created from the
+// account-settings page only carry `category` (code) + `title`.
+async function findCategoryRecordForFleet(fleetRecord){
+  const catId = txt(fleetRecord.categoryId);
+  const code = deriveCatCode(typeof fleetRecord.category === 'string' ? fleetRecord.category : '')
+    || deriveCatCode(fleetRecord.categoryCode)
+    || deriveCatCode(fleetRecord.categoryLabel || fleetRecord.categoryDisplayTitle);
+  for (const collectionName of COLLECTION_CANDIDATES.vehicles) {
+    if (catId) {
+      try {
+        const byId = await wixData.get(collectionName, catId, { suppressAuth: true });
+        if (byId) return byId;
+      } catch (_) {}
+      try {
+        const byLegacyId = await wixData.query(collectionName).eq('categoryRecordId', catId).limit(1).find({ suppressAuth: true });
+        if ((byLegacyId.items || [])[0]) return byLegacyId.items[0];
+      } catch (_) {}
+    }
+    if (code) {
+      try {
+        const all = await wixData.query(collectionName).limit(1000).find({ suppressAuth: true });
+        const hit = (all.items || []).find((c) =>
+          deriveCatCode(c.category || c.Category) === code
+          || deriveCatCode(c.categoryCode) === code
+          || deriveCatCode(c.title || c.Title) === code
+        );
+        if (hit) return hit;
+      } catch (_) {}
+    }
+  }
+  return null;
+}
+
 export async function getVehicleCardData({ sessionToken, fleetVehicleId } = {}) {
   await requireStaffAccess({ sessionToken, area: 'fleet', action: 'View' });
   const targetId = txt(fleetVehicleId);
@@ -189,12 +218,7 @@ export async function getVehicleCardData({ sessionToken, fleetVehicleId } = {}) 
 
   const fleetRecord = await findFleetRecordByAnyId(targetId);
   if (!fleetRecord) throw new Error('FLEET_VEHICLE_NOT_FOUND');
-  const categoryQuery = await firstSuccessful(COLLECTION_CANDIDATES.vehicles, async (collectionName) => (
-    txt(fleetRecord.categoryId)
-      ? wixData.query(collectionName).eq('categoryRecordId', txt(fleetRecord.categoryId)).limit(1).find({ suppressAuth: true })
-      : wixData.query(collectionName).eq('categoryCode', txt(fleetRecord.categoryCode)).limit(1).find({ suppressAuth: true })
-  ));
-  const categoryRecord = normalizeCategory((categoryQuery?.items || [])[0] || {});
+  const categoryRecord = normalizeCategory(await findCategoryRecordForFleet(fleetRecord) || {});
   const fleet = normalizeFleet(fleetRecord, categoryRecord);
 
   const internalId = txt(fleetRecord._id);
@@ -481,13 +505,20 @@ export async function getFleetBoard({ sessionToken } = {}) {
     const id  = txt(v._id);
     const plt = txt(v.plate).toLowerCase();
     const ar  = vehicleRentalMap.get(id) || vehicleRentalMap.get(plt) || null;
-    // Resolve the canonical category code: direct code fields first, then the
-    // categoryId / reference looked up against VehiclesNew.
-    const rawCode = deriveCatCode(v.categoryCode)
-      || deriveCatCode(typeof v.category === 'string' ? v.category : '')
-      || deriveCatCode(v.category?.categoryCode || v.category?.category)
+    // Resolve the canonical category code. Precedence (same as fleetCalendar.jsw):
+    // the `category` code first (settings is the editor of record for it), then the
+    // categoryId / reference looked up against VehiclesNew, then the denormalised
+    // categoryCode / categoryLabel mirrors — those may be stale from older saves,
+    // so a parse only wins when it is a known VehiclesNew code.
+    const known = (c) => (c && (catLabelByCode.size === 0 || catLabelByCode.has(c)) ? c : '');
+    const rawCode = known(deriveCatCode(typeof v.category === 'string' ? v.category : ''))
+      || known(deriveCatCode(v.category?.categoryCode || v.category?.category))
       || catById.get(txt(v.categoryId)) || ''
       || catById.get(txt(typeof v.category === 'object' ? (v.category?._id || '') : v.category)) || ''
+      || known(deriveCatCode(v.categoryCode))
+      || known(deriveCatCode(v.categoryLabel || v.categoryDisplayTitle))
+      || deriveCatCode(typeof v.category === 'string' ? v.category : '')
+      || deriveCatCode(v.categoryCode)
       || deriveCatCode(v.categoryLabel || v.categoryDisplayTitle);
     const canonLabel = (rawCode && catLabelByCode.get(rawCode))
       || txt(v.categoryLabel || v.categoryDisplayTitle || v.category?.categoryLabel || v.category?.title || v.category?.categoryDisplayTitle || '')
@@ -524,17 +555,19 @@ export async function getFleetBoard({ sessionToken } = {}) {
   };
   normalized.sort((a, b) => priority(a) - priority(b));
 
-  const summary = {
-    total:       normalized.length,
-    available:   normalized.filter(v => !v.hardHold && !v.activeRental && v.readyToGo).length,
-    out:         normalized.filter(v => !!v.activeRental).length,
-    notReady:    normalized.filter(v => !v.readyToGo && !v.hardHold && !v.activeRental).length,
-    hold:        normalized.filter(v => v.hardHold).length,
-    maintenance: normalized.filter(v => {
-      const st = (v.operationalStatus || v.status || '').toLowerCase();
-      return ['service','maintenance','blocked','repair'].some(s => st.includes(s));
-    }).length
+  // Mutually exclusive buckets — mirrors vehicleStatus() in fleetHtml.html so the
+  // KPI tiles always sum to the total. A car that is out on rental AND flagged
+  // maintenance counts once (as maintenance, same as its row badge).
+  const bucketOf = v => {
+    const st = (v.operationalStatus || v.status || '').toLowerCase();
+    if (v.hardHold) return 'hold';
+    if (['service','maintenance','blocked','repair','inactive'].some(s => st.includes(s))) return 'maintenance';
+    if (v.activeRental) return 'out';
+    if (!v.readyToGo) return 'notReady';
+    return 'available';
   };
+  const summary = { total: normalized.length, available: 0, out: 0, notReady: 0, hold: 0, maintenance: 0 };
+  for (const v of normalized) summary[bucketOf(v)] += 1;
 
   return { success: true, vehicles: normalized, summary };
 }
