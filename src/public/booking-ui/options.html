@@ -225,8 +225,10 @@
     .item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-width:0}
     .item-body strong,.item-title{display:block;font-size:18px;line-height:1.15;margin:0;font-weight:900;min-width:0;word-break:break-word}
     .item-body small,.item-detail{display:block;color:var(--muted);font-size:14px;line-height:1.45;font-weight:700;min-width:0;word-break:break-word}
-    .ins-excess{display:inline-block;margin-top:5px;font:700 11px/1 var(--f);letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.06);color:var(--muted)}
-    .ins-excess-zero{background:rgba(21,128,61,.1);color:#15803d}
+    .ins-excess{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font:700 11px/1 var(--f);letter-spacing:.04em;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.07);color:#7b6646}
+    .ins-excess-zero{background:rgba(21,128,61,.12);color:#15803d}
+    .insurance-item.active .ins-excess{background:rgba(255,255,255,.14);color:rgba(255,235,155,.85)}
+    .insurance-item.active .ins-excess-zero{background:rgba(100,220,130,.18);color:rgba(150,255,180,.9)}
     .item-price{font-size:18px;font-weight:900;white-space:nowrap;align-self:flex-start;text-align:right;line-height:1.15}
     .item-price span{display:block;font-size:12px;font-weight:800;color:#7b6646;margin-top:3px}
     .insurance-item.active,.extra-item.active{
@@ -903,18 +905,18 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
           <button class="ins-col" data-pick="cdw" type="button">
             <span class="ins-tier">Βασική κάλυψη</span>
             <span class="ins-top-row"><span class="ins-name">CDW</span><span class="ins-p">0€<small>/ημέρα</small></span></span>
-            <ul class="ins-feats"><li>✓ Βασική κάλυψη ζημιών</li><li>✓ Κλοπή</li><li>— Franchise ισχύει</li></ul>
+            <ul class="ins-feats"><li>✓ Βασική κάλυψη ζημιών</li><li>✓ Κλοπή</li><li>— Excess ισχύει</li></ul>
           </button>
           <button class="ins-col ins-rec" data-pick="scdw" type="button">
             <span class="ins-badge">⭐ Προτεινόμενο</span>
             <span class="ins-tier">Η πιο δημοφιλής</span>
             <span class="ins-top-row"><span class="ins-name">SCDW</span><span class="ins-p">+12€<small>/ημέρα</small></span></span>
-            <ul class="ins-feats"><li>✓ Μειωμένη ευθύνη</li><li>✓ Κλοπή</li><li>✓ Μικρότερο franchise</li></ul>
+            <ul class="ins-feats"><li>✓ Μειωμένη ευθύνη</li><li>✓ Κλοπή</li><li>✓ Μικρότερο excess</li></ul>
           </button>
           <button class="ins-col" data-pick="full" type="button">
             <span class="ins-tier">Πλήρης προστασία</span>
             <span class="ins-top-row"><span class="ins-name">FULL</span><span class="ins-p">+20€<small>/ημέρα</small></span></span>
-            <ul class="ins-feats"><li>✓ Πλήρης κάλυψη</li><li>✓ Κλοπή</li><li>✓ Μηδενικό franchise</li></ul>
+            <ul class="ins-feats"><li>✓ Πλήρης κάλυψη</li><li>✓ Κλοπή</li><li>✓ Μηδενικό excess</li></ul>
           </button>
         </div>
       </div>
@@ -1319,13 +1321,16 @@ bindRouteLinks();
         const catRate = currentCatCode && item.categoryRates && item.categoryRates[currentCatCode];
         const effectivePrice = (catRate && typeof catRate.pricePerDay === 'number') ? catRate.pricePerDay : Number(item.pricePerDay || 0);
         const effectiveExcess = (catRate && typeof catRate.excess === 'number') ? catRate.excess : Number(item.excess ?? 0);
-        const excessLabel = effectiveExcess > 0 ? `<span class="ins-excess">Franchise: ${effectiveExcess.toLocaleString('el-GR')}€</span>` : `<span class="ins-excess ins-excess-zero">Franchise: 0€</span>`;
+        const excessBadge = effectiveExcess > 0
+          ? `<span class="ins-excess">⚠ Excess: ${effectiveExcess.toLocaleString('el-GR')}€</span>`
+          : `<span class="ins-excess ins-excess-zero">✓ Excess: 0€</span>`;
         const checked = (selectedInsuranceKey ? item.key === selectedInsuranceKey : idx === 0);
         return `<label class="insurance-item ${checked ? 'active' : ''}">
           <input type="radio" name="insurance" value="${escapeHtml(effectivePrice)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="perDay" data-excess="${escapeHtml(effectiveExcess)}" ${checked ? 'checked' : ''}>
           <div class="item-content">
             <div class="item-head"><strong class="item-title">${escapeHtml(item.label)}</strong><div class="item-price">${formatMoney(effectivePrice)}<span>/ ημέρα</span></div></div>
-            <small class="item-detail">${escapeHtml(item.description || 'Ασφαλιστική κάλυψη για την κράτησή σου.')} ${excessLabel}</small>
+            <small class="item-detail">${escapeHtml(item.description || 'Ασφαλιστική κάλυψη για την κράτησή σου.')}</small>
+            ${excessBadge}
           </div>
         </label>`;
       }).join('');
