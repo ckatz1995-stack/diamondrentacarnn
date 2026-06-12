@@ -1048,7 +1048,8 @@ export async function computeQuote(data) {
             const resolvedCfg = extraCfg || {};
             const mode = cleanText(typeof rawExtra === 'object' ? (rawExtra.mode || rawExtra.billingMode || '') : '') || cleanText(resolvedCfg.billingMode || resolvedCfg.mode || 'perDay');
             const unitPrice = Number(toFiniteNumber(typeof rawExtra === 'object' ? (rawExtra.pricePerDay ?? rawExtra.price ?? rawExtra.amount) : undefined, toFiniteNumber(resolvedCfg.price, 0)).toFixed(2));
-            computedExtrasTotal += Number((mode === 'perBooking' ? unitPrice : unitPrice * billableDays).toFixed(2));
+            const qty = Math.max(1, Number(typeof rawExtra === 'object' ? (rawExtra.qty ?? rawExtra.quantity ?? 1) : 1) || 1);
+            computedExtrasTotal += Number((mode === 'perBooking' ? unitPrice * qty : unitPrice * qty * billableDays).toFixed(2));
         }
         const businessSettings = pricingCatalog?.businessSettings || {};
         const automaticFees = inlineComputeAutomaticFees({ driverAge, pickupDateTime: pickup, dropoffDateTime: dropoff, businessSettings, feeRules: pricingCatalog?.feeRules || [] });
