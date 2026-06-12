@@ -600,13 +600,13 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
       <div class="analysis-box" id="analysisBox">
         <h3>Οικονομική ανάλυση</h3>
         <button class="analysis-accordion-btn" id="analysisAccordionBtn" type="button">▼ Εμφάνιση ανάλυσης κόστους</button>
-        <div class="analysis-line"><span>Βασική χρέωση</span><span id="baseCost">0,00€</span></div>
+        <div class="analysis-line"><span id="baseCostLabel">Βασική χρέωση</span><span id="baseCost">0,00€</span></div>
         <div class="analysis-line" id="insuranceRow"><span>Ασφάλεια</span><span id="insuranceCost">0,00€</span></div>
         <div class="analysis-line" id="extrasRow"><span>Extras</span><span id="extrasCost">0,00€</span></div>
         <div class="analysis-line" id="locationFeeRow" hidden><span id="locationFeeLabel">Χρέωση τοποθεσιών</span><span id="locationFeeCost">0,00€</span></div>
         <div class="analysis-line" id="ageFeeRow" hidden><span style="display:inline-flex;align-items:center;gap:4px"><span id="ageFeeLabel">Επασφάλιστρο ηλικίας</span><span class="fee-tip" tabindex="0" data-tip="Επιπλέον χρέωση για οδηγούς κάτω των 25 ή άνω των 70 ετών.">ℹ</span></span><span id="ageFeeCost">0,00€</span></div>
         <div class="analysis-line" id="nightFeeRow" hidden><span style="display:inline-flex;align-items:center;gap:4px"><span id="nightFeeLabel">Νυχτερινή χρέωση</span><span class="fee-tip" tabindex="0" data-tip="Χρέωση για παραλαβή ή επιστροφή μεταξύ 22:00–08:00.">ℹ</span></span><span id="nightFeeCost">0,00€</span></div>
-        <div class="analysis-line big"><span>Τελικό σύνολο</span><strong id="grandTotal">0,00€</strong></div>
+        <div class="analysis-line big"><span>Τελικό σύνολο</span><strong id="grandTotal" aria-live="polite">0,00€</strong></div>
       </div>
     </div>
   </section>
@@ -646,8 +646,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
             </div>
             <div class="toggle-content" id="invoiceFields"><div class="grid-4"><div class="field"><label id="lbl-companyName">Επωνυμία επιχείρησης <span class="req">*</span></label><input id="companyName" name="companyName" type="text"><span class="field-error" id="err-companyName"></span></div><div class="field"><label>Επάγγελμα / δραστηριότητα</label><input name="profession" type="text"></div><div class="field"><label id="lbl-vatNumber">Α.Φ.Μ. <span class="req">*</span></label><input id="vatNumber" name="vatNumber" type="text"><span class="field-error" id="err-vatNumber"></span></div><div class="field"><label>Δ.Ο.Υ.</label><input name="taxOffice" type="text"></div><div class="field"><label>Διεύθυνση / έδρα</label><input name="billingAddress" type="text"></div><div class="field"><label>Πόλη</label><input name="companyCity" type="text"></div><div class="field"><label>Τ.Κ.</label><input name="companyZip" type="text"></div><div class="field"><label>Τηλέφωνο έδρας</label><input name="companyPhone" type="text"></div><div class="field"><label>Email εταιρίας</label><input name="companyEmail" type="email"></div></div></div>
           </div>
-          <div class="helper-note">Η τελική ανάλυση παραμένει ορατή πάνω στη σελίδα ώστε να γνωρίζει ο πελάτης ακριβώς τι αποστέλλει πριν ολοκληρώσει το αίτημα.</div>
-          <label class="check-row"><input type="checkbox" id="termsCheck" required><span>Έχω διαβάσει και αποδέχομαι τους όρους, τις προϋποθέσεις και την πολιτική απορρήτου.</span></label><span class="field-error" id="err-terms"></span>
+          <div class="helper-note">Με την αποστολή του αιτήματος δεν γίνεται καμία χρέωση. Θα λάβετε επιβεβαίωση με όλα τα στοιχεία της κράτησής σας.</div>
+          <label class="check-row"><input type="checkbox" id="termsCheck" required><span>Έχω διαβάσει και αποδέχομαι τους <a href="/rental-terms" target="_blank" rel="noopener" id="termsLink">όρους ενοικίασης</a> και την πολιτική απορρήτου.</span></label><span class="field-error" id="err-terms"></span>
           <div id="submitError" role="alert" style="display:none;margin:12px 0 0;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.25);border-radius:12px;padding:11px 14px;color:#b83c2e;font-size:13px;font-weight:700;line-height:1.4"></div>
           <div id="submitTimeoutError" role="alert">
             <span id="submitTimeoutMsg"></span>
@@ -776,6 +776,7 @@ function goTo(path){
 function bindRouteLinks(root = document){
   const links = Array.from(root.querySelectorAll('a[href]'));
   links.forEach((link) => {
+    if(link.getAttribute('target') === '_blank') return;
     const href = normalizeRoute(link.getAttribute('href'));
     if(!href || href.startsWith('tel:') || href.startsWith('mailto:') || href.startsWith('#')) return;
     link.setAttribute('href', href);
@@ -786,6 +787,14 @@ function bindRouteLinks(root = document){
   });
 }
 bindRouteLinks();
+
+// The iframe origin is filesusr.com, so a relative /rental-terms would point to the
+// wrong host — resolve it against the Wix site base so the new tab opens correctly.
+function syncTermsLink(){
+  const link = document.getElementById('termsLink');
+  if(link) link.href = `${currentSiteBase()}/rental-terms`;
+}
+syncTermsLink();
 
 function parseMessage(raw){
   if(!raw) return null;
@@ -936,6 +945,15 @@ function diffDays(a,b){
 function formatMoney(value){
   const num = Number(value || 0);
   return `${num.toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€`;
+}
+function setBaseCostLabel(days, pricePerDay){
+  const el = document.getElementById('baseCostLabel');
+  if(!el) return;
+  const d = Number(days || 0);
+  const p = Number(pricePerDay || 0);
+  el.textContent = (d > 0 && p > 0)
+    ? `Βασική χρέωση (${d} ${d === 1 ? 'ημέρα' : 'ημέρες'} × ${formatMoney(p)})`
+    : 'Βασική χρέωση';
 }
 
 function normalizeKey(value){ return String(value || '').trim().toLowerCase(); }
@@ -1088,7 +1106,14 @@ function updateLocationFields(){
     else{
       setFieldVisible(flightField, true);
       const flightLbl = document.getElementById('flightNumberLabel');
-      if(flightLbl) flightLbl.textContent = pickupCfg.flightLabel;
+      if(flightLbl){
+        // The field is required whenever visible (see validateCheckoutFields) — show the asterisk
+        flightLbl.textContent = `${pickupCfg.flightLabel} `;
+        const req = document.createElement('span');
+        req.className = 'req';
+        req.textContent = '*';
+        flightLbl.appendChild(req);
+      }
       const flightInput = flightField.querySelector('input');
       if(flightInput) flightInput.placeholder = pickupCfg.flightPlaceholder || '';
       if(originField){
@@ -1247,9 +1272,12 @@ function renderVehicle(v){
   const grandTotal = totals.total;
 
   document.querySelector('.vehicle-badge').textContent = v.label || state.category || 'D';
-  document.getElementById('vehicleImage').src = v.image || '';
   const categoryCode = extractCategoryCode(v.label || v.category || state.category || 'A');
-  document.getElementById('vehicleName').textContent = buildVehicleHeading(v.shortName || v.title || v.name || v.displayName || v.displayTitle, categoryCode);
+  const vehicleHeading = buildVehicleHeading(v.shortName || v.title || v.name || v.displayName || v.displayTitle, categoryCode);
+  const vehicleImg = document.getElementById('vehicleImage');
+  vehicleImg.src = v.image || '';
+  vehicleImg.alt = vehicleHeading;
+  document.getElementById('vehicleName').textContent = vehicleHeading;
   document.getElementById('vehicleSubtitle').textContent = 'ή παρόμοιο';
   document.getElementById('topPricePerDay').textContent = formatMoney(Number(totals.basePricePerDay || v.price || 0));
   state.category = categoryCode || state.category;
@@ -1260,6 +1288,7 @@ function renderVehicle(v){
     ? `${insLabel} · Excess ${state.insuranceExcess > 0 ? formatMoney(state.insuranceExcess) : '0€'}`
     : insLabel;
   document.getElementById('extrasText').textContent = extrasDisplayText();
+  setBaseCostLabel(days, totals.basePricePerDay);
   document.getElementById('baseCost').textContent = formatMoney(baseTotal);
   document.getElementById('insuranceCost').textContent = formatMoney(totals.insuranceCost);
   document.getElementById('extrasCost').textContent = formatMoney(totals.extrasCost);
@@ -1299,8 +1328,10 @@ function renderVehicle(v){
   callServerQuote();
 }
 
+let _quoteSeq = 0;
 async function callServerQuote(){
   if(!vehicle || !state.vehicleId) return;
+  const seq = ++_quoteSeq;
   try{
     const payload = {
       vehicleId: state.vehicleId,
@@ -1320,6 +1351,7 @@ async function callServerQuote(){
       body: JSON.stringify(payload)
     });
     const data = await res.json();
+    if(seq !== _quoteSeq) return; // a newer quote request superseded this one
     if(!data?.success){
       const el = document.getElementById('grandTotal');
       if(el && el.textContent === '—' && _localGrandTotalFallback !== null) el.textContent = formatMoney(_localGrandTotalFallback);
@@ -1327,6 +1359,7 @@ async function callServerQuote(){
     }
     const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
     const hide = (id, hidden) => { const el = document.getElementById(id); if(el) el.hidden = hidden; };
+    setBaseCostLabel(Number(data.billableDays || data.days || diffDays(state.pickup, state.dropoff)), Number(data.basePricePerDay || 0));
     set('baseCost', formatMoney(data.baseCost));
     set('insuranceCost', formatMoney(data.insuranceCost));
     hide('insuranceRow', !(data.insuranceCost > 0));
@@ -1346,6 +1379,7 @@ async function callServerQuote(){
     set('topPricePerDay', formatMoney(data.basePricePerDay || 0));
     lastServerQuote = data;
   }catch(e){
+    if(seq !== _quoteSeq) return;
     const el = document.getElementById('grandTotal');
     if(el && el.textContent === '—' && _localGrandTotalFallback !== null) el.textContent = formatMoney(_localGrandTotalFallback);
   }
@@ -1537,7 +1571,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     submitBtn.textContent = oldText;
     showSubmitOverlay(false);
     form.dataset.submitting = '';
-    const supportPhone = (window.BookingState && BookingState.get('supportPhone')) || '+30 2310 000 000';
+    const supportPhone = String(getBusinessSettings().companyPhone || '').trim() || '+30 2310 000 000'; // TODO multi-tenant: fallback should come from admin settings
     const msgEl = document.getElementById('submitTimeoutMsg');
     const errEl = document.getElementById('submitTimeoutError');
     if(msgEl) msgEl.textContent = 'Το αίτημα αργεί περισσότερο από το αναμενόμενο. Η κράτησή σας ενδέχεται να έχει ληφθεί — μην υποβάλετε ξανά. Επικοινωνήστε μαζί μας στο ' + supportPhone + ' για επιβεβαίωση.';
@@ -1645,7 +1679,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       BookingState.set('bookingReference', data.bookingNumber || data.id || '');
       BookingState.set('totalPrice', data.totalPrice ?? sq.totalPrice ?? 0);
     }
-    goTo(`/success?booking=${encodeURIComponent(data.bookingNumber)}`);
+    goTo(`/success?booking=${encodeURIComponent(data.bookingNumber || data.id || '')}`);
   } catch (err) {
     clearTimeout(timeoutId);
     if(submissionTimedOut) return;
@@ -1712,6 +1746,7 @@ window.addEventListener('message', (event) => {
   if (data.type === 'booking-context') {
     embeddedContext = data || embeddedContext;
     safeWrite(BOOKING_CONTEXT_STORAGE_KEY, embeddedContext);
+    syncTermsLink();
     const query = data.query || {};
     state.vehicleId = String(query.vehicle || query.vehicleId || state.vehicleId || '').trim();
     state.pickup = query.pickup || state.pickup;
