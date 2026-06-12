@@ -1230,6 +1230,21 @@ export const COLLECTION_SCHEMAS = [
         "key": "notes",
         "displayName": "Notes",
         "type": "TEXT"
+      },
+      {
+        "key": "photoFront",
+        "displayName": "Photo Front",
+        "type": "TEXT"
+      },
+      {
+        "key": "photoSide",
+        "displayName": "Photo Side",
+        "type": "TEXT"
+      },
+      {
+        "key": "photoBack",
+        "displayName": "Photo Back",
+        "type": "TEXT"
       }
     ],
     "permissions": {

@@ -1,5 +1,6 @@
 
 import wixData from 'wix-data';
+import { mediaManager } from 'wix-media-backend';
 import { requireStaffAccess } from 'backend/staffAccess.jsw';
 
 const COLLECTIONS = {
@@ -16,6 +17,16 @@ const COLLECTION_CANDIDATES = {
 };
 
 function txt(v){ return String(v ?? '').trim(); }
+function deriveCatCode(v){
+  const s = txt(v);
+  if (!s) return '';
+  if (/^[0-9a-f]{8}-[0-9a-f-]{12,}$/i.test(s) || /^[0-9a-f]{16,}$/i.test(s)) return ''; // record id, not a code
+  const dash = s.match(/^([A-Za-z0-9Α-Ω]{1,10})\s*[-–\/]/);
+  if (dash) return dash[1].toUpperCase();
+  if (/^[A-Za-z0-9Α-Ω]{1,10}$/.test(s)) return s.toUpperCase();
+  const m = s.match(/^([A-Za-z0-9Α-Ω]{1,10})\b/);
+  return m ? m[1].toUpperCase() : '';
+}
 function num(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }
 function bool(v){
   if (typeof v === 'boolean') return v;
@@ -56,6 +67,9 @@ function normalizeFleet(item = {}, category = null){
     hardHold: bool(item.hardHold),
     notes: txt(item.notes),
     mediaGallery: txt(item.mediaGallery),
+    photoFront: txt(item.photoFront),
+    photoSide: txt(item.photoSide),
+    photoBack: txt(item.photoBack),
     needsReview: txt(item.needsReview),
     legacyCreatedAt: iso(item.legacyCreatedAt),
     legacyUpdatedAt: iso(item.legacyUpdatedAt),
@@ -270,6 +284,9 @@ export async function saveVehicleCardData({ sessionToken, fleetVehicleId, patch 
     hardHold: patch.hardHold == null ? current.hardHold : !!patch.hardHold,
     notes: txt(patch.notes ?? current.notes),
     mediaGallery: txt(patch.mediaGallery ?? current.mediaGallery),
+    photoFront: txt(patch.photoFront ?? current.photoFront),
+    photoSide: txt(patch.photoSide ?? current.photoSide),
+    photoBack: txt(patch.photoBack ?? current.photoBack),
     needsReview: txt(patch.needsReview ?? current.needsReview),
     legacyUpdatedAt: new Date().toISOString()
   };
@@ -279,6 +296,71 @@ export async function saveVehicleCardData({ sessionToken, fleetVehicleId, patch 
     : COLLECTIONS.fleet;
   const updated = await wixData.update(targetCollection, next, { suppressAuth: true });
   return { success: true, fleet: normalizeFleet(updated) };
+}
+
+const PHOTO_SLOT_FIELDS = { front: 'photoFront', side: 'photoSide', back: 'photoBack' };
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB after client-side downscale
+
+export async function uploadVehiclePhoto({ sessionToken, fleetVehicleId, slot, base64, fileName, mimeType } = {}) {
+  await requireStaffAccess({ sessionToken, area: 'fleet', action: 'Edit' });
+  const targetId = txt(fleetVehicleId);
+  if (!targetId) throw new Error('MISSING_FLEET_VEHICLE_ID');
+  const field = PHOTO_SLOT_FIELDS[txt(slot).toLowerCase()];
+  if (!field) throw new Error('INVALID_PHOTO_SLOT');
+
+  const current = await findFleetRecordByAnyId(targetId);
+  if (!current) throw new Error('FLEET_VEHICLE_NOT_FOUND');
+
+  const data = txt(base64).replace(/^data:[^;]+;base64,/, '');
+  if (!data) throw new Error('MISSING_PHOTO_DATA');
+  const buffer = Buffer.from(data, 'base64');
+  if (!buffer.length) throw new Error('EMPTY_PHOTO_DATA');
+  if (buffer.length > MAX_PHOTO_BYTES) throw new Error('PHOTO_TOO_LARGE');
+
+  const mime = /^image\/(jpe?g|png|webp)$/i.test(txt(mimeType)) ? txt(mimeType).toLowerCase() : 'image/jpeg';
+  const ext = mime === 'image/png' ? 'png' : (mime === 'image/webp' ? 'webp' : 'jpg');
+  const safeName = (txt(fileName).replace(/[^A-Za-z0-9._-]/g, '_') || `photo.${ext}`).replace(/\.(\w+)?$/, '') + `.${ext}`;
+  const uploadName = `${txt(current.plate) || targetId}_${txt(slot)}_${Date.now()}_${safeName}`;
+
+  const fileInfo = await mediaManager.upload('/fleet-photos', buffer, uploadName, {
+    mediaOptions: { mimeType: mime, mediaType: 'image' },
+    metadataOptions: { isPrivate: false, isVisitorUpload: false }
+  });
+  const fileUrl = txt(fileInfo?.fileUrl || fileInfo?.url || '');
+  if (!fileUrl) throw new Error('UPLOAD_FAILED');
+
+  const targetCollection = COLLECTION_CANDIDATES.fleet.includes(txt(current._collectionName))
+    ? txt(current._collectionName)
+    : COLLECTIONS.fleet;
+  const updated = await wixData.update(targetCollection, {
+    ...current,
+    [field]: fileUrl,
+    legacyUpdatedAt: new Date().toISOString()
+  }, { suppressAuth: true });
+
+  return { success: true, slot: txt(slot).toLowerCase(), fileUrl, fleet: normalizeFleet(updated) };
+}
+
+export async function removeVehiclePhoto({ sessionToken, fleetVehicleId, slot } = {}) {
+  await requireStaffAccess({ sessionToken, area: 'fleet', action: 'Edit' });
+  const targetId = txt(fleetVehicleId);
+  if (!targetId) throw new Error('MISSING_FLEET_VEHICLE_ID');
+  const field = PHOTO_SLOT_FIELDS[txt(slot).toLowerCase()];
+  if (!field) throw new Error('INVALID_PHOTO_SLOT');
+
+  const current = await findFleetRecordByAnyId(targetId);
+  if (!current) throw new Error('FLEET_VEHICLE_NOT_FOUND');
+
+  const targetCollection = COLLECTION_CANDIDATES.fleet.includes(txt(current._collectionName))
+    ? txt(current._collectionName)
+    : COLLECTIONS.fleet;
+  const updated = await wixData.update(targetCollection, {
+    ...current,
+    [field]: '',
+    legacyUpdatedAt: new Date().toISOString()
+  }, { suppressAuth: true });
+
+  return { success: true, slot: txt(slot).toLowerCase(), fleet: normalizeFleet(updated) };
 }
 
 export async function addMaintenanceJob({ sessionToken, fleetVehicleId, start, end, works, notes, durationDays } = {}) {
@@ -328,15 +410,28 @@ export async function addMaintenanceJob({ sessionToken, fleetVehicleId, start, e
 export async function getFleetBoard({ sessionToken } = {}) {
   await requireStaffAccess({ sessionToken, area: 'fleet', action: 'View' });
 
-  // 1. All active fleet vehicles — include category reference so vehicles added
-  // via Wix CMS (which only populate the reference, not the direct string fields)
-  // still resolve categoryCode / categoryLabel correctly.
+  // 1. All fleet vehicles — no eq('active', true) filter: rows added via the
+  // Wix CMS often leave the Active checkbox unset (null), and eq() would hide
+  // them from the board entirely. Only explicitly-deactivated rows are skipped.
   const fleetRes = await wixData.query('FleetNew')
-    .eq('active', true)
     .include('category')
-    .limit(500)
+    .limit(1000)
     .find({ suppressAuth: true });
-  const vehicles = fleetRes.items || [];
+  const vehicles = (fleetRes.items || []).filter(v => v.active !== false);
+
+  // 1b. Canonical category map from VehiclesNew so every fleet row groups
+  // under the same code/label regardless of which field the row populated.
+  const catById = new Map();
+  const catLabelByCode = new Map();
+  try {
+    const catRes = await wixData.query('VehiclesNew').limit(1000).find({ suppressAuth: true });
+    for (const c of (catRes.items || [])) {
+      const code = deriveCatCode(c.category || c.Category) || deriveCatCode(c.title || c.Title);
+      if (!code) continue;
+      if (c._id) catById.set(txt(c._id), code);
+      if (!catLabelByCode.has(code)) catLabelByCode.set(code, txt(c.title || c.Title) || code);
+    }
+  } catch (_) {}
 
   // 2. All non-closed rentals (to find currently active/out vehicles)
   let rentals = [];
@@ -386,13 +481,24 @@ export async function getFleetBoard({ sessionToken } = {}) {
     const id  = txt(v._id);
     const plt = txt(v.plate).toLowerCase();
     const ar  = vehicleRentalMap.get(id) || vehicleRentalMap.get(plt) || null;
+    // Resolve the canonical category code: direct code fields first, then the
+    // categoryId / reference looked up against VehiclesNew.
+    const rawCode = deriveCatCode(v.categoryCode)
+      || deriveCatCode(typeof v.category === 'string' ? v.category : '')
+      || deriveCatCode(v.category?.categoryCode || v.category?.category)
+      || catById.get(txt(v.categoryId)) || ''
+      || catById.get(txt(typeof v.category === 'object' ? (v.category?._id || '') : v.category)) || ''
+      || deriveCatCode(v.categoryLabel || v.categoryDisplayTitle);
+    const canonLabel = (rawCode && catLabelByCode.get(rawCode))
+      || txt(v.categoryLabel || v.categoryDisplayTitle || v.category?.categoryLabel || v.category?.title || v.category?.categoryDisplayTitle || '')
+      || rawCode;
     return {
       fleetVehicleId:       txt(v.fleetVehicleId || id),
       plate:                txt(v.plate),
       model:                txt(v.model),
       vehicleLabel:         txt(v.vehicleLabel || [txt(v.plate), txt(v.model)].filter(Boolean).join(' - ')),
-      categoryCode:         txt(v.categoryCode  || v.category?.categoryCode || (typeof v.category==='string'?v.category:'')),
-      categoryLabel:        txt(v.categoryLabel || v.categoryDisplayTitle || v.category?.categoryLabel || v.category?.title || v.category?.categoryDisplayTitle || (typeof v.category==='string'?v.category:'')),
+      categoryCode:         rawCode,
+      categoryLabel:        canonLabel,
       status:               txt(v.status),
       operationalStatus:    txt(v.operationalStatus),
       currentStationCode:   txt(v.currentStationCode),

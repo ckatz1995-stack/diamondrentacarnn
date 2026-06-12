@@ -1,5 +1,5 @@
 import wixLocation from 'wix-location';
-import { getVehicleCardData, saveVehicleCardData, addMaintenanceJob } from 'backend/vehicleCard.jsw';
+import { getVehicleCardData, saveVehicleCardData, addMaintenanceJob, uploadVehiclePhoto, removeVehiclePhoto } from 'backend/vehicleCard.jsw';
 import { buildUserContext, logoutBackroom, requireBackroomAccess, getSessionToken } from 'public/backroomAuth';
 import { isTrustedBridgeOrigin, normalizeBridgeMessage, postMessageSafe, resolveHtmlComponent } from 'public/bridgeUtils';
 import { APP_ROUTES as ROUTES } from 'public/appRoutes';
@@ -110,6 +110,45 @@ $w.onReady(async function () {
       } catch (error) {
         logSuppressed('addMaintenanceJob failed', error);
         post({ type: 'maintenanceJobSaved', success: false, message: error?.message || String(error) });
+      }
+      return;
+    }
+
+    if (msg.type === 'uploadVehiclePhoto') {
+      const fleetVehicleId = String(msg.fleetVehicleId || '').trim();
+      const slot = String(msg.slot || '').trim();
+      if (!fleetVehicleId || !slot) return;
+      try {
+        const res = await uploadVehiclePhoto({
+          sessionToken: resolveAuthToken(),
+          fleetVehicleId,
+          slot,
+          base64: String(msg.base64 || ''),
+          fileName: String(msg.fileName || ''),
+          mimeType: String(msg.mimeType || '')
+        });
+        if (res?.success === false) {
+          post({ type: 'vehiclePhotoSaved', success: false, slot, message: res.message || 'Upload failed' });
+          return;
+        }
+        post({ type: 'vehiclePhotoSaved', success: true, slot: res.slot, fileUrl: res.fileUrl, fleet: res.fleet });
+      } catch (error) {
+        logSuppressed('uploadVehiclePhoto failed', error);
+        post({ type: 'vehiclePhotoSaved', success: false, slot, message: error?.message || String(error) });
+      }
+      return;
+    }
+
+    if (msg.type === 'removeVehiclePhoto') {
+      const fleetVehicleId = String(msg.fleetVehicleId || '').trim();
+      const slot = String(msg.slot || '').trim();
+      if (!fleetVehicleId || !slot) return;
+      try {
+        const res = await removeVehiclePhoto({ sessionToken: resolveAuthToken(), fleetVehicleId, slot });
+        post({ type: 'vehiclePhotoSaved', success: res?.success !== false, slot, removed: true, fleet: res?.fleet });
+      } catch (error) {
+        logSuppressed('removeVehiclePhoto failed', error);
+        post({ type: 'vehiclePhotoSaved', success: false, slot, message: error?.message || String(error) });
       }
       return;
     }

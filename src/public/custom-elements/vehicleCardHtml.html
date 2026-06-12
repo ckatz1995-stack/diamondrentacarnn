@@ -135,6 +135,24 @@ button:active{transform:scale(.97)}
 .section-title{font:700 12px/1 var(--f);color:var(--text);display:flex;align-items:center;gap:6px}
 .section-body{padding:14px 16px}
 
+/* ── Vehicle photos (front/side/back) ── */
+.photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:560px){.photos-grid{grid-template-columns:1fr}}
+.photo-slot{border:1.5px dashed var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface3);display:flex;flex-direction:column}
+.photo-slot.has-photo{border-style:solid}
+.photo-slot-head{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-bottom:1px solid var(--border)}
+.photo-slot-title{font:700 10.5px/1 var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--sub)}
+.photo-slot-actions{display:flex;gap:4px}
+.photo-slot-btn{appearance:none;border:1px solid var(--border);background:var(--surface);color:var(--sub);font:700 10px/1 var(--f);border-radius:7px;padding:4px 8px;cursor:pointer}
+.photo-slot-btn:hover{background:rgba(0,0,0,.05)}
+.photo-slot-btn.danger{color:#b3413a}
+.photo-slot-view{aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;background:#eceae6;overflow:hidden;cursor:pointer}
+.photo-slot-view img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-slot-empty{font:600 11px/1.5 var(--f);color:var(--muted);text-align:center;padding:10px}
+.photo-slot-status{font:600 10px/1.4 var(--f);color:var(--muted);padding:5px 10px;min-height:14px}
+.photo-slot-status.err{color:#b3413a}
+.photo-slot-status.ok{color:#2e7d32}
+
 /* ── Details grid ── */
 .details-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .detail-field{border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;background:var(--surface3)}
@@ -365,6 +383,18 @@ button:active{transform:scale(.97)}
             <div class="details-grid" id="detailsGrid"></div>
           </div>
         </div>
+
+        <!-- Vehicle photos: front / side / back — shown to customers in the booking flow -->
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">📷 Photos (Front / Side / Back)</span>
+            <span style="font:600 10px/1 var(--f);color:var(--muted)">Shown to customers on the booking options page</span>
+          </div>
+          <div class="section-body">
+            <div class="photos-grid" id="photosGrid"></div>
+          </div>
+        </div>
+        <input type="file" id="photoFileInput" accept="image/jpeg,image/png,image/webp" style="display:none">
         <!-- Edit form (shown when editing) -->
         <div class="section-card" id="editCard" style="display:none">
           <div class="section-head"><span class="section-title">Edit Vehicle</span></div>
@@ -596,7 +626,110 @@ function render(){
 
   renderMaintJobs();
   renderHistory();
+  renderPhotos();
 }
+
+// ── Vehicle photos (front/side/back) ───────────────────────
+const PHOTO_SLOTS = [
+  {key:'front', label:'Front',  field:'photoFront'},
+  {key:'side',  label:'Side',   field:'photoSide'},
+  {key:'back',  label:'Back',   field:'photoBack'},
+];
+let pendingPhotoSlot = null;
+
+function wixImgUrl(src){
+  const s = String(src||'').trim();
+  if(!s) return '';
+  if(/^https?:\/\//i.test(s)) return s;
+  const m = s.match(/^wix:image:\/\/v1\/([^\/]+)\//);
+  return m ? 'https://static.wixstatic.com/media/'+m[1] : s;
+}
+
+function renderPhotos(){
+  const grid = $('photosGrid'); if(!grid) return;
+  const f = state.fleet || {};
+  grid.innerHTML = PHOTO_SLOTS.map(slot=>{
+    const url = wixImgUrl(f[slot.field]||'');
+    return `<div class="photo-slot${url?' has-photo':''}" data-slot="${slot.key}">
+      <div class="photo-slot-head">
+        <span class="photo-slot-title">${slot.label}</span>
+        <span class="photo-slot-actions">
+          <button class="photo-slot-btn" data-act="upload" data-slot="${slot.key}" type="button">${url?'Replace':'Upload'}</button>
+          ${url?`<button class="photo-slot-btn danger" data-act="remove" data-slot="${slot.key}" type="button">✕</button>`:''}
+        </span>
+      </div>
+      <div class="photo-slot-view" data-act="upload" data-slot="${slot.key}">
+        ${url
+          ? `<img src="${esc(url)}" alt="${slot.label}" loading="lazy">`
+          : `<div class="photo-slot-empty">No ${slot.label.toLowerCase()} photo yet.<br>Click to upload.</div>`}
+      </div>
+      <div class="photo-slot-status" id="photoStatus_${slot.key}"></div>
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('[data-act="upload"]').forEach(el=>{
+    el.addEventListener('click',()=>{ pendingPhotoSlot = el.dataset.slot; $('photoFileInput').click(); });
+  });
+  grid.querySelectorAll('[data-act="remove"]').forEach(el=>{
+    el.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const slot = el.dataset.slot;
+      photoStatus(slot,'Removing…','');
+      postToWix({type:'removeVehiclePhoto',fleetVehicleId:state.fleetVehicleId,slot});
+    });
+  });
+}
+
+function photoStatus(slot,msg,cls){
+  const el = $('photoStatus_'+slot); if(!el) return;
+  el.textContent = msg||'';
+  el.className = 'photo-slot-status'+(cls?' '+cls:'');
+}
+
+// Downscale to max 1600px and JPEG-compress so the postMessage payload stays small
+function downscaleImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=>reject(new Error('Could not read the file.'));
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onerror = ()=>reject(new Error('Not a valid image file.'));
+      img.onload = ()=>{
+        const MAX = 1600;
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if(w>MAX || h>MAX){ const r = Math.min(MAX/w, MAX/h); w = Math.round(w*r); h = Math.round(h*r); }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',0.85));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+$('photoFileInput').addEventListener('change', async (e)=>{
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  const slot = pendingPhotoSlot;
+  pendingPhotoSlot = null;
+  if(!file || !slot) return;
+  if(!/^image\//.test(file.type)){ photoStatus(slot,'Please choose an image file.','err'); return; }
+  photoStatus(slot,'Uploading…','');
+  try{
+    const dataUrl = await downscaleImage(file);
+    postToWix({
+      type:'uploadVehiclePhoto',
+      fleetVehicleId:state.fleetVehicleId,
+      slot,
+      base64:dataUrl,
+      fileName:file.name||('photo_'+slot+'.jpg'),
+      mimeType:'image/jpeg',
+    });
+  }catch(err){
+    photoStatus(slot, err && err.message ? err.message : 'Upload failed.', 'err');
+  }
+});
 
 function renderMaintJobs(){
   const body = $('maintBody'); if(!body) return;
@@ -830,6 +963,19 @@ window.addEventListener('message',(evt)=>{
     state.fleetVehicleId=data.fleet?.fleetVehicleId||state.fleetVehicleId||'';
     closeEditForm();
     render();
+    return;
+  }
+
+  if(data.type==='vehiclePhotoSaved'){
+    const slot = String(data.slot||'');
+    if(data.success){
+      if(data.fleet) state.fleet = data.fleet;
+      renderPhotos();
+      photoStatus(slot, data.removed ? 'Photo removed.' : 'Photo saved ✓', 'ok');
+      setTimeout(()=>photoStatus(slot,'',''),3000);
+    }else{
+      photoStatus(slot, data.message || 'Upload failed.', 'err');
+    }
     return;
   }
 
