@@ -225,6 +225,8 @@
     .item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-width:0}
     .item-body strong,.item-title{display:block;font-size:18px;line-height:1.15;margin:0;font-weight:900;min-width:0;word-break:break-word}
     .item-body small,.item-detail{display:block;color:var(--muted);font-size:14px;line-height:1.45;font-weight:700;min-width:0;word-break:break-word}
+    .ins-excess{display:inline-block;margin-top:5px;font:700 11px/1 var(--f);letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.06);color:var(--muted)}
+    .ins-excess-zero{background:rgba(21,128,61,.1);color:#15803d}
     .item-price{font-size:18px;font-weight:900;white-space:nowrap;align-self:flex-start;text-align:right;line-height:1.15}
     .item-price span{display:block;font-size:12px;font-weight:800;color:#7b6646;margin-top:3px}
     .insurance-item.active,.extra-item.active{
@@ -1312,13 +1314,18 @@ bindRouteLinks();
       const insurancePlans = Array.isArray(pricingCatalog?.insurancePlans) ? pricingCatalog.insurancePlans : [];
       const extraServices = Array.isArray(pricingCatalog?.extraServices) ? pricingCatalog.extraServices : [];
 
+      const currentCatCode = extractCategoryCode(state.category || '');
       insuranceList.innerHTML = insurancePlans.map((item, idx) => {
+        const catRate = currentCatCode && item.categoryRates && item.categoryRates[currentCatCode];
+        const effectivePrice = (catRate && typeof catRate.pricePerDay === 'number') ? catRate.pricePerDay : Number(item.pricePerDay || 0);
+        const effectiveExcess = (catRate && typeof catRate.excess === 'number') ? catRate.excess : Number(item.excess ?? 0);
+        const excessLabel = effectiveExcess > 0 ? `<span class="ins-excess">Franchise: ${effectiveExcess.toLocaleString('el-GR')}€</span>` : `<span class="ins-excess ins-excess-zero">Franchise: 0€</span>`;
         const checked = (selectedInsuranceKey ? item.key === selectedInsuranceKey : idx === 0);
         return `<label class="insurance-item ${checked ? 'active' : ''}">
-          <input type="radio" name="insurance" value="${escapeHtml(item.pricePerDay)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="perDay" ${checked ? 'checked' : ''}>
+          <input type="radio" name="insurance" value="${escapeHtml(effectivePrice)}" data-key="${escapeHtml(item.key)}" data-label="${escapeHtml(item.label)}" data-mode="perDay" data-excess="${escapeHtml(effectiveExcess)}" ${checked ? 'checked' : ''}>
           <div class="item-content">
-            <div class="item-head"><strong class="item-title">${escapeHtml(item.label)}</strong><div class="item-price">${formatMoney(item.pricePerDay)}<span>/ ημέρα</span></div></div>
-            <small class="item-detail">${escapeHtml(item.description || 'Ασφαλιστική κάλυψη για την κράτησή σου.')}</small>
+            <div class="item-head"><strong class="item-title">${escapeHtml(item.label)}</strong><div class="item-price">${formatMoney(effectivePrice)}<span>/ ημέρα</span></div></div>
+            <small class="item-detail">${escapeHtml(item.description || 'Ασφαλιστική κάλυψη για την κράτησή σου.')} ${excessLabel}</small>
           </div>
         </label>`;
       }).join('');
@@ -1329,7 +1336,8 @@ bindRouteLinks();
         if(!col) return;
         var priceEl = col.querySelector('.ins-p');
         if(priceEl){
-          var price = Number(plan.pricePerDay || 0);
+          var catRateCol = currentCatCode && plan.categoryRates && plan.categoryRates[currentCatCode];
+          var price = (catRateCol && typeof catRateCol.pricePerDay === 'number') ? catRateCol.pricePerDay : Number(plan.pricePerDay || 0);
           priceEl.innerHTML = (price === 0 ? '0€' : '+' + price.toLocaleString('el-GR', {minimumFractionDigits:0}) + '€') + '<small>/ημέρα</small>';
         }
         // Update feature list if catalog provides features array
