@@ -199,7 +199,32 @@ export async function get_fleet_models(request){
         ...toImageArray(item?.Image),
         ...toImageArray(item?.photo),
         ...toImageArray(item?.Photo),
+        ...toImageArray(item?.modelImage),
+        ...toImageArray(item?.modelPhoto),
+        ...toImageArray(item?.vehicleImage),
+        ...toImageArray(item?.vehiclePhoto),
+        ...toImageArray(item?.thumbnail),
+        ...toImageArray(item?.Thumbnail),
+        ...toImageArray(item?.featuredImage),
+        ...toImageArray(item?.mainImage),
+        ...toImageArray(item?.frontImage),
+        ...toImageArray(item?.carImage),
       ].filter(Boolean);
+
+      // Read specs from FleetNew item fields (may be populated in some setups)
+      const specs = {};
+      const tx = String(item?.transmission || item?.Transmission || item?.gearbox || item?.Gearbox || "").trim();
+      if(tx && tx !== "-") specs.gearbox = tx;
+      const fu = String(item?.fuelType || item?.FuelType || item?.fuel || item?.Fuel || "").trim();
+      if(fu && fu !== "-") specs.fuel = fu;
+      const se = Number(item?.seats || item?.Seats || 0);
+      if(se > 0) specs.seats = se;
+      const do_ = Number(item?.doors || item?.Doors || 0);
+      if(do_ > 0) specs.doors = do_;
+      const ac = item?.airCondition ?? item?.AirCondition ?? item?.ac ?? item?.AC ?? null;
+      if(ac != null) specs.ac = Boolean(ac);
+      const eng = String(item?.engineCc || item?.EngineCc || item?.engine || item?.Engine || "").trim();
+      if(eng && eng !== "-") specs.engine = eng;
 
       const key = normalizeModelKey(model);
       if (!grouped.has(key)) {
@@ -207,12 +232,15 @@ export async function get_fleet_models(request){
           model,
           note: "",
           photos: Array.from(new Set(photos)).slice(0, 3),
+          specs,
           category: inferredCategory || targetCategory || ""
         });
       } else {
         const current = grouped.get(key);
         current.photos = Array.from(new Set([...(current.photos || []), ...photos])).slice(0, 3);
         if (!current.category && inferredCategory) current.category = inferredCategory;
+        // merge specs only if not already set
+        if(!current.specs || !Object.keys(current.specs).length) current.specs = specs;
       }
     }
 

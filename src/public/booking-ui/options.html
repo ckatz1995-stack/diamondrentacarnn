@@ -758,18 +758,33 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .models-strip-chip.is-active{background:linear-gradient(135deg,#e7bf69,#f6e19f);color:#2a1d09;border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.22)}
 @media(max-width:560px){.models-strip-label,.models-strip-sep{display:none}}
 /* ── Models expand panel (slides open below the chips row) ── */
-.models-strip-panel{margin-top:9px;padding-top:12px;border-top:1px solid rgba(255,255,255,.10);display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.models-strip-panel{margin-top:9px;padding-top:12px;border-top:1px solid rgba(255,255,255,.10);display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
 .models-strip-panel[hidden]{display:none!important}
-.msp-photo{flex:0 0 200px;max-width:200px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.06);border:1px solid rgba(231,191,105,.18);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
-.msp-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.msp-photo-placeholder{display:flex;align-items:center;justify-content:center;color:rgba(231,191,105,.35);width:100%;height:100%}
-.msp-photo-placeholder svg{width:64px;height:40px}
-.msp-info{flex:1;min-width:160px;display:flex;flex-direction:column;gap:6px}
-.msp-name{font-size:15px;font-weight:900;color:#f3ead2;letter-spacing:.02em;line-height:1.2}
-.msp-note{font-size:11.5px;color:rgba(231,191,105,.72);font-weight:700}
-.msp-specs{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+/* Media column: main photo + 3 thumbs */
+.msp-media{flex:0 0 260px;display:flex;flex-direction:column;gap:7px}
+.msp-main-photo{border-radius:10px;overflow:hidden;background:rgba(0,0,0,.25);border:1px solid rgba(231,191,105,.20);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
+.msp-main-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.msp-main-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(231,191,105,.28)}
+.msp-main-placeholder svg{width:64px;height:40px}
+/* Thumbnail row */
+.msp-thumbs{display:flex;gap:6px}
+.msp-thumb{flex:1;border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);border-radius:8px;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;overflow:hidden;font-family:inherit;transition:border-color .15s ease}
+.msp-thumb:hover{border-color:rgba(231,191,105,.40)}
+.msp-thumb.is-active{border-color:#e7bf69;box-shadow:0 0 0 1px rgba(231,191,105,.28)}
+.msp-thumb-img{width:100%;aspect-ratio:16/9;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.20)}
+.msp-thumb-img img{width:100%;height:100%;object-fit:cover;display:block}
+.msp-thumb-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(231,191,105,.22)}
+.msp-thumb-placeholder svg{width:26px;height:16px}
+.msp-thumb-label{font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:3px 4px;text-align:center;line-height:1}
+.msp-thumb.is-active .msp-thumb-label{color:#e7bf69}
+/* Info column */
+.msp-info{flex:1;min-width:150px;display:flex;flex-direction:column;gap:7px}
+.msp-name{font-size:16px;font-weight:900;color:#f3ead2;letter-spacing:.02em;line-height:1.2}
+.msp-note{font-size:11.5px;color:rgba(231,191,105,.72);font-weight:700;line-height:1.4}
+.msp-specs{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
 .msp-spec{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);color:#f3ead2;letter-spacing:.04em}
-@media(max-width:560px){.msp-photo{flex:0 0 100%;max-width:100%}}
+.msp-disclaimer{font-size:10px;color:rgba(255,255,255,.32);margin-top:auto;line-height:1.5;font-style:italic}
+@media(max-width:620px){.msp-media{flex:0 0 100%}}
 
 /* ── Summary sidebar: stretch to fill the main content height ── */
 .opts-layout{align-items:stretch!important}
@@ -1971,24 +1986,69 @@ async function renderModels(category){
 
     let activeIndex = -1;
 
+    const CAR_SVG = `<svg viewBox="0 0 64 40" fill="currentColor"><path d="M10 26c0-1.5.6-4.2 1.6-5.8l3.1-5.2C16 13 18 12 20 12h22c2 0 4 1 5.3 3l3.1 5.2c1 1.6 1.6 4.3 1.6 5.8v5a2 2 0 0 1-2 2h-2.1a5 5 0 0 1-9.8 0H25.9a5 5 0 0 1-9.8 0H14a2 2 0 0 1-2-2v-3zm8.4-6h27.2l-2.5-4.2c-.6-1-1.7-1.8-2.9-1.8H21.8c-1.2 0-2.3.8-2.9 1.8L16.4 20h2zm2.6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm26 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>`;
+    const THUMB_LABELS = ['Εμπρός', 'Πλάι', 'Πίσω'];
+
     function showPanel(idx){
       if(!panel) return;
       const m = namedItems[idx];
-      const photo = (Array.isArray(m.photos) ? m.photos[0] : m.image) || '';
       const name = m.model || m.name || 'Μοντέλο';
+      const photos = Array.isArray(m.photos) ? m.photos.filter(Boolean) : (m.image ? [m.image] : []);
       const specs = m.specs || {};
-      const specsHtml = [specs.gearbox, specs.fuel, specs.seats ? `${specs.seats} θέσεις` : null, specs.ac ? 'A/C' : null, specs.engine || null]
-        .filter(v => v && String(v) !== '-')
-        .map(v => `<span class="msp-spec">${escapeHtml(String(v))}</span>`).join('');
-      const photoHtml = photo
-        ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" loading="lazy">`
-        : `<div class="msp-photo-placeholder"><svg viewBox="0 0 64 40" fill="currentColor"><path d="M10 26c0-1.5.6-4.2 1.6-5.8l3.1-5.2C16 13 18 12 20 12h22c2 0 4 1 5.3 3l3.1 5.2c1 1.6 1.6 4.3 1.6 5.8v5a2 2 0 0 1-2 2h-2.1a5 5 0 0 1-9.8 0H25.9a5 5 0 0 1-9.8 0H14a2 2 0 0 1-2-2v-3zm8.4-6h27.2l-2.5-4.2c-.6-1-1.7-1.8-2.9-1.8H21.8c-1.2 0-2.3.8-2.9 1.8L16.4 20h2zm2.6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm26 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg></div>`;
-      panel.innerHTML = `<div class="msp-photo">${photoHtml}</div>
+
+      const specsHtml = [
+        specs.gearbox, specs.fuel,
+        specs.seats ? `${specs.seats} θέσεις` : null,
+        specs.ac ? 'A/C' : null,
+        specs.doors ? `${specs.doors} πόρτες` : null,
+        specs.engine || null
+      ].filter(v => v && String(v) !== '-')
+       .map(v => `<span class="msp-spec">${escapeHtml(String(v))}</span>`).join('');
+
+      const mainSrc = photos[0] || '';
+      const mainContent = mainSrc
+        ? `<img src="${escapeHtml(mainSrc)}" alt="${escapeHtml(name)}" loading="lazy">`
+        : `<div class="msp-main-placeholder">${CAR_SVG}</div>`;
+
+      const thumbsHtml = THUMB_LABELS.map((label, i) => {
+        const src = photos[i] || '';
+        const thumbImg = src
+          ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(label)}" loading="lazy">`
+          : `<div class="msp-thumb-placeholder">${CAR_SVG}</div>`;
+        return `<button type="button" class="msp-thumb${i===0?' is-active':''}" data-src="${escapeHtml(src)}" data-label="${escapeHtml(label)}">
+          <span class="msp-thumb-img">${thumbImg}</span>
+          <span class="msp-thumb-label">${escapeHtml(label)}</span>
+        </button>`;
+      }).join('');
+
+      panel.innerHTML = `
+        <div class="msp-media">
+          <div class="msp-main-photo" id="mspMain">${mainContent}</div>
+          <div class="msp-thumbs">${thumbsHtml}</div>
+        </div>
         <div class="msp-info">
           <span class="msp-name">${escapeHtml(name)}</span>
           ${m.note ? `<span class="msp-note">${escapeHtml(m.note)}</span>` : ''}
           ${specsHtml ? `<div class="msp-specs">${specsHtml}</div>` : ''}
+          <p class="msp-disclaimer">Το παρακάτω όχημα είναι ενδεικτικό. Η τελική παράδοση εξαρτάται από τη διαθεσιμότητα.</p>
         </div>`;
+
+      // Thumbnail click: swap main photo
+      panel.querySelectorAll('.msp-thumb').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const src = btn.dataset.src;
+          const label = btn.dataset.label;
+          const main = panel.querySelector('#mspMain');
+          if(main){
+            main.innerHTML = src
+              ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(label)}" loading="lazy">`
+              : `<div class="msp-main-placeholder">${CAR_SVG}</div>`;
+          }
+          panel.querySelectorAll('.msp-thumb').forEach(b => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+        });
+      });
+
       panel.removeAttribute('hidden');
     }
 
