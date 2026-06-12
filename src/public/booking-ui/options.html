@@ -536,14 +536,6 @@ html,body{overflow-x:hidden!important}
 @media(max-width:1100px){.opts-layout{display:block}.opts-aside{position:static;margin-top:16px}}
 </style>
 
-<style>
-/* Trip summary strip (chips of the saved search) */
-.trip-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 14px;background:rgba(255,255,255,.78);border:1px solid rgba(160,110,35,.14);border-radius:16px;margin-bottom:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.68)}
-.sum-chip{border:1px solid rgba(160,110,35,.22);background:rgba(255,255,255,.85);color:#2b2114;font-size:12.5px;font-weight:800;border-radius:999px;padding:6px 12px;font-family:inherit;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block}
-.trip-strip .trip-edit-link{margin-left:auto;border:0;background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));color:#2a1d09;font-size:12.5px;font-weight:900;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;white-space:nowrap}
-.trip-strip .trip-edit-link:hover{filter:brightness(1.05)}
-</style>
-
 <style id="options-theme">
 /* ═══ DIAMOND OPTIONS THEME v2 — vehicles-page parity, consolidated ═══ */
 html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
@@ -673,7 +665,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .extra-item.active .qty-btn{color:#f6e19f}
 .extra-item.active .qty-val{color:#fff}
 .extras-note{font-size:11.5px!important;color:#7a6446!important;margin-top:13px!important;padding:10px 14px!important;background:rgba(160,110,35,.06)!important;border-radius:10px!important;border:1px solid rgba(160,110,35,.12)!important;line-height:1.5!important}
-#tripStrip{display:none!important}
 .summary-change-btn{width:100%!important;margin-bottom:10px!important;padding:8px 12px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important;background:rgba(255,255,255,.07)!important;color:rgba(255,255,255,.78)!important;font-size:12px!important;font-weight:800!important;cursor:pointer!important;font-family:inherit!important;transition:background .15s!important;text-align:center!important}
 .summary-change-btn:hover{background:rgba(255,255,255,.14)!important;color:#fff!important}
 
@@ -863,7 +854,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
     <div class="no-data-banner" id="noDataBanner">
       Παρακαλώ επιλέξτε πρώτα ένα <a href="/categories">όχημα</a>.
     </div>
-    <div class="trip-strip" id="tripStrip" hidden></div>
 
     <!-- Vehicle models toolbar: rounded dark teal card, same as vehicles page category tabs -->
     <div id="modelsStrip" class="models-strip" hidden>
@@ -924,29 +914,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
           </button>
         </div>
       </div>
-      <div class="insurance-list" id="insuranceList">
-        <label class="insurance-item active">
-          <input type="radio" name="insurance" value="0" data-key="cdw" data-label="CDW" checked>
-          <div class="item-content">
-            <div class="item-head"><strong class="item-title">CDW</strong><div class="item-price">0,00€<span>/ ημέρα</span></div></div>
-            <small class="item-detail">Βασική ασφαλιστική επιλογή χωρίς επιπλέον ημερήσια χρέωση.</small>
-          </div>
-        </label>
-        <label class="insurance-item">
-          <input type="radio" name="insurance" value="12" data-key="scdw" data-label="SCDW">
-          <div class="item-content">
-            <div class="item-head"><strong class="item-title">SCDW</strong><div class="item-price">12,00€<span>/ ημέρα</span></div></div>
-            <small class="item-detail">Μειωμένη ευθύνη με χρέωση 12,00€ ανά ημέρα.</small>
-          </div>
-        </label>
-        <label class="insurance-item">
-          <input type="radio" name="insurance" value="20" data-key="full" data-label="FULL">
-          <div class="item-content">
-            <div class="item-head"><strong class="item-title">FULL</strong><div class="item-price">20,00€<span>/ ημέρα</span></div></div>
-            <small class="item-detail">Πιο ολοκληρωμένη κάλυψη με χρέωση 20,00€ ανά ημέρα.</small>
-          </div>
-        </label>
-      </div>
+      <!-- Hidden radio store — populated by renderPricingChoices() from the pricing catalog -->
+      <div class="insurance-list" id="insuranceList"></div>
     </section>
 
     <section class="extras-card">
@@ -1359,7 +1328,7 @@ bindRouteLinks();
         // Update feature list if catalog provides features array
         if(Array.isArray(plan.features) && plan.features.length){
           var feats = col.querySelector('.ins-feats');
-          if(feats) feats.innerHTML = plan.features.map(function(f){ return '<li>' + f + '</li>'; }).join('');
+          if(feats) feats.innerHTML = plan.features.map(function(f){ return '<li>' + escapeHtml(f) + '</li>'; }).join('');
         }
         // Update ins-name if label provided
         var nameEl = col.querySelector('.ins-name');
@@ -1506,6 +1475,10 @@ bindRouteLinks();
         renderPricingChoices();
         return pricingCatalog;
       }
+      // Render the default catalog immediately so the insurance radios exist
+      // while the network fetch is in flight (the list is the radio store for the columns)
+      pricingCatalog = coerceCatalogArrays(defaultPricingCatalog());
+      renderPricingChoices();
       try{
         const res = await fetch(`${currentApiBase()}/pricing_catalog`, { cache:'no-store' });
         const rawText = await res.text();
@@ -1651,14 +1624,6 @@ function noteForModel(model){
     mercedescla:'Premium σημείο αναφοράς της κατηγορίας LX', cla:'Premium σημείο αναφοράς της κατηγορίας LX'
   };
   return notes[key] || 'Ενδεικτικό μοντέλο της κατηγορίας που επέλεξες';
-}
-function fallbackPhotosForModel(model){
-  const key = normalizeModelKey(model);
-  const flat = {};
-  Object.values(MODEL_FALLBACKS).forEach(group => (group.items || []).forEach(item => {
-    flat[normalizeModelKey(item.model)] = item.photos;
-  }));
-  return flat[key] || [];
 }
 async function fetchFleetModels(categoryCode, vehicleId){
   const categoryKey = String(categoryCode || state.category || '').trim();
@@ -1996,12 +1961,6 @@ async function renderModels(category){
     }));
   }
 
-  const banner = document.getElementById('modelsBanner');
-  if(banner){
-    const names = items.slice(0,3).map(m => m.model || m.name).filter(Boolean);
-    if(names.length) banner.textContent = `Η κατηγορία ${category} περιλαμβάνει ενδεικτικά ${names.join(', ')} κ.α. Η τελική παράδοση εξαρτάται από τη διαθεσιμότητα.`;
-  }
-
   // Populate the top models strip with clickable buttons (like vehicles page cat-tabs)
   (function(){
     const strip = document.getElementById('modelsStrip');
@@ -2127,36 +2086,6 @@ async function renderModels(category){
 
     strip.removeAttribute('hidden');
   })();
-
-  const grid = document.getElementById('modelsGrid');
-  if(!grid) return; // grid removed from DOM — strip above is the sole display
-
-  if(!items.length){
-    grid.innerHTML = '<p style="color:#8a7048;font-size:14px;padding:8px 0">Δεν βρέθηκαν μοντέλα για αυτή την κατηγορία.</p>';
-    return;
-  }
-
-  grid.innerHTML = items.map(m => {
-    const name = escapeHtml(m.model || m.name || 'Μοντέλο');
-    const note = escapeHtml(m.note || '');
-    const photo = (Array.isArray(m.photos) ? m.photos[0] : m.image) || '';
-    const specs = m.specs || {};
-    const specsHtml = [specs.gearbox, specs.fuel, specs.seats ? `${specs.seats} θέσεις` : null]
-      .filter(v => v && String(v) !== '-')
-      .map(v => `<span class="model-chip">${escapeHtml(v)}</span>`).join('');
-    return `<div class="model-card">
-      <div class="model-photo-wrap">
-        ${photo
-          ? `<img src="${escapeHtml(photo)}" alt="${name}" class="model-photo" loading="lazy">`
-          : `<div class="model-photo-placeholder" aria-hidden="true"><svg viewBox="0 0 64 40" fill="currentColor"><path d="M10 26c0-1.5.6-4.2 1.6-5.8l3.1-5.2C16 13 18 12 20 12h22c2 0 4 1 5.3 3l3.1 5.2c1 1.6 1.6 4.3 1.6 5.8v5a2 2 0 0 1-2 2h-2.1a5 5 0 0 1-9.8 0H25.9a5 5 0 0 1-9.8 0H14a2 2 0 0 1-2-2v-3zm8.4-6h27.2l-2.5-4.2c-.6-1-1.7-1.8-2.9-1.8H21.8c-1.2 0-2.3.8-2.9 1.8L16.4 20h2zm2.6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm26 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg></div>`}
-      </div>
-      <div class="model-info">
-        <strong class="model-name">${name}</strong>
-        ${note ? `<span class="model-note">${note}</span>` : ''}
-        ${specsHtml ? `<div class="model-chips">${specsHtml}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
 }
 
 
@@ -2166,8 +2095,6 @@ async function renderModels(category){
       const categoryCode = extractCategoryCode(v.label || v.category || state.category || 'A');
       document.getElementById('vehicleName').textContent = buildVehicleHeading(v.shortName || v.title || v.name || v.displayName || v.displayTitle, categoryCode);
       document.getElementById('categoryBadge').textContent = categoryCode || 'A';
-      const dateRangeText = document.getElementById('dateRangeText');
-      if(dateRangeText) dateRangeText.innerHTML = `${escapeHtml(formatDateTime(state.pickup))}<br>έως<br>${escapeHtml(formatDateTime(state.dropoff))}`;
       document.getElementById('summaryDates').textContent = `${formatDateTime(state.pickup)} — ${formatDateTime(state.dropoff)}`;
       document.getElementById('summaryLocations').textContent = `${state.pickupLocation} → ${state.dropoffLocation}`;
       renderFacts(v.specs);
@@ -2296,13 +2223,6 @@ async function loadVehicle(){
         `&total=${encodeURIComponent(total)}`;
       goTo(checkoutPath);
     });
-
-    const details = document.getElementById('modelsDetails');
-    const toggleText = document.getElementById('modelsToggleText');
-    if(details && toggleText) details.addEventListener('toggle', () => {
-      toggleText.textContent = details.open ? 'Απόκρυψη προβολής μοντέλων' : 'Άνοιγμα προβολής μοντέλων';
-    });
-
 
     const TRUSTED_PARENT_SUFFIXES = ['wix.com','wixsite.com','parastorage.com','wixstatic.com'];
     function isTrustedParentOrigin(origin){ const raw=String(origin||'').trim().toLowerCase(); if(!raw) return true; try{ const host=new URL(raw).hostname.toLowerCase(); if(!host) return false; if(TRUSTED_PARENT_SUFFIXES.some(s=>host===s||host.endsWith('.'+s))) return true; try{ const ref=document.referrer; if(ref){ const rh=new URL(ref).hostname.toLowerCase(); if(rh&&host===rh) return true; } }catch(_){} return false; }catch(_){ return false; } }
@@ -2651,62 +2571,6 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
   cols.forEach(function(col){col.addEventListener('click',function(){var key=col.getAttribute('data-pick');var radio=document.querySelector('input[name="insurance"][data-key="'+key+'"]');if(radio){radio.checked=true;radio.dispatchEvent(new Event('change',{bubbles:true}));}syncActive();});});
   document.querySelectorAll('input[name="insurance"]').forEach(function(r){r.addEventListener('change',syncActive);});
   syncActive();
-})();
-(function(){
-  try{
-    var el=document.getElementById('editSearchSummary');
-    if(!el||!window.BookingState) return;
-    var s=BookingState.getAll();
-    var pl=s.pickupLocation||s.pickup_location||'';
-    var dl=s.dropoffLocation||s.dropoff_location||'';
-    var pu=s.pickup||s.pickupDate||'';
-    var dr=s.dropoff||s.dropoffDate||'';
-    function fmtDt(v){try{if(!v)return '';var d=new Date(v);if(isNaN(d))return String(v);return d.toLocaleDateString('el-GR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(_){return String(v);}}
-    var lines=[];
-    if(pl)lines.push('📍 '+pl);
-    if(dl&&dl!==pl)lines.push('🏁 '+dl);
-    if(pu)lines.push('↑ '+fmtDt(pu));
-    if(dr)lines.push('↓ '+fmtDt(dr));
-    if(lines.length){el.innerHTML=lines.join('<br>');el.style.display='block';}
-  }catch(_){}
-})();
-</script>
-<script>
-/* Trip summary strip: show the saved search as chips with an edit link back to the vehicles page */
-(function(){
-  var strip = document.getElementById('tripStrip');
-  if(!strip) return;
-  function readSearch(){
-    var keys = ['diamond-booking-search-v1','diamond_booking_search_v1'];
-    for(var k=0;k<keys.length;k++){
-      try{ var raw = sessionStorage.getItem(keys[k]) || localStorage.getItem(keys[k]); if(raw) return JSON.parse(raw); }catch(_){ }
-    }
-    return null;
-  }
-  function fmtDT(value){
-    var m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})/);
-    return m ? (m[3] + '/' + m[2] + ' ' + m[4]) : '';
-  }
-  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
-  function navVehicles(){
-    try { if (window.parent && window.parent !== window) { parent.postMessage({ type:'wix-booking-nav', path:'/categories' }, '*'); return; } } catch(_){ }
-    location.assign('/categories');
-  }
-  var s = readSearch();
-  if(!s) return;
-  var chips = [];
-  if(s.pickupLocation) chips.push(s.pickupLocation);
-  var pdt = fmtDT(s.pickup); if(pdt) chips.push(pdt);
-  if(s.dropoffLocation && s.dropoffLocation !== s.pickupLocation) chips.push(s.dropoffLocation);
-  var ddt = fmtDT(s.dropoff); if(ddt) chips.push('\u2192 ' + ddt);
-  if(s.age) chips.push('\u0397\u03bb\u03b9\u03ba\u03af\u03b1 ' + s.age);
-  if(s.category && String(s.category).toLowerCase() !== 'all') chips.push('\u039a\u03b1\u03c4\u03b7\u03b3\u03bf\u03c1\u03af\u03b1 ' + s.category);
-  if(!chips.length) return;
-  strip.innerHTML = chips.map(function(c){ return '<span class="sum-chip">' + esc(c) + '</span>'; }).join('') +
-    '<button type="button" class="trip-edit-link" id="tripEditLink">\u0391\u03bb\u03bb\u03b1\u03b3\u03ae</button>';
-  strip.hidden = false;
-  var btn = document.getElementById('tripEditLink');
-  if(btn) btn.addEventListener('click', navVehicles);
 })();
 </script>
 </body>
