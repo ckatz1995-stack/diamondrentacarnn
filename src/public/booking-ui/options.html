@@ -634,6 +634,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .ins-col.is-active .ins-p{color:#f6e19f!important}
 .ins-col.is-active .ins-feats{border-top-color:rgba(231,191,105,.20)!important}
 .ins-col.is-active .ins-feats li{color:rgba(255,255,255,.84)!important}
+.ins-exc{display:inline-flex;align-self:flex-start;align-items:center;margin-top:8px;font-size:11.5px;font-weight:900;letter-spacing:.02em;padding:5px 11px;border-radius:999px;background:rgba(160,110,35,.13);color:#8a6420;border:1px solid rgba(160,110,35,.22)}
+.ins-exc-zero{background:rgba(21,128,61,.12);color:#15803d;border-color:rgba(21,128,61,.25)}
+.ins-col.is-active .ins-exc{background:rgba(255,255,255,.13);color:#f6e19f;border-color:rgba(231,191,105,.35)}
+.ins-col.is-active .ins-exc-zero{background:rgba(100,220,130,.16);color:#9af0b4;border-color:rgba(100,220,130,.35)}
 
 /* ── Extras card: compact horizontal-row product cards ── */
 .extras-body{padding:16px 22px 20px}
@@ -978,6 +982,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
           <strong id="baseLine">160,00€</strong>
         </div>
         <div class="row" id="insuranceRow"><span>Ασφάλεια</span><strong id="insuranceLine">0,00€</strong></div>
+        <div class="row muted" id="excessRow"><span>Excess (απαλλαγή)</span><strong id="excessLine">—</strong></div>
         <div class="row" id="extrasRow"><span>Extras</span><strong id="extrasLine">0,00€</strong></div>
         <div class="row muted" id="locationRow" hidden><span id="locationLabel">Χρέωση τοποθεσιών</span><strong id="locationLine">0,00€</strong></div>
         <div class="row muted" id="ageRow" hidden><span id="ageLabel">Επασφάλιστρο ηλικίας</span><strong id="ageLine">0,00€</strong></div>
@@ -1339,12 +1344,18 @@ bindRouteLinks();
       insurancePlans.forEach(function(plan){
         var col = document.querySelector('.ins-col[data-pick="' + plan.key + '"]');
         if(!col) return;
+        var catRateCol = currentCatCode && plan.categoryRates && plan.categoryRates[currentCatCode];
         var priceEl = col.querySelector('.ins-p');
         if(priceEl){
-          var catRateCol = currentCatCode && plan.categoryRates && plan.categoryRates[currentCatCode];
           var price = (catRateCol && typeof catRateCol.pricePerDay === 'number') ? catRateCol.pricePerDay : Number(plan.pricePerDay || 0);
           priceEl.innerHTML = (price === 0 ? '0€' : '+' + price.toLocaleString('el-GR', {minimumFractionDigits:0}) + '€') + '<small>/ημέρα</small>';
         }
+        // Excess (deductible) pill — visible on each comparison column
+        var excessVal = (catRateCol && typeof catRateCol.excess === 'number') ? catRateCol.excess : Number(plan.excess ?? 0);
+        var excEl = col.querySelector('.ins-exc');
+        if(!excEl){ excEl = document.createElement('span'); excEl.className = 'ins-exc'; col.appendChild(excEl); }
+        excEl.textContent = excessVal > 0 ? ('Excess: ' + excessVal.toLocaleString('el-GR') + '€') : 'Excess: 0€';
+        excEl.classList.toggle('ins-exc-zero', excessVal === 0);
         // Update feature list if catalog provides features array
         if(Array.isArray(plan.features) && plan.features.length){
           var feats = col.querySelector('.ins-feats');
@@ -1726,6 +1737,10 @@ async function fetchFleetModels(categoryCode, vehicleId){
       const basePricePerDay = resolveDynamicDailyPrice(vehicle, days);
       const base = Number((basePricePerDay * days).toFixed(2));
       const insuranceTotal = Number(insuranceInput?.value || 0) * days;
+      // Excess (deductible) of the selected plan — informational, not added to the total
+      const insExcess = Number(insuranceInput?.dataset?.excess ?? NaN);
+      const excessLineEl = document.getElementById('excessLine');
+      if(excessLineEl) excessLineEl.textContent = Number.isFinite(insExcess) ? (insExcess > 0 ? formatMoney(insExcess) : '0,00€') : '—';
       const extrasTotal = selectedExtras().reduce((sum, el) => {
         const amount = Number(el.value || 0);
         const qty = Number(el.dataset.qty || 1);
@@ -1865,6 +1880,10 @@ async function fetchFleetModels(categoryCode, vehicleId){
       if(iEl) iEl.textContent = formatMoney(q.insuranceCost);
       const insuranceRow = document.getElementById('insuranceRow');
       if(insuranceRow) insuranceRow.hidden = !(q.insuranceCost > 0);
+      if(typeof q.insuranceExcess === 'number'){
+        const exEl = document.getElementById('excessLine');
+        if(exEl) exEl.textContent = q.insuranceExcess > 0 ? formatMoney(q.insuranceExcess) : '0,00€';
+      }
       const eEl = document.getElementById('extrasLine');
       if(eEl) eEl.textContent = formatMoney(q.extrasCost);
       const extrasRow = document.getElementById('extrasRow');
@@ -2215,7 +2234,10 @@ async function loadVehicle(){
         insurance: {
           key: insuranceInput?.dataset.key || 'cdw',
           label: insuranceInput?.dataset.label || 'CDW',
-          pricePerDay: Number(insuranceInput?.value || 0)
+          pricePerDay: Number(insuranceInput?.value || 0),
+          excess: (lastServerQuote && typeof lastServerQuote.insuranceExcess === 'number')
+            ? lastServerQuote.insuranceExcess
+            : Number(insuranceInput?.dataset?.excess ?? 0)
         },
         extras,
         ageFee: lastServerQuote ? Number(lastServerQuote.ageFee || 0) : ageFeeFor(state.age),
@@ -2245,6 +2267,7 @@ async function loadVehicle(){
         BookingState.setMany({
           selectedInsurance: payload.insurance.key,
           selectedInsurancePrice: payload.insurance.pricePerDay,
+          selectedInsuranceExcess: Number(payload.insurance.excess || 0),
           selectedExtras: bsExtras,
           totalPrice: total,
           billableDays: days
@@ -2261,6 +2284,7 @@ async function loadVehicle(){
         `&insurance=${encodeURIComponent(payload.insurance.label)}` +
         `&insuranceKey=${encodeURIComponent(payload.insurance.key)}` +
         `&insuranceCost=${encodeURIComponent(insuranceTotal)}` +
+        `&insuranceExcess=${encodeURIComponent(payload.insurance.excess || 0)}` +
         `&extras=${encodeURIComponent(extrasLabels)}` +
         `&extrasKeys=${encodeURIComponent(payload.extras.map(x => x.key).join(','))}` +
         `&extrasCost=${encodeURIComponent(extrasTotal)}` +

@@ -1216,6 +1216,7 @@ const state = {
   insurance: qp('insurance', storedOptions?.insurance?.label || 'CDW'),
   insuranceKey: qp('insuranceKey', storedOptions?.insurance?.key || 'basic'),
   insuranceCost: Number(qp('insuranceCost', (storedOptions?.insurance?.pricePerDay || 0) * (storedOptions?.days || 1))),
+  insuranceExcess: Number(qp('insuranceExcess', storedOptions?.insurance?.excess ?? NaN)),
   extras: qp('extras', Array.isArray(storedOptions?.extras) ? storedOptions.extras.map(x => x.label).join(', ') : ''),
   extrasKeys: (qp('extrasKeys', Array.isArray(storedOptions?.extras) ? storedOptions.extras.map(x => x.key).join(',') : '')).split(',').filter(Boolean),
   extrasCost: Number(qp('extrasCost', storedExtrasFallbackTotal())),
@@ -1284,7 +1285,10 @@ function renderVehicle(v){
   state.category = categoryCode || state.category;
   document.getElementById('pickupText').textContent = `${state.pickupLocation} • ${fmtDateTime(state.pickup)}`;
   document.getElementById('dropoffText').textContent = `${state.dropoffLocation} • ${fmtDateTime(state.dropoff)}`;
-  document.getElementById('insuranceText').textContent = state.insurance || 'CDW';
+  const insLabel = state.insurance || 'CDW';
+  document.getElementById('insuranceText').textContent = Number.isFinite(state.insuranceExcess)
+    ? `${insLabel} · Excess ${state.insuranceExcess > 0 ? formatMoney(state.insuranceExcess) : '0€'}`
+    : insLabel;
   document.getElementById('extrasText').textContent = state.extras || 'Χωρίς extras';
   document.getElementById('baseCost').textContent = formatMoney(baseTotal);
   document.getElementById('insuranceCost').textContent = formatMoney(totals.insuranceCost);
@@ -1356,6 +1360,10 @@ async function callServerQuote(){
     set('baseCost', formatMoney(data.baseCost));
     set('insuranceCost', formatMoney(data.insuranceCost));
     hide('insuranceRow', !(data.insuranceCost > 0));
+    if(typeof data.insuranceExcess === 'number'){
+      state.insuranceExcess = data.insuranceExcess;
+      set('insuranceText', `${state.insurance || 'CDW'} · Excess ${data.insuranceExcess > 0 ? formatMoney(data.insuranceExcess) : '0€'}`);
+    }
     set('extrasCost', formatMoney(data.extrasCost));
     hide('extrasRow', !(data.extrasCost > 0));
     if(data.locationFee > 0){ set('locationFeeCost', formatMoney(data.locationFee)); hide('locationFeeRow', false); }
