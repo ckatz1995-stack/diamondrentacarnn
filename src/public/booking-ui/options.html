@@ -1804,7 +1804,7 @@ async function fetchFleetModels(categoryCode, vehicleId){
         pickupDateTime: state.pickup,
         dropoffDateTime: state.dropoff,
         selectedPackage: insuranceInput?.dataset?.key || 'cdw',
-        selectedExtras: extrasInputs.map(function(el){ return el.dataset.key; }).filter(Boolean),
+        selectedExtras: extrasInputs.map(function(el){ return { key: el.dataset.key, qty: Number(el.dataset.qty || 1) }; }).filter(function(x){ return !!x.key; }),
         driverAge: state.age,
         pickuppoint: state.pickupLocation,
         dropoffpoint: state.dropoffLocation
@@ -2222,13 +2222,13 @@ async function loadVehicle(){
     document.getElementById('continueBtn').addEventListener('click', () => {
       const payload = persistSelection();
       const insuranceTotal = payload.insurance.pricePerDay * days;
-      const extrasTotal = payload.extras.reduce((sum, x) => sum + ((x.mode === 'perBooking') ? Number(x.price || x.pricePerDay || 0) : Number(x.price || x.pricePerDay || 0) * days), 0);
+      const extrasTotal = payload.extras.reduce((sum, x) => { const u = Number(x.price || x.pricePerDay || 0); const q = Number(x.qty || 1); return sum + (x.mode === 'perBooking' ? u * q : u * q * days); }, 0);
       const baseCost = Number((Number(payload.basePricePerDay || resolveDynamicDailyPrice(vehicle, days)) * days).toFixed(2));
       const total = lastServerQuote ? Number(lastServerQuote.totalPrice || 0) : baseCost + insuranceTotal + extrasTotal + Number(payload.ageFee || 0) + Number(payload.nightFee || 0) + Number(payload.locationFee || 0);
 
       // DIAMOND STATE: Save selected insurance, extras, totals to BookingState before checkout
       if(window.BookingState){
-        const bsExtras = payload.extras.map(function(x){ return {name:x.label,pricePerDay:Number(x.pricePerDay||x.price||0),key:x.key,mode:x.mode}; });
+        const bsExtras = payload.extras.map(function(x){ return {name:x.label,pricePerDay:Number(x.pricePerDay||x.price||0),key:x.key,mode:x.mode,qty:Number(x.qty||1)}; });
         BookingState.setMany({
           selectedInsurance: payload.insurance.key,
           selectedInsurancePrice: payload.insurance.pricePerDay,
