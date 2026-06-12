@@ -145,12 +145,19 @@ function categoryLookupMaps(rows = []) {
   return { byId, byCode };
 }
 
-function resolveFleetCategoryMeta(value, lookups = { byId: new Map(), byCode: new Map() }) {
-  const rawId = value && typeof value === 'object' ? cleanId(value._id || value.id || value.categoryId || value._ref) : '';
+function resolveFleetCategoryMeta(value, lookups = { byId: new Map(), byCode: new Map() }, explicitId = '') {
+  const rawId = (explicitId && cleanId(explicitId))
+    || (value && typeof value === 'object' ? cleanId(value._id || value.id || value.categoryId || value._ref) : '');
   const rawCode = resolveFleetCategoryCode(value);
+  // "AAUTO - HYUNDAI I10 AUTOMATIC" → also try the leading token ("AAUTO") as a code
+  const tokenCode = text(rawCode).split(/\s*[-–\/]\s*/)[0].trim().toUpperCase();
   const byId = lookups?.byId instanceof Map ? lookups.byId : new Map();
   const byCode = lookups?.byCode instanceof Map ? lookups.byCode : new Map();
-  const matched = (rawId && byId.get(rawId)) || (rawCode && byCode.get(String(rawCode).toUpperCase())) || null;
+  // Code match first — the settings form edits the code; a stored categoryId may be stale.
+  const matched = (rawCode && byCode.get(String(rawCode).toUpperCase()))
+    || (tokenCode && byCode.get(tokenCode))
+    || (rawId && byId.get(rawId))
+    || null;
   return {
     code: matched?.category || (rawCode && !/^[0-9A-F-]{16,}$/i.test(rawCode) ? rawCode : ''),
     id: matched?._id || rawId || '',
@@ -163,7 +170,12 @@ function resolveFleetCategoryMeta(value, lookups = { byId: new Map(), byCode: ne
 function buildVehicleCategoryDisplayTitle(payload = {}) {
   const category = text(payload.category || payload.Category).toUpperCase();
   const title = text(payload.title || payload.Title || payload.name || payload.Name);
-  if (category && title) return `${category} - ${title}`;
+  if (category && title) {
+    // Titles like "Aauto - Hyundai i10 automatic" already embed the code — don't prefix again
+    const lead = title.split(/\s*[-–]\s*/)[0].trim().toUpperCase();
+    if (lead === category) return title;
+    return `${category} - ${title}`;
+  }
   return title || category || 'Όχημα';
 }
 
@@ -233,7 +245,12 @@ function normalizeFleetVehicleItem(payload = {}, categoryLookups = { byId: new M
   const safeId = cleanId(payload._id || payload.id);
   const plate = text(payload.plate || payload.Plate).toUpperCase();
   const model = text(payload.model || payload.Model || payload.title || payload.Title);
-  const categoryMeta = resolveFleetCategoryMeta(payload.category ?? payload.Category ?? payload.categoryCode ?? payload.categorycode, categoryLookups);
+  const categoryMeta = resolveFleetCategoryMeta(
+    payload.category ?? payload.Category ?? payload.categoryCode ?? payload.categorycode,
+    categoryLookups,
+    cleanId(payload.categoryId || payload.vehicleCategoryId || '')
+  );
+  const operationalStatus = text(payload.operationalStatus || payload.OperationalStatus);
   return {
     ...(safeId ? { _id: safeId } : {}),
     plate,
@@ -243,6 +260,9 @@ function normalizeFleetVehicleItem(payload = {}, categoryLookups = { byId: new M
     categoryDisplayTitle: categoryMeta.displayTitle || categoryMeta.code || '',
     categoryTitle: categoryMeta.title || '',
     status: text(payload.status || payload.Status, activeStatusFrom(payload)),
+    // Only carried through when the source row has it — the settings form doesn't
+    // edit operationalStatus (the Vehicle Card does), so saves must not wipe it.
+    ...(operationalStatus ? { operationalStatus } : {}),
     active: readBool(payload.active ?? payload.Active, true),
     notes: text(payload.notes || payload.Notes || payload.description || payload.Description)
   };
@@ -264,8 +284,15 @@ function buildFleetVehicleDisplayTitle(payload = {}, categoryLookups = { byId: n
 
 function mapFleetVehicleAdminRow(item = {}, categoryLookups = { byId: new Map(), byCode: new Map() }) {
   const normalized = normalizeFleetVehicleItem(item, categoryLookups);
+  // Surface the live operational state: a car the Vehicle Card put in service
+  // shows as maintenance here too, instead of a stale 'available' status field.
+  const op = text(normalized.operationalStatus || '').toLowerCase();
+  const status = ['service', 'maintenance', 'blocked', 'repair'].some((s) => op.includes(s))
+    ? 'maintenance'
+    : normalized.status;
   return {
     ...normalized,
+    status,
     displayTitle: buildFleetVehicleDisplayTitle(normalized, categoryLookups)
   };
 }
@@ -661,7 +688,11 @@ export async function deleteVehicleCategory({ authToken, itemId, categoryCode } 
 
 export async function upsertFleetVehicle({ authToken, payload = {} } = {}){
   const actor = await requirePricingEdit(authToken);
-  const normalized = normalizeFleetVehicleItem(payload);
+  // Resolve against VehiclesNew so the row stores the canonical categoryId and
+  // display title, not just the bare code.
+  const vehicleCategoryRows = await queryAllRows(VEHICLE_CATEGORIES_COLLECTION);
+  const lookups = categoryLookupMaps(vehicleCategoryRows);
+  const normalized = normalizeFleetVehicleItem(payload, lookups);
   if (!normalized.plate) throw new Error('Missing fleet plate');
   if (!normalized.model) throw new Error('Missing fleet model');
   if (!normalized.category) throw new Error('Missing fleet category');
@@ -670,13 +701,17 @@ export async function upsertFleetVehicle({ authToken, payload = {} } = {}){
   if (normalized._id) previous = await queryFirstByField(FLEET_COLLECTION, '_id', normalized._id);
   if (!previous) previous = await findFleetVehicleByPlate(normalized.plate);
 
-  const saveRow = previous ? { ...previous, ...normalized, _id: previous._id } : normalized;
+  const saveRow = previous ? { ...previous, ...normalized, _id: previous._id } : { ...normalized };
+  // Heal the denormalised mirrors other modules read (Vehicle Card, fleet
+  // calendar) so they can never disagree with the canonical category again.
+  saveRow.categoryCode = normalized.category;
+  saveRow.categoryLabel = normalized.categoryDisplayTitle || normalized.category;
   const saved = previous
     ? await wixData.update(FLEET_COLLECTION, saveRow, { suppressAuth: true })
     : await wixData.insert(FLEET_COLLECTION, saveRow, { suppressAuth: true });
 
-  await writePricingAudit(actor, previous ? 'pricing.updateFleetVehicle' : 'pricing.insertFleetVehicle', 'pricing.fleetVehicle', String(saved?._id || saved?.plate || ''), previous, saved, `${previous ? 'Ενημέρωση' : 'Νέο'} όχημα στόλου ${buildFleetVehicleDisplayTitle(saved)}`);
-  return mapFleetVehicleAdminRow(saved);
+  await writePricingAudit(actor, previous ? 'pricing.updateFleetVehicle' : 'pricing.insertFleetVehicle', 'pricing.fleetVehicle', String(saved?._id || saved?.plate || ''), previous, saved, `${previous ? 'Ενημέρωση' : 'Νέο'} όχημα στόλου ${buildFleetVehicleDisplayTitle(saved, lookups)}`);
+  return mapFleetVehicleAdminRow(saved, lookups);
 }
 
 export async function deleteFleetVehicle({ authToken, itemId, plate } = {}){

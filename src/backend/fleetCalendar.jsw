@@ -48,8 +48,10 @@ const VF = {
   plate: "plate",
   model: "model",
   category: "category",
+  categoryId: "categoryId",
   categoryCode: "categoryCode",
   categoryLabel: "categoryLabel",
+  categoryDisplayTitle: "categoryDisplayTitle",
   active: "active",
   station: "station",
   mileage: "mileage",
@@ -144,8 +146,10 @@ async function ensureFieldMapping() {
     VF.plate = _pickKey(v, ["Plate", "plate"], VF.plate);
     VF.model = _pickKey(v, ["Model", "model"], VF.model);
     VF.category = _pickKey(v, ["Category", "category"], VF.category);
+    VF.categoryId = _pickKey(v, ["categoryId", "CategoryId", "Categoryid"], VF.categoryId);
     VF.categoryCode  = _pickKey(v, ["categoryCode", "CategoryCode", "catCode", "CatCode"], VF.categoryCode);
     VF.categoryLabel = _pickKey(v, ["categoryLabel", "CategoryLabel", "catLabel", "CatLabel"], VF.categoryLabel);
+    VF.categoryDisplayTitle = _pickKey(v, ["categoryDisplayTitle", "CategoryDisplayTitle"], VF.categoryDisplayTitle);
     VF.active = _pickKey(v, ["Active", "active"], VF.active);
     VF.station = _pickKey(v, ["Station", "station", "CurrentStation", "currentStation"], VF.station);
     VF.mileage = _pickKey(v, ["Mileage", "mileage", "Kms", "kms"], VF.mileage);
@@ -162,7 +166,7 @@ async function ensureFieldMapping() {
   __fieldMappingReady = true;
 }
 
-async function getFleetMetaById(vehicleId) {
+async function getFleetMetaById(vehicleId, catMaps = null) {
   const id = refId(vehicleId);
   if (!id) return null;
   try {
@@ -170,12 +174,13 @@ async function getFleetMetaById(vehicleId) {
     if (!item) return null;
     const plate = String(item?.[VF.plate] || item?.plate || "").trim();
     const model = String(item?.[VF.model] || item?.model || "").trim();
-    const assignedCategoryCode = fleetCatCode(item) || catCode(item?.[VF.category] || item?.category || "");
+    const maps = catMaps || await fetchVehicleCategoryMap();
+    const resolved = resolveVehicleCategory(item, maps).code;
     return {
       plate,
       model,
       label: plate ? (model ? `${plate} - ${model}` : plate) : model,
-      assignedCategoryCode
+      assignedCategoryCode: resolved === "Other" ? "" : resolved
     };
   } catch (_) {
     return null;
@@ -250,9 +255,42 @@ function fleetCatCode(vehicle) {
 
 // Fleet category full label — tries direct label field first
 function fleetCatLabel(vehicle) {
-  const direct = _safeText(vehicle?.[VF.categoryLabel] || vehicle?.categoryLabel || vehicle?.CategoryLabel);
+  const direct = _safeText(vehicle?.[VF.categoryLabel] || vehicle?.categoryLabel || vehicle?.CategoryLabel || vehicle?.[VF.categoryDisplayTitle] || vehicle?.categoryDisplayTitle);
   if (direct) return direct;
   return catLabel(vehicle?.[VF.category]) || "";
+}
+
+// Unified category resolution — same precedence as vehicleCard.getFleetBoard so
+// the calendar, the fleet board and the settings pages always place a vehicle in
+// the same category even when the row carries stale denormalised fields:
+// 1. the `category` code/text (the settings page is the editor of record for it)
+// 2. categoryId / category-reference looked up in VehiclesNew
+// 3. categoryCode / categoryLabel mirrors — only if they parse to a KNOWN code
+// 4. any parse at all (legacy rows), else "Other"
+function resolveVehicleCategory(vehicle, catMaps) {
+  const known = catMaps?.knownCodes;
+  const isKnown = (c) => !!c && (!known || !known.size || known.has(c));
+  const parseKnown = (val) => { const c = catCode(val); return isKnown(c) ? c : ""; };
+
+  let code = parseKnown(vehicle?.[VF.category] || vehicle?.category);
+  if (!code) {
+    const catRef = vehicle?.[VF.category];
+    const ids = [
+      vehicle?.[VF.categoryId] || vehicle?.categoryId,
+      typeof catRef === "object" ? (catRef?._id || catRef?.id) : catRef
+    ];
+    for (const idVal of ids) {
+      const c = catMaps?.codeById?.get(String(idVal || "").trim());
+      if (c) { code = c; break; }
+    }
+  }
+  if (!code) code = parseKnown(vehicle?.[VF.categoryCode] || vehicle?.categoryCode);
+  if (!code) code = parseKnown(vehicle?.[VF.categoryLabel] || vehicle?.categoryLabel || vehicle?.[VF.categoryDisplayTitle] || vehicle?.categoryDisplayTitle);
+  if (!code) code = fleetCatCode(vehicle);
+  code = code || "Other";
+
+  const label = (catMaps?.labelByCode?.get(code)) || fleetCatLabel(vehicle) || code;
+  return { code, label };
 }
 
 
@@ -313,13 +351,13 @@ export async function getFleetCalendarData({ authToken, from, to } = {}) {
   const f = toDate(from) || new Date(new Date(now).setHours(0,0,0,0));
   const t = toDate(to) || new Date(now.getTime() + 14 * 86400000);
 
-  const vehicleCategoryMap = await fetchVehicleCategoryMap();
+  const catMaps = await fetchVehicleCategoryMap();
   const fleet = await fetchFleet();
   const bookings = await fetchBookingsInRange(iso(f), iso(t));
 
   const fleetById = new Map((fleet || []).map(v => [String(v?._id || ""), v]));
-  const groups = buildGroups(fleet, vehicleCategoryMap);
-  const { items, unassigned } = buildItems(bookings, fleetById, vehicleCategoryMap);
+  const groups = buildGroups(fleet, catMaps);
+  const { items, unassigned } = buildItems(bookings, fleetById, catMaps);
   const heat = buildHeatmap({ from: f, to: t, fleet, items });
 
   const vehicleNotes = {};
@@ -436,13 +474,16 @@ export async function confirmAndAutoAssign({ authToken, bookingId } = {}) {
 
   const start = toDate(b?.[F.pickupDT]);
   const end = toDate(b?.[F.dropoffDT]);
-  const cat = catCode(b?.[F.categoryId]) || catCode(b?.[F.category]) || "";
 
   if (!start || !end) return { success: false, message: "MissingDates" };
 
+  const catMaps = await fetchVehicleCategoryMap();
+  const bookedCatRef = String(b?.[F.categoryId] || "").trim();
+  const cat = catMaps.codeById.get(bookedCatRef) || catCode(b?.[F.categoryId]) || catCode(b?.[F.category]) || "";
+
   const fleet = await fetchFleet();
   const candidates = (fleet || []).filter(v => {
-    const vcat = fleetCatCode(v);
+    const vcat = resolveVehicleCategory(v, catMaps).code;
     return !cat || vcat === cat || fleetCatLabel(v).startsWith(cat);
   });
 
@@ -457,7 +498,7 @@ export async function confirmAndAutoAssign({ authToken, bookingId } = {}) {
 
     if ((check.items || []).length === 0) {
       b[F.assignedFleetId] = String(v[VF.id]);
-      const meta = await getFleetMetaById(v[VF.id]);
+      const meta = await getFleetMetaById(v[VF.id], catMaps);
       if (meta) {
         b.assignedVehiclePlate = meta.plate || "";
         b.assignedVehicleModel = meta.model || "";
@@ -538,24 +579,31 @@ export async function removeMaintenanceBlock({ authToken, blockId } = {}) {
  */
 
 async function fetchVehicleCategoryMap() {
-  // Maps VehiclesNew._id -> short category code (e.g. "A") for resolving Fleet.category reference fields
+  // Canonical category maps built from VehiclesNew:
+  //  codeById    VehiclesNew._id -> short code ("A", "AAUTO")
+  //  labelById   VehiclesNew._id -> full label ("Aauto - Hyundai i10 automatic")
+  //  labelByCode code -> full label
+  //  knownCodes  Set of valid codes — used to reject stale parses on fleet rows
+  const maps = { codeById: new Map(), labelById: new Map(), labelByCode: new Map(), knownCodes: new Set() };
   try {
     const res = await wixData.query("VehiclesNew").limit(1000).find({ suppressAuth: true });
-    const map = {};
     for (const v of (res.items || [])) {
       const id = String(v._id || "");
-      if (!id) continue;
       // Try direct code field, then extract from title like "A - Hyundai i10"
       const raw = String(v.categoryCode || v.CategoryCode || v.category || v.Category || "").trim()
         || (String(v.title || v.Title || "").split(/\s*[-–]\s*/)[0] || "").trim();
       const code = catCode(raw) || raw.toUpperCase();
-      const label = String(v.categoryLabel || v.CategoryLabel || v.title || v.Title || raw || "").trim();
-      if (id && code) { map[id] = code; if (label) map[`${id}_label`] = label; }
+      if (!code) continue;
+      const label = String(v.categoryLabel || v.CategoryLabel || v.displayTitle || v.title || v.Title || raw || "").trim();
+      maps.knownCodes.add(code);
+      if (id) {
+        maps.codeById.set(id, code);
+        if (label) maps.labelById.set(id, label);
+      }
+      if (label && !maps.labelByCode.has(code)) maps.labelByCode.set(code, label);
     }
-    return map;
-  } catch (_) {
-    return {};
-  }
+  } catch (_) {}
+  return maps;
 }
 
 async function fetchFleet() {
@@ -585,21 +633,15 @@ async function fetchBookingsInRange(fromISO, toISO) {
  * TRANSFORMS
  * =========================
  */
-function buildGroups(fleet, vehicleCategoryMap) {
-  const catMap = vehicleCategoryMap || {};
+function buildGroups(fleet, catMaps) {
   const byCat = new Map();
+  const labelFor = new Map();
 
   for (const v of (fleet || [])) {
-    let cat = fleetCatCode(v);
-    // Last resort: look up the category reference in vehicleCategoryMap
-    if (!cat || cat === "Other") {
-      const catRef = v?.[VF.category];
-      const refId_ = typeof catRef === "object" ? String(catRef?._id || catRef?.id || "") : String(catRef || "");
-      if (refId_ && catMap[refId_]) cat = String(catMap[refId_]).toUpperCase();
-    }
-    cat = cat || "Other";
-    if (!byCat.has(cat)) byCat.set(cat, []);
-    byCat.get(cat).push(v);
+    const { code, label } = resolveVehicleCategory(v, catMaps);
+    if (!byCat.has(code)) byCat.set(code, []);
+    byCat.get(code).push(v);
+    if (label && !labelFor.has(code)) labelFor.set(code, label);
   }
 
   const cats = Array.from(byCat.keys()).sort((a, b) => {
@@ -618,10 +660,8 @@ function buildGroups(fleet, vehicleCategoryMap) {
       return px.localeCompare(py, "el");
     });
 
-    // Use full label (e.g. "A - Hyundai i10") for display; fall back to short code
-    const catRef0 = vehicles[0]?.[VF.category];
-    const refId0 = typeof catRef0 === "object" ? String(catRef0?._id || catRef0?.id || "") : String(catRef0 || "");
-    const fullCatLabel = fleetCatLabel(vehicles[0]) || catLabel(catRef0) || (refId0 && catMap[`${refId0}_label`]) || cat;
+    // Full label (e.g. "Aauto - Hyundai i10 automatic") resolved canonically; fall back to short code
+    const fullCatLabel = labelFor.get(cat) || cat;
 
     // Category header row — flat (no nestedGroups) so vis-timeline renders it as a normal label
     groups.push({
@@ -692,7 +732,7 @@ function buildGroups(fleet, vehicleCategoryMap) {
   return groups;
 }
 
-function buildItems(bookings, fleetById, categoryMap) {
+function buildItems(bookings, fleetById, catMaps) {
   const items = [];
   const unassigned = [];
 
@@ -710,7 +750,8 @@ function buildItems(bookings, fleetById, categoryMap) {
 
     const categoryRefId = String(b?.[F.categoryId] || b?.[F.category] || "").trim();
     const bookedLabel =
-      (categoryMap && categoryRefId && categoryMap[`${categoryRefId}_label`]) ||
+      (catMaps?.labelById?.get(categoryRefId)) ||
+      (catMaps?.labelByCode?.get(catCode(categoryRefId))) ||
       (!isOpaqueCategoryId(categoryRefId) ? (catLabel(b?.[F.categoryId]) || catLabel(b?.[F.category])) : "") ||
       "";
 
