@@ -452,7 +452,7 @@ function normalizeCatalogItem(payload = {}, kind = 'insurance'){
     active: readBool(payload.active, true),
     publicVisible: readBool(payload.publicVisible, true)
   };
-  if (kind === 'insurance') return { ...base, pricePerDay: toNumber(payload.pricePerDay ?? payload.price, 0), billingMode: 'perDay' };
+  if (kind === 'insurance') { const rawCatRates = payload.categoryRates; const categoryRates = (rawCatRates && typeof rawCatRates === 'object' && !Array.isArray(rawCatRates)) ? rawCatRates : {}; return { ...base, pricePerDay: toNumber(payload.pricePerDay ?? payload.price, 0), excess: toNumber(payload.excess, 0), categoryRates, billingMode: 'perDay' }; }
   if (kind === 'extra') return { ...base, price: toNumber(payload.price ?? payload.pricePerDay, 0), billingMode: text(payload.billingMode, 'perDay') === 'perBooking' ? 'perBooking' : 'perDay' };
   return { ...base, ruleType: text(payload.ruleType, 'manual'), audienceGroup: text(payload.audienceGroup), amount: toNumber(payload.amount ?? payload.price, 0), billingMode: text(payload.billingMode, 'perBooking') === 'perDay' ? 'perDay' : 'perBooking' };
 }

@@ -1029,6 +1029,9 @@ export async function computeQuote(data) {
         const { billableDays } = computeBillableDaysDetailed(pickup, dropoff, 1, graceMinutes, BUSINESS_TIMEZONE);
         const insuranceMap = pricingCatalog?.maps?.insurance || {};
         const extrasMap = pricingCatalog?.maps?.extras || {};
+        const insurancePlansArr = Array.isArray(pricingCatalog?.insurancePlans) ? pricingCatalog.insurancePlans : [];
+        const insurancePlansByKey = {};
+        insurancePlansArr.forEach(p => { if (p?.key) insurancePlansByKey[p.key] = p; });
         const dynamicPricing = inlineResolveDynamicPricing({ catalog: pricingCatalog, categoryCandidates: [resolvedCategoryCode, ...categoryCandidates], vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, fallbackPricePerDay: fallbackBasePricePerDay });
         let moduleResolverSeasonKey = null;
         try { moduleResolverSeasonKey = resolveDynamicPricingRate({ categoryCode: resolvedCategoryCode, categoryCandidates, vehicleCategoryId: String(vehicleId), billableDays, pickupDateTime: pickup, dropoffDateTime: dropoff, catalog: pricingCatalog, fallbackPricePerDay: fallbackBasePricePerDay })?.season?.key || null; } catch (e) { moduleResolverSeasonKey = `error:${e?.message || e}`; }
@@ -1037,7 +1040,11 @@ export async function computeQuote(data) {
         const quoteWarnings = [];
         if (catalogHasRules && dynamicPricing?.source !== 'dynamicRule') quoteWarnings.push('pricing:no-rule-match');
         if (pkg && pkg !== 'none' && pkg !== 'nodw' && !(pkg in insuranceMap)) quoteWarnings.push(`insurance:missing:${pkg}`);
-        const insuranceExtraPerDay = toFiniteNumber(insuranceMap[pkg], 0);
+        const insurancePlan = insurancePlansByKey[pkg];
+        const catCode = cleanText(resolvedCategoryCode).toUpperCase();
+        const catInsRate = catCode && insurancePlan?.categoryRates && insurancePlan.categoryRates[catCode];
+        const insuranceExtraPerDay = toFiniteNumber(catInsRate?.pricePerDay ?? insuranceMap[pkg], 0);
+        const insuranceExcess = toFiniteNumber(catInsRate?.excess ?? insurancePlan?.excess, 0);
         const extrasInput = Array.isArray(selectedExtras) ? selectedExtras : [];
         let computedExtrasTotal = 0;
         for (const rawExtra of extrasInput) {
@@ -1085,7 +1092,7 @@ export async function computeQuote(data) {
             })),
             rules: (pricingCatalog?.categoryRateRules || []).map((r) => ({ code: String(r.categoryCode || ''), season: String(r.seasonKey || ''), min: r.minDays, max: r.maxDays, price: r.pricePerDay, active: r.active !== false }))
         } : undefined;
-        return { success: true, totalPrice, basePricePerDay, billableDays, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee, season: seasonInfo, rule: dynamicPricing?.rule || null, warnings: quoteWarnings, ...(diagnostics ? { diagnostics } : {}) };
+        return { success: true, totalPrice, basePricePerDay, billableDays, baseCost: finalBaseCost, insuranceCost: finalInsuranceCost, insuranceExcess, extrasCost: finalExtrasCost, ageFee: finalAgeFee, nightFee: finalNightFee, locationFee: finalLocationFee, season: seasonInfo, rule: dynamicPricing?.rule || null, warnings: quoteWarnings, ...(diagnostics ? { diagnostics } : {}) };
     } catch (err) {
         return { success: false, message: (err && err.message) ? err.message : String(err) };
     }

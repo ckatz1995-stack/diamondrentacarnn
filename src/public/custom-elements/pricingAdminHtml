@@ -2271,6 +2271,29 @@ function openRuleModal(id='') {
 
 function openInsModal(id='') {
   const item = id ? (state.snapshot?.insurancePlans||[]).find(x=>x._id===id)||{} : {};
+  const cats = (state.snapshot?.vehicleCategories||[]).filter(c=>c.active!==false);
+  const catRates = (item.categoryRates && typeof item.categoryRates === 'object') ? item.categoryRates : {};
+  const catRateRows = cats.length
+    ? cats.map(c => {
+        const r = catRates[String(c.category||'').toUpperCase()] || {};
+        const pVal = typeof r.pricePerDay === 'number' ? r.pricePerDay : '';
+        const eVal = typeof r.excess === 'number' ? r.excess : '';
+        return `<tr>
+          <td style="padding:5px 8px;font:600 12px var(--f);color:var(--text)">${esc(c.title||c.category)} <span style="font-weight:400;color:var(--muted)">(${esc(c.category)})</span></td>
+          <td style="padding:4px 6px"><input type="number" id="catr_p_${esc(c.category)}" value="${esc(String(pVal))}" placeholder="default" step="0.01" min="0" style="width:100%;padding:5px 8px;border:1px solid var(--line2);border-radius:var(--r);font:13px var(--f)"></td>
+          <td style="padding:4px 6px"><input type="number" id="catr_e_${esc(c.category)}" value="${esc(String(eVal))}" placeholder="default" step="1" min="0" style="width:100%;padding:5px 8px;border:1px solid var(--line2);border-radius:var(--r);font:13px var(--f)"></td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="3" style="padding:8px;color:var(--muted);font:13px var(--f)">No vehicle categories found — add categories first.</td></tr>`;
+  const catRateTable = `<div class="field-sub" style="margin-top:16px">Per-category rates (leave blank to use global defaults)</div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="padding:5px 8px;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--sub);text-align:left">Category</th>
+        <th style="padding:5px 6px;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--sub);text-align:left">Price / day (${cur()})</th>
+        <th style="padding:5px 6px;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--sub);text-align:left">Excess (€)</th>
+      </tr></thead>
+      <tbody>${catRateRows}</tbody>
+    </table>`;
   const body =
     msec('🛡','Plan',
       mr2(mfld('Title *',minp('title',item.title,'text','Basic CDW')),
@@ -2278,7 +2301,9 @@ function openInsModal(id='') {
       + mfld('Short label',minp('label',item.label,'text','CDW'),'Compact name used in summaries')
       + mfld('Description',mta('description',item.description,'What this coverage includes')))
     + msec('💲','Pricing',
-      mfld('Price / day',mnum('pricePerDay',item.pricePerDay,cur()),'Set 0 for a plan that is included free'))
+      mr2(mfld('Default price / day',mnum('pricePerDay',item.pricePerDay,cur()),'Used when no category-specific rate is set'),
+          mfld('Default excess',mnum('excess',item.excess??0,'€'),'Deductible when no category rate is set; 0 = full coverage'))
+      + catRateTable)
     + msec('👁','Visibility & ordering',
       mfld('Sort order',mnum('sortOrder',item.sortOrder,'','0'),'Lower numbers appear first')
       + mtog('active',item.active!==false,'Active','Inactive plans are hidden everywhere')
@@ -2287,8 +2312,22 @@ function openInsModal(id='') {
     if (!mv('key')) return merr('key','Key is required');
     if (!mv('title')) return merr('title','Title is required');
     if (mn('pricePerDay')<0) return merr('pricePerDay','Price cannot be negative');
+    // Collect per-category rates from the dynamic inputs
+    const categoryRates = {};
+    cats.forEach(c => {
+      const pEl = document.getElementById(`catr_p_${c.category}`);
+      const eEl = document.getElementById(`catr_e_${c.category}`);
+      const pv = pEl?.value.trim(); const ev = eEl?.value.trim();
+      if (pv !== '' || ev !== '') {
+        const code = String(c.category||'').toUpperCase();
+        categoryRates[code] = {};
+        if (pv !== '') categoryRates[code].pricePerDay = Number(pv);
+        if (ev !== '') categoryRates[code].excess = Number(ev);
+      }
+    });
     post('upsertInsurancePlan',{ _id:id||undefined, key:slug(mv('key')), title:mv('title'), label:mv('label'),
-      pricePerDay:mn('pricePerDay'), description:mv('description'), sortOrder:mn('sortOrder'),
+      pricePerDay:mn('pricePerDay'), excess:mn('excess'), categoryRates,
+      description:mv('description'), sortOrder:mn('sortOrder'),
       active:mc('active'), publicVisible:mc('publicVisible') });
     closeModal();
   }, null, { eyebrow:'Pricing', subtitle:'Coverage option offered during booking', saveLabel:id?'Save plan':'Create plan' });
