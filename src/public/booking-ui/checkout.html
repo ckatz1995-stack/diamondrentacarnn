@@ -315,15 +315,17 @@ button:hover,.btn:hover,.header-phone:hover{transform:translateY(-1px)}
 /* ── LUXURY DARK WARM: premium boutique redesign ── */
 html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),transparent 50%),linear-gradient(170deg,#1e1910 0%,#141009 100%)!important}
 
-.summary-shell{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;border-top:3px solid #c88a35!important;box-shadow:0 24px 64px rgba(0,0,0,.52)!important}
-.meta{background:rgba(160,110,35,.07)!important;border:1px solid rgba(160,110,35,.14)!important}
-.meta .k{color:#7a5e38!important}
-.meta .v{color:#1c1408!important}
-.summary-main h1{color:#1c1408!important}
-.summary-sub{color:#7a5e38!important}
-.top-price{color:#2e6172!important}
-.top-price span{color:#2e6172!important}
-.top-price small{color:rgba(46,97,114,.60)!important}
+.summary-shell{background:linear-gradient(160deg,rgba(20,40,48,.99),rgba(14,30,36,1))!important;border:1px solid rgba(231,191,105,.18)!important;border-top:3px solid rgba(231,191,105,.42)!important;box-shadow:0 26px 60px rgba(0,0,0,.40)!important}
+.vehicle-visual{background:radial-gradient(circle at 50% 20%,rgba(231,191,105,.18),transparent 55%),linear-gradient(160deg,rgba(26,50,60,.80),rgba(14,30,36,.95))!important}
+.vehicle-badge{background:rgba(231,191,105,.18)!important;color:#f6e19f!important;border:1px solid rgba(231,191,105,.32)!important;box-shadow:0 4px 12px rgba(0,0,0,.28)!important}
+.meta{background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.10)!important}
+.meta .k{color:rgba(255,255,255,.48)!important}
+.meta .v{color:rgba(255,255,255,.92)!important}
+.summary-main h1{color:#f6e19f!important}
+.summary-sub{color:rgba(255,255,255,.55)!important}
+.top-price{text-align:right!important}
+.top-price span{color:#f6e19f!important;font-size:26px!important}
+.top-price small{color:rgba(255,255,255,.48)!important}
 /* ── Sidebar panels: dark navy premium (same language as options page) ── */
 .analysis-box,.invoice-box,.sidebar-submit{background:linear-gradient(160deg,rgba(20,40,48,.99),rgba(14,30,36,1))!important;border:1px solid rgba(231,191,105,.14)!important;border-top:3px solid rgba(231,191,105,.36)!important;box-shadow:0 26px 60px rgba(0,0,0,.32)!important}
 .analysis-box h3{color:#f6e19f!important}
@@ -342,15 +344,15 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 .btn-back:hover{background:rgba(255,255,255,.14)!important}
 /* ── Form panels: warm cream ── */
 .form-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
-.section{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important}
+.section{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.20)!important;border-top:3px solid rgba(160,110,35,.38)!important}
 .helper-note{background:rgba(160,110,35,.07)!important;border:1px solid rgba(160,110,35,.14)!important}
 .card-title{color:#1c1408!important;border-bottom-color:rgba(160,110,35,.14)!important}
-.section-title{color:#1c1408!important}
+.section-title{color:#7a4e18!important;letter-spacing:-.04em!important}
 
 
 /* ── WARM AMBER BODY ── */
 html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
-.summary-shell,.form-card,.section{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
+.form-card,.section{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -376,7 +378,8 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 @media(max-width:767px){
   .summary-grid{grid-template-columns:1fr!important}
   .meta-grid{grid-template-columns:1fr 1fr!important}
-  .vehicle-visual{display:none!important}
+  .vehicle-visual{min-height:130px!important;padding:12px 10px!important}
+  .vehicle-visual img{max-height:96px!important}
   /* Cost accordion */
   .analysis-box .analysis-line:not(.big){display:none}
   .analysis-box.expanded .analysis-line{display:flex!important}
