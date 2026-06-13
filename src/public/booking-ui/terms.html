@@ -5,115 +5,105 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Όροι ενοικίασης και πολιτικές</title>
   <style>
-    :root{--bg:#a8844a; --bg2:#8e6d3d; --line:rgba(72,51,17,.14); --text:#1f1a13; --muted:#655437; --accent:#3f748a; --accent2:#2d6072; --gold:#e7bf69; --gold2:#f6e19f; --soft:0 10px 22px rgba(0,0,0,.09); --container:1180px}
-    *{box-sizing:border-box} html,body{margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(circle at top left, rgba(255,255,255,.08), transparent 26%),linear-gradient(180deg,var(--bg),var(--bg2))}
-    a{text-decoration:none}.site-header{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(168,132,74,.82);border-bottom:1px solid rgba(255,255,255,.12)}
-    .header-inner,.page,.footer-grid{max-width:var(--container);margin:0 auto}.header-inner{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .brand{display:flex;align-items:center;gap:12px;color:#fff}.brand-mark{width:42px;height:42px;border-radius:14px;background:linear-gradient(180deg,var(--gold2),var(--gold));color:#4a3816;display:flex;align-items:center;justify-content:center;font-weight:900;box-shadow:var(--soft)}
-    .brand-text strong{display:block;font-size:18px;line-height:1;letter-spacing:-.03em}.brand-text span{display:block;font-size:11px;opacity:.9;text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
-    .header-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}.header-nav a{color:#fff;font-weight:800;font-size:14px;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12)}
-    .header-phone{color:#4a3816;font-weight:900;background:linear-gradient(180deg,var(--gold2),var(--gold));padding:12px 18px;border-radius:999px;box-shadow:var(--soft);white-space:nowrap}.page{padding:18px 16px 44px}
-    .hero{border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg,rgba(245,232,194,.96),rgba(227,200,136,.96));box-shadow:var(--soft);padding:22px}.kicker{display:inline-block;padding:9px 14px;border-radius:999px;background:rgba(63,116,138,.10);border:1px solid rgba(63,116,138,.12);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2)}
-    .hero h1{margin:14px 0 8px;font-size:clamp(32px,4vw,42px);letter-spacing:-.03em}.hero p{margin:0;color:var(--muted);line-height:1.6;font-weight:700}.layout{display:grid;grid-template-columns:minmax(0,1.06fr) 320px;gap:18px;margin-top:18px}
-    .section-card,.side-card{border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,rgba(245,232,194,.96),rgba(227,200,136,.96));box-shadow:var(--soft)}.section-card{padding:20px}.section-card h2{margin:0 0 12px;font-size:24px;letter-spacing:-.02em}
-    .copy{color:#40321c;line-height:1.75;font-weight:600}.copy p{margin:0 0 14px}.copy ul{margin:0 0 14px 18px;padding:0}.copy li{margin:0 0 8px}.stack{display:grid;gap:16px}.side-card{padding:18px;position:sticky;top:88px}
-    .mini{border:1px solid rgba(72,51,17,.12);border-radius:18px;background:rgba(255,255,255,.44);padding:16px}.mini h3{margin:0 0 8px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}.btn{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 18px;border-radius:16px;font-weight:900}
-    .btn-light{background:rgba(255,255,255,.62);color:#4a3819;border:1px solid rgba(0,0,0,.06)}.btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff}.plan{border:1px solid rgba(72,51,17,.12);border-radius:18px;background:rgba(255,255,255,.44);padding:16px;margin-top:12px}.plan strong{display:block;font-size:16px}.plan small{display:block;color:var(--muted);line-height:1.6;margin-top:8px}.plan-price{margin-top:8px;font-weight:900;color:var(--accent2)}
-    .footer{margin-top:18px;border-top:1px solid rgba(255,255,255,.14)}.footer-grid{padding:20px 16px;color:#fff;display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.footer-grid strong{display:block;font-size:18px}.footer-grid span,.footer-grid p,.footer-grid a{color:rgba(255,255,255,.88);font-weight:700;line-height:1.6}.muted{color:var(--muted)}
+    /* ══════════════════════════════════════════════════════════════
+       DIAMOND — Rental terms · single coherent theme
+       Synced design language: warm amber body · dark-teal header ·
+       warm-cream content cards · dark-navy + gold sidebar · deep footer
+       ══════════════════════════════════════════════════════════════ */
+    :root{
+      --line:rgba(160,110,35,.18); --text:#1f1a13; --muted:#655437;
+      --accent:#3f748a; --accent2:#2d6072; --gold:#e7bf69; --gold2:#f6e19f;
+      --navy:linear-gradient(160deg,rgba(20,40,48,.99),rgba(14,30,36,1));
+      --cream:#fdf8ef;
+      --card-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22);
+      --soft:0 10px 22px rgba(0,0,0,.09); --container:1180px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);
+      background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)}
+    a{text-decoration:none}
+
+    /* ── Header: dark teal ── */
+    .site-header{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);
+      background:linear-gradient(180deg,rgba(26,50,60,.97),rgba(20,40,48,.99));
+      border-bottom:1px solid rgba(231,191,105,.16);box-shadow:0 4px 24px rgba(0,0,0,.28)}
+    .header-inner,.page,.footer-grid{max-width:var(--container);margin:0 auto}
+    .header-inner{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:12px;color:#fff}
+    .brand-logo-mark{width:40px;height:40px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#e7bf69,#f6e19f);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#3a2c16;box-shadow:0 4px 12px rgba(0,0,0,.22)}
+    .brand-text strong{display:block;font-size:18px;line-height:1;letter-spacing:-.03em}
+    .brand-text span{display:block;font-size:11px;opacity:.9;text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+    .header-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+    .header-nav a{color:#fff;font-weight:800;font-size:14px;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);transition:background .16s ease,border-color .16s ease,color .16s ease}
+    .header-nav a:hover{background:rgba(231,191,105,.16);border-color:rgba(231,191,105,.28);color:#f6e19f}
+    .header-phone{color:#2a1e0a;font-weight:900;background:linear-gradient(135deg,#e7bf69,#f6e19f);padding:12px 18px;border-radius:999px;box-shadow:0 6px 16px rgba(0,0,0,.22);white-space:nowrap}
+
+    /* ── Booking progress bar ── */
+    .booking-progress{background:rgba(0,0,0,.12);border-bottom:1px solid rgba(255,255,255,.08);padding:0 16px}
+    .bp-inner{display:flex;align-items:center;justify-content:center;gap:0;max-width:560px;margin:0 auto;padding:8px 0}
+    .bp-step{display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto}
+    .bp-dot{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.22);color:rgba(255,255,255,.50);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center}
+    .bp-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.45);white-space:nowrap}
+    .bp-connector{flex:1 1 auto;height:2px;background:rgba(255,255,255,.16);margin:0 6px 18px;min-width:20px}
+    .bp-step.done .bp-dot{background:rgba(255,255,255,.26);border-color:rgba(255,255,255,.40);color:#fff}
+    .bp-step.done .bp-label{color:rgba(255,255,255,.72)}
+    .bp-step.active .bp-dot{background:#e7bf69;border-color:#f6e19f;color:#4a3816;box-shadow:0 0 0 3px rgba(231,191,105,.28)}
+    .bp-step.active .bp-label{color:#fff;font-weight:900}
+
+    /* ── Page + hero (warm cream) ── */
+    .page{padding:18px 16px 44px}
+    .hero{background:var(--cream);border:1px solid var(--line);border-top:3px solid #c88a35;border-radius:28px;box-shadow:var(--card-shadow);padding:22px}
+    .kicker{display:inline-block;padding:9px 14px;border-radius:999px;background:rgba(160,110,35,.12);border:1px solid rgba(160,110,35,.24);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a07828}
+    .hero h1{margin:14px 0 8px;font-size:clamp(32px,4vw,42px);letter-spacing:-.03em;color:#1c1408}
+    .hero p{margin:0;color:#4a3820;line-height:1.6;font-weight:700}
+    .layout{display:grid;grid-template-columns:minmax(0,1.06fr) 320px;gap:18px;margin-top:18px}
+
+    /* ── Section cards (warm cream, collapsible) ── */
+    .section-card{background:var(--cream);border:1px solid rgba(160,110,35,.16);border-radius:24px;box-shadow:var(--card-shadow);padding:20px}
+    .section-card h2{margin:0 0 16px;font-size:26px;letter-spacing:-.02em;color:#1c1408;padding-bottom:14px;border-bottom:2px solid rgba(160,110,35,.18);
+      cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .section-card h2::after{content:'▾';font-size:16px;opacity:.5;transition:transform .28s ease;flex-shrink:0;font-weight:400}
+    .section-card.is-collapsed h2::after{transform:rotate(-90deg)}
+    .section-card .copy{overflow:hidden;max-height:4000px;transition:max-height .38s ease,opacity .28s ease;opacity:1}
+    .section-card.is-collapsed .copy{max-height:0;opacity:0}
+    .copy{color:#40321c;line-height:1.75;font-weight:600}.copy p{margin:0 0 14px}.copy ul{margin:0 0 14px 18px;padding:0}.copy li{margin:0 0 8px}
+    .stack{display:grid;gap:16px}
+
+    /* ── Sidebar (dark navy + gold) ── */
+    .side-card{background:var(--navy);border:1px solid rgba(231,191,105,.14);border-top:3px solid rgba(231,191,105,.36);border-radius:24px;color:#fff;box-shadow:0 22px 52px rgba(0,0,0,.30);padding:18px;position:sticky;top:88px}
+    .mini{border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(255,255,255,.08);padding:16px}
+    .mini h3{margin:0 0 8px;color:#fff}
+    .side-card .muted{color:rgba(255,255,255,.72)}
+    .side-card a{color:#f6e19f}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 18px;border-radius:16px;font-weight:900}
+    .btn-light{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.16)}
+    .btn-primary{background:linear-gradient(135deg,#c88a35,#e0a848);color:#1a0e04;box-shadow:0 8px 24px rgba(160,80,0,.28)}
+    .plan{border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(255,255,255,.09);padding:16px;margin-top:12px}
+    .plan strong{display:block;font-size:16px;color:#fff}
+    .plan small{display:block;color:rgba(255,255,255,.72);line-height:1.6;margin-top:8px}
+    .plan-price,.plan .price{margin-top:8px;font-weight:900;color:#f6e19f}
+
+    /* ── Footer: deep dark ── */
+    .footer{margin-top:18px;background:linear-gradient(160deg,rgba(20,40,48,.99) 0%,rgba(14,30,36,1) 100%);border:1px solid rgba(231,191,105,.12);border-top:3px solid rgba(231,191,105,.28);box-shadow:0 -4px 40px rgba(0,0,0,.22)}
+    .footer-grid{padding:20px 16px;color:#fff;display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+    .footer-brand{color:#fff}
+    .footer-logo-mark{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#e7bf69,#f6e19f);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#3a2c16;margin-bottom:10px;box-shadow:0 8px 20px rgba(0,0,0,.28)}
+    .footer-grid strong{display:block;font-size:18px}
+    .footer-grid span,.footer-grid p,.footer-grid a{color:rgba(255,255,255,.78);font-weight:700;line-height:1.6}
+    .footer-col h5{font-size:11px;letter-spacing:.18em;color:#e7bf69;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(231,191,105,.18)}
+    .footer-col a,.footer-col p{color:rgba(255,255,255,.78);font-size:14px}
+    .footer-col a:hover{color:#f6e19f}
+    .footer-divider{margin:0 26px;border:0;border-top:1px solid rgba(255,255,255,.08)}
+    .footer-bottom{font-size:12.5px;color:rgba(255,255,255,.52);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:16px 26px 22px}
+    .footer-bottom-links{display:flex;gap:16px}
+    .footer-bottom-links a{color:rgba(255,255,255,.52);font-size:12.5px;font-weight:700;text-decoration:none}
+    .footer-bottom-links a:hover{color:#f6e19f}
+    .muted{color:var(--muted)}
+
     @media (max-width:860px){.header-inner{flex-wrap:wrap}.header-nav{order:3;width:100%}.layout,.footer-grid{grid-template-columns:1fr}.header-phone{width:100%;text-align:center}.side-card{position:static}}
-/* ── HEADER: Dark teal ── */
-.site-header{background:linear-gradient(180deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border-bottom:1px solid rgba(231,191,105,.16)!important;box-shadow:0 4px 24px rgba(0,0,0,.28)!important}
-.brand-logo-mark{width:40px;height:40px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#e7bf69,#f6e19f);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#3a2c16;box-shadow:0 4px 12px rgba(0,0,0,.22)}
-.header-nav a{background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.09)!important;transition:background .16s ease,border-color .16s ease,color .16s ease}
-.header-nav a:hover{background:rgba(231,191,105,.16)!important;border-color:rgba(231,191,105,.28)!important;color:#f6e19f!important}
-.header-phone{background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;color:#2a1e0a!important;font-weight:900!important;box-shadow:0 6px 16px rgba(0,0,0,.22)!important}
-/* ── FOOTER: Deep dark ── */
-.footer{background:linear-gradient(160deg,rgba(20,40,48,.99) 0%,rgba(14,30,36,1) 100%)!important;border:1px solid rgba(231,191,105,.12)!important;border-top:3px solid rgba(231,191,105,.28)!important;box-shadow:0 -4px 40px rgba(0,0,0,.22)!important}
-.footer-logo-mark{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#e7bf69,#f6e19f);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#3a2c16;margin-bottom:10px;box-shadow:0 8px 20px rgba(0,0,0,.28)}
-.footer-brand{color:#fff!important}
-.footer-col h5{font-size:11px!important;letter-spacing:.18em!important;color:#e7bf69!important;margin-bottom:14px!important;padding-bottom:10px!important;border-bottom:1px solid rgba(231,191,105,.18)!important}
-.footer-col a,.footer-col p{color:rgba(255,255,255,.78)!important;font-size:14px!important}
-.footer-col a:hover{color:#f6e19f!important}
-.footer-divider{margin:0 26px;border:0;border-top:1px solid rgba(255,255,255,.08)}
-.footer-bottom{font-size:12.5px!important;color:rgba(255,255,255,.52)!important;display:flex!important;align-items:center!important;justify-content:space-between!important;flex-wrap:wrap!important;gap:8px!important;padding:16px 26px 22px!important}
-.footer-bottom-links{display:flex;gap:16px}
-.footer-bottom-links a{color:rgba(255,255,255,.52);font-size:12.5px;font-weight:700;text-decoration:none}
-.footer-bottom-links a:hover{color:#f6e19f}
-
-  
-/* ── INNER PAGE REDESIGN: terms ── */
-.hero{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border:1px solid rgba(231,191,105,.16)!important;border-top:3px solid rgba(231,191,105,.32)!important;box-shadow:0 26px 56px rgba(0,0,0,.30)!important}
-.hero h1{color:#fff!important}
-.hero p,.hero p#pageIntro{color:rgba(255,255,255,.78)!important}
-.kicker{background:rgba(231,191,105,.16)!important;border-color:rgba(231,191,105,.30)!important;color:#f6e19f!important}
-.section-card{box-shadow:0 16px 36px rgba(0,0,0,.10)!important}
-.section-card h2{color:var(--accent2,#2d6072);font-size:26px!important;letter-spacing:-.02em!important;margin-bottom:16px!important;padding-bottom:14px!important;border-bottom:2px solid rgba(63,116,138,.16)!important}
-.side-card{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border:1px solid rgba(231,191,105,.14)!important;color:#fff!important;box-shadow:0 22px 52px rgba(0,0,0,.30)!important}
-.side-card h3{color:#fff!important}
-.side-card .mini{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important}
-.side-card .muted{color:rgba(255,255,255,.72)!important}
-.side-card a{color:#f6e19f!important}
-.plan{background:rgba(255,255,255,.09)!important;border:1px solid rgba(255,255,255,.14)!important}
-.plan strong{color:#fff!important}
-.plan small{color:rgba(255,255,255,.72)!important}
-.plan-price{color:#f6e19f!important}
-.btn-light{background:rgba(255,255,255,.12)!important;color:#fff!important;border:1px solid rgba(255,255,255,.16)!important}
-.btn-primary{box-shadow:0 12px 28px rgba(0,0,0,.26)!important}
-
-
-/* ── PROFESSIONAL CLEAN REDESIGN ── */
-html,body{background:#f2f4f6!important}
-
-.hero{background:#fff!important;border:1px solid rgba(0,0,0,.09)!important;border-top:3px solid #3f748a!important;box-shadow:0 4px 20px rgba(0,0,0,.08)!important}
-.hero h1{color:#1a1a1a!important}
-.hero p,.hero p#pageIntro{color:#374151!important}
-.kicker{background:rgba(63,116,138,.10)!important;border-color:rgba(63,116,138,.20)!important;color:#2d6072!important}
-.section-card{background:#fff!important;border:1px solid rgba(0,0,0,.09)!important;box-shadow:0 4px 16px rgba(0,0,0,.07)!important}
-.section-card h2{color:#1a1a1a!important;padding-bottom:14px!important;border-bottom:2px solid rgba(63,116,138,.16)!important}
-.mini{background:#f0f2f4!important;border-color:rgba(0,0,0,.08)!important}
-.side-card h3{color:#fff!important}
-.plan{border-color:rgba(255,255,255,.16)!important}
-.btn-light{background:rgba(255,255,255,.14)!important;color:#fff!important;border:1px solid rgba(255,255,255,.18)!important}
-
-
-/* ── LUXURY DARK WARM: premium boutique redesign ── */
-html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),transparent 50%),linear-gradient(170deg,#1e1910 0%,#141009 100%)!important}
-
-.hero{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;border-top:3px solid #c88a35!important;box-shadow:0 24px 64px rgba(0,0,0,.52)!important}
-.hero h1{color:#1c1408!important}
-.hero p,.hero p#pageIntro{color:#4a3820!important}
-.kicker{background:rgba(160,110,35,.12)!important;border-color:rgba(160,110,35,.24)!important;color:#a07828!important}
-.section-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.16)!important;box-shadow:0 20px 52px rgba(0,0,0,.46)!important}
-.section-card h2{color:#1c1408!important;border-bottom-color:rgba(160,110,35,.18)!important}
-.mini{background:rgba(160,110,35,.08)!important;border-color:rgba(160,110,35,.14)!important}
-.side-card h3{color:#fff!important}
-.plan{border-color:rgba(255,255,255,.14)!important}
-.btn-primary{background:linear-gradient(135deg,#c88a35,#e0a848)!important;color:#1a0e04!important;box-shadow:0 10px 28px rgba(0,0,0,.35)!important}
-.btn-light{background:rgba(255,255,255,.10)!important;color:rgba(255,255,255,.9)!important;border:1px solid rgba(255,255,255,.18)!important}
-
-
-/* ── BOOKING PROGRESS BAR ── */
-.booking-progress{background:rgba(0,0,0,.12);border-bottom:1px solid rgba(255,255,255,.08);padding:0 16px}
-.bp-inner{display:flex;align-items:center;justify-content:center;gap:0;max-width:560px;margin:0 auto;padding:8px 0}
-.bp-step{display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto}
-.bp-dot{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.22);color:rgba(255,255,255,.50);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center}
-.bp-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.45);white-space:nowrap}
-.bp-connector{flex:1 1 auto;height:2px;background:rgba(255,255,255,.16);margin:0 6px 18px;min-width:20px}
-.bp-step.done .bp-dot{background:rgba(255,255,255,.26);border-color:rgba(255,255,255,.40);color:#fff}
-.bp-step.done .bp-label{color:rgba(255,255,255,.72)}
-.bp-step.active .bp-dot{background:#e7bf69;border-color:#f6e19f;color:#4a3816;box-shadow:0 0 0 3px rgba(231,191,105,.28)}
-.bp-step.active .bp-label{color:#fff;font-weight:900}
-@media(max-width:400px){.bp-label{display:none}.bp-connector{min-width:12px}}
-/* ── WARM AMBER BODY ── */
-html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),transparent 50%),linear-gradient(155deg,#c8a438 0%,#b88a28 55%,#a07820 100%)!important}
-.hero,.section-card{box-shadow:0 10px 36px rgba(90,48,0,.18),0 3px 10px rgba(65,30,0,.12),inset 0 1px 0 rgba(255,235,155,.22)!important}
-.btn-primary{box-shadow:0 8px 24px rgba(160,80,0,.28)!important}
-.section-card h2{cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.section-card h2::after{content:'▾';font-size:16px;opacity:.5;transition:transform .28s ease;flex-shrink:0;font-weight:400}
-.section-card.is-collapsed h2::after{transform:rotate(-90deg)}
-.section-card .copy{overflow:hidden;max-height:4000px;transition:max-height .38s ease,opacity .28s ease;opacity:1}
-.section-card.is-collapsed .copy{max-height:0!important;opacity:0}
-</style>
+    @media(max-width:400px){.bp-label{display:none}.bp-connector{min-width:12px}}
+  </style>
 </head>
 <body>
   <header class="site-header"><div class="header-inner"><a class="brand" href="/"><div class="brand-logo-mark">◆</div><div class="brand-text"><strong id="brandName">DIAMOND Rent A Car</strong><span id="brandCity">Thessaloniki</span></div></a><nav class="header-nav"><a href="/">Αρχική</a><a href="/categories">Οχήματα</a><a href="/options">Ασφάλειες & extras</a><a href="/rental-terms">Όροι ενοικίασης</a><a href="/booking">Ολοκλήρωση</a></nav><a class="header-phone" id="phoneLink" href="tel:+302310000000">+30 2310 000 000</a></div></header>
