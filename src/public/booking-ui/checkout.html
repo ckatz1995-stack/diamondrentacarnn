@@ -313,8 +313,6 @@ button:hover,.btn:hover,.header-phone:hover{transform:translateY(-1px)}
 .footer-bottom-links a:hover{color:#f6e19f}
 
 /* ── LUXURY DARK WARM: premium boutique redesign ── */
-html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),transparent 50%),linear-gradient(170deg,#1e1910 0%,#141009 100%)!important}
-
 .summary-shell{background:linear-gradient(160deg,rgba(20,40,48,.99),rgba(14,30,36,1))!important;border:1px solid rgba(231,191,105,.18)!important;border-top:3px solid rgba(231,191,105,.42)!important;box-shadow:0 26px 60px rgba(0,0,0,.40)!important}
 .vehicle-visual{background:radial-gradient(circle at 50% 20%,rgba(231,191,105,.18),transparent 55%),linear-gradient(160deg,rgba(26,50,60,.80),rgba(14,30,36,.95))!important}
 .vehicle-badge{background:rgba(231,191,105,.18)!important;color:#f6e19f!important;border:1px solid rgba(231,191,105,.32)!important;box-shadow:0 4px 12px rgba(0,0,0,.28)!important}
@@ -962,7 +960,10 @@ function applyBusinessIdentity(){
   document.querySelectorAll('.site-header .brand-text strong, .site-header .brand strong').forEach((el) => { el.textContent = companyName; });
   document.querySelectorAll('.site-header .brand-text span, .site-header .brand span').forEach((el) => { el.textContent = companyCity; });
   document.querySelectorAll('.header-phone, .footer a[href^="tel:"], .footer-col a[href^="tel:"]').forEach((el) => {
-    el.textContent = companyPhone;
+    // Header phone keeps its icon + label structure — only swap the label text, not the whole anchor
+    const label = el.querySelector('.header-phone-label');
+    if (label) { label.textContent = companyPhone; }
+    else { el.textContent = companyPhone; }
     try { el.setAttribute('href', `tel:${companyPhone.replace(/\s+/g, '')}`); } catch (err) {}
   });
   document.querySelectorAll('.footer a[href^="mailto:"], .footer-col a[href^="mailto:"]').forEach((el) => {
