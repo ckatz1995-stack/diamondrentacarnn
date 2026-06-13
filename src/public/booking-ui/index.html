@@ -2238,6 +2238,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         <div class="service-card"><div class="card-icon">R</div><h4>Σταθμός ΟΣΕ</h4><p>Χρήσιμη επιλογή για αφίξεις με τρένο ή για πελάτες που θέλουν συντονισμένη εξυπηρέτηση κοντά στον σταθμό.</p></div>
         <div class="service-card"><div class="card-icon">T</div><h4>Κατόπιν συνεννόησης</h4><p>Για ειδικά αιτήματα παραλαβής ή επιστροφής, η ομάδα μας εξετάζει τη διαθεσιμότητα και σου επιβεβαιώνει την καλύτερη λύση.</p></div>
 </div>
+    </section>
 
     <section class="section-card">
       <div class="section-head">
@@ -2417,7 +2418,10 @@ function applyBusinessIdentity(){
   document.querySelectorAll('.site-header .brand-text strong, .site-header .brand strong').forEach((el) => { el.textContent = companyName; });
   document.querySelectorAll('.site-header .brand-text span, .site-header .brand span').forEach((el) => { el.textContent = companyCity; });
   document.querySelectorAll('.header-phone, .footer a[href^="tel:"], .footer-col a[href^="tel:"]').forEach((el) => {
-    el.textContent = companyPhone;
+    // Header phone keeps its icon + label structure — only swap the label text, not the whole anchor
+    const label = el.querySelector('.header-phone-label');
+    if (label) { label.textContent = companyPhone; }
+    else { el.textContent = companyPhone; }
     try { el.setAttribute('href', `tel:${companyPhone.replace(/\s+/g, '')}`); } catch (err) {}
   });
   document.querySelectorAll('.footer a[href^="mailto:"], .footer-col a[href^="mailto:"]').forEach((el) => {
