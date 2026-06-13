@@ -12,6 +12,8 @@
     "postinstall": "wix sync-types",
     "dev": "wix dev",
     "lint": "eslint .",
+    "sync:theme": "node tools/sync-shared-theme.mjs",
+    "check:theme": "node tools/sync-shared-theme.mjs --check",
     "test": "node --loader ./tests/loader.mjs --test tests/*.test.mjs"
   }
 }
