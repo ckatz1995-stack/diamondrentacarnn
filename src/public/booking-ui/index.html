@@ -2506,7 +2506,7 @@ function populateAgeSelectFromCatalog(){
   groups.sort((a,b)=>ageGroupSortValue(a)-ageGroupSortValue(b));
   select.innerHTML = groups.map((value)=>`<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
   if([...select.options].some((opt)=>opt.value===current)) select.value = current;
-  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['category']);
+  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['driverAge']);
 }
 function isoToLocalInputParts(value){
   const d = new Date(value);
@@ -3473,7 +3473,7 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
     if(d.type==='PORTAL_MEMBER_STATE'){
       if(d.loggedIn&&d.member){
         wSess(d.member);
-        if(d.member.driverAge){try{var sel=document.getElementById('driverAge');if(sel&&[...sel.options].some(function(o){return o.value===d.member.driverAge;})){sel.value=d.member.driverAge;if(typeof window.refreshCustomControls==='function')window.refreshCustomControls(['category']);}}catch(_){}}
+        if(d.member.driverAge){try{var sel=document.getElementById('driverAge');if(sel&&[...sel.options].some(function(o){return o.value===d.member.driverAge;})){sel.value=d.member.driverAge;if(typeof window.refreshCustomControls==='function')window.refreshCustomControls(['driverAge']);}}catch(_){}}
         uiUpdate();
       }
       return;
