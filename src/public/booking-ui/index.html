@@ -2480,14 +2480,15 @@ function populateLocationSelectsFromCatalog(){
   if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['pickupStation','dropoffStation','pickupLocation','dropoffLocation']);
 }
 function populateCategorySelectFromCatalog(){
-  const select = document.getElementById('category');
+  const id = 'category';
+  const select = document.getElementById(id);
   if(!select) return;
   const current = select.value || 'all';
   const keys = [...new Set((vehicleCategories || []).map((item)=>String(item?.label || item?.category || '').trim()).filter(Boolean))];
   if(!keys.length) return;
   select.innerHTML = '<option value="all">Όλες οι κατηγορίες</option>' + keys.map((key)=>`<option value="${escapeHtml(key)}">Κατηγορία ${escapeHtml(key)}</option>`).join('');
   if([...select.options].some((opt)=>opt.value===current)) select.value = current;
-  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['category']);
+  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls([id]);
 }
 function ageGroupSortValue(value){
   const raw = String(value || '').trim();
@@ -2497,7 +2498,8 @@ function ageGroupSortValue(value){
   return match ? Number(match[1]) : 9999;
 }
 function populateAgeSelectFromCatalog(){
-  const select = document.getElementById('driverAge');
+  const id = 'driverAge';
+  const select = document.getElementById(id);
   if(!select) return;
   const current = select.value || '23-69';
   const rules = Array.isArray(pricingCatalog?.feeRules) ? pricingCatalog.feeRules : [];
@@ -2506,7 +2508,7 @@ function populateAgeSelectFromCatalog(){
   groups.sort((a,b)=>ageGroupSortValue(a)-ageGroupSortValue(b));
   select.innerHTML = groups.map((value)=>`<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
   if([...select.options].some((opt)=>opt.value===current)) select.value = current;
-  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['driverAge']);
+  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls([id]);
 }
 function isoToLocalInputParts(value){
   const d = new Date(value);
