@@ -345,7 +345,10 @@ function applyBusinessIdentity(){
   document.querySelectorAll('.site-header .brand-text strong, .site-header .brand strong').forEach((el) => { el.textContent = companyName; });
   document.querySelectorAll('.site-header .brand-text span, .site-header .brand span').forEach((el) => { el.textContent = companyCity; });
   document.querySelectorAll('.header-phone, .footer a[href^="tel:"], .footer-col a[href^="tel:"]').forEach((el) => {
-    el.textContent = companyPhone;
+    // Header phone keeps its icon + label structure — only swap the label text, not the whole anchor
+    const label = el.querySelector('.header-phone-label');
+    if (label) { label.textContent = companyPhone; }
+    else { el.textContent = companyPhone; }
     try { el.setAttribute('href', `tel:${companyPhone.replace(/\s+/g, '')}`); } catch (err) {}
   });
   document.querySelectorAll('.footer a[href^="mailto:"], .footer-col a[href^="mailto:"]').forEach((el) => {

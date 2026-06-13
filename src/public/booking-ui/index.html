@@ -2238,6 +2238,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
         <div class="service-card"><div class="card-icon">R</div><h4>Σταθμός ΟΣΕ</h4><p>Χρήσιμη επιλογή για αφίξεις με τρένο ή για πελάτες που θέλουν συντονισμένη εξυπηρέτηση κοντά στον σταθμό.</p></div>
         <div class="service-card"><div class="card-icon">T</div><h4>Κατόπιν συνεννόησης</h4><p>Για ειδικά αιτήματα παραλαβής ή επιστροφής, η ομάδα μας εξετάζει τη διαθεσιμότητα και σου επιβεβαιώνει την καλύτερη λύση.</p></div>
 </div>
+    </section>
 
     <section class="section-card">
       <div class="section-head">
@@ -2417,7 +2418,10 @@ function applyBusinessIdentity(){
   document.querySelectorAll('.site-header .brand-text strong, .site-header .brand strong').forEach((el) => { el.textContent = companyName; });
   document.querySelectorAll('.site-header .brand-text span, .site-header .brand span').forEach((el) => { el.textContent = companyCity; });
   document.querySelectorAll('.header-phone, .footer a[href^="tel:"], .footer-col a[href^="tel:"]').forEach((el) => {
-    el.textContent = companyPhone;
+    // Header phone keeps its icon + label structure — only swap the label text, not the whole anchor
+    const label = el.querySelector('.header-phone-label');
+    if (label) { label.textContent = companyPhone; }
+    else { el.textContent = companyPhone; }
     try { el.setAttribute('href', `tel:${companyPhone.replace(/\s+/g, '')}`); } catch (err) {}
   });
   document.querySelectorAll('.footer a[href^="mailto:"], .footer-col a[href^="mailto:"]').forEach((el) => {
@@ -2476,14 +2480,15 @@ function populateLocationSelectsFromCatalog(){
   if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['pickupStation','dropoffStation','pickupLocation','dropoffLocation']);
 }
 function populateCategorySelectFromCatalog(){
-  const select = document.getElementById('category');
+  const id = 'category';
+  const select = document.getElementById(id);
   if(!select) return;
   const current = select.value || 'all';
   const keys = [...new Set((vehicleCategories || []).map((item)=>String(item?.label || item?.category || '').trim()).filter(Boolean))];
   if(!keys.length) return;
   select.innerHTML = '<option value="all">Όλες οι κατηγορίες</option>' + keys.map((key)=>`<option value="${escapeHtml(key)}">Κατηγορία ${escapeHtml(key)}</option>`).join('');
   if([...select.options].some((opt)=>opt.value===current)) select.value = current;
-  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['category']);
+  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls([id]);
 }
 function ageGroupSortValue(value){
   const raw = String(value || '').trim();
@@ -2493,7 +2498,8 @@ function ageGroupSortValue(value){
   return match ? Number(match[1]) : 9999;
 }
 function populateAgeSelectFromCatalog(){
-  const select = document.getElementById('driverAge');
+  const id = 'driverAge';
+  const select = document.getElementById(id);
   if(!select) return;
   const current = select.value || '23-69';
   const rules = Array.isArray(pricingCatalog?.feeRules) ? pricingCatalog.feeRules : [];
@@ -2502,7 +2508,7 @@ function populateAgeSelectFromCatalog(){
   groups.sort((a,b)=>ageGroupSortValue(a)-ageGroupSortValue(b));
   select.innerHTML = groups.map((value)=>`<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
   if([...select.options].some((opt)=>opt.value===current)) select.value = current;
-  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls(['category']);
+  if (typeof window.refreshCustomControls === 'function') window.refreshCustomControls([id]);
 }
 function isoToLocalInputParts(value){
   const d = new Date(value);
@@ -3390,7 +3396,21 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
   function setOk(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.toggle('show',!!m);}}
   function setBusy(id,b,label,busyLabel){var btn=document.getElementById(id);if(!btn)return;btn.disabled=b;btn.textContent=b?busyLabel:label;}
 
+  var authTimer=null;
+  function clearAuthTimeout(){if(authTimer){clearTimeout(authTimer);authTimer=null;}}
+  function startAuthTimeout(errId){
+    clearAuthTimeout();
+    authTimer=setTimeout(function(){
+      authTimer=null;
+      setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
+      setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
+      // Report on the panel that initiated the request (captured at arm time), not whatever tab is active now
+      setErr(errId||'mbrLoginErr',ERR_MAP.server_error);
+    },12000);
+  }
+
   function closeModal(){
+    clearAuthTimeout();
     document.getElementById('mbrOverlay').classList.add('hidden');
     setErr('mbrLoginErr','');setErr('mbrRegErr','');setOk('mbrRegOk','');
     setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
@@ -3415,6 +3435,7 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
     var pass=document.getElementById('mbrLoginPass').value||'';
     if(!email||!pass){setErr('mbrLoginErr','Συμπληρώστε email και κωδικό.');return;}
     setBusy('mbrLoginSubmit',true,'Σύνδεση →','Σύνδεση...');
+    startAuthTimeout('mbrLoginErr');
     try{window.parent.postMessage({type:'PORTAL_LOGIN',email:email,password:pass},'*');}catch(_){}
   });
 
@@ -3429,6 +3450,7 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
     if(pass.length<6){setErr('mbrRegErr','Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες.');return;}
     if(pass!==pass2){setErr('mbrRegErr','Οι κωδικοί δεν ταιριάζουν.');return;}
     setBusy('mbrRegSubmit',true,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
+    startAuthTimeout('mbrRegErr');
     try{window.parent.postMessage({type:'PORTAL_REGISTER',email:email,password:pass,firstName:first,lastName:last},'*');}catch(_){}
   });
 
@@ -3444,11 +3466,14 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
   });
 
   window.addEventListener('message',function(event){
+    // Same origin guard as the main bridge handler — never trust member/auth state from an untrusted frame
+    if(event.origin && typeof isTrustedParentOrigin==='function' && !isTrustedParentOrigin(event.origin)) return;
     var raw=event.data,d=null;
     if(typeof raw==='string'){try{d=JSON.parse(raw);}catch(_){return;}}else{d=raw;}
     if(!d||!d.type)return;
 
     if(d.type==='PORTAL_AUTH_RESULT'){
+      clearAuthTimeout();
       setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
       setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
       if(d.ok){
@@ -3469,7 +3494,7 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
     if(d.type==='PORTAL_MEMBER_STATE'){
       if(d.loggedIn&&d.member){
         wSess(d.member);
-        if(d.member.driverAge){try{var sel=document.getElementById('driverAge');if(sel&&[...sel.options].some(function(o){return o.value===d.member.driverAge;})){sel.value=d.member.driverAge;if(typeof window.refreshCustomControls==='function')window.refreshCustomControls(['category']);}}catch(_){}}
+        if(d.member.driverAge){try{var sel=document.getElementById('driverAge');if(sel&&[...sel.options].some(function(o){return o.value===d.member.driverAge;})){sel.value=d.member.driverAge;if(typeof window.refreshCustomControls==='function')window.refreshCustomControls(['driverAge']);}}catch(_){}}
         uiUpdate();
       }
       return;

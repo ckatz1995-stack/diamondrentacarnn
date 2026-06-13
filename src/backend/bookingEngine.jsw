@@ -776,7 +776,14 @@ export async function createBooking(data) {
         const basePricePerDay = toFiniteNumber(dynamicPricing?.pricePerDay, fallbackBasePricePerDay);
 
         const pkg = cleanText(selectedPackage || "cdw").toLowerCase();
-        const insuranceExtraPerDay = toFiniteNumber(insuranceMap[pkg], 0);
+        // Per-category insurance rate + excess (same resolution as computeQuote so the
+        // booked price always matches the quoted price)
+        const bookingInsurancePlans = Array.isArray(pricingCatalog?.insurancePlans) ? pricingCatalog.insurancePlans : [];
+        const bookingInsurancePlan = bookingInsurancePlans.find(p => p?.key === pkg);
+        const bookingCatCode = cleanText(resolvedCategoryCode).toUpperCase();
+        const bookingCatInsRate = bookingCatCode && bookingInsurancePlan?.categoryRates && bookingInsurancePlan.categoryRates[bookingCatCode];
+        const insuranceExtraPerDay = toFiniteNumber(bookingCatInsRate?.pricePerDay ?? insuranceMap[pkg], 0);
+        const insuranceExcess = toFiniteNumber(bookingCatInsRate?.excess ?? bookingInsurancePlan?.excess, 0);
 
         const extrasInput = Array.isArray(selectedExtras) ? selectedExtras : [];
         const finalExtras = [];
@@ -789,14 +796,20 @@ export async function createBooking(data) {
             if (!extraKey || finalExtras.includes(extraKey)) continue;
             finalExtras.push(extraKey);
 
-            const extraCfg = extrasMap[extraKey] || {};
-            const label = cleanText(typeof rawExtra === 'object' ? (rawExtra.label || rawExtra.name || '') : '') || cleanText(extraCfg.label || extraKey);
-            const mode = cleanText(typeof rawExtra === 'object' ? (rawExtra.mode || rawExtra.billingMode || '') : '') || cleanText(extraCfg.billingMode || extraCfg.mode || 'perDay');
-            const unitPrice = Number(toFiniteNumber(typeof rawExtra === 'object' ? (rawExtra.pricePerDay ?? rawExtra.price ?? rawExtra.amount) : undefined, toFiniteNumber(extraCfg.price, 0)).toFixed(2));
-            const lineTotal = Number((mode === 'perBooking' ? unitPrice : unitPrice * billableDays).toFixed(2));
+            const extraCfg = extrasMap[extraKey];
+            // Mirror computeQuote: an unknown extra key is still priced at €0 (so the booked
+            // total stays consistent with the quote) but we surface a warning instead of
+            // silently swallowing it.
+            if (!extraCfg) console.warn(`createBooking extra:missing:${extraKey} — not found in catalog, priced at €0`);
+            const resolvedCfg = extraCfg || {};
+            const label = cleanText(typeof rawExtra === 'object' ? (rawExtra.label || rawExtra.name || '') : '') || cleanText(resolvedCfg.label || extraKey);
+            const mode = cleanText(typeof rawExtra === 'object' ? (rawExtra.mode || rawExtra.billingMode || '') : '') || cleanText(resolvedCfg.billingMode || resolvedCfg.mode || 'perDay');
+            const unitPrice = Number(toFiniteNumber(typeof rawExtra === 'object' ? (rawExtra.pricePerDay ?? rawExtra.price ?? rawExtra.amount) : undefined, toFiniteNumber(resolvedCfg.price, 0)).toFixed(2));
+            const qty = Math.max(1, Number(typeof rawExtra === 'object' ? (rawExtra.qty ?? rawExtra.quantity ?? 1) : 1) || 1);
+            const lineTotal = Number((mode === 'perBooking' ? unitPrice * qty : unitPrice * qty * billableDays).toFixed(2));
 
-            extraLabels.push(label || extraKey);
-            selectedExtrasDetails.push({ key: extraKey, label: label || extraKey, mode: mode === 'perBooking' ? 'perBooking' : 'perDay', unitPrice, lineTotal });
+            extraLabels.push(qty > 1 ? `${label || extraKey} ×${qty}` : (label || extraKey));
+            selectedExtrasDetails.push({ key: extraKey, label: label || extraKey, mode: mode === 'perBooking' ? 'perBooking' : 'perDay', unitPrice, qty, lineTotal });
             computedExtrasTotal += lineTotal;
         }
 
@@ -897,6 +910,7 @@ vehicleCategorySpecs: mapVehicleCategoryCatalogItem(vehicle).specs,
             pricingRuleKey: String(dynamicPricing?.rule?.key || ''),
             pricingRuleLabel: String(dynamicPricing?.rule?.label || ''),
             insuranceExtraPerDay,
+            insuranceExcess,
             baseCost: finalBaseCost,
             insuranceCost: finalInsuranceCost,
             extrasTotal: finalExtrasCost,
@@ -987,7 +1001,7 @@ vehicleCategorySpecs: mapVehicleCategoryCatalogItem(vehicle).specs,
                         totalPrice,
                         status: 'Pending',
                         notes: normalizedMainDriver.notes || '',
-                        extras: selectedExtrasDetails.map(e => ({ name: e.label, price: e.lineTotal })),
+                        extras: selectedExtrasDetails.map(e => ({ name: e.qty > 1 ? `${e.label} ×${e.qty}` : e.label, price: e.lineTotal })),
                     }),
                 }).catch(() => {});
             }

@@ -164,20 +164,6 @@ button:hover,.cta:hover,.header-phone:hover{
   border-radius:22px;
   padding:12px 14px;
 }
-.filter-row{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:14px;
-}
-.filter-slot{display:flex;flex-direction:column;gap:7px}
-.filter-title{
-  margin:0;
-  color:#665435;
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
 .filter-combined select{
   width:100%;
   height:44px;
@@ -200,95 +186,6 @@ button:hover,.cta:hover,.header-phone:hover{
   border-radius:30px;
   background:linear-gradient(180deg,rgba(244,233,200,.98),rgba(228,205,145,.98));
 }
-.result-main{display:grid;grid-template-columns:240px minmax(0,1fr)}
-.media-col{
-  position:relative;
-  padding:18px;
-  min-height:214px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:linear-gradient(180deg,#ddc48f 0%, #c49d5c 100%);
-}
-.media-col::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at 50% 18%, rgba(255,255,255,.22), transparent 44%);
-  pointer-events:none;
-}
-.vehicle-badge{
-  position:absolute;
-  top:14px;
-  left:14px;
-  width:42px;
-  height:42px;
-  border-radius:999px;
-  background:rgba(255,255,255,.92);
-  color:var(--blue-deep);
-  font-weight:900;
-  font-size:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:1;
-}
-.vehicle-image{
-  width:100%;
-  max-width:216px;
-  max-height:152px;
-  object-fit:contain;
-  filter:drop-shadow(0 16px 18px rgba(0,0,0,.16));
-  position:relative;
-  z-index:1;
-}
-.content-col{padding:20px 22px 16px}
-.head-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 170px;
-  gap:14px;
-  align-items:start;
-  margin-bottom:12px;
-}
-.vehicle-title{
-  margin:0;
-  font-size:42px;
-  line-height:1.02;
-  letter-spacing:-.04em;
-}
-.vehicle-title .similar{
-  display:inline-block;
-  margin-left:8px;
-  color:var(--muted);
-  font-size:17px;
-  font-weight:700;
-}
-.vehicle-copy{
-  margin:10px 0 0;
-  color:#5b4a30;
-  font-size:14px;
-  line-height:1.55;
-  font-weight:700;
-}
-.price-box{
-  text-align:right;
-  white-space:nowrap;
-  padding-top:2px;
-}
-.price-box .amount{
-  display:block;
-  font-size:34px;
-  line-height:1;
-  font-weight:900;
-  color:var(--blue-deep);
-}
-.price-box .sub{
-  display:block;
-  margin-top:6px;
-  color:#604f34;
-  font-size:14px;
-  font-weight:800;
-}
 /* Compact spec chips — replaces the bulky spec grid */
 .spec-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .spec-chips .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(231,191,105,.10);border:1px solid rgba(231,191,105,.26);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;color:#f3ead2;white-space:nowrap;line-height:1.2}
@@ -300,62 +197,12 @@ button:hover,.cta:hover,.header-phone:hover{
   margin-top:6px;
   padding:2px 9px;
   border-radius:20px;
-  background:#f59e0b;
-  color:#fff;
+  background:linear-gradient(135deg,#e7bf69,#c88a35);
+  color:#1a0e04;
   font-size:.72em;
   font-weight:700;
   letter-spacing:.03em;
 }
-.season-row .season-val{ color:#f59e0b; font-weight:700; }
-.spec-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px;
-}
-.spec{
-  padding:12px 13px;
-  border-radius:15px;
-  background:rgba(255,255,255,.42);
-  border:1px solid rgba(0,0,0,.05);
-}
-.spec .k{
-  display:block;
-  color:#7a6948;
-  text-transform:uppercase;
-  letter-spacing:.08em;
-  font-size:10px;
-  font-weight:900;
-  margin-bottom:6px;
-}
-.spec .v{
-  display:block;
-  font-size:16px;
-  font-weight:850;
-  color:#2d2314;
-}
-.result-bottom{padding:0 16px 16px}
-.total-box{
-  width:100%;
-  border-radius:20px;
-  background:linear-gradient(180deg,var(--blue),var(--blue-deep));
-  color:#fff;
-  padding:16px 18px;
-}
-.total-stack{width:100%;display:grid;gap:8px}
-.total-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:12px;
-  align-items:center;
-  padding:6px 0;
-  border-bottom:1px solid rgba(255,255,255,.12);
-}
-.total-row:last-child{border-bottom:0;padding-top:12px}
-.total-row .k{font-size:14px;font-weight:800;opacity:.97}
-.total-row .v{font-size:20px;line-height:1;font-weight:900;text-align:right}
-.total-row.grand .k{font-size:22px;opacity:1}
-.total-row.grand .v{font-size:38px}
-.card-footer{margin-top:12px}
 .cta{
   width:100%;
   height:60px;
@@ -382,14 +229,6 @@ button:hover,.cta:hover,.header-phone:hover{
   .header-inner{padding:10px 14px;}
   .header-phone{padding:10px 15px;font-size:14px;}
   .header-nav a{font-size:13px;padding:9px 12px;}
-  .title-area h2{font-size:48px;}
-}
-@media (max-width: 900px){
-  :root{ --container:920px; }
-  .title-area h2{font-size:42px;}
-  .result-head{gap:12px;}
-  .spec-grid{gap:10px;}
-  .price-total-box{padding:16px 18px;}
 }
 
 
@@ -399,21 +238,9 @@ button:hover,.cta:hover,.header-phone:hover{
 .header-phone{padding:10px 15px;font-size:14px}
 .search-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px}
 .search-options-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px}
-.filter-row{grid-template-columns:minmax(260px,420px);gap:10px}
-.result-main{grid-template-columns:215px minmax(0,1fr)}
-.media-col{min-height:196px;padding:14px}
-.vehicle-image{max-width:190px;max-height:132px}
-.content-col{padding:16px 18px 14px}
-.head-row{grid-template-columns:minmax(0,1fr) 136px;gap:10px}
-.vehicle-title{font-size:clamp(30px,3.4vw,38px)}
-.vehicle-title .similar{font-size:15px;margin-left:6px}
-.vehicle-copy{font-size:13px;margin-top:8px}
-.price-box .amount{font-size:30px}.price-box .sub{font-size:13px}
-.spec-grid{gap:8px}.spec{padding:10px 11px}.spec .v{font-size:15px}
-.total-box{padding:14px 16px}.total-row .k{font-size:13px}.total-row .v{font-size:18px}.total-row.grand .k{font-size:20px}.total-row.grand .v{font-size:34px}
 .cta{height:56px;font-size:18px}
-@media (max-width:1024px){.header-inner{flex-wrap:wrap;justify-content:center}.header-nav{order:3;width:100%;justify-content:center}.header-phone{width:100%;text-align:center}.search-grid,.search-options-grid{grid-template-columns:1fr 1fr}.filter-row{grid-template-columns:1fr}.result-main{grid-template-columns:1fr}.media-col{min-height:180px}.head-row{grid-template-columns:1fr}.price-box{text-align:left}.spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.search-options-grid,.filter-row,.spec-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.content-col{padding:12px 14px}.vehicle-title{font-size:21px}.vehicle-copy{display:none}.media-col{min-height:138px;padding:10px}.price-box .amount{font-size:26px}.total-box{padding:10px 14px}.total-stack{gap:4px}.total-row .k{font-size:12.5px}.total-row .v{font-size:15px}.total-row.grand .k{font-size:16px}.total-row.grand .v{font-size:25px}.cta{height:52px;font-size:16px}.result-bottom{padding:0 12px 12px}}
+@media (max-width:1024px){.header-inner{flex-wrap:wrap;justify-content:center}.header-nav{order:3;width:100%;justify-content:center}.header-phone{width:100%;text-align:center}.search-grid,.search-options-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.page{padding:12px 0 28px}.header-inner{padding:10px 12px}.search-grid,.search-options-grid{grid-template-columns:1fr}.search-wrap,.filter-combined,.result-card,.empty-card{border-radius:22px}.cta{height:52px;font-size:16px}}
 
 
 @media (max-width:760px){.page{width:min(var(--container), calc(100vw - 8px))}.footer-grid{grid-template-columns:1fr}.footer-bottom{padding:0 16px 18px}}
@@ -597,45 +424,6 @@ button:hover,.cta:hover,.header-phone:hover{
 .footer-bottom-links a:hover{color:#f6e19f}
 
 
-/* ── INNER PAGE REDESIGN: vehicles ── */
-.search-wrap{background:linear-gradient(160deg,rgba(26,50,60,.97),rgba(20,40,48,.99))!important;border:1px solid rgba(231,191,105,.18)!important;box-shadow:0 20px 52px rgba(0,0,0,.30)!important}
-.search-bar{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.14)!important}
-.search-wrap .field label{color:rgba(255,255,255,.64)!important}
-.search-wrap .field input,.search-wrap .field select,.search-wrap select{background:rgba(255,255,255,.93)!important}
-.search-note{color:rgba(255,255,255,.55)!important}
-.filter-combined{background:linear-gradient(160deg,rgba(28,52,62,.96),rgba(20,40,48,.98))!important;border:1px solid rgba(231,191,105,.12)!important;box-shadow:0 14px 30px rgba(0,0,0,.22)!important}
-.filter-title{color:rgba(255,255,255,.60)!important}
-.filter-combined select{background:rgba(255,255,255,.93)!important}
-.helper-note{color:rgba(255,255,255,.50)!important}
-.result-card{box-shadow:0 22px 54px rgba(0,0,0,.20)!important;border:1px solid rgba(231,191,105,.10)!important}
-.price-box .amount{color:#e7bf69!important}
-.vehicle-badge{background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;color:#2a1e0a!important;border:none!important;border-radius:14px!important;box-shadow:0 6px 14px rgba(0,0,0,.24)!important}
-.cta{height:68px!important;font-size:21px!important;background:linear-gradient(135deg,#e7bf69,#f6e19f)!important;color:#2a1e0a!important;border-radius:18px!important;box-shadow:0 14px 30px rgba(0,0,0,.24)!important}
-.total-box{border-top:2px solid rgba(231,191,105,.28)!important}
-.empty-card{background:linear-gradient(160deg,rgba(26,50,60,.95),rgba(20,40,48,.98))!important;border:1px solid rgba(231,191,105,.12)!important}
-.empty-card h2{color:#fff!important}
-.empty-card p{color:rgba(255,255,255,.72)!important}
-
-
-/* ── PROFESSIONAL CLEAN REDESIGN ── */
-html,body{background:#f2f4f6!important}
-
-.search-wrap{background:#fff!important;border:1px solid rgba(0,0,0,.10)!important;box-shadow:0 4px 20px rgba(0,0,0,.07)!important}
-.search-bar{background:rgba(0,0,0,.025)!important;border-color:rgba(0,0,0,.08)!important}
-.search-wrap .field label{color:#6b7280!important}
-.search-note{color:#9ca3af!important}
-.filter-combined{background:#fff!important;border:1px solid rgba(0,0,0,.10)!important;box-shadow:0 4px 16px rgba(0,0,0,.06)!important}
-.filter-title{color:#374151!important}
-.filter-combined select{background:#fff!important}
-.helper-note{color:#6b7280!important}
-.result-card{background:#fff!important;box-shadow:0 4px 20px rgba(0,0,0,.08)!important;border:1px solid rgba(0,0,0,.09)!important}
-.price-box .amount{color:#2d6072!important}
-.cta{background:linear-gradient(180deg,#3f748a,#2d6072)!important;color:#fff!important;box-shadow:0 8px 22px rgba(45,96,114,.26)!important}
-.empty-card{background:#fff!important;border:1px solid rgba(0,0,0,.10)!important;box-shadow:0 4px 16px rgba(0,0,0,.06)!important}
-.empty-card h2{color:#1a1a1a!important}
-.empty-card p{color:#6b7280!important}
-
-
 /* ── LUXURY DARK WARM: premium boutique redesign ── */
 html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),transparent 50%),linear-gradient(170deg,#1e1910 0%,#141009 100%)!important}
 
@@ -644,14 +432,11 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 .search-wrap .field label{color:#7a5e38!important}
 .search-note{color:rgba(160,110,35,.70)!important}
 .filter-combined{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.16)!important;box-shadow:0 16px 44px rgba(0,0,0,.46),0 2px 8px rgba(0,0,0,.20)!important}
-.filter-title{color:#4a3820!important}
 .filter-combined select{background:#fdf8ef!important}
 .search-wrap .field select,.search-wrap .field input{background:#fff!important}
 .helper-note{color:#7a5e38!important}
 .result-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.18)!important;box-shadow:0 24px 64px rgba(0,0,0,.52),0 4px 16px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,240,190,.06)!important}
-.price-box .amount{color:#a07828!important}
 .cta{background:linear-gradient(135deg,#c88a35,#e0a848)!important;color:#1a0e04!important;font-weight:900!important;box-shadow:0 12px 32px rgba(0,0,0,.38)!important;border-radius:18px!important;height:68px!important;font-size:21px!important}
-.total-box{border-top:2px solid rgba(160,110,35,.28)!important}
 .empty-card{background:#fdf8ef!important;border:1px solid rgba(160,110,35,.16)!important;box-shadow:0 16px 44px rgba(0,0,0,.46),0 2px 8px rgba(0,0,0,.20)!important}
 .empty-card h2{color:#1c1408!important}
 .empty-card p{color:#4a3820!important}
@@ -670,8 +455,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .cta .cta-total{font-weight:900}
 @media (max-width:620px){
   .cta{height:54px!important;font-size:16.5px!important}
-  .price-box .amount{font-size:26px!important}
-  .media-col{min-height:138px!important}
 }
 
 /* ── CARD V2: results-style layout (photo | info | price+action rail) ── */
@@ -687,6 +470,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .v2-perks{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;font-size:12.5px;color:#5a4528;font-weight:600}
 .v2-perks li{display:flex;align-items:center;gap:6px;min-width:0}
 .v2-perks li::before{content:"✓";flex:none;width:16px;height:16px;border-radius:50%;background:rgba(160,110,35,.14);color:#a07828;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.v2-excess{font-weight:800;color:#8a6420;white-space:nowrap}
 @media(max-width:520px){.v2-perks{grid-template-columns:1fr}}
 .night-hint{margin-top:5px;font-size:12px;font-weight:700;color:#7a5410;background:rgba(231,191,105,.22);border:1px solid rgba(160,110,35,.30);border-radius:8px;padding:5px 9px;line-height:1.3}
 .v2card{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
@@ -713,10 +497,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .v2-price{font-size:26px}
   .cta.v2-cta{height:50px!important}
 }
-/* Trust strip */
-.trust-strip{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 14px;padding:9px 18px;background:rgba(255,255,255,.26);border:1px solid rgba(160,110,35,.14);border-radius:14px;margin:4px 0 10px;font-size:12.5px;font-weight:800;color:#3d3020}
-.ts-item{white-space:nowrap}
-.ts-sep{color:rgba(120,90,40,.32);font-weight:400}
 /* Compact inline sort toolbar */
 .results-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:rgba(255,255,255,.26);border:1px solid rgba(160,110,35,.12);border-radius:12px;margin-bottom:10px}
 .results-count{font-size:13px;font-weight:800;color:#3d3020}
@@ -730,7 +510,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 /* V2 fees inside buy column */
 .v2-buy .v2-fees{width:100%;font-size:12.5px;color:#4a3820;margin-top:0}
 .v2-buy .v2-fees summary{color:#1e5c72;font-size:12px}
-@media(max-width:620px){.results-toolbar{flex-wrap:wrap;gap:8px}.sort-select-slim{flex:1}.trust-strip{font-size:12px;padding:8px 12px}}
+@media(max-width:620px){.results-toolbar{flex-wrap:wrap;gap:8px}.sort-select-slim{flex:1}}
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -752,16 +532,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 }
 @media(prefers-reduced-motion:reduce){.mobile-nav{transition:none}}
 
-/* DIAMOND MOBILE: Vehicle cards single column */
-@media(max-width:767px){
-  .result-card .result-main{grid-template-columns:1fr!important;gap:0!important}
-  .media-col{min-height:140px!important}
-  .spec-grid{grid-template-columns:repeat(3,1fr)!important;flex-wrap:wrap}
-  .head-row{display:block!important}
-  .price-box{margin-top:8px;text-align:left}
-  .total-box{overflow-x:hidden!important}
-  .total-row{flex-wrap:wrap}
-}
 /* DIAMOND: Compact editable search summary */
 .search-summary-bar{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.78);border:1px solid rgba(160,110,35,.14);border-radius:16px;font-size:14px;font-weight:800;color:#2b2114;margin-bottom:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.68)}
 .search-summary-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1033,6 +803,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .cat-tab:hover{background:rgba(231,191,105,.18);border-color:rgba(231,191,105,.40)}
 .cat-tab.is-active{background:linear-gradient(135deg,var(--gold,#e7bf69),var(--gold-soft,#f6e19f));color:#2a1d09;border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.22)}
 .results-toolbar .sort-lbl{color:rgba(255,255,255,.62)!important}
+.results-toolbar .results-count{color:rgba(255,255,255,.72)!important}
 @media(max-width:620px){.cat-tab{padding:8px 12px;font-size:12px}}
 </style>
 </head>
@@ -1072,7 +843,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 .bp-step.done .bp-label{color:rgba(255,255,255,.72)}
 .bp-step.active .bp-dot{background:#e7bf69;border-color:#f6e19f;color:#4a3816;box-shadow:0 0 0 3px rgba(231,191,105,.28)}
 .bp-step.active .bp-label{color:#fff;font-weight:900}
-.bp-connector.done{background:rgba(255,255,255,.38)}
+.bp-connector.done{background:rgba(231,191,105,.50)}
 @media(max-width:400px){.bp-label{display:none}.bp-connector{min-width:12px}}
 .date-range-error{display:none;background:rgba(184,60,46,.09);border:1.5px solid rgba(184,60,46,.28);border-radius:10px;padding:10px 14px;color:#b83c2e;font-size:13px;font-weight:700;margin:8px 0 4px}
 .date-range-error.visible{display:block}
@@ -1162,6 +933,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   <div class="results-toolbar">
     <div class="cat-tabs" id="catTabs" role="tablist" aria-label="Φίλτρο κατηγορίας"></div>
     <div class="sort-inline-wrap">
+      <span id="resultMetaRow" class="results-count" aria-live="polite"></span>
       <span class="sort-lbl">Ταξινόμηση</span>
       <select id="sortSelect" class="sort-select-slim">
         <option value="priceAsc">Τιμή ↑</option>
@@ -1336,6 +1108,16 @@ function ageSurcharge(days, group){ const rule = lookupFeeRule('ageRange', group
 function ageLabel(group){ if(group === '19-22') return 'Επασφάλιστρο ηλικίας (19-22)'; if(group === '70+') return 'Επασφάλιστρο ηλικίας (70+)'; return `Επασφάλιστρο ηλικίας${group ? ` (${group})` : ''}`; }
 function toNumber(value, fallback = 0){ const num = Number(value); return Number.isFinite(num) ? num : Number(fallback || 0); }
 function currentBusinessSettings(){ return pricingCatalog?.businessSettings || {}; }
+// Excess (deductible) of the basic CDW plan for a category — shown on cards so the
+// customer sees their liability before picking coverage on the next step.
+function cdwExcessFor(catCode){
+  const plans = Array.isArray(pricingCatalog?.insurancePlans) ? pricingCatalog.insurancePlans : [];
+  const plan = plans.find(p => String(p?.key || '').toLowerCase() === 'cdw') || plans[0];
+  if(!plan) return null;
+  const cr = plan.categoryRates && plan.categoryRates[String(catCode || '').trim().toUpperCase()];
+  const v = (cr && typeof cr.excess === 'number') ? cr.excess : Number(plan.excess ?? NaN);
+  return Number.isFinite(v) ? v : null;
+}
 function nightWindowHours(){
   const settings = currentBusinessSettings();
   return {
@@ -1592,7 +1374,10 @@ function applyBusinessIdentity(){
   document.querySelectorAll('.site-header .brand-text strong, .site-header .brand strong').forEach((el) => { el.textContent = companyName; });
   document.querySelectorAll('.site-header .brand-text span, .site-header .brand span').forEach((el) => { el.textContent = companyCity; });
   document.querySelectorAll('.header-phone, .footer a[href^="tel:"], .footer-col a[href^="tel:"]').forEach((el) => {
-    el.textContent = companyPhone;
+    // Header phone keeps its icon + label structure — only swap the label text, not the whole anchor
+    const label = el.querySelector('.header-phone-label');
+    if (label) { label.textContent = companyPhone; }
+    else { el.textContent = companyPhone; }
     try { el.setAttribute('href', `tel:${companyPhone.replace(/\s+/g, '')}`); } catch (err) {}
   });
   document.querySelectorAll('.footer a[href^="mailto:"], .footer-col a[href^="mailto:"]').forEach((el) => {
@@ -1902,7 +1687,7 @@ function render(){
             <div class="spec-chips">${chips || '<span class="chip">—</span>'}</div>
             <ul class="v2-perks">
               <li>Απεριόριστα χιλιόμετρα</li>
-              <li>Βασική ασφάλεια CDW</li>
+              <li>Βασική ασφάλεια CDW${(()=>{ const ex = cdwExcessFor(catCode); return ex != null ? ` <span class="v2-excess">(Excess ${ex.toLocaleString('el-GR')}€)</span>` : ''; })()}</li>
               <li>24/7 οδική βοήθεια</li>
               <li>Προσωπική επιβεβαίωση κράτησης</li>
             </ul>
@@ -2690,7 +2475,20 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
   function setOk(id,m){var e=document.getElementById(id);if(e){e.textContent=m;e.classList.toggle('show',!!m);}}
   function setBusy(id,b,label,busyLabel){var btn=document.getElementById(id);if(!btn)return;btn.disabled=b;btn.textContent=b?busyLabel:label;}
 
+  var authTimer=null;
+  function clearAuthTimeout(){if(authTimer){clearTimeout(authTimer);authTimer=null;}}
+  function startAuthTimeout(errId){
+    clearAuthTimeout();
+    authTimer=setTimeout(function(){
+      authTimer=null;
+      setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
+      setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
+      setErr(errId,'Δεν ήρθε απάντηση. Δοκιμάστε ξανά.');
+    },12000);
+  }
+
   function closeModal(){
+    clearAuthTimeout();
     document.getElementById('mbrOverlay').classList.add('hidden');
     setErr('mbrLoginErr','');setErr('mbrRegErr','');setOk('mbrRegOk','');
     setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
@@ -2715,6 +2513,7 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
     var pass=document.getElementById('mbrLoginPass').value||'';
     if(!email||!pass){setErr('mbrLoginErr','Συμπληρώστε email και κωδικό.');return;}
     setBusy('mbrLoginSubmit',true,'Σύνδεση →','Σύνδεση...');
+    startAuthTimeout('mbrLoginErr');
     try{window.parent.postMessage({type:'PORTAL_LOGIN',email:email,password:pass},'*');}catch(_){}
   });
 
@@ -2729,6 +2528,7 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
     if(pass.length<6){setErr('mbrRegErr','Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες.');return;}
     if(pass!==pass2){setErr('mbrRegErr','Οι κωδικοί δεν ταιριάζουν.');return;}
     setBusy('mbrRegSubmit',true,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
+    startAuthTimeout('mbrRegErr');
     try{window.parent.postMessage({type:'PORTAL_REGISTER',email:email,password:pass,firstName:first,lastName:last},'*');}catch(_){}
   });
 
@@ -2744,10 +2544,12 @@ try { new ResizeObserver(notifyHeight).observe(document.body); } catch (e) {}
   });
 
   window.addEventListener('message',function(event){
+    if(event.origin && typeof isTrustedParentOrigin==='function' && !isTrustedParentOrigin(event.origin)) return;
     var raw=event.data,d=null;
     if(typeof raw==='string'){try{d=JSON.parse(raw);}catch(_){return;}}else{d=raw;}
     if(!d||!d.type)return;
     if(d.type==='PORTAL_AUTH_RESULT'){
+      clearAuthTimeout();
       setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
       setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
       if(d.ok){
