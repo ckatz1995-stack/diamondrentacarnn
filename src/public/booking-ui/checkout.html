@@ -326,14 +326,16 @@ html,body{background:radial-gradient(ellipse at 30% 0%,rgba(180,120,30,.13),tran
 .top-price{text-align:right!important}
 .top-price span{color:#f6e19f!important;font-size:26px!important}
 .top-price small{color:rgba(255,255,255,.48)!important}
-/* ── Sidebar panels: dark navy premium (same language as options page) ── */
-.analysis-box,.invoice-box,.sidebar-submit{background:linear-gradient(160deg,rgba(20,40,48,.99),rgba(14,30,36,1))!important;border:1px solid rgba(231,191,105,.14)!important;border-top:3px solid rgba(231,191,105,.36)!important;box-shadow:0 26px 60px rgba(0,0,0,.32)!important}
+/* ── Sidebar: ONE unified dark navy panel — three seamless sections ── */
+.checkout-sidebar{background:linear-gradient(160deg,rgba(20,40,48,.99),rgba(14,30,36,1))!important;border:1px solid rgba(231,191,105,.14)!important;border-top:3px solid rgba(231,191,105,.36)!important;border-radius:20px!important;box-shadow:0 26px 60px rgba(0,0,0,.32)!important;gap:0!important}
+.analysis-box,.invoice-box,.sidebar-submit{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:18px 20px!important}
+.invoice-box,.sidebar-submit{border-top:1px solid rgba(255,255,255,.10)!important}
 .analysis-box h3{color:#f6e19f!important}
 .analysis-line{color:rgba(255,255,255,.80)!important;border-bottom-color:rgba(255,255,255,.08)!important}
 .analysis-line.big{border-top-color:rgba(231,191,105,.26)!important}
 .analysis-line.big strong{color:#f6e19f!important}
 .fee-tip{background:rgba(255,255,255,.12)!important;color:rgba(255,255,255,.70)!important}
-.invoice-box .card-title{color:#f6e19f!important;border-bottom-color:rgba(255,255,255,.10)!important}
+.invoice-box .card-title{color:#f6e19f!important;font-size:12px!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:.10em!important;border-bottom:none!important;padding-bottom:0!important;margin-bottom:14px!important}
 .choice{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.10)!important;color:rgba(255,255,255,.88)!important}
 .choice small{color:rgba(255,255,255,.52)!important}
 .choice:has(input:checked){background:rgba(231,191,105,.14)!important;border-color:rgba(231,191,105,.40)!important;color:#f6e19f!important}
