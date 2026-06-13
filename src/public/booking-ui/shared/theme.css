@@ -67,7 +67,7 @@ button:hover,.btn:hover,.header-phone:hover{transform:translateY(-1px)}
 @media(prefers-reduced-motion:reduce){.mobile-nav{transition:none}}
 
 /* ── Booking progress stepper ── */
-.booking-progress{background:rgba(0,0,0,.12);border-bottom:1px solid rgba(255,255,255,.08);padding:0 16px}
+.booking-progress{background:linear-gradient(180deg,rgba(20,40,48,.99),rgba(26,50,60,.96));border-bottom:1px solid rgba(231,191,105,.14);box-shadow:0 4px 18px rgba(0,0,0,.18);padding:0 16px}
 .bp-inner{display:flex;align-items:center;justify-content:center;gap:0;max-width:560px;margin:0 auto;padding:8px 0}
 .bp-step{display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto}
 .bp-dot{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.22);color:rgba(255,255,255,.50);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;transition:all .2s}
