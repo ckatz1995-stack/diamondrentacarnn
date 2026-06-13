@@ -497,10 +497,6 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
   .v2-price{font-size:26px}
   .cta.v2-cta{height:50px!important}
 }
-/* Trust strip */
-.trust-strip{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 14px;padding:9px 18px;background:rgba(255,255,255,.26);border:1px solid rgba(160,110,35,.14);border-radius:14px;margin:4px 0 10px;font-size:12.5px;font-weight:800;color:#3d3020}
-.ts-item{white-space:nowrap}
-.ts-sep{color:rgba(120,90,40,.32);font-weight:400}
 /* Compact inline sort toolbar */
 .results-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:rgba(255,255,255,.26);border:1px solid rgba(160,110,35,.12);border-radius:12px;margin-bottom:10px}
 .results-count{font-size:13px;font-weight:800;color:#3d3020}
@@ -514,7 +510,7 @@ html,body{background:radial-gradient(ellipse at 25% -5%,rgba(215,170,50,.28),tra
 /* V2 fees inside buy column */
 .v2-buy .v2-fees{width:100%;font-size:12.5px;color:#4a3820;margin-top:0}
 .v2-buy .v2-fees summary{color:#1e5c72;font-size:12px}
-@media(max-width:620px){.results-toolbar{flex-wrap:wrap;gap:8px}.sort-select-slim{flex:1}.trust-strip{font-size:12px;padding:8px 12px}}
+@media(max-width:620px){.results-toolbar{flex-wrap:wrap;gap:8px}.sort-select-slim{flex:1}}
 </style>
 <style>
 /* ═══ DIAMOND SECOND PASS — MOBILE & LOADING ═══ */
@@ -1378,7 +1374,10 @@ function applyBusinessIdentity(){
   document.querySelectorAll('.site-header .brand-text strong, .site-header .brand strong').forEach((el) => { el.textContent = companyName; });
   document.querySelectorAll('.site-header .brand-text span, .site-header .brand span').forEach((el) => { el.textContent = companyCity; });
   document.querySelectorAll('.header-phone, .footer a[href^="tel:"], .footer-col a[href^="tel:"]').forEach((el) => {
-    el.textContent = companyPhone;
+    // Header phone keeps its icon + label structure — only swap the label text, not the whole anchor
+    const label = el.querySelector('.header-phone-label');
+    if (label) { label.textContent = companyPhone; }
+    else { el.textContent = companyPhone; }
     try { el.setAttribute('href', `tel:${companyPhone.replace(/\s+/g, '')}`); } catch (err) {}
   });
   document.querySelectorAll('.footer a[href^="mailto:"], .footer-col a[href^="mailto:"]').forEach((el) => {

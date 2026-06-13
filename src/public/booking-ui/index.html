@@ -3396,14 +3396,14 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
 
   var authTimer=null;
   function clearAuthTimeout(){if(authTimer){clearTimeout(authTimer);authTimer=null;}}
-  function startAuthTimeout(){
+  function startAuthTimeout(errId){
     clearAuthTimeout();
     authTimer=setTimeout(function(){
       authTimer=null;
       setBusy('mbrLoginSubmit',false,'Σύνδεση →','Σύνδεση...');
       setBusy('mbrRegSubmit',false,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
-      var isReg=document.getElementById('mbrPanelReg').classList.contains('active');
-      setErr(isReg?'mbrRegErr':'mbrLoginErr',ERR_MAP.server_error);
+      // Report on the panel that initiated the request (captured at arm time), not whatever tab is active now
+      setErr(errId||'mbrLoginErr',ERR_MAP.server_error);
     },12000);
   }
 
@@ -3433,7 +3433,7 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
     var pass=document.getElementById('mbrLoginPass').value||'';
     if(!email||!pass){setErr('mbrLoginErr','Συμπληρώστε email και κωδικό.');return;}
     setBusy('mbrLoginSubmit',true,'Σύνδεση →','Σύνδεση...');
-    startAuthTimeout();
+    startAuthTimeout('mbrLoginErr');
     try{window.parent.postMessage({type:'PORTAL_LOGIN',email:email,password:pass},'*');}catch(_){}
   });
 
@@ -3448,7 +3448,7 @@ if (typeof window.refreshCustomControls === 'function') window.refreshCustomCont
     if(pass.length<6){setErr('mbrRegErr','Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες.');return;}
     if(pass!==pass2){setErr('mbrRegErr','Οι κωδικοί δεν ταιριάζουν.');return;}
     setBusy('mbrRegSubmit',true,'Δημιουργία Λογαριασμού →','Παρακαλώ αναμένετε...');
-    startAuthTimeout();
+    startAuthTimeout('mbrRegErr');
     try{window.parent.postMessage({type:'PORTAL_REGISTER',email:email,password:pass,firstName:first,lastName:last},'*');}catch(_){}
   });
 
