@@ -796,10 +796,15 @@ export async function createBooking(data) {
             if (!extraKey || finalExtras.includes(extraKey)) continue;
             finalExtras.push(extraKey);
 
-            const extraCfg = extrasMap[extraKey] || {};
-            const label = cleanText(typeof rawExtra === 'object' ? (rawExtra.label || rawExtra.name || '') : '') || cleanText(extraCfg.label || extraKey);
-            const mode = cleanText(typeof rawExtra === 'object' ? (rawExtra.mode || rawExtra.billingMode || '') : '') || cleanText(extraCfg.billingMode || extraCfg.mode || 'perDay');
-            const unitPrice = Number(toFiniteNumber(typeof rawExtra === 'object' ? (rawExtra.pricePerDay ?? rawExtra.price ?? rawExtra.amount) : undefined, toFiniteNumber(extraCfg.price, 0)).toFixed(2));
+            const extraCfg = extrasMap[extraKey];
+            // Mirror computeQuote: an unknown extra key is still priced at €0 (so the booked
+            // total stays consistent with the quote) but we surface a warning instead of
+            // silently swallowing it.
+            if (!extraCfg) console.warn(`createBooking extra:missing:${extraKey} — not found in catalog, priced at €0`);
+            const resolvedCfg = extraCfg || {};
+            const label = cleanText(typeof rawExtra === 'object' ? (rawExtra.label || rawExtra.name || '') : '') || cleanText(resolvedCfg.label || extraKey);
+            const mode = cleanText(typeof rawExtra === 'object' ? (rawExtra.mode || rawExtra.billingMode || '') : '') || cleanText(resolvedCfg.billingMode || resolvedCfg.mode || 'perDay');
+            const unitPrice = Number(toFiniteNumber(typeof rawExtra === 'object' ? (rawExtra.pricePerDay ?? rawExtra.price ?? rawExtra.amount) : undefined, toFiniteNumber(resolvedCfg.price, 0)).toFixed(2));
             const qty = Math.max(1, Number(typeof rawExtra === 'object' ? (rawExtra.qty ?? rawExtra.quantity ?? 1) : 1) || 1);
             const lineTotal = Number((mode === 'perBooking' ? unitPrice * qty : unitPrice * qty * billableDays).toFixed(2));
 
