@@ -1755,7 +1755,11 @@ body.dark .bnav-btn.active .bnav-lbl{color:#5fa8c4}
   setupStars();
 
   /* ─── postMessage handler ────────────────────────────── */
+  var TRUSTED_PARENT_SUFFIXES=['wix.com','wixsite.com','parastorage.com','wixstatic.com'];
+  function isTrustedParentOrigin(origin){var raw=String(origin||'').trim().toLowerCase();if(!raw)return true;try{var host=new URL(raw).hostname.toLowerCase();if(!host)return false;if(TRUSTED_PARENT_SUFFIXES.some(function(s){return host===s||host.endsWith('.'+s);}))return true;try{var ref=document.referrer;if(ref){var rh=new URL(ref).hostname.toLowerCase();if(rh&&host===rh)return true;}}catch(_){}return false;}catch(_){return false;}}
+
   window.addEventListener('message',function(event){
+    if(event.origin && !isTrustedParentOrigin(event.origin)) return;
     var raw=event.data,d=null;
     if(typeof raw==='string'){try{d=JSON.parse(raw);}catch(_){return;}}else{d=raw;}
     if(!d||!d.type)return;
